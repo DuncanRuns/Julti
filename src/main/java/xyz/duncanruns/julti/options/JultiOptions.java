@@ -30,8 +30,8 @@ public final class JultiOptions {
 
     // Window
     public boolean useBorderless = false;
-    public int[] screenLocation = MonitorUtil.getDefaultMonitor().position;
-    public int[] screenSize = MonitorUtil.getDefaultMonitor().size;
+    public int[] windowPos = MonitorUtil.getDefaultMonitor().position;
+    public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
 
     // Automated Tasks
     public boolean autoHide = false;

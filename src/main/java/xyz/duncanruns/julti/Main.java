@@ -3,11 +3,9 @@ package xyz.duncanruns.julti;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.options.JultiOptions;
 
-import java.util.List;
-import java.util.Random;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
@@ -25,47 +23,14 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
-        Random random = new Random();
-
         try {
             while (running) {
-                String[] args = scanner.nextLine().split(" ");
-                if (args.length == 1) {
-                    String singleCommand = args[0];
-                    if (singleCommand.equals("redetect")) {
-                        julti.redetectInstances();
-                        continue;
-                    }
-                    if (singleCommand.equals("stop")) {
-                        log(Level.INFO, "Stopping...");
-                        running = false;
-                        continue;
-                    }
-                    if (singleCommand.equals("resetall")) {
-                        log(Level.INFO, "Resetting all instances...");
-                        julti.getInstanceManager().getInstances().forEach(MinecraftInstance::reset);
-                        continue;
-                    }
-                    if (singleCommand.equals("activaterandom")) {
-                        log(Level.INFO, "Activating random instance...");
-                        List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
-                        instances.get(random.nextInt(instances.size())).activate();
-                        continue;
-                    }
-                    if (singleCommand.equals("closeallwindows")) {
-                        log(Level.INFO, "Closing windows...");
-                        julti.getInstanceManager().getInstances().forEach(MinecraftInstance::closeWindow);
-                        continue;
-                    }
-                    if (singleCommand.equals("list")) {
-                        int i = 0;
-                        for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
-                            log(Level.INFO, (++i) + ": " + instance.getName() + " - " + instance.getInstancePath());
-                        }
-                        continue;
-                    }
+                String input = scanner.nextLine();
+                if (Objects.equals(input, "stop")) {
+                    running = false;
+                } else {
+                    julti.runCommand(input);
                 }
-                log(Level.WARN, "Unknown Command");
             }
         } catch (Exception ignored) {
         }

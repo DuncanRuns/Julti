@@ -312,6 +312,10 @@ public class MinecraftInstance {
         HwndUtil.moveHwnd(hwnd, x, y, w, h);
     }
 
+    public void setSizeZero() {
+        move(0, 0, 0, 0);
+    }
+
     public void maximize() {
         HwndUtil.showHwnd(hwnd);
     }

@@ -19,41 +19,297 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class Julti {
 
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
-
     private InstanceManager instanceManager;
-
     private ScheduledExecutorService tickExecutor;
     private ScheduledExecutorService logCheckExecutor;
-    private final Timer timer;
-
     private long last2SecCycle;
     private long lastWorldClear;
     private long lastAction;
-
     private Pointer selectedHwnd;
-
     private boolean hasHidden;
+    private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
     public Julti() {
         instanceManager = null;
         tickExecutor = null;
         logCheckExecutor = null;
-        last2SecCycle = 0;
 
-        timer = new Timer();
+        last2SecCycle = 0;
+        lastWorldClear = 0;
+        lastAction = 0;
+
         hasHidden = true;
 
         selectedHwnd = null;
     }
 
-    private static void sleep(long millis) {
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+    }
+
+    private static void sleep(final long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ignored) {
+        }
+    }
+
+    private HashMap<String, Consumer<String[]>> getCommandMap() {
+        HashMap<String, Consumer<String[]>> map = new HashMap<>();
+        map.put("redetect", this::runCommandRedetect);
+        map.put("reset", this::runCommandReset);
+        map.put("close", this::runCommandClose);
+        map.put("activate", this::runCommandActivate);
+        map.put("list", this::runCommandList);
+        map.put("help", this::runCommandHelp);
+        map.put("hide", this::runCommandHide);
+        map.put("option", this::runCommandOption);
+        return map;
+    }
+
+    private void runCommandRedetect(String[] args) {
+        redetectInstances();
+    }
+
+    private void runCommandReset(String[] args) {
+        List<MinecraftInstance> instances = getInstanceManager().getInstances();
+        if (args.length == 0) {
+            if (!reset()) {
+                log(Level.ERROR, "No instances to reset / No instance selected.");
+            }
+        } else {
+            final String input = args[0];
+            if (Objects.equals(input, "all")) {
+                for (MinecraftInstance instance : instances) {
+                    instance.reset();
+                }
+            } else if (Objects.equals(input, "random")) {
+                instances.get(new Random().nextInt(instances.size())).reset();
+            } else if (Objects.equals(input, "background")) {
+                backgroundReset();
+            } else if (Objects.equals(input, "unselected")) {
+                backgroundReset();
+            } else {
+                instances.get(Integer.parseInt(input) - 1).reset();
+            }
+        }
+    }
+
+    private void runCommandClose(String[] args) {
+        List<MinecraftInstance> instances = getInstanceManager().getInstances();
+        if (args.length == 0) {
+            log(Level.ERROR, "No args given to close command!");
+        } else {
+            final String input = args[0];
+            if (Objects.equals(input, "all")) {
+                for (MinecraftInstance instance : instances) {
+                    instance.closeWindow();
+                }
+            } else if (Objects.equals(input, "random")) {
+                instances.get(new Random().nextInt(instances.size())).closeWindow();
+            } else {
+                instances.get(Integer.parseInt(input) - 1).closeWindow();
+            }
+        }
+    }
+
+    private void runCommandActivate(String[] args) {
+        List<MinecraftInstance> instances = getInstanceManager().getInstances();
+        if (args.length == 0) {
+            log(Level.ERROR, "No args given to activate command!");
+        } else {
+            final String input = args[0];
+            if (Objects.equals(input, "random")) {
+                instances.get(new Random().nextInt(instances.size())).activate();
+            } else {
+                instances.get(Integer.parseInt(input) - 1).activate();
+            }
+        }
+    }
+
+    private void runCommandList(String[] args) {
+        int i = 0;
+        for (MinecraftInstance instance : getInstanceManager().getInstances()) {
+            log(Level.INFO, (++i) + ": " + instance.getName() + " - " + instance.getInstancePath());
+        }
+    }
+
+    private void runCommandHelp(String[] args) {
+        log(Level.INFO,
+                "Commands:" +
+                        "\nredetect -> Sets current instances to the opened Minecraft instances" +
+                        "\nreset -> Reset current instance and activate the next instance" +
+                        "\nreset [all/random/unselected/background/#] -> Resets instance(s)" +
+                        "\nclose [all/random/#] -> Closes a specific / all instance(s)" +
+                        "\nactivate [random/#] -> Activates a specific instance" +
+                        "\nlist -> Lists all opened instances" +
+                        "\nhelp -> Shows all commands" +
+                        "\nhide [all/random/unselected/#] -> Hides instance(s)" +
+                        "\noption -> Lists all options" +
+                        "\noption [option] -> Gets the current value of an option and gives an example to set it" +
+                        "\noption [option] [value] -> Sets the value of the option to the specified value"
+        );
+    }
+
+    private void runCommandHide(String[] args) {
+        List<MinecraftInstance> instances = getInstanceManager().getInstances();
+        if (args.length == 0) {
+            MinecraftInstance selectedInstance = getSelectedInstance();
+            if (selectedInstance == null) {
+                log(Level.ERROR, "No instances to hide / No instance selected.");
+            } else {
+                for (MinecraftInstance instanceToHide : instances) {
+                    if (!Objects.equals(selectedInstance, instanceToHide)) {
+                        instanceToHide.setSizeZero();
+                    }
+                }
+            }
+        } else {
+            final String input = args[0];
+            if (Objects.equals(input, "all")) {
+                for (MinecraftInstance instance : instances) {
+                    instance.setSizeZero();
+                }
+            } else if (Objects.equals(input, "random")) {
+                instances.get(new Random().nextInt(instances.size())).setSizeZero();
+            } else if (Objects.equals(input, "unselected")) {
+                MinecraftInstance selectedInstance = getSelectedInstance();
+                for (MinecraftInstance instanceToHide : instances) {
+                    if (!Objects.equals(selectedInstance, instanceToHide)) {
+                        instanceToHide.setSizeZero();
+                    }
+                }
+            } else {
+                instances.get(Integer.parseInt(input) - 1).setSizeZero();
+            }
+            hasHidden = true;
+        }
+    }
+
+    private void runCommandOption(String[] args) {
+        log(Level.WARN, "The option command is not yet implemented.");
+
+    }
+
+    public void redetectInstances() {
+        log(Level.INFO, "Redetecting Instances...");
+        instanceManager.redetectInstances();
+        log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
+    }
+
+    public InstanceManager getInstanceManager() {
+        return instanceManager;
+    }
+
+    private boolean reset() {
+        updateLastActionTime();
+        JultiOptions options = JultiOptions.getInstance();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+
+        // Return if no instances
+        if (instances.size() == 0) {
+            return false;
+        }
+
+        // Get selected instance and next instance, return if no selected instance,
+        // if there is only a single instance, reset it and return.
+        MinecraftInstance selectedInstance = getSelectedInstance();
+        if (selectedInstance == null) {
+            return false;
+        }
+        if (instances.size() == 1) {
+            selectedInstance.reset(true);
+            return true;
+        }
+
+        int nextInstInd = instances.indexOf(selectedInstance) + 1;
+        if (nextInstInd >= instances.size()) {
+            nextInstInd = 0;
+        }
+        MinecraftInstance nextInstance = instances.get(nextInstInd);
+
+        nextInstance.activate();
+        switchScene(nextInstInd + 1);
+
+        if (hasHidden) {
+            unHideAndWait();
+            instances.forEach(MinecraftInstance::reset);
+        } else {
+            selectedInstance.reset();
+        }
+
+        String toCopy = JultiOptions.getInstance().clipboardOnReset;
+        if (!toCopy.isEmpty()) {
+            KeyboardUtil.copyToClipboard(toCopy);
+        }
+        return true;
+    }
+
+    @Nullable
+    private MinecraftInstance getSelectedInstance() {
+        Pointer hwnd = HwndUtil.getCurrentHwnd();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        for (MinecraftInstance instance : instances) {
+            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
+                return instance;
+            }
+        }
+        return null;
+    }
+
+    private void updateLastActionTime() {
+        lastAction = System.currentTimeMillis();
+    }
+
+    private void switchScene(final int i) {
+        JultiOptions options = JultiOptions.getInstance();
+        if (i <= 9 && options.obsPressHotkey) {
+            int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
+            List<Integer> keys = new ArrayList<>();
+            if (options.obsUseAlt) {
+                keys.add(Win32Con.VK_MENU);
+            }
+            keys.add(keyToPress);
+            KeyboardUtil.pressKeysForTime(keys, 100L);
+        } else {
+            log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
+        }
+    }
+
+    private void unHideAndWait() {
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        updateLastActionTime();
+        JultiOptions options = JultiOptions.getInstance();
+        hasHidden = false;
+        for (MinecraftInstance instance : instances) {
+            if (options.useBorderless) {
+                instance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+            } else {
+                instance.maximize();
+            }
+        }
+        sleep(100);
+    }
+
+    public void runCommand(final String command) {
+        String[] args = command.split(" ");
+        if (args.length == 0 || Objects.equals(args[0].trim(), "")) {
+            return;
+        }
+        Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
+        if (commandConsumer == null) {
+            log(Level.ERROR, "Unknown Command \"" + command + "\"");
+        } else {
+            try {
+                commandConsumer.accept(Arrays.copyOfRange(args, 1, args.length));
+            } catch (Exception e) {
+                log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
+            }
         }
     }
 
@@ -62,7 +318,7 @@ public class Julti {
         reloadInstanceManager();
         setupHotkeys();
         tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
-        tickExecutor.scheduleWithFixedDelay(this::tick, 25, 50, TimeUnit.MILLISECONDS);
+        tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
     }
@@ -85,10 +341,18 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.bgResetHotkey), this::onBGResetKey);
 
         for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
-            HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> this.runHotkey(entry.getKey()));
+            HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> this.runCommand(entry.getKey()));
         }
 
         HotkeyUtil.startGlobalHotkeyChecker();
+    }
+
+    private void tryTick() {
+        try {
+            tick();
+        } catch (Exception e) {
+            log(Level.ERROR, "Error during tick:" + e.getMessage());
+        }
     }
 
     private void tick() {
@@ -116,78 +380,42 @@ public class Julti {
     }
 
     private void logCheckTick() {
+        int i = 0;
         for (MinecraftInstance instance : instanceManager.getInstances()) {
-            instance.checkLog();
+            i++;
+            try {
+                instance.checkLog();
+            } catch (Exception e) {
+                log(Level.ERROR, "Error while checking log for instance #" + i + ":\n" + e.getMessage());
+            }
         }
     }
 
     private void onResetKey() {
-        updateLastActionTime();
-        JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-
-        // Return if no instances
-        if (instances.size() == 0) {
-            return;
+        try {
+            reset();
+        } catch (Exception e) {
+            log(Level.ERROR, "Error during reset:\n" + e.getMessage());
         }
-
-        // Get selected instance and next instance, return if no selected instance,
-        // if there is only a single instance, reset it and return.
-        MinecraftInstance selectedInstance = getSelectedInstance();
-        if (selectedInstance == null) {
-            return;
-        }
-        if (instances.size() == 1) {
-            selectedInstance.reset(true);
-            return;
-        }
-
-        int nextInstInd = instances.indexOf(selectedInstance) + 1;
-        if (nextInstInd >= instances.size()) {
-            nextInstInd = 0;
-        }
-        MinecraftInstance nextInstance = instances.get(nextInstInd);
-
-        nextInstance.activate();
-        switchScene(nextInstInd + 1);
-
-        if (hasHidden) {
-            unHideAndWait();
-            instances.forEach(MinecraftInstance::reset);
-        } else {
-            selectedInstance.reset();
-        }
-
-        String toCopy = JultiOptions.getInstance().clipboardOnReset;
-        if (!toCopy.isEmpty()) {
-            KeyboardUtil.copyToClipboard(toCopy);
-        }
-    }
-
-    private void unHideAndWait() {
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-        updateLastActionTime();
-        JultiOptions options = JultiOptions.getInstance();
-        hasHidden = false;
-        for (MinecraftInstance instance : instances) {
-            if (options.useBorderless) {
-                instance.borderlessAndMove(options.screenLocation[0], options.screenLocation[1], options.screenSize[0], options.screenSize[1]);
-            } else {
-                instance.maximize();
-            }
-        }
-        sleep(100);
-    }
-
-    private void updateLastActionTime() {
-        lastAction = System.currentTimeMillis();
     }
 
     private void onHideKey() {
-        hideNonSelectedInstances();
+        try {
+            hideNonSelectedInstances();
+        } catch (Exception e) {
+            log(Level.ERROR, "Error during hiding:\n" + e.getMessage());
+        }
     }
 
     private void onBGResetKey() {
+        try {
+            backgroundReset();
+        } catch (Exception e) {
+            log(Level.ERROR, "Error during background reset:" + e.getMessage());
+        }
+    }
+
+    private void backgroundReset() {
         updateLastActionTime();
         if (hasHidden) {
             unHideAndWait();
@@ -203,41 +431,10 @@ public class Julti {
         }
     }
 
-    private void runHotkey(String bindingName) {
-        System.out.println("Running " + bindingName);
-    }
-
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
         JultiOptions options = JultiOptions.getInstance();
         if (options.useBorderless) {
-            minecraftInstance.borderlessAndMove(options.screenLocation[0], options.screenLocation[1], options.screenSize[0], options.screenSize[1]);
-        }
-    }
-
-    @Nullable
-    private MinecraftInstance getSelectedInstance() {
-        Pointer hwnd = HwndUtil.getCurrentHwnd();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-        for (MinecraftInstance instance : instances) {
-            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
-                return instance;
-            }
-        }
-        return null;
-    }
-
-    private void switchScene(final int i) {
-        JultiOptions options = JultiOptions.getInstance();
-        if (i <= 9 && options.obsPressHotkey) {
-            int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
-            List<Integer> keys = new ArrayList<>();
-            if (options.obsUseAlt) {
-                keys.add(Win32Con.VK_MENU);
-            }
-            keys.add(keyToPress);
-            KeyboardUtil.pressKeysForTime(keys, 100L);
-        } else {
-            log(Level.WARN, "Too many instances! Could not switch to a scene past 9.");
+            minecraftInstance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
         }
     }
 
@@ -261,24 +458,10 @@ public class Julti {
             if (instance.equals(selectedInstance)) {
                 continue;
             }
-            instance.move(0, 0, 0, 0);
+            instance.setSizeZero();
         }
 
         hasHidden = true;
-    }
-
-    public InstanceManager getInstanceManager() {
-        return instanceManager;
-    }
-
-    public void redetectInstances() {
-        log(Level.INFO, "Redetecting Instances...");
-        instanceManager.redetectInstances();
-        log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
     }
 
     public void stop() {
@@ -315,3 +498,4 @@ public class Julti {
 
 
 }
+
