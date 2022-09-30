@@ -175,4 +175,14 @@ public class InstanceManager {
             instance.tryClearWorlds();
         }
     }
+
+    /**
+     * Removes an instance by its index, not its actual number (Instance #1 has index 0).
+     *
+     * @param ind the instance index
+     */
+    synchronized public void removeInstanceByIndex(int ind) {
+        MinecraftInstance removed = instances.remove(ind);
+        log(Level.INFO, "Removed Instance #" + (ind + 1) + ": " + removed.getName());
+    }
 }

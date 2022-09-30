@@ -81,7 +81,13 @@ public class Julti {
         map.put("help", this::runCommandHelp);
         map.put("hide", this::runCommandHide);
         map.put("option", this::runCommandOption);
+        map.put("remove", this::runCommandRemove);
         return map;
+    }
+
+    private void runCommandRemove(String[] args) {
+        int toRemove = Integer.parseInt(args[0]);
+        instanceManager.removeInstanceByIndex(toRemove - 1);
     }
 
     private void runCommandRedetect(String[] args) {
@@ -152,7 +158,20 @@ public class Julti {
     }
 
     private void runCommandHelp(String[] args) {
-        log(Level.INFO, "Commands:" + "\nredetect -> Sets current instances to the opened Minecraft instances" + "\nreset -> Reset current instance and activate the next instance" + "\nreset [all/random/unselected/background/#] -> Resets instance(s)" + "\nclose [all/random/#] -> Closes a specific / all instance(s)" + "\nactivate [random/#] -> Activates a specific instance" + "\nlist -> Lists all opened instances" + "\nhelp -> Shows all commands" + "\nhide [all/random/unselected/#] -> Hides instance(s)" + "\noption -> Lists all options" + "\noption [option] -> Gets the current value of an option and gives an example to set it" + "\noption [option] [value] -> Sets the value of the option to the specified value");
+        log(Level.INFO, "Commands:\n" +
+                "redetect -> Sets current instances to the opened Minecraft instances\n" +
+                "reset -> Functions the same as the reset hotkey\n" +
+                "reset [all/random/unselected/background/#] -> Resets specified instance(s); background functions the same as the background reset hotkey\n" +
+                "close <all/random/#> -> Closes a specific / all instance(s)\n" +
+                "activate <random/#> -> Activates a specific instance\n" +
+                "list -> Lists all opened instances\n" +
+                "help -> Shows all commands\n" +
+                "hide -> Functions the same as the hide hotkey\n" +
+                "hide [all/random/unselected/#] -> Hides instance(s)\n" +
+                "option -> Lists all options\n" +
+                "option [option] -> Gets the current value of an option and gives an example to set it\n" +
+                "option [option] [value] -> Sets the value of the option to the specified value\n" +
+                "remove <#> -> Removes a single instance from the current instances");
     }
 
     private void runCommandHide(String[] args) {
