@@ -320,7 +320,7 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
-        log(Level.INFO, "Welcome to Julti v" + VERSION);
+        log(Level.INFO, "Welcome to Julti v" + VERSION + "!");
     }
 
     /**
