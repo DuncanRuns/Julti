@@ -14,7 +14,10 @@ import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -192,8 +195,18 @@ public class Julti {
     }
 
     private void runCommandOption(String[] args) {
-        log(Level.WARN, "The option command is not yet implemented.");
-
+        if (args.length == 1 && args[0].equals("open")) {
+            try {
+                Desktop.getDesktop().open(JultiOptions.getSelectedProfilePath().toFile());
+            } catch (IOException e) {
+                log(Level.ERROR, "Error opening options file:\n" + e.getMessage());
+            }
+        } else if (args.length == 1 && args[0].equals("reload")) {
+            JultiOptions.getInstance(true);
+        } else {
+            log(Level.WARN, "The option command is not yet implemented. Please change options in " + JultiOptions.getSelectedProfilePath() + "." +
+                    "\nYou can also run \"option open\" to open the file and \"option reload\" to reload them.");
+        }
     }
 
     public void redetectInstances() {

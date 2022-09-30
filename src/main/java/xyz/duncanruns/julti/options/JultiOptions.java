@@ -58,6 +58,13 @@ public final class JultiOptions {
     }
 
     public static JultiOptions getInstance() {
+        return getInstance(false);
+    }
+
+    public static JultiOptions getInstance(boolean reload) {
+        if (reload) {
+            INSTANCE = null;
+        }
         if (INSTANCE == null) {
             INSTANCE = new JultiOptions(getSelectedProfilePath());
             INSTANCE.tryLoad();
@@ -65,7 +72,7 @@ public final class JultiOptions {
         return INSTANCE;
     }
 
-    private static Path getSelectedProfilePath() {
+    public static Path getSelectedProfilePath() {
         Path jultiDir = getJultiDir();
         Path selectedFilePath = jultiDir.resolve("selectedprofile.txt");
         if (Files.isRegularFile(selectedFilePath)) {
@@ -77,6 +84,8 @@ public final class JultiOptions {
                 return jultiDir.resolve("profiles").resolve(name + ".json");
             } catch (Exception ignored) {
             }
+        } else {
+            changeProfile("default");
         }
         return jultiDir.resolve("profiles").resolve("default.json");
     }
