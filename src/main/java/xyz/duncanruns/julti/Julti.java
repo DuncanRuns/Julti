@@ -207,6 +207,9 @@ public class Julti {
     public void redetectInstances() {
         log(Level.INFO, "Redetecting Instances...");
         instanceManager.redetectInstances();
+        for (MinecraftInstance instance : instanceManager.getInstances()) {
+            onInstanceLoad(instance);
+        }
         log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
     }
 
