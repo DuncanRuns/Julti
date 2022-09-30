@@ -97,6 +97,10 @@ public final class HotkeyUtil {
         return false;
     }
 
+    public static String formatKeys(List<Integer> keys) {
+        return new Hotkey(keys).toString();
+    }
+
     private static class SingleHotkeyChecker {
         private final Hotkey hotkey;
         private final Runnable runnable;

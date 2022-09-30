@@ -82,7 +82,66 @@ public class Julti {
         map.put("hide", this::runCommandHide);
         map.put("option", this::runCommandOption);
         map.put("remove", this::runCommandRemove);
+        map.put("hotkey", this::runCommandHotkey);
         return map;
+    }
+
+    private void runCommandHotkey(final String[] args) {
+        List<String> setHotkeyArgs = Arrays.asList("reset", "hide", "bgreset", "custom");
+        JultiOptions options = JultiOptions.getInstance();
+        if (args.length == 0) {
+            log(Level.ERROR, "No args given to hotkey command!");
+        } else if ("list".equals(args[0])) {
+            StringBuilder out = new StringBuilder("Hotkeys:\n" +
+                    "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
+                    "Hide: " + HotkeyUtil.formatKeys(options.hideHotkey) + "\n" +
+                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
+            for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
+                out.append("\nCommand \"").append(entry.getKey()).append("\": ").append(HotkeyUtil.formatKeys(entry.getValue()));
+            }
+            log(Level.INFO, out.toString());
+        } else if (setHotkeyArgs.contains(args[0])) {
+            log(Level.INFO, "Waiting 1 second to not pick up accidental keypress...");
+            sleep(1000);
+            log(Level.INFO, "Please press your desired hotkey.");
+            HotkeyUtil.onNextHotkey(() -> true, hotkey -> {
+                JultiOptions jultiOptions = JultiOptions.getInstance();
+                switch (args[0]) {
+                    case "reset":
+                        jultiOptions.resetHotkey = hotkey.getKeys();
+                        break;
+                    case "bgreset":
+                        jultiOptions.bgResetHotkey = hotkey.getKeys();
+                        break;
+                    case "hide":
+                        jultiOptions.hideHotkey = hotkey.getKeys();
+                        break;
+                    case "custom":
+                        StringBuilder commandBuilder = new StringBuilder();
+                        for (String a : Arrays.copyOfRange(args, 1, args.length)) {
+                            commandBuilder.append(a).append(" ");
+                        }
+                        String command = commandBuilder.toString().trim();
+                        jultiOptions.extraHotkeys.put(command.toString(), hotkey.getKeys());
+                        break;
+                }
+                log(Level.INFO, "Hotkey Set");
+            });
+        } else if ("remove".equals(args[0])) {
+            StringBuilder commandBuilder = new StringBuilder();
+            for (String a : Arrays.copyOfRange(args, 1, args.length)) {
+                commandBuilder.append(a).append(" ");
+            }
+            String command = commandBuilder.toString().trim();
+            if (options.extraHotkeys.remove(command) == null) {
+                log(Level.ERROR, "Command \"" + command + "\" is not bound to any key.");
+            } else {
+                log(Level.INFO, "Removed binding for command \"" + command + "\".");
+            }
+        } else {
+            log(Level.ERROR, "Unknown arg \"" + args[0] + "\".");
+        }
+        setupHotkeys();
     }
 
     private void runCommandRemove(String[] args) {
@@ -102,15 +161,15 @@ public class Julti {
             }
         } else {
             final String input = args[0];
-            if (Objects.equals(input, "all")) {
+            if ("all".equals(input)) {
                 for (MinecraftInstance instance : instances) {
                     instance.reset();
                 }
-            } else if (Objects.equals(input, "random")) {
+            } else if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).reset();
-            } else if (Objects.equals(input, "background")) {
+            } else if ("background".equals(input)) {
                 backgroundReset();
-            } else if (Objects.equals(input, "unselected")) {
+            } else if ("unselected".equals(input)) {
                 backgroundReset();
             } else {
                 instances.get(Integer.parseInt(input) - 1).reset();
@@ -124,11 +183,11 @@ public class Julti {
             log(Level.ERROR, "No args given to close command!");
         } else {
             final String input = args[0];
-            if (Objects.equals(input, "all")) {
+            if ("all".equals(input)) {
                 for (MinecraftInstance instance : instances) {
                     instance.closeWindow();
                 }
-            } else if (Objects.equals(input, "random")) {
+            } else if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).closeWindow();
             } else {
                 instances.get(Integer.parseInt(input) - 1).closeWindow();
@@ -142,7 +201,7 @@ public class Julti {
             log(Level.ERROR, "No args given to activate command!");
         } else {
             final String input = args[0];
-            if (Objects.equals(input, "random")) {
+            if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).activate();
             } else {
                 instances.get(Integer.parseInt(input) - 1).activate();
@@ -171,7 +230,12 @@ public class Julti {
                 "option -> Lists all options\n" +
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
                 "option [option] [value] -> Sets the value of the option to the specified value\n" +
-                "remove <#> -> Removes a single instance from the current instances");
+                "remove <#> -> Removes a single instance from the current instances\n" +
+                "hotkey list -> List all hotkeys.\n" +
+                "hotkey <reset/bgreset/hide> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
+                "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
+                "hotkey remove <custom command> -> Removes a hotkey."
+        );
     }
 
     private void runCommandHide(String[] args) {
@@ -189,13 +253,13 @@ public class Julti {
             }
         } else {
             final String input = args[0];
-            if (Objects.equals(input, "all")) {
+            if ("all".equals(input)) {
                 for (MinecraftInstance instance : instances) {
                     instance.setSizeZero();
                 }
-            } else if (Objects.equals(input, "random")) {
+            } else if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).setSizeZero();
-            } else if (Objects.equals(input, "unselected")) {
+            } else if ("unselected".equals(input)) {
                 MinecraftInstance selectedInstance = getSelectedInstance();
                 for (MinecraftInstance instanceToHide : instances) {
                     if (!Objects.equals(selectedInstance, instanceToHide)) {
@@ -328,10 +392,11 @@ public class Julti {
 
     public void runCommand(final String command) {
         String[] args = command.split(" ");
-        if (args.length == 0 || Objects.equals(args[0].trim(), "")) {
+        if (args.length == 0 || "".equals(args[0].trim())) {
             return;
         }
         Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
+        System.out.println(commandConsumer);
         if (commandConsumer == null) {
             log(Level.ERROR, "Unknown Command \"" + command + "\"");
         } else {
