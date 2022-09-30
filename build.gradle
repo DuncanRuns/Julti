@@ -36,7 +36,8 @@ jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 
     manifest {
-        attributes 'Main-Class': 'xyz.duncanruns.julti.Main'
+        attributes 'Main-Class': 'xyz.duncanruns.julti.Main',
+                'Multi-Release': true
     }
 
     from {
