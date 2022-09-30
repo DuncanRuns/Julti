@@ -396,7 +396,6 @@ public class Julti {
             return;
         }
         Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
-        System.out.println(commandConsumer);
         if (commandConsumer == null) {
             log(Level.ERROR, "Unknown Command \"" + command + "\"");
         } else {
