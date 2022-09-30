@@ -171,7 +171,7 @@ public class InstanceManager {
     }
 
     public void clearAllWorlds() {
-        for(MinecraftInstance instance: new ArrayList<>(instances)){
+        for (MinecraftInstance instance : new ArrayList<>(instances)) {
             instance.tryClearWorlds();
         }
     }
