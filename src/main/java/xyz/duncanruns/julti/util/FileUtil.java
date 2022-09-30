@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.Scanner;
 
 public final class FileUtil {
+    // Replacement for Files for java 8 compatibility
+
     private FileUtil() {
     }
 
