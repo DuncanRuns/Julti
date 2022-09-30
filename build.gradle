@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '0.0.1'
+version '0.0.2'
 
 repositories {
     mavenCentral()
@@ -36,8 +36,10 @@ jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 
     manifest {
+        // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
         attributes 'Main-Class': 'xyz.duncanruns.julti.Main',
-                'Multi-Release': true
+                'Multi-Release': true,
+                'Implementation-Version': version
     }
 
     from {

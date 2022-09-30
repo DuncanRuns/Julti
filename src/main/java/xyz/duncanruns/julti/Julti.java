@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 
 public class Julti {
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
-    private static final String VERSION = "0.0.1";
+    private static final String VERSION = getVersion();
     private InstanceManager instanceManager;
     private ScheduledExecutorService tickExecutor;
     private ScheduledExecutorService logCheckExecutor;
@@ -49,6 +49,15 @@ public class Julti {
         hasHidden = true;
 
         selectedHwnd = null;
+    }
+
+    private static String getVersion() {
+        // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
+        String ver = Julti.class.getPackage().getImplementationVersion();
+        if (ver == null) {
+            return "DEV";
+        }
+        return ver;
     }
 
     public static void log(Level level, String message) {
