@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Julti {
-
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
+    private static final String VERSION = "0.0.1";
     private InstanceManager instanceManager;
     private ScheduledExecutorService tickExecutor;
     private ScheduledExecutorService logCheckExecutor;
@@ -143,20 +143,7 @@ public class Julti {
     }
 
     private void runCommandHelp(String[] args) {
-        log(Level.INFO,
-                "Commands:" +
-                        "\nredetect -> Sets current instances to the opened Minecraft instances" +
-                        "\nreset -> Reset current instance and activate the next instance" +
-                        "\nreset [all/random/unselected/background/#] -> Resets instance(s)" +
-                        "\nclose [all/random/#] -> Closes a specific / all instance(s)" +
-                        "\nactivate [random/#] -> Activates a specific instance" +
-                        "\nlist -> Lists all opened instances" +
-                        "\nhelp -> Shows all commands" +
-                        "\nhide [all/random/unselected/#] -> Hides instance(s)" +
-                        "\noption -> Lists all options" +
-                        "\noption [option] -> Gets the current value of an option and gives an example to set it" +
-                        "\noption [option] [value] -> Sets the value of the option to the specified value"
-        );
+        log(Level.INFO, "Commands:" + "\nredetect -> Sets current instances to the opened Minecraft instances" + "\nreset -> Reset current instance and activate the next instance" + "\nreset [all/random/unselected/background/#] -> Resets instance(s)" + "\nclose [all/random/#] -> Closes a specific / all instance(s)" + "\nactivate [random/#] -> Activates a specific instance" + "\nlist -> Lists all opened instances" + "\nhelp -> Shows all commands" + "\nhide [all/random/unselected/#] -> Hides instance(s)" + "\noption -> Lists all options" + "\noption [option] -> Gets the current value of an option and gives an example to set it" + "\noption [option] [value] -> Sets the value of the option to the specified value");
     }
 
     private void runCommandHide(String[] args) {
@@ -204,8 +191,7 @@ public class Julti {
         } else if (args.length == 1 && args[0].equals("reload")) {
             JultiOptions.getInstance(true);
         } else {
-            log(Level.WARN, "The option command is not yet implemented. Please change options in " + JultiOptions.getSelectedProfilePath() + "." +
-                    "\nYou can also run \"option open\" to open the file and \"option reload\" to reload them.");
+            log(Level.WARN, "The option command is not yet implemented. Please change options in " + JultiOptions.getSelectedProfilePath() + "." + "\nYou can also run \"option open\" to open the file and \"option reload\" to reload them.");
         }
     }
 
@@ -334,6 +320,7 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
+        log(Level.INFO, "Welcome to Julti v" + VERSION);
     }
 
     /**
