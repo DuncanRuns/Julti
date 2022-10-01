@@ -132,7 +132,7 @@ public final class HwndUtil {
     }
 
     public static void moveHwnd(Pointer hwnd, int x, int y, int w, int h) {
-        User32.INSTANCE.MoveWindow(hwnd, x, y, w, h, false);
+        User32.INSTANCE.MoveWindow(hwnd, x, y, w, h, true);
     }
 
     public static Path getInstancePathFromPid(int pid) {

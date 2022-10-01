@@ -34,7 +34,6 @@ public class Julti {
     private long lastWorldClear;
     private long lastAction;
     private Pointer selectedHwnd;
-    private boolean hasHidden;
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
     public Julti() {
@@ -45,8 +44,6 @@ public class Julti {
         last2SecCycle = 0;
         lastWorldClear = 0;
         lastAction = 0;
-
-        hasHidden = true;
 
         selectedHwnd = null;
     }
@@ -126,6 +123,8 @@ public class Julti {
                         break;
                 }
                 log(Level.INFO, "Hotkey Set");
+                hotkey.wasPressed();
+                setupHotkeys();
             });
         } else if ("remove".equals(args[0])) {
             StringBuilder commandBuilder = new StringBuilder();
@@ -138,10 +137,10 @@ public class Julti {
             } else {
                 log(Level.INFO, "Removed binding for command \"" + command + "\".");
             }
+            setupHotkeys();
         } else {
             log(Level.ERROR, "Unknown arg \"" + args[0] + "\".");
         }
-        setupHotkeys();
     }
 
     private void runCommandRemove(String[] args) {
@@ -154,6 +153,7 @@ public class Julti {
     }
 
     private void runCommandReset(String[] args) {
+        updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
             if (!reset()) {
@@ -196,6 +196,7 @@ public class Julti {
     }
 
     private void runCommandActivate(String[] args) {
+        updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to activate command!");
@@ -239,6 +240,7 @@ public class Julti {
     }
 
     private void runCommandHide(String[] args) {
+        updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
             MinecraftInstance selectedInstance = getSelectedInstance();
@@ -247,7 +249,7 @@ public class Julti {
             } else {
                 for (MinecraftInstance instanceToHide : instances) {
                     if (!Objects.equals(selectedInstance, instanceToHide)) {
-                        instanceToHide.setSizeZero();
+                        instanceToHide.hide();
                     }
                 }
             }
@@ -255,21 +257,20 @@ public class Julti {
             final String input = args[0];
             if ("all".equals(input)) {
                 for (MinecraftInstance instance : instances) {
-                    instance.setSizeZero();
+                    instance.hide();
                 }
             } else if ("random".equals(input)) {
-                instances.get(new Random().nextInt(instances.size())).setSizeZero();
+                instances.get(new Random().nextInt(instances.size())).hide();
             } else if ("unselected".equals(input)) {
                 MinecraftInstance selectedInstance = getSelectedInstance();
                 for (MinecraftInstance instanceToHide : instances) {
                     if (!Objects.equals(selectedInstance, instanceToHide)) {
-                        instanceToHide.setSizeZero();
+                        instanceToHide.hide();
                     }
                 }
             } else {
-                instances.get(Integer.parseInt(input) - 1).setSizeZero();
+                instances.get(Integer.parseInt(input) - 1).hide();
             }
-            hasHidden = true;
         }
     }
 
@@ -330,12 +331,7 @@ public class Julti {
         nextInstance.activate();
         switchScene(nextInstInd + 1);
 
-        if (hasHidden) {
-            unHideAndWait();
-            instances.forEach(MinecraftInstance::reset);
-        } else {
-            selectedInstance.reset();
-        }
+        selectedInstance.reset();
 
         String toCopy = JultiOptions.getInstance().clipboardOnReset;
         if (!toCopy.isEmpty()) {
@@ -373,21 +369,6 @@ public class Julti {
         } else {
             log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
-    }
-
-    private void unHideAndWait() {
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-        updateLastActionTime();
-        JultiOptions options = JultiOptions.getInstance();
-        hasHidden = false;
-        for (MinecraftInstance instance : instances) {
-            if (options.useBorderless) {
-                instance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
-            } else {
-                instance.maximize();
-            }
-        }
-        sleep(100);
     }
 
     public void runCommand(final String command) {
@@ -512,9 +493,6 @@ public class Julti {
 
     private void backgroundReset() {
         updateLastActionTime();
-        if (hasHidden) {
-            unHideAndWait();
-        }
         MinecraftInstance selectedInstance = getSelectedInstance();
         if (selectedInstance == null) {
             return;
@@ -553,10 +531,8 @@ public class Julti {
             if (instance.equals(selectedInstance)) {
                 continue;
             }
-            instance.setSizeZero();
+            instance.hide();
         }
-
-        hasHidden = true;
     }
 
     public void stop() {
