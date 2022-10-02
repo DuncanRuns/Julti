@@ -400,7 +400,7 @@ public class Julti {
 
     public void runCommand(final String commands) {
         for (String command : commands.split(";")) {
-            command = commands.trim();
+            command = command.trim();
             String[] args = command.split(" ");
             if (args.length == 0 || "".equals(args[0].trim())) {
                 return;
