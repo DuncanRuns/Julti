@@ -396,19 +396,21 @@ public class Julti {
         }
     }
 
-    public void runCommand(final String command) {
-        String[] args = command.split(" ");
-        if (args.length == 0 || "".equals(args[0].trim())) {
-            return;
-        }
-        Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
-        if (commandConsumer == null) {
-            log(Level.ERROR, "Unknown Command \"" + command + "\"");
-        } else {
-            try {
-                commandConsumer.accept(Arrays.copyOfRange(args, 1, args.length));
-            } catch (Exception e) {
-                log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
+    public void runCommand(final String commands) {
+        for (String command : commands.split(";")) {
+            String[] args = command.split(" ");
+            if (args.length == 0 || "".equals(args[0].trim())) {
+                return;
+            }
+            Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
+            if (commandConsumer == null) {
+                log(Level.ERROR, "Unknown Command \"" + command + "\"");
+            } else {
+                try {
+                    commandConsumer.accept(Arrays.copyOfRange(args, 1, args.length));
+                } catch (Exception e) {
+                    log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
+                }
             }
         }
     }
