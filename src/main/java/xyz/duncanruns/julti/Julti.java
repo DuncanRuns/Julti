@@ -102,6 +102,7 @@ public class Julti {
             sleep(1000);
             log(Level.INFO, "Please press your desired hotkey.");
             HotkeyUtil.onNextHotkey(() -> true, hotkey -> {
+                Thread.currentThread().setName("hotkeys");
                 JultiOptions jultiOptions = JultiOptions.getInstance();
                 switch (args[0]) {
                     case "reset":
@@ -119,7 +120,7 @@ public class Julti {
                             commandBuilder.append(a).append(" ");
                         }
                         String command = commandBuilder.toString().trim();
-                        jultiOptions.extraHotkeys.put(command.toString(), hotkey.getKeys());
+                        jultiOptions.extraHotkeys.put(command, hotkey.getKeys());
                         break;
                 }
                 log(Level.INFO, "Hotkey Set");
@@ -144,8 +145,9 @@ public class Julti {
     }
 
     private void runCommandRemove(String[] args) {
-        int toRemove = Integer.parseInt(args[0]);
-        instanceManager.removeInstanceByIndex(toRemove - 1);
+        int index = indexFromArg(args[0]);
+        if (index != -1)
+            instanceManager.removeInstanceByIndex(index);
     }
 
     private void runCommandRedetect(String[] args) {
@@ -172,7 +174,9 @@ public class Julti {
             } else if ("unselected".equals(input)) {
                 backgroundReset();
             } else {
-                instances.get(Integer.parseInt(input) - 1).reset();
+                int index = indexFromArg(input);
+                if (index != -1)
+                    instances.get(index).reset();
             }
         }
     }
@@ -190,7 +194,9 @@ public class Julti {
             } else if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).closeWindow();
             } else {
-                instances.get(Integer.parseInt(input) - 1).closeWindow();
+                int index = indexFromArg(input);
+                if (index != -1)
+                    instances.get(index).closeWindow();
             }
         }
     }
@@ -205,7 +211,9 @@ public class Julti {
             if ("random".equals(input)) {
                 instances.get(new Random().nextInt(instances.size())).activate();
             } else {
-                instances.get(Integer.parseInt(input) - 1).activate();
+                int index = indexFromArg(input);
+                if (index != -1)
+                    instances.get(index).activate();
             }
         }
     }
@@ -269,7 +277,9 @@ public class Julti {
                     }
                 }
             } else {
-                instances.get(Integer.parseInt(input) - 1).hide();
+                int index = indexFromArg(input);
+                if (index != -1)
+                    instances.get(index).hide();
             }
         }
     }
@@ -288,6 +298,40 @@ public class Julti {
         }
     }
 
+    private int indexFromArg(final String num) {
+        List<MinecraftInstance> instances = getInstanceManager().getInstances();
+        if (num.startsWith("~")) {
+            // parseInt can handle "1", "-1", and "+1"
+            int offset = Integer.parseInt(num.substring(1));
+
+            MinecraftInstance selectedInstance = getSelectedInstance();
+            if (selectedInstance == null) {
+                return -1;
+            }
+            // index of current instance + offset wrapped around into instances size range
+            return (instances.indexOf(selectedInstance) + (offset)) % instances.size();
+        } else {
+            // not relative
+            return Integer.parseInt(num) - 1;
+        }
+    }
+
+    public InstanceManager getInstanceManager() {
+        return instanceManager;
+    }
+
+    @Nullable
+    private MinecraftInstance getSelectedInstance() {
+        Pointer hwnd = HwndUtil.getCurrentHwnd();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        for (MinecraftInstance instance : instances) {
+            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
+                return instance;
+            }
+        }
+        return null;
+    }
+
     public void redetectInstances() {
         log(Level.INFO, "Redetecting Instances...");
         instanceManager.redetectInstances();
@@ -295,10 +339,6 @@ public class Julti {
             onInstanceLoad(instance);
         }
         log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
-    }
-
-    public InstanceManager getInstanceManager() {
-        return instanceManager;
     }
 
     private boolean reset() {
@@ -322,10 +362,7 @@ public class Julti {
             return true;
         }
 
-        int nextInstInd = instances.indexOf(selectedInstance) + 1;
-        if (nextInstInd >= instances.size()) {
-            nextInstInd = 0;
-        }
+        int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
         MinecraftInstance nextInstance = instances.get(nextInstInd);
 
         nextInstance.activate();
@@ -338,18 +375,6 @@ public class Julti {
             KeyboardUtil.copyToClipboard(toCopy);
         }
         return true;
-    }
-
-    @Nullable
-    private MinecraftInstance getSelectedInstance() {
-        Pointer hwnd = HwndUtil.getCurrentHwnd();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-        for (MinecraftInstance instance : instances) {
-            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
-                return instance;
-            }
-        }
-        return null;
     }
 
     private void updateLastActionTime() {
