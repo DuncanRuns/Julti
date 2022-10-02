@@ -212,8 +212,10 @@ public class Julti {
                 instances.get(new Random().nextInt(instances.size())).activate();
             } else {
                 int index = indexFromArg(input);
-                if (index != -1)
+                if (index != -1) {
                     instances.get(index).activate();
+                    switchScene(index + 1);
+                }
             }
         }
     }
