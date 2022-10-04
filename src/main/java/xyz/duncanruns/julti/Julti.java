@@ -80,7 +80,12 @@ public class Julti {
         map.put("option", this::runCommandOption);
         map.put("remove", this::runCommandRemove);
         map.put("hotkey", this::runCommandHotkey);
+        map.put("titles", this::runCommandTitles);
         return map;
+    }
+
+    private void runCommandTitles(String[] args) {
+        getInstanceManager().renameWindows();
     }
 
     private void runCommandHotkey(final String[] args) {
@@ -228,24 +233,26 @@ public class Julti {
     }
 
     private void runCommandHelp(String[] args) {
-        log(Level.INFO, "Commands:\n" +
-                "redetect -> Sets current instances to the opened Minecraft instances\n" +
-                "reset -> Functions the same as the reset hotkey\n" +
+        log(Level.INFO, "\n--------------------\nCommands:\n" +
+                "\nhelp -> Shows all commands\n" +
+                "\nredetect -> Sets current instances to the opened Minecraft instances\n" +
+                "\nremove <#> -> Removes a single instance from the current instances\n" +
+                "\nreset -> Functions the same as the reset hotkey\n" +
                 "reset [all/random/unselected/background/#] -> Resets specified instance(s); background functions the same as the background reset hotkey\n" +
-                "close <all/random/#> -> Closes a specific / all instance(s)\n" +
-                "activate <random/#> -> Activates a specific instance\n" +
-                "list -> Lists all opened instances\n" +
-                "help -> Shows all commands\n" +
-                "hide -> Functions the same as the hide hotkey\n" +
+                "\nclose <all/random/#> -> Closes a specific / all instance(s)\n" +
+                "\nactivate <random/#> -> Activates a specific instance\n" +
+                "\nhide -> Functions the same as the hide hotkey\n" +
                 "hide [all/random/unselected/#] -> Hides instance(s)\n" +
-                "option -> Lists all options\n" +
+                "\nlist -> Lists all opened instances\n" +
+                "\noption -> Lists all options\n" +
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
                 "option [option] [value] -> Sets the value of the option to the specified value\n" +
-                "remove <#> -> Removes a single instance from the current instances\n" +
-                "hotkey list -> List all hotkeys.\n" +
+                "\nhotkey list -> List all hotkeys.\n" +
                 "hotkey <reset/bgreset/hide> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
                 "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
-                "hotkey remove <custom command> -> Removes a hotkey."
+                "hotkey remove <custom command> -> Removes a hotkey.\n" +
+                "\ntitles -> Set window titles to \"Minecraft* - Instance #\"." +
+                "\n--------------------"
         );
     }
 
