@@ -78,7 +78,9 @@ public class Wall extends JFrame implements WindowListener {
 
     @Override
     public void paint(Graphics g) {
-        drawWall(g);
+        if ((!JultiOptions.getInstance().wallOneAtATime) || isActive()) {
+            drawWall(g);
+        }
     }
 
     private void drawWall(Graphics graphics) {
@@ -178,6 +180,8 @@ public class Wall extends JFrame implements WindowListener {
     }
 
     public void lockInstance(int screenX, int screenY) {
+        // Disable locking for One At A Time
+        if (JultiOptions.getInstance().wallOneAtATime) return;
         MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
         lockedInstances.add(clickedInstance);
     }
@@ -251,6 +255,13 @@ public class Wall extends JFrame implements WindowListener {
     }
 
     public void requestReset(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
+        // If using One At A Time, just reset all instances
+        if (JultiOptions.getInstance().wallOneAtATime) {
+            instances.forEach(MinecraftInstance::reset);
+            requestFocus();
+            return;
+        }
+
         selectedInstance.reset();
         if (lockedInstances.isEmpty()) {
             requestFocus();

@@ -28,6 +28,7 @@ public final class JultiOptions {
     public boolean useF3 = true;
     public String clipboardOnReset = "";
     public boolean useWall = false;
+    public boolean wallOneAtATime = false;
 
     // Window
     public boolean useBorderless = false;
