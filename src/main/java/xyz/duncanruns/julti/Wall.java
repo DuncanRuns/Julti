@@ -102,26 +102,33 @@ public class Wall extends JFrame implements WindowListener {
 
             int n = 0;
             fullLoop:
-            for (int y = 0; y < totalColumns; y++) {
-                for (int x = 0; x < totalRows; x++) {
-                    final MinecraftInstance instance = instances.get(n);
-                    if (instance.hasWindow()) {
-                        ScreenCapUtil.ImageInfo imageInfo = instance.captureScreen();
-                        BufferedImage image = new BufferedImage(imageInfo.width, imageInfo.height, BufferedImage.TYPE_INT_RGB);
-                        setImageRGB(image, imageInfo);
-
-                        drawInstance(graphics, iWidth, iHeight, image, x, y, instance);
-                    }
-                    n++;
-                    if (n >= instances.size()) {
-                        break fullLoop;
+            for (int y = 0; y < totalRows; y++) {
+                for (int x = 0; x < totalColumns; x++) {
+                    try {
+                        final MinecraftInstance instance = instances.get(n);
+                        if (instance.hasWindow()) {
+                            ScreenCapUtil.ImageInfo imageInfo = instance.captureScreen();
+                            BufferedImage image = new BufferedImage(imageInfo.width, imageInfo.height, BufferedImage.TYPE_INT_RGB);
+                            setImageRGB(image, imageInfo);
+                            //int finalX = x;
+                            //int finalY = y;
+                            //threads[n] = new Thread(() -> drawInstance(graphics, iWidth, iHeight, image, finalX, finalY, instance));
+                            //threads[n].start();
+                            drawInstance(graphics, iWidth, iHeight, image, x, y, instance);
+                        }
+                        n++;
+                        if (n >= instances.size()) {
+                            break fullLoop;
+                        }
+                    } catch (Exception ignored) {
+                        ignored.printStackTrace();
                     }
                 }
             }
 
             //for (Thread thread : threads) {
-            //    thread.join();
-            //}
+            //        thread.join();
+            //    }
             //measureFrames();
             //drawFPS(graphics);
         } catch (Exception ignored) {
@@ -141,14 +148,14 @@ public class Wall extends JFrame implements WindowListener {
         }
     }
 
-    private void drawInstance(Graphics graphics, int iWidth, int iHeight, BufferedImage image, int finalX, int finalY, MinecraftInstance instance) {
+    private void drawInstance(Graphics graphics, int iWidth, int iHeight, BufferedImage image, int x, int y, MinecraftInstance instance) {
         if (lockedInstances.contains(instance)) {
             Graphics imageG = image.getGraphics();
             //imageG.setColor(new Color(0, 0, 0, 128));
             //imageG.fillRect(0, 0, image.getWidth(), image.getHeight());
             imageG.drawImage(LOCK_IMAGE, 0, 0, this);
         }
-        graphics.drawImage(image, iWidth * finalX, iHeight * finalY, iWidth, iHeight, this);
+        graphics.drawImage(image, iWidth * x, iHeight * y, iWidth, iHeight, this);
     }
 
     private void measureFrames() {
