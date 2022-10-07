@@ -7,15 +7,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.options.JultiOptions;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.KeyboardUtil;
+import xyz.duncanruns.julti.util.ScreenCapUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
@@ -35,6 +38,7 @@ public class Julti {
     private long lastAction;
     private Pointer selectedHwnd;
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
+    private Wall wall = null;
 
     public Julti() {
         instanceManager = null;
@@ -57,10 +61,6 @@ public class Julti {
         return ver;
     }
 
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-    }
-
     private static void sleep(final long millis) {
         try {
             Thread.sleep(millis);
@@ -81,6 +81,18 @@ public class Julti {
         map.put("remove", this::runCommandRemove);
         map.put("hotkey", this::runCommandHotkey);
         map.put("titles", this::runCommandTitles);
+        map.put("testcap", strings -> {
+            File output = new File("out.png");
+            try {
+                output.createNewFile();
+                ScreenCapUtil.ImageInfo imageInfo = getInstanceManager().getInstances().get(0).captureScreen();
+                BufferedImage image = new BufferedImage(imageInfo.width, imageInfo.height, BufferedImage.TYPE_INT_RGB);
+                image.setRGB(0, 0, imageInfo.width, imageInfo.height, imageInfo.pixels, 0, imageInfo.pixels.length);
+                ImageIO.write(image, "png", output);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         return map;
     }
 
@@ -89,12 +101,16 @@ public class Julti {
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "hide", "bgreset", "custom");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "hide", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
         } else if ("list".equals(args[0])) {
             StringBuilder out = new StringBuilder("Hotkeys:\n" +
+                    "Reset All (Wall): " + HotkeyUtil.formatKeys(options.wallResetHotkey) + "\n" +
+                    "Reset Single (Wall): " + HotkeyUtil.formatKeys(options.wallSingleResetHotkey) + "\n" +
+                    "Lock Instance (Wall): " + HotkeyUtil.formatKeys(options.wallLockHotkey) + "\n" +
+                    "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
                     "Hide: " + HotkeyUtil.formatKeys(options.hideHotkey) + "\n" +
                     "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
@@ -118,6 +134,18 @@ public class Julti {
                         break;
                     case "hide":
                         jultiOptions.hideHotkey = hotkey.getKeys();
+                        break;
+                    case "wallreset":
+                        jultiOptions.wallResetHotkey = hotkey.getKeys();
+                        break;
+                    case "wallsinglereset":
+                        jultiOptions.wallSingleResetHotkey = hotkey.getKeys();
+                        break;
+                    case "walllock":
+                        jultiOptions.wallLockHotkey = hotkey.getKeys();
+                        break;
+                    case "wallplay":
+                        jultiOptions.wallPlayHotkey = hotkey.getKeys();
                         break;
                     case "custom":
                         StringBuilder commandBuilder = new StringBuilder();
@@ -163,7 +191,7 @@ public class Julti {
         updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
-            if (!reset()) {
+            if (!multiReset()) {
                 log(Level.ERROR, "No instances to reset / No instance selected.");
             }
         } else {
@@ -248,7 +276,7 @@ public class Julti {
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
                 "option [option] [value] -> Sets the value of the option to the specified value\n" +
                 "\nhotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/bgreset/hide> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
+                "hotkey <reset/bgreset/hide/wallreset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
                 "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
                 "hotkey remove <custom command> -> Removes a hotkey.\n" +
                 "\ntitles -> Set window titles to \"Minecraft* - Instance #\"." +
@@ -325,10 +353,6 @@ public class Julti {
         }
     }
 
-    public InstanceManager getInstanceManager() {
-        return instanceManager;
-    }
-
     @Nullable
     private MinecraftInstance getSelectedInstance() {
         Pointer hwnd = HwndUtil.getCurrentHwnd();
@@ -350,7 +374,31 @@ public class Julti {
         log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
     }
 
-    private boolean reset() {
+    private boolean wallReset() {
+        updateLastActionTime();
+        JultiOptions options = JultiOptions.getInstance();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        // Return if no instances
+        if (instances.size() == 0) {
+            return false;
+        }
+
+        // Get selected instance and next instance, return if no selected instance,
+        // if there is only a single instance, reset it and return.
+        MinecraftInstance selectedInstance = getSelectedInstance();
+        if (selectedInstance == null) {
+            return false;
+        }
+        if (instances.size() == 1) {
+            selectedInstance.reset(true);
+            return true;
+        }
+
+        wall.requestReset(selectedInstance, instances);
+        return true;
+    }
+
+    private boolean multiReset() {
         updateLastActionTime();
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
@@ -390,7 +438,11 @@ public class Julti {
         lastAction = System.currentTimeMillis();
     }
 
-    private void switchScene(final int i) {
+    public void switchScene(MinecraftInstance instance) {
+        switchScene(getInstanceManager().getInstances().indexOf(instance) + 1);
+    }
+
+    public void switchScene(final int i) {
         JultiOptions options = JultiOptions.getInstance();
         if (i <= 9 && options.obsPressHotkey) {
             int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
@@ -403,6 +455,14 @@ public class Julti {
         } else {
             log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
+    }
+
+    public InstanceManager getInstanceManager() {
+        return instanceManager;
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
     }
 
     public void runCommand(final String commands) {
@@ -433,6 +493,9 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
+        if (JultiOptions.getInstance().useWall) {
+            startWall();
+        }
         log(Level.INFO, "Welcome to Julti v" + VERSION + "!");
     }
 
@@ -453,11 +516,64 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.hideHotkey), this::onHideKey);
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.bgResetHotkey), this::onBGResetKey);
 
+        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallResetHotkey), this::onWallResetKey);
+        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallLockHotkey), this::onWallLockKey);
+        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallPlayHotkey), this::onWallPlayKey);
+        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallSingleResetHotkey), this::onWallSingleResetKey);
+
         for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
             HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> this.runCommand(entry.getKey()));
         }
 
         HotkeyUtil.startGlobalHotkeyChecker();
+    }
+
+    private void onWallSingleResetKey() {
+        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            try {
+                wall.resetInstance(point.x, point.y);
+            } catch (Exception ignored) {
+
+            }
+        }
+    }
+
+    private void onWallPlayKey() {
+        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            try {
+                wall.playInstance(point.x, point.y);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void onWallLockKey() {
+        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            try {
+                wall.lockInstance(point.x, point.y);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private void onWallResetKey() {
+        try {
+            if (!(JultiOptions.getInstance().useWall && wall.isActive())) {
+                return;
+            }
+
+            List<MinecraftInstance> lockedInstances = wall.getLockedInstances();
+            for (MinecraftInstance instance : instanceManager.getInstances()) {
+                if (lockedInstances.contains(instance)) continue;
+                instance.reset();
+            }
+        } catch (Exception e) {
+            log(Level.ERROR, "Error during wall reset:\n" + e.getMessage());
+        }
+
     }
 
     private void tryTick() {
@@ -506,7 +622,11 @@ public class Julti {
 
     private void onResetKey() {
         try {
-            reset();
+            if (JultiOptions.getInstance().useWall) {
+                wallReset();
+            } else {
+                multiReset();
+            }
         } catch (Exception e) {
             log(Level.ERROR, "Error during reset:\n" + e.getMessage());
         }
@@ -549,6 +669,9 @@ public class Julti {
     }
 
     private void hideNonSelectedInstances() {
+
+        JultiOptions options = JultiOptions.getInstance();
+
         updateLastActionTime();
         List<MinecraftInstance> instances = instanceManager.getInstances();
 
@@ -560,6 +683,12 @@ public class Julti {
         // Get selected instance and next instance, return if no selected instance.
         MinecraftInstance selectedInstance = getSelectedInstance();
         if (selectedInstance == null) {
+            return;
+        }
+
+
+        if (options.useWall) {
+            log(Level.WARN, "Instance hiding not enabled while using wall!");
             return;
         }
 
@@ -602,6 +731,10 @@ public class Julti {
             instanceStrings.add(instance.getInstancePath().toString());
         }
         JultiOptions.getInstance().lastInstances = Collections.unmodifiableList(instanceStrings);
+    }
+
+    public void startWall() {
+        this.wall = new Wall(this);
     }
 
 

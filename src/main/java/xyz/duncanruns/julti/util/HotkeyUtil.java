@@ -1,5 +1,7 @@
 package xyz.duncanruns.julti.util;
 
+import xyz.duncanruns.julti.win32.Win32Con;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,9 +123,15 @@ public final class HotkeyUtil {
 
     public static class Hotkey {
 
-        private final List<Integer> keys;
+        protected final List<Integer> keys;
 
         private boolean hasBeenPressed;
+
+        // Should only be used in extended classes
+        private Hotkey() {
+            keys = null;
+            hasBeenPressed = true;
+        }
 
         public Hotkey(List<Integer> keys) {
             // Copy the list by wrapping in the ArrayList constructor, and use unmodifiableList to give an unmodifiable view of it.

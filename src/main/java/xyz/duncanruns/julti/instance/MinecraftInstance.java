@@ -4,10 +4,11 @@ import com.sun.jna.Pointer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.options.JultiOptions;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.McKeyUtil;
+import xyz.duncanruns.julti.util.ScreenCapUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.io.File;
@@ -246,6 +247,9 @@ public class MinecraftInstance {
         return false;
     }
 
+    public ScreenCapUtil.ImageInfo captureScreen() {
+        return ScreenCapUtil.capture(this.hwnd);
+    }
 
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
@@ -471,6 +475,14 @@ public class MinecraftInstance {
                     .map(Path::toFile)
                     .forEach(File::delete);
         }
+    }
+
+    public boolean isWorldLoaded() {
+        return worldLoaded;
+    }
+
+    public boolean isPreviewLoaded() {
+        return inPreview;
     }
 
     private enum ResetType {

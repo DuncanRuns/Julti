@@ -3,7 +3,6 @@ package xyz.duncanruns.julti;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.options.JultiOptions;
 
 import java.util.Objects;
 import java.util.Scanner;

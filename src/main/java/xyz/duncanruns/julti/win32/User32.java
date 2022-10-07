@@ -10,7 +10,7 @@ import com.sun.jna.win32.StdCallLibrary;
 /**
  * JNA interface with Window's user32.dll
  *
- * @author Pete S & DuncanRuns
+ * @author Pete S & DuncanRuns & Lxnus
  */
 public interface User32 extends StdCallLibrary {
     User32 INSTANCE = Native.load("user32", User32.class);
@@ -48,6 +48,14 @@ public interface User32 extends StdCallLibrary {
     short GetAsyncKeyState(int vKey);
 
     UINT SendInput(DWORD dword, INPUT[] inputs, int inputSize);
+
+    public HDC GetWindowDC(HWND hWnd);
+
+    public boolean GetClientRect(HWND hWnd, RECT rect);
+
+    HDC GetDC(HWND hWnd);
+
+    int ReleaseDC(HWND hWnd, HDC hDC);
 
     interface WNDENUMPROC extends StdCallCallback {
         boolean callback(Pointer hWnd, Pointer arg);

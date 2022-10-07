@@ -1,4 +1,4 @@
-package xyz.duncanruns.julti.options;
+package xyz.duncanruns.julti;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,6 +27,7 @@ public final class JultiOptions {
     public boolean pauseOnLoad = true;
     public boolean useF3 = true;
     public String clipboardOnReset = "";
+    public boolean useWall = false;
 
     // Window
     public boolean useBorderless = false;
@@ -42,6 +43,10 @@ public final class JultiOptions {
     public List<Integer> resetHotkey = Collections.singletonList(0x55);
     public List<Integer> hideHotkey = Collections.singletonList(0x50);
     public List<Integer> bgResetHotkey = Collections.singletonList(0xDB);
+    public List<Integer> wallResetHotkey = Collections.singletonList(0x55);
+    public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');
+    public List<Integer> wallLockHotkey = Collections.singletonList(1);
+    public List<Integer> wallPlayHotkey = Collections.singletonList(2);
     public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
 
     // OBS
@@ -103,7 +108,7 @@ public final class JultiOptions {
         return false;
     }
 
-    private static Path getJultiDir() {
+    public static Path getJultiDir() {
         return Paths.get(System.getProperty("user.home")).resolve(".Julti");
     }
 
