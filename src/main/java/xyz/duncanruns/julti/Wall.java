@@ -180,8 +180,6 @@ public class Wall extends JFrame implements WindowListener {
     }
 
     public void lockInstance(int screenX, int screenY) {
-        // Disable locking for One At A Time
-        if (JultiOptions.getInstance().wallOneAtATime) return;
         MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
         lockedInstances.add(clickedInstance);
     }
@@ -254,11 +252,13 @@ public class Wall extends JFrame implements WindowListener {
         return Collections.unmodifiableList(new ArrayList<>(lockedInstances));
     }
 
-    public void requestReset(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
+    public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         // If using One At A Time, just reset all instances
         if (JultiOptions.getInstance().wallOneAtATime) {
             instances.forEach(MinecraftInstance::reset);
             requestFocus();
+            // Clear out locked instances since all instances reset.
+            lockedInstances.clear();
             return;
         }
 

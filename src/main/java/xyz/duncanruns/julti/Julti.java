@@ -394,7 +394,7 @@ public class Julti {
             return true;
         }
 
-        wall.requestReset(selectedInstance, instances);
+        wall.onLeaveInstance(selectedInstance, instances);
         return true;
     }
 
