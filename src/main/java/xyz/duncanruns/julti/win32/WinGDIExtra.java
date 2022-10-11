@@ -10,6 +10,6 @@ import com.sun.jna.platform.win32.WinGDI;
  */
 public interface WinGDIExtra extends WinGDI {
 
-    public DWORD SRCCOPY = new DWORD(0x00CC0020);
+    DWORD SRCCOPY = new DWORD(0x00CC0020);
 
 }

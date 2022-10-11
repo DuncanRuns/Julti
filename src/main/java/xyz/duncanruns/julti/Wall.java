@@ -39,17 +39,6 @@ public class Wall extends JFrame implements WindowListener {
     private final Set<MinecraftInstance> lockedInstances = new HashSet<>();
     private boolean closed;
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        onClose();
-    }
-
-    private void onClose() {
-        executor.shutdownNow();
-        closed = true;
-    }
-
     public Wall(Julti julti) {
         super();
         closed = false;
@@ -87,6 +76,17 @@ public class Wall extends JFrame implements WindowListener {
         } else {
             return ImageIO.read(Wall.class.getResource("/lock.png"));
         }
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        onClose();
+    }
+
+    private void onClose() {
+        executor.shutdownNow();
+        closed = true;
     }
 
     @Override

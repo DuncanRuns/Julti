@@ -1,7 +1,5 @@
 package xyz.duncanruns.julti.util;
 
-import xyz.duncanruns.julti.win32.Win32Con;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

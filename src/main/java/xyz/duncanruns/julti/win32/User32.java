@@ -49,9 +49,9 @@ public interface User32 extends StdCallLibrary {
 
     UINT SendInput(DWORD dword, INPUT[] inputs, int inputSize);
 
-    public HDC GetWindowDC(HWND hWnd);
+    HDC GetWindowDC(HWND hWnd);
 
-    public boolean GetClientRect(HWND hWnd, RECT rect);
+    boolean GetClientRect(HWND hWnd, RECT rect);
 
     HDC GetDC(HWND hWnd);
 
