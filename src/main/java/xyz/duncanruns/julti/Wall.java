@@ -37,9 +37,22 @@ public class Wall extends JFrame implements WindowListener {
     private final List<Long> frameTimeQueue = new ArrayList<>(21);
     private double fps = 0.0;
     private final Set<MinecraftInstance> lockedInstances = new HashSet<>();
+    private boolean closed;
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        onClose();
+    }
+
+    private void onClose() {
+        executor.shutdownNow();
+        closed = true;
+    }
 
     public Wall(Julti julti) {
         super();
+        closed = false;
         this.julti = julti;
         setToPrimaryMonitor();
         executor.scheduleAtFixedRate(this::tick, 50_000_000, 1_000_000_000L / 60, TimeUnit.NANOSECONDS);
@@ -202,8 +215,7 @@ public class Wall extends JFrame implements WindowListener {
         int column = x / iWidth;
         int instanceIndex = row * totalColumns + column;
 
-        MinecraftInstance clickedInstance = instances.get(instanceIndex);
-        return clickedInstance;
+        return instances.get(instanceIndex);
     }
 
     public void playInstance(int screenX, int screenY) {
@@ -220,7 +232,7 @@ public class Wall extends JFrame implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        executor.shutdownNow();
+        onClose();
     }
 
     @Override
@@ -277,5 +289,9 @@ public class Wall extends JFrame implements WindowListener {
         MinecraftInstance instance = getSelectedInstance(x, y);
         lockedInstances.remove(instance);
         instance.reset();
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 }

@@ -36,13 +36,10 @@ public final class JultiOptions {
     public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
 
     // Automated Tasks
-    public boolean autoHide = false;
-    public int autoHideTime = 5;
     public boolean autoClearWorlds = true;
 
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList(0x55);
-    public List<Integer> hideHotkey = Collections.singletonList(0x50);
     public List<Integer> bgResetHotkey = Collections.singletonList(0xDB);
     public List<Integer> wallResetHotkey = Collections.singletonList(0x55);
     public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');

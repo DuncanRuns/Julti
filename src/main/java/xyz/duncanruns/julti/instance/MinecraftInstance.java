@@ -18,7 +18,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -50,12 +53,10 @@ public class MinecraftInstance {
     private long logProgress = -1;
     private FileTime lastLogModify = null;
 
-    private boolean hidden;
 
     public MinecraftInstance(Pointer hwnd) {
         this.hwnd = hwnd;
         this.titleInfo = new WindowTitleInfo(getCurrentWindowTitle());
-        hidden = false;
     }
 
     private String getCurrentWindowTitle() {
@@ -77,17 +78,6 @@ public class MinecraftInstance {
         this.titleInfo = new WindowTitleInfo();
         this.instancePath = instancePath;
         this.notMC = false;
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
     }
 
     public String getOriginalTitle() {
@@ -213,7 +203,6 @@ public class MinecraftInstance {
     }
 
     public void activate() {
-        checkHidden(true);
         if (hasWindow()) {
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
@@ -228,31 +217,23 @@ public class MinecraftInstance {
         }
     }
 
-    private boolean checkHidden(boolean resetIfHidden) {
-        JultiOptions options = JultiOptions.getInstance();
-        if (hidden) {
-            hidden = false;
-            move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
-            if (resetIfHidden) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Thread.currentThread().setName("hidewaiter");
-                        reset();
-                    }
-                }, 2000);
-            }
-            return true;
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
         }
-        return false;
-    }
-
-    public ScreenCapUtil.ImageInfo captureScreen() {
-        return ScreenCapUtil.capture(this.hwnd);
     }
 
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+    }
+
+    public ScreenCapUtil.ImageInfo captureScreen() {
+        return ScreenCapUtil.capture(this.hwnd);
     }
 
     public void closeWindow() {
@@ -273,12 +254,7 @@ public class MinecraftInstance {
 
     public void reset(boolean singleInstance) {
         // If no window, do nothing
-        // Run checkHidden, if the window was hidden, unhide and then checkHidden will handle the reset.
         if (hasWindow()) {
-            if (checkHidden(true)) {
-                return;
-            }
-
             switch (getResetType()) {
 
                 case NEW_ATUM:
@@ -343,10 +319,6 @@ public class MinecraftInstance {
         HwndUtil.moveHwnd(hwnd, x, y, w, h);
     }
 
-    public void hide() {
-        move(0, 0, 0, 0);
-        hidden = true;
-    }
 
     public void maximize() {
         HwndUtil.showHwnd(hwnd);

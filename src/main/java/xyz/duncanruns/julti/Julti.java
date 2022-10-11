@@ -76,7 +76,6 @@ public class Julti {
         map.put("activate", this::runCommandActivate);
         map.put("list", this::runCommandList);
         map.put("help", this::runCommandHelp);
-        map.put("hide", this::runCommandHide);
         map.put("option", this::runCommandOption);
         map.put("remove", this::runCommandRemove);
         map.put("hotkey", this::runCommandHotkey);
@@ -101,7 +100,7 @@ public class Julti {
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "hide", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallsinglereset");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
@@ -112,7 +111,6 @@ public class Julti {
                     "Lock Instance (Wall): " + HotkeyUtil.formatKeys(options.wallLockHotkey) + "\n" +
                     "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
-                    "Hide: " + HotkeyUtil.formatKeys(options.hideHotkey) + "\n" +
                     "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
             for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
                 out.append("\nCommand \"").append(entry.getKey()).append("\": ").append(HotkeyUtil.formatKeys(entry.getValue()));
@@ -131,9 +129,6 @@ public class Julti {
                         break;
                     case "bgreset":
                         jultiOptions.bgResetHotkey = hotkey.getKeys();
-                        break;
-                    case "hide":
-                        jultiOptions.hideHotkey = hotkey.getKeys();
                         break;
                     case "wallreset":
                         jultiOptions.wallResetHotkey = hotkey.getKeys();
@@ -269,14 +264,12 @@ public class Julti {
                 "reset [all/random/unselected/background/#] -> Resets specified instance(s); background functions the same as the background reset hotkey\n" +
                 "\nclose <all/random/#> -> Closes a specific / all instance(s)\n" +
                 "\nactivate <random/#> -> Activates a specific instance\n" +
-                "\nhide -> Functions the same as the hide hotkey\n" +
-                "hide [all/random/unselected/#] -> Hides instance(s)\n" +
                 "\nlist -> Lists all opened instances\n" +
                 "\noption -> Lists all options\n" +
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
                 "option [option] [value] -> Sets the value of the option to the specified value\n" +
                 "\nhotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/bgreset/hide/wallreset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
+                "hotkey <reset/bgreset/wallreset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
                 "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
                 "hotkey remove <custom command> -> Removes a hotkey.\n" +
                 "\ntitles -> Set window titles to \"Minecraft* - Instance #\"." +
@@ -284,42 +277,6 @@ public class Julti {
         );
     }
 
-    private void runCommandHide(String[] args) {
-        updateLastActionTime();
-        List<MinecraftInstance> instances = getInstanceManager().getInstances();
-        if (args.length == 0) {
-            MinecraftInstance selectedInstance = getSelectedInstance();
-            if (selectedInstance == null) {
-                log(Level.ERROR, "No instances to hide / No instance selected.");
-            } else {
-                for (MinecraftInstance instanceToHide : instances) {
-                    if (!Objects.equals(selectedInstance, instanceToHide)) {
-                        instanceToHide.hide();
-                    }
-                }
-            }
-        } else {
-            final String input = args[0];
-            if ("all".equals(input)) {
-                for (MinecraftInstance instance : instances) {
-                    instance.hide();
-                }
-            } else if ("random".equals(input)) {
-                instances.get(new Random().nextInt(instances.size())).hide();
-            } else if ("unselected".equals(input)) {
-                MinecraftInstance selectedInstance = getSelectedInstance();
-                for (MinecraftInstance instanceToHide : instances) {
-                    if (!Objects.equals(selectedInstance, instanceToHide)) {
-                        instanceToHide.hide();
-                    }
-                }
-            } else {
-                int index = indexFromArg(input);
-                if (index != -1)
-                    instances.get(index).hide();
-            }
-        }
-    }
 
     private void runCommandOption(String[] args) {
         if (args.length == 1 && args[0].equals("open")) {
@@ -493,9 +450,6 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
-        if (JultiOptions.getInstance().useWall) {
-            startWall();
-        }
         log(Level.INFO, "Welcome to Julti v" + VERSION + "!");
     }
 
@@ -513,7 +467,6 @@ public class Julti {
         JultiOptions options = JultiOptions.getInstance();
 
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.resetHotkey), this::onResetKey);
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.hideHotkey), this::onHideKey);
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.bgResetHotkey), this::onBGResetKey);
 
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallResetHotkey), this::onWallResetKey);
@@ -596,15 +549,17 @@ public class Julti {
                 selectedHwnd = newHwnd;
                 updateLastActionTime();
             }
+
+            if (options.useWall && (wall == null || wall.isClosed())) {
+                startWall();
+            } else if ((!options.useWall) && !(wall == null || wall.isClosed())) {
+                wall.dispose();
+            }
         }
 
         if (options.autoClearWorlds && (System.currentTimeMillis() - lastWorldClear) > 20000) {
             lastWorldClear = System.currentTimeMillis();
             instanceManager.clearAllWorlds();
-        }
-
-        if (options.autoHide && (System.currentTimeMillis() - lastAction) > 60000L * options.autoHideTime) {
-            hideNonSelectedInstances();
         }
     }
 
@@ -629,14 +584,6 @@ public class Julti {
             }
         } catch (Exception e) {
             log(Level.ERROR, "Error during reset:\n" + e.getMessage());
-        }
-    }
-
-    private void onHideKey() {
-        try {
-            hideNonSelectedInstances();
-        } catch (Exception e) {
-            log(Level.ERROR, "Error during hiding:\n" + e.getMessage());
         }
     }
 
@@ -668,38 +615,6 @@ public class Julti {
         }
     }
 
-    private void hideNonSelectedInstances() {
-
-        JultiOptions options = JultiOptions.getInstance();
-
-        updateLastActionTime();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-
-        // Return if less than 2 instances.
-        if (instances.size() < 2) {
-            return;
-        }
-
-        // Get selected instance and next instance, return if no selected instance.
-        MinecraftInstance selectedInstance = getSelectedInstance();
-        if (selectedInstance == null) {
-            return;
-        }
-
-
-        if (options.useWall) {
-            log(Level.WARN, "Instance hiding not enabled while using wall!");
-            return;
-        }
-
-        // Hide instances
-        for (MinecraftInstance instance : instances) {
-            if (instance.equals(selectedInstance)) {
-                continue;
-            }
-            instance.hide();
-        }
-    }
 
     public void stop() {
         stopExecutors();
@@ -734,7 +649,7 @@ public class Julti {
     }
 
     public void startWall() {
-        this.wall = new Wall(this);
+        wall = new Wall(this);
     }
 
 
