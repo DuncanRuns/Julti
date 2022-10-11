@@ -15,6 +15,7 @@ public class Main {
         JultiOptions.getInstance().tryLoad();
         Julti julti = new Julti();
         julti.start();
+        new JultiGUI(julti);
         runJultiCLI(julti);
     }
 

@@ -2,6 +2,7 @@ package xyz.duncanruns.julti;
 
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.ScreenCapUtil;
 
 import javax.imageio.ImageIO;
@@ -67,6 +68,11 @@ public class Wall extends JFrame implements WindowListener {
         setResizable(false);
         setVisible(true);
         setTitle("Wall");
+        try {
+            setIconImage(ResourceUtil.getImageResource("/lock.png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static Image getLockImage() throws IOException {
@@ -74,7 +80,7 @@ public class Wall extends JFrame implements WindowListener {
         if (lockFile.isFile()) {
             return ImageIO.read(lockFile);
         } else {
-            return ImageIO.read(Wall.class.getResource("/lock.png"));
+            return ResourceUtil.getImageResource("/lock.png");
         }
     }
 
