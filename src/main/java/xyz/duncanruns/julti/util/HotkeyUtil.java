@@ -217,7 +217,7 @@ public final class HotkeyUtil {
         public String toString() {
             StringBuilder out = new StringBuilder();
             for (int vKey : keys) {
-                if (!out.toString().equals("")) {
+                if (!out.toString().isEmpty()) {
                     out.append(" + ");
                 }
                 out.append(KeyboardUtil.getKeyName(vKey));

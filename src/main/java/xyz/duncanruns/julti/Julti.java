@@ -10,15 +10,11 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.KeyboardUtil;
-import xyz.duncanruns.julti.util.ScreenCapUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.*;
@@ -35,7 +31,6 @@ public class Julti {
     private ScheduledExecutorService logCheckExecutor;
     private long last2SecCycle;
     private long lastWorldClear;
-    private long lastAction;
     private Pointer selectedHwnd;
     private Wall wall = null;
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
@@ -47,7 +42,6 @@ public class Julti {
 
         last2SecCycle = 0;
         lastWorldClear = 0;
-        lastAction = 0;
 
         selectedHwnd = null;
     }
@@ -80,19 +74,28 @@ public class Julti {
         map.put("remove", this::runCommandRemove);
         map.put("hotkey", this::runCommandHotkey);
         map.put("titles", this::runCommandTitles);
-        map.put("testcap", strings -> {
-            File output = new File("out.png");
-            try {
-                output.createNewFile();
-                ScreenCapUtil.ImageInfo imageInfo = getInstanceManager().getInstances().get(0).captureScreen();
-                BufferedImage image = new BufferedImage(imageInfo.width, imageInfo.height, BufferedImage.TYPE_INT_RGB);
-                image.setRGB(0, 0, imageInfo.width, imageInfo.height, imageInfo.pixels, 0, imageInfo.pixels.length);
-                ImageIO.write(image, "png", output);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        map.put("profile", this::runCommandProfile);
         return map;
+    }
+
+    private String combineArgs(String[] args) {
+        StringBuilder out = new StringBuilder();
+        for (String arg : args) {
+            if (!out.toString().isEmpty()) {
+                out.append(" ");
+            }
+            out.append(arg);
+        }
+        return out.toString();
+    }
+
+    private void runCommandProfile(String[] args) {
+        if (args.length == 0) {
+            log(Level.INFO, "Current options profile: " + JultiOptions.getInstance().getProfileName());
+        } else {
+            String newName = combineArgs(args);
+            JultiOptions.changeProfile(newName);
+        }
     }
 
     private void runCommandTitles(String[] args) {
@@ -183,7 +186,6 @@ public class Julti {
     }
 
     private void runCommandReset(String[] args) {
-        updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
             if (!multiReset()) {
@@ -228,7 +230,6 @@ public class Julti {
     }
 
     private void runCommandActivate(String[] args) {
-        updateLastActionTime();
         List<MinecraftInstance> instances = getInstanceManager().getInstances();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to activate command!");
@@ -273,16 +274,21 @@ public class Julti {
                 "\n" +
                 "list -> Lists all opened instances\n" +
                 "\n" +
+                "titles -> Set window titles to \"Minecraft* - Instance #\".\n" +
+                "\n" +
+                "profile -> States the current options profile\n" +
+                "profile [profile name] -> Sets the current options profile\n" +
+                "\n" +
                 "option -> Lists all options\n" +
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
                 "option [option] [value] -> Sets the value of the option to the specified value\n" +
+                "option open -> Opens the current options json file\n" +
+                "option reload -> Reloads the current options json file\n" +
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
                 "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
                 "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
                 "hotkey remove <custom command> -> Removes a hotkey.\n" +
-                "\n" +
-                "titles -> Set window titles to \"Minecraft* - Instance #\".\n" +
                 "--------------------"
         );
     }
@@ -308,15 +314,9 @@ public class Julti {
             }
         } else if (args.length > 1) {
             String[] valueArgs = Arrays.copyOfRange(args, 1, args.length);
-            StringBuilder all = new StringBuilder();
-            for (String arg : valueArgs) {
-                if (!all.toString().equals("")) {
-                    all.append(" ");
-                }
-                all.append(arg);
-            }
+            String all = combineArgs(valueArgs);
             String optionName = args[0];
-            if (options.trySetValue(optionName, all.toString())) {
+            if (options.trySetValue(optionName, all)) {
                 log(Level.INFO, "Set \"" + optionName + "\" to " + options.getValueString(optionName) + ".");
             } else {
                 log(Level.ERROR, "Could not set value.");
@@ -324,7 +324,7 @@ public class Julti {
         } else {
             StringBuilder optionNames = new StringBuilder();
             for (String optionName : options.getOptionNamesWithType()) {
-                if (!optionNames.toString().equals("")) {
+                if (!optionNames.toString().isEmpty()) {
                     optionNames.append("\n");
                 }
                 optionNames.append("- ").append(optionName);
@@ -575,7 +575,6 @@ public class Julti {
             Pointer newHwnd = HwndUtil.getCurrentHwnd();
             if (!Objects.equals(newHwnd, selectedHwnd)) {
                 selectedHwnd = newHwnd;
-                updateLastActionTime();
             }
 
             if (options.useWall && (wall == null || wall.isClosed())) {
@@ -592,7 +591,6 @@ public class Julti {
     }
 
     private boolean wallReset() {
-        updateLastActionTime();
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
         // Return if no instances
@@ -616,7 +614,6 @@ public class Julti {
     }
 
     private boolean multiReset() {
-        updateLastActionTime();
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
 
@@ -652,7 +649,6 @@ public class Julti {
     }
 
     private void backgroundReset() {
-        updateLastActionTime();
         MinecraftInstance selectedInstance = getSelectedInstance();
         if (selectedInstance == null) {
             return;
@@ -669,10 +665,6 @@ public class Julti {
         if (options.useBorderless) {
             minecraftInstance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
         }
-    }
-
-    private void updateLastActionTime() {
-        lastAction = System.currentTimeMillis();
     }
 
     public void startWall() {

@@ -170,12 +170,12 @@ public final class HwndUtil {
 
     private static String takeArg(String string, int ind) throws Exception {
         String sub = string.substring(ind);
-        if (sub.equals("")) {
+        if (sub.isEmpty()) {
             return "";
         }
         while (sub.charAt(0) == ' ') {
             sub = sub.substring(1);
-            if (sub.equals("")) {
+            if (sub.isEmpty()) {
                 return "";
             }
         }

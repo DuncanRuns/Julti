@@ -253,7 +253,6 @@ public final class JultiOptions {
                 return true;
             }
         } catch (Exception ignored) {
-            ignored.printStackTrace();
         }
         return false;
     }
