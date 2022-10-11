@@ -1,5 +1,7 @@
-package xyz.duncanruns.julti;
+package xyz.duncanruns.julti.gui;
 
+import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.ResourceUtil;

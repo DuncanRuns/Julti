@@ -1,4 +1,6 @@
-package xyz.duncanruns.julti;
+package xyz.duncanruns.julti.gui;
+
+import xyz.duncanruns.julti.Julti;
 
 import javax.swing.*;
 import java.awt.*;
