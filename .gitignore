@@ -117,3 +117,4 @@ Temporary Items
 logs/
 # I should probably make actual tests but for now I just exclude my janky stuff
 src/test/
+*.py
