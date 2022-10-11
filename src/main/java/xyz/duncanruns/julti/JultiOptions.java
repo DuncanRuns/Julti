@@ -256,4 +256,15 @@ public final class JultiOptions {
         }
         return false;
     }
+
+    public boolean copyTo(String profileName) {
+        try {
+            ensureJultiDir();
+            Files.createDirectories(location.getParent());
+            FileUtil.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 }

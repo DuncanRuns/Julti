@@ -92,8 +92,14 @@ public class Julti {
     private void runCommandProfile(String[] args) {
         if (args.length == 0) {
             log(Level.INFO, "Current options profile: " + JultiOptions.getInstance().getProfileName());
-        } else {
-            String newName = combineArgs(args);
+        } else if ("switch".equals(args[0])) {
+            JultiOptions.getInstance().trySave();
+            String newName = combineArgs(withoutFirst(args));
+            JultiOptions.changeProfile(newName);
+        } else if ("duplicate".equals(args[0])) {
+            JultiOptions.getInstance().trySave();
+            String newName = combineArgs(withoutFirst(args));
+            JultiOptions.getInstance().copyTo(newName);
             JultiOptions.changeProfile(newName);
         }
     }
@@ -147,7 +153,7 @@ public class Julti {
                         break;
                     case "custom":
                         StringBuilder commandBuilder = new StringBuilder();
-                        for (String a : Arrays.copyOfRange(args, 1, args.length)) {
+                        for (String a : withoutFirst(args)) {
                             commandBuilder.append(a).append(" ");
                         }
                         String command = commandBuilder.toString().trim();
@@ -160,7 +166,7 @@ public class Julti {
             });
         } else if ("remove".equals(args[0])) {
             StringBuilder commandBuilder = new StringBuilder();
-            for (String a : Arrays.copyOfRange(args, 1, args.length)) {
+            for (String a : withoutFirst(args)) {
                 commandBuilder.append(a).append(" ");
             }
             String command = commandBuilder.toString().trim();
@@ -277,7 +283,8 @@ public class Julti {
                 "titles -> Set window titles to \"Minecraft* - Instance #\".\n" +
                 "\n" +
                 "profile -> States the current options profile\n" +
-                "profile [profile name] -> Sets the current options profile\n" +
+                "profile switch <profile name> -> Switch to another profile, or create a new one if it does not exist\n" +
+                "profile duplicate <profile name> -> Duplicate the current options into another profile\n" +
                 "\n" +
                 "option -> Lists all options\n" +
                 "option [option] -> Gets the current value of an option and gives an example to set it\n" +
@@ -286,13 +293,12 @@ public class Julti {
                 "option reload -> Reloads the current options json file\n" +
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function.\n" +
-                "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command.\n" +
-                "hotkey remove <custom command> -> Removes a hotkey.\n" +
+                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
+                "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command\n" +
+                "hotkey remove <custom command> -> Removes a hotkey\n" +
                 "--------------------"
         );
     }
-
 
     private void runCommandOption(String[] args) {
         JultiOptions options = JultiOptions.getInstance();
@@ -313,7 +319,7 @@ public class Julti {
                 log(Level.INFO, "Option \"" + optionName + "\" has a value of: " + value);
             }
         } else if (args.length > 1) {
-            String[] valueArgs = Arrays.copyOfRange(args, 1, args.length);
+            String[] valueArgs = withoutFirst(args);
             String all = combineArgs(valueArgs);
             String optionName = args[0];
             if (options.trySetValue(optionName, all)) {
@@ -557,7 +563,7 @@ public class Julti {
                 log(Level.ERROR, "Unknown Command \"" + command + "\"");
             } else {
                 try {
-                    commandConsumer.accept(Arrays.copyOfRange(args, 1, args.length));
+                    commandConsumer.accept(withoutFirst(args));
                 } catch (Exception e) {
                     log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
                 }
@@ -658,6 +664,10 @@ public class Julti {
                 instance.reset();
             }
         }
+    }
+
+    private static String[] withoutFirst(String[] args) {
+        return Arrays.copyOfRange(args, 1, args.length);
     }
 
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
