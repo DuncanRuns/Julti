@@ -37,8 +37,8 @@ public class Julti {
     private long lastWorldClear;
     private long lastAction;
     private Pointer selectedHwnd;
-    private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
     private Wall wall = null;
+    private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
     public Julti() {
         instanceManager = null;
@@ -151,7 +151,7 @@ public class Julti {
                         jultiOptions.extraHotkeys.put(command, hotkey.getKeys());
                         break;
                 }
-                log(Level.INFO, "Hotkey Set");
+                log(Level.INFO, "Hotkey Set.");
                 hotkey.wasPressed();
                 setupHotkeys();
             });
@@ -279,6 +279,7 @@ public class Julti {
 
 
     private void runCommandOption(String[] args) {
+        JultiOptions options = JultiOptions.getInstance();
         if (args.length == 1 && args[0].equals("open")) {
             try {
                 Desktop.getDesktop().open(JultiOptions.getSelectedProfilePath().toFile());
@@ -287,8 +288,38 @@ public class Julti {
             }
         } else if (args.length == 1 && args[0].equals("reload")) {
             JultiOptions.getInstance(true);
+        } else if (args.length == 1) {
+            String optionName = args[0];
+            String value = options.getValueString(optionName);
+            if (value == null) {
+                log(Level.WARN, "Option \"" + optionName + "\" does not exist. ");
+            } else {
+                log(Level.INFO, "Option \"" + optionName + "\" has a value of: " + value);
+            }
+        } else if (args.length > 1) {
+            String[] valueArgs = Arrays.copyOfRange(args, 1, args.length);
+            StringBuilder all = new StringBuilder();
+            for (String arg : valueArgs) {
+                if (!all.toString().equals("")) {
+                    all.append(" ");
+                }
+                all.append(arg);
+            }
+            String optionName = args[0];
+            if (options.trySetValue(optionName, all.toString())) {
+                log(Level.INFO, "Set \"" + optionName + "\" to " + options.getValueString(optionName) + ".");
+            } else {
+                log(Level.ERROR, "Could not set value.");
+            }
         } else {
-            log(Level.WARN, "The option command is not yet implemented. Please change options in " + JultiOptions.getSelectedProfilePath() + "." + "\nYou can also run \"option open\" to open the file and \"option reload\" to reload them.");
+            StringBuilder optionNames = new StringBuilder();
+            for (String optionName : options.getOptionNamesWithType()) {
+                if (!optionNames.toString().equals("")) {
+                    optionNames.append("\n");
+                }
+                optionNames.append("- ").append(optionName);
+            }
+            log(Level.INFO, "All available options:\n" + optionNames);
         }
     }
 
@@ -394,7 +425,11 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallSingleResetHotkey), this::onWallSingleResetKey);
 
         for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
-            HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> this.runCommand(entry.getKey()));
+            HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> {
+                if ((wall != null && wall.isActive()) || getSelectedInstance() != null) {
+                    this.runCommand(entry.getKey());
+                }
+            });
         }
 
         HotkeyUtil.startGlobalHotkeyChecker();
@@ -486,6 +521,18 @@ public class Julti {
 
             }
         }
+    }
+
+    @Nullable
+    private MinecraftInstance getSelectedInstance() {
+        Pointer hwnd = HwndUtil.getCurrentHwnd();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        for (MinecraftInstance instance : instances) {
+            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
+                return instance;
+            }
+        }
+        return null;
     }
 
     public void runCommand(final String commands) {
@@ -620,18 +667,6 @@ public class Julti {
 
     public void startWall() {
         wall = new Wall(this);
-    }
-
-    @Nullable
-    private MinecraftInstance getSelectedInstance() {
-        Pointer hwnd = HwndUtil.getCurrentHwnd();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-        for (MinecraftInstance instance : instances) {
-            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
-                return instance;
-            }
-        }
-        return null;
     }
 
     public void stop() {

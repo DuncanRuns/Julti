@@ -7,7 +7,11 @@ import org.apache.commons.io.FilenameUtils;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 
+import javax.annotation.Nullable;
 import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -155,8 +159,102 @@ public final class JultiOptions {
         return Collections.unmodifiableList(instancePaths);
     }
 
+    public String getValueString(String optionName) {
+        Object value = getValue(optionName);
+        if (value == null) return null;
+        if (value.getClass().isArray()) {
+            List<Object> objectList = new ArrayList<>();
+            for (int i = 0; i < Array.getLength(value); i++) {
+                objectList.add(Array.get(value, i));
+            }
+            value = objectList;
+        }
+        return String.valueOf(value);
+    }
+
+    @Nullable
+    public Object getValue(String optionName) {
+        Field optionField = null;
+        try {
+            optionField = getClass().getField(optionName);
+        } catch (NoSuchFieldException ignored) {
+        }
+        if (optionField == null || Modifier.isTransient(optionField.getModifiers())) {
+            return null;
+        }
+        if (optionField.getType().isPrimitive()) {
+            // Basic value to change
+            Class<?> clazz = optionField.getType();
+            System.out.println(clazz);
+            try {
+                if (boolean.class == clazz) return optionField.getBoolean(this);
+                if (byte.class == clazz) return optionField.getByte(this);
+                if (short.class == clazz) return optionField.getShort(this);
+                if (int.class == clazz) return optionField.getInt(this);
+                if (long.class == clazz) return optionField.getLong(this);
+                if (float.class == clazz) return optionField.getFloat(this);
+                if (double.class == clazz) return optionField.getDouble(this);
+            } catch (Exception e) {
+                // This should theoretically never run
+                return null;
+            }
+        } else {
+            try {
+                return optionField.get(this);
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return null;
+    }
+
     @Override
     public int hashCode() {
         return location.hashCode();
+    }
+
+    public List<String> getOptionNamesWithType() {
+        List<String> names = new ArrayList<>();
+        for (Field field : getClass().getFields()) {
+            if (!Modifier.isTransient(field.getModifiers())) {
+                names.add(field.getName() + " (" + field.getType().getSimpleName() + ")");
+            }
+        }
+        return names;
+    }
+
+    public boolean trySetValue(String optionName, String valueString) {
+        try {
+            Field optionField = getClass().getField(optionName);
+            if (optionField.getType().isPrimitive()) {
+                Class clazz = optionField.getType();
+                if (boolean.class == clazz) optionField.setBoolean(this, Boolean.parseBoolean(valueString));
+                if (byte.class == clazz) optionField.setByte(this, Byte.parseByte(valueString));
+                if (short.class == clazz) optionField.setShort(this, Short.parseShort(valueString));
+                if (int.class == clazz) optionField.setInt(this, Integer.parseInt(valueString));
+                if (long.class == clazz) optionField.setLong(this, Long.parseLong(valueString));
+                if (float.class == clazz) optionField.setFloat(this, Float.parseFloat(valueString));
+                if (double.class == clazz) optionField.setDouble(this, Double.parseDouble(valueString));
+                return true;
+            } else if (optionField.getType().isArray()) {
+                // Only int arrays exist for now, so assuming int.
+                String[] words = valueString.split(" ");
+                int[] ints = new int[words.length];
+                for (int i = 0; i < ints.length; i++) {
+                    String word = words[i];
+                    if (word.endsWith(",")) {
+                        word = word.substring(0, word.length() - 1);
+                    }
+                    ints[i] = Integer.parseInt(word);
+                }
+                optionField.set(this, ints);
+                return true;
+            } else {
+                optionField.set(this, valueString);
+                return true;
+            }
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
+        return false;
     }
 }
