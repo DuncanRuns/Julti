@@ -11,6 +11,7 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.KeyboardUtil;
+import xyz.duncanruns.julti.util.LogReceiver;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
@@ -392,6 +393,7 @@ public class Julti {
 
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     public void start() {

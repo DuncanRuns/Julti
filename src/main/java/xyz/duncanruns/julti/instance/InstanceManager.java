@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.util.HwndUtil;
+import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ public class InstanceManager {
 
     synchronized public void renameWindows() {
         int i = 0;
+        log(Level.INFO, "Renaming windows...");
         for (MinecraftInstance instance : instances) {
             instance.setWindowTitle("Minecraft* - Instance " + (++i));
         }
@@ -79,6 +81,7 @@ public class InstanceManager {
 
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     synchronized public List<MinecraftInstance> getInstances() {

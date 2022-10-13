@@ -1,9 +1,11 @@
 package xyz.duncanruns.julti;
 
+import com.formdev.flatlaf.FlatDarkLaf;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.gui.JultiGUI;
+import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -13,11 +15,13 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger("Main");
 
     public static void main(String[] args) {
+        FlatDarkLaf.setup();
         JultiOptions.getInstance().tryLoad();
         Julti julti = new Julti();
-        julti.start();
         new JultiGUI(julti);
-        runJultiCLI(julti);
+        julti.start();
+        // Command line included in GUI
+        // runJultiCLI(julti);
     }
 
     public static void runJultiCLI(Julti julti) {
@@ -44,6 +48,7 @@ public class Main {
 
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     private static void sleep(long millis) {

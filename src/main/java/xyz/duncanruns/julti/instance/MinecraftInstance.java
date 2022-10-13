@@ -5,10 +5,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.HwndUtil;
-import xyz.duncanruns.julti.util.KeyboardUtil;
-import xyz.duncanruns.julti.util.McKeyUtil;
-import xyz.duncanruns.julti.util.ScreenCapUtil;
+import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.io.File;
@@ -230,6 +227,7 @@ public class MinecraftInstance {
 
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     public ScreenCapUtil.ImageInfo captureScreen() {
@@ -239,6 +237,9 @@ public class MinecraftInstance {
     public void closeWindow() {
         if (hasWindow()) {
             HwndUtil.sendCloseMessage(hwnd);
+            log(Level.INFO, "Closed " + getName());
+        } else {
+            log(Level.WARN, "Could not close " + getName() + " because it is not open.");
         }
     }
 
