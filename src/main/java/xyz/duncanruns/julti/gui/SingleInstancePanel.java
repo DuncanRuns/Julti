@@ -56,7 +56,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
 
     private void doPop(MouseEvent e) {
         JPopupMenu popupMenu = new JPopupMenu();
-        if(instance.hasWindow()) {
+        if (instance.hasWindow()) {
             JMenuItem close = new JMenuItem();
             close.setAction(new AbstractAction() {
                 @Override
@@ -67,6 +67,17 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             });
             close.setText("Close");
             popupMenu.add(close);
+        } else {
+            JMenuItem open = new JMenuItem();
+            open.setAction(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Thread.currentThread().setName("julti-gui");
+                    instance.launch();
+                }
+            });
+            open.setText("Launch");
+            popupMenu.add(open);
         }
         JMenuItem remove = new JMenuItem();
         remove.setAction(new AbstractAction() {

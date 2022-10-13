@@ -38,6 +38,7 @@ public final class JultiOptions {
     public boolean useBorderless = false;
     public int[] windowPos = MonitorUtil.getDefaultMonitor().position;
     public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
+    public String multiMCPath = "";
 
     // Automated Tasks
     public boolean autoClearWorlds = true;

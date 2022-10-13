@@ -243,6 +243,16 @@ public class MinecraftInstance {
         }
     }
 
+    public void launch() {
+        try {
+            String multiMCPath = JultiOptions.getInstance().multiMCPath;
+            if (!multiMCPath.isEmpty())
+                Runtime.getRuntime().exec(new String[]{multiMCPath, "--launch", getName()});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void pressF3Esc() {
         KeyboardUtil.sendKeyDownToHwnd(hwnd, Win32Con.VK_F3, true);
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
