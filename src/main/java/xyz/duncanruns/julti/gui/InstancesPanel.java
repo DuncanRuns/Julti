@@ -53,7 +53,6 @@ public class InstancesPanel extends JPanel {
 
         if (instancePanels.size() != instances.size()) {
             while (instancePanels.size() < instances.size()) {
-                System.out.println("a");
                 instancePanels.add((SingleInstancePanel) mainPanel.add(new SingleInstancePanel()));
             }
             while (instancePanels.size() > instances.size()) {
