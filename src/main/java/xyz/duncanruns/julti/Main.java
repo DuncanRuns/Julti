@@ -18,8 +18,9 @@ public class Main {
         FlatDarkLaf.setup();
         JultiOptions.getInstance().tryLoad();
         Julti julti = new Julti();
-        new JultiGUI(julti);
+        JultiGUI gui = new JultiGUI(julti);
         julti.start();
+        gui.requestFocus();
         // Command line included in GUI
         // runJultiCLI(julti);
     }
