@@ -46,7 +46,7 @@ public class LogPanel extends JPanel {
     }
 
     private void createCommandLine() {
-        JTextField commandLine = new JTextField();
+        JTextField commandLine = new JTextField("Enter commands here...");
         commandLine.addActionListener(e -> {
             Thread.currentThread().setName("julti-gui");
             String command = e.getActionCommand();
@@ -57,12 +57,15 @@ public class LogPanel extends JPanel {
         commandLine.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-
+                if (commandLine.getText().trim().equals("Enter commands here..."))
+                    commandLine.setText("");
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-
+                if (commandLine.getText().trim().equals("")) {
+                    commandLine.setText("Enter commands here...");
+                }
             }
         });
         commandLine.setBorder(new FlatBorder());

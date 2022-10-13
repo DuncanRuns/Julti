@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.gui;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -8,11 +9,13 @@ public class OptionsGUI extends JFrame implements WindowListener {
     private boolean closed = false;
 
     public OptionsGUI() {
-        setVisible(true);
-        setResizable(false);
+        setLayout(new FlowLayout());
         setTitle("Julti Options");
         add(new JLabel("The Options GUI has not been completed, please use the option and profile command."));
         addWindowListener(this);
+        setSize(500,100);
+        setVisible(true);
+        setResizable(false);
     }
 
     public boolean isClosed() {

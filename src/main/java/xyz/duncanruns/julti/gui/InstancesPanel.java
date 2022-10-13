@@ -53,7 +53,7 @@ public class InstancesPanel extends JPanel {
 
         if (instancePanels.size() != instances.size()) {
             while (instancePanels.size() < instances.size()) {
-                instancePanels.add((SingleInstancePanel) mainPanel.add(new SingleInstancePanel()));
+                instancePanels.add((SingleInstancePanel) mainPanel.add(new SingleInstancePanel(julti)));
             }
             while (instancePanels.size() > instances.size()) {
                 mainPanel.remove(instancePanels.remove(0));
@@ -62,7 +62,7 @@ public class InstancesPanel extends JPanel {
         }
         int i = 0;
         for (MinecraftInstance instance : instances) {
-            instancePanels.get(i++).setInfo(instance.getName(), instance.hasWindow() ? "Open" : "Closed");
+            instancePanels.get(i++).setInfo(instance);
         }
     }
 }

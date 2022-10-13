@@ -1,16 +1,24 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
+import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-public class SingleInstancePanel extends JPanel {
+public class SingleInstancePanel extends JPanel implements MouseListener {
 
     private final JLabel nameLabel = new JLabel("Unknown");
     private final JLabel statusLabel = new JLabel("Unknown");
+    private final Julti julti;
+    private MinecraftInstance instance;
 
-    public SingleInstancePanel() {
+    public SingleInstancePanel(Julti julti) {
+        this.julti = julti;
         setBorder(new FlatBorder());
         setLayout(new FlowLayout());
         JPanel panel = new JPanel();
@@ -22,10 +30,71 @@ public class SingleInstancePanel extends JPanel {
         panel.add(nameLabel);
         panel.add(statusLabel);
         add(panel);
+        addMouseListener(this);
     }
 
-    public void setInfo(String name, String status) {
-        nameLabel.setText(name);
-        statusLabel.setText(status);
+    public void setInfo(MinecraftInstance instance) {
+        nameLabel.setText(instance.getName());
+        statusLabel.setText(instance.hasWindow() ? "Open" : "Closed");
+        this.instance = instance;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (e.getButton() == 1) {
+            Thread.currentThread().setName("julti-gui");
+            instance.activate();
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            doPop(e);
+        }
+    }
+
+    private void doPop(MouseEvent e) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        if(instance.hasWindow()) {
+            JMenuItem close = new JMenuItem();
+            close.setAction(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Thread.currentThread().setName("julti-gui");
+                    instance.closeWindow();
+                }
+            });
+            close.setText("Close");
+            popupMenu.add(close);
+        }
+        JMenuItem remove = new JMenuItem();
+        remove.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Thread.currentThread().setName("julti-gui");
+                julti.getInstanceManager().removeInstance(instance);
+            }
+        });
+        remove.setText("Remove");
+        popupMenu.add(remove);
+        popupMenu.show(e.getComponent(), e.getX(), e.getY());
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            doPop(e);
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 }

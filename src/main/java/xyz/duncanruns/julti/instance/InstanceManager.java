@@ -179,6 +179,10 @@ public class InstanceManager {
         }
     }
 
+    synchronized public void removeInstance(MinecraftInstance instance) {
+        removeInstanceByIndex(instances.indexOf(instance));
+    }
+
     /**
      * Removes an instance by its index, not its actual number (Instance #1 has index 0).
      *
