@@ -20,7 +20,13 @@ public class ControlPanel extends JPanel {
             Thread.currentThread().setName("julti-gui");
             julti.getInstanceManager().renameWindows();
         }));
-        add(GUIUtil.createButtonWithMethod(new JButton("Close Instances"), actionEvent -> {
+        add(GUIUtil.createButtonWithMethod(new JButton("Open All Instances"), actionEvent -> {
+            Thread.currentThread().setName("julti-gui");
+            for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
+                instance.launch();
+            }
+        }));
+        add(GUIUtil.createButtonWithMethod(new JButton("Close All Instances"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");
             for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
                 instance.closeWindow();
