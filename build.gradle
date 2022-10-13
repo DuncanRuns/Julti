@@ -29,6 +29,8 @@ dependencies {
     implementation 'com.google.guava:guava:31.1-jre'
 
     implementation 'com.github.tuupertunut:powershell-lib-java:2.0.0'
+
+    implementation 'com.formdev:flatlaf:2.5'
 }
 
 jar {
