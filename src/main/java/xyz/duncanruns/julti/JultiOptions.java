@@ -185,7 +185,6 @@ public final class JultiOptions {
         if (optionField.getType().isPrimitive()) {
             // Basic value to change
             Class<?> clazz = optionField.getType();
-            System.out.println(clazz);
             try {
                 if (boolean.class == clazz) return optionField.getBoolean(this);
                 if (byte.class == clazz) return optionField.getByte(this);
