@@ -375,6 +375,7 @@ public class Julti {
     public void switchScene(final int i) {
         JultiOptions options = JultiOptions.getInstance();
         if (i <= 9 && options.obsPressHotkey) {
+            KeyboardUtil.releaseAllModifiers();
             int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
             List<Integer> keys = new ArrayList<>();
             if (options.obsUseAlt) {

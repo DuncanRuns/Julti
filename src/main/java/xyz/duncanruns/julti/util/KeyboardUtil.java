@@ -234,4 +234,10 @@ public final class KeyboardUtil {
         }
         sendKeyUpToHwnd(hwnd, virtualKey, usePost);
     }
+
+    public static void releaseAllModifiers() {
+        for (int key : ALL_MODIFIERS) {
+            keyUp(key);
+        }
+    }
 }
