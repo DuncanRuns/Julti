@@ -38,10 +38,6 @@ public final class JultiOptions {
     public boolean useBorderless = false;
     public int[] windowPos = MonitorUtil.getDefaultMonitor().position;
     public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
-    public String multiMCPath = "";
-
-    // Automated Tasks
-    public boolean autoClearWorlds = true;
 
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList(0x55);
@@ -56,6 +52,10 @@ public final class JultiOptions {
     public boolean obsPressHotkey = true;
     public boolean obsUseNumpad = true;
     public boolean obsUseAlt = false;
+
+    // Other
+    public boolean autoClearWorlds = true;
+    public String multiMCPath = "";
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
@@ -226,7 +226,7 @@ public final class JultiOptions {
         try {
             Field optionField = getClass().getField(optionName);
             if (optionField.getType().isPrimitive()) {
-                Class clazz = optionField.getType();
+                Class<?> clazz = optionField.getType();
                 if (boolean.class == clazz) optionField.setBoolean(this, Boolean.parseBoolean(valueString));
                 if (byte.class == clazz) optionField.setByte(this, Byte.parseByte(valueString));
                 if (short.class == clazz) optionField.setShort(this, Short.parseShort(valueString));
