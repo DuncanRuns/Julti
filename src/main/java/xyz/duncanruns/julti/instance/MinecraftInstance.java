@@ -330,6 +330,10 @@ public class MinecraftInstance {
         HwndUtil.moveHwnd(hwnd, x, y, w, h);
     }
 
+    public void undoBorderless() {
+        HwndUtil.undoHwndBorderless(hwnd);
+        maximize();
+    }
 
     public void maximize() {
         HwndUtil.showHwnd(hwnd);
@@ -466,6 +470,10 @@ public class MinecraftInstance {
 
     public boolean isPreviewLoaded() {
         return inPreview;
+    }
+
+    public boolean isBorderless() {
+        return HwndUtil.isHwndBorderless(hwnd);
     }
 
     private enum ResetType {

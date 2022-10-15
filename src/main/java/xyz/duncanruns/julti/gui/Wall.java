@@ -10,8 +10,8 @@ import xyz.duncanruns.julti.util.ScreenCapUtil;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Wall extends JFrame implements WindowListener {
+public class Wall extends JFrame {
     private static final Image LOCK_IMAGE;
 
     static {
@@ -49,7 +49,12 @@ public class Wall extends JFrame implements WindowListener {
         setToPrimaryMonitor();
         executor.scheduleAtFixedRate(this::tick, 50_000_000, 1_000_000_000L / 60, TimeUnit.NANOSECONDS);
         setupWindow();
-        addWindowListener(this);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onClose();
+            }
+        });
     }
 
     private void setToPrimaryMonitor() {
@@ -77,6 +82,11 @@ public class Wall extends JFrame implements WindowListener {
         }
     }
 
+    private void onClose() {
+        executor.shutdownNow();
+        closed = true;
+    }
+
     private static Image getLockImage() throws IOException {
         File lockFile = new File(JultiOptions.getJultiDir().resolve("lock.png").toUri());
         if (lockFile.isFile()) {
@@ -90,11 +100,6 @@ public class Wall extends JFrame implements WindowListener {
     public void dispose() {
         super.dispose();
         onClose();
-    }
-
-    private void onClose() {
-        executor.shutdownNow();
-        closed = true;
     }
 
     @Override
@@ -144,7 +149,6 @@ public class Wall extends JFrame implements WindowListener {
                             break fullLoop;
                         }
                     } catch (Exception ignored) {
-                        ignored.printStackTrace();
                     }
                 }
             }
@@ -231,41 +235,6 @@ public class Wall extends JFrame implements WindowListener {
         clickedInstance.activate();
         julti.switchScene(clickedInstance);
         lockedInstances.remove(clickedInstance);
-    }
-
-    @Override
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-        onClose();
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-
     }
 
     public List<MinecraftInstance> getLockedInstances() {

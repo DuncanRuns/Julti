@@ -99,7 +99,7 @@ public final class HwndUtil {
         User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(Win32Con.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
     }
 
-    public static boolean IsHwndBorderless(Pointer hwnd) {
+    public static boolean isHwndBorderless(Pointer hwnd) {
         long oldStyle = getHwndStyle(hwnd);
         long newStyle = oldStyle;
         newStyle &= ~(Win32Con.WS_BORDER

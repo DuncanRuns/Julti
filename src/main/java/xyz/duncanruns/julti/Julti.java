@@ -64,6 +64,14 @@ public class Julti {
         }
     }
 
+    public void changeProfile(String newName) {
+        storeLastInstances();
+        JultiOptions.getInstance().trySave();
+        JultiOptions.changeProfile(newName);
+        log(Level.INFO, "Switched to profile \"" + newName + "\"");
+        reloadInstanceManager();
+    }
+
     private HashMap<String, Consumer<String[]>> getCommandMap() {
         HashMap<String, Consumer<String[]>> map = new HashMap<>();
         map.put("redetect", this::runCommandRedetect);
@@ -95,14 +103,13 @@ public class Julti {
         if (args.length == 0) {
             log(Level.INFO, "Current options profile: " + JultiOptions.getInstance().getProfileName());
         } else if ("switch".equals(args[0])) {
-            JultiOptions.getInstance().trySave();
-            String newName = combineArgs(withoutFirst(args));
-            JultiOptions.changeProfile(newName);
+            changeProfile(combineArgs(withoutFirst(args)));
         } else if ("duplicate".equals(args[0])) {
-            JultiOptions.getInstance().trySave();
             String newName = combineArgs(withoutFirst(args));
             JultiOptions.getInstance().copyTo(newName);
-            JultiOptions.changeProfile(newName);
+            changeProfile(newName);
+        } else {
+            log(Level.ERROR, "No args given to profile command!");
         }
     }
 
@@ -362,9 +369,7 @@ public class Julti {
     public void redetectInstances() {
         log(Level.INFO, "Redetecting Instances...");
         instanceManager.redetectInstances();
-        for (MinecraftInstance instance : instanceManager.getInstances()) {
-            onInstanceLoad(instance);
-        }
+        reloadInstancePositions();
         log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
     }
 
@@ -374,7 +379,7 @@ public class Julti {
 
     public void switchScene(final int i) {
         JultiOptions options = JultiOptions.getInstance();
-        if (i <= 9 && options.obsPressHotkey) {
+        if (options.obsPressHotkeys && i <= 9) {
             KeyboardUtil.releaseAllModifiers();
             int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
             List<Integer> keys = new ArrayList<>();
@@ -382,7 +387,7 @@ public class Julti {
                 keys.add(Win32Con.VK_MENU);
             }
             keys.add(keyToPress);
-            KeyboardUtil.pressKeysForTime(keys, 100L);
+            KeyboardUtil.pressKeysForTime(keys, 100);
         } else {
             log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
@@ -395,6 +400,14 @@ public class Julti {
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
+    }
+
+    public void switchToWallScene() {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.obsPressHotkeys) {
+            KeyboardUtil.releaseAllModifiers();
+            KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
+        }
     }
 
     public void start() {
@@ -447,7 +460,7 @@ public class Julti {
 
         for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
             HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> {
-                if ((wall != null && wall.isActive()) || getSelectedInstance() != null) {
+                if (isWallActive() || getSelectedInstance() != null) {
                     this.runCommand(entry.getKey());
                 }
             });
@@ -498,7 +511,7 @@ public class Julti {
 
     private void onWallResetKey() {
         try {
-            if (!(JultiOptions.getInstance().useWall && wall.isActive())) {
+            if (!(JultiOptions.getInstance().useWall && isWallActive())) {
                 return;
             }
 
@@ -514,7 +527,7 @@ public class Julti {
     }
 
     private void onWallLockKey() {
-        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+        if (JultiOptions.getInstance().useWall && isWallActive()) {
             Point point = MouseInfo.getPointerInfo().getLocation();
             try {
                 wall.lockInstance(point.x, point.y);
@@ -524,7 +537,7 @@ public class Julti {
     }
 
     private void onWallPlayKey() {
-        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+        if (JultiOptions.getInstance().useWall && isWallActive()) {
             Point point = MouseInfo.getPointerInfo().getLocation();
             try {
                 wall.playInstance(point.x, point.y);
@@ -534,7 +547,7 @@ public class Julti {
     }
 
     private void onWallSingleResetKey() {
-        if (JultiOptions.getInstance().useWall && wall.isActive()) {
+        if (JultiOptions.getInstance().useWall && isWallActive()) {
             Point point = MouseInfo.getPointerInfo().getLocation();
             try {
                 wall.resetInstance(point.x, point.y);
@@ -542,6 +555,10 @@ public class Julti {
 
             }
         }
+    }
+
+    private boolean isWallActive() {
+        return wall != null && wall.isActive();
     }
 
     @Nullable
@@ -679,11 +696,17 @@ public class Julti {
         JultiOptions options = JultiOptions.getInstance();
         if (options.useBorderless) {
             minecraftInstance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+        } else if (minecraftInstance.isBorderless()) {
+            minecraftInstance.undoBorderless();
         }
     }
 
     public void startWall() {
         wall = new Wall(this);
+    }
+
+    public void reloadInstancePositions() {
+        instanceManager.getInstances().forEach(this::onInstanceLoad);
     }
 
     public void stop() {
@@ -695,7 +718,7 @@ public class Julti {
         JultiOptions.getInstance().trySave();
     }
 
-    private void storeLastInstances() {
+    public void storeLastInstances() {
         List<String> instanceStrings = new ArrayList<>();
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             instanceStrings.add(instance.getInstancePath().toString());

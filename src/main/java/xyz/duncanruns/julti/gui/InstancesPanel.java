@@ -18,7 +18,7 @@ public class InstancesPanel extends JPanel {
     private final JPanel mainPanel;
     private final Supplier<Boolean> shouldUpdateSupplier;
     private final Supplier<Boolean> shouldShutdownSupplier;
-    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ArrayList<SingleInstancePanel> instancePanels = new ArrayList<>();
 
     public InstancesPanel(Julti julti, Supplier<Boolean> shouldUpdateSupplier, Supplier<Boolean> shouldShutdownSupplier) {
@@ -34,7 +34,7 @@ public class InstancesPanel extends JPanel {
         add(instancesLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
 
         mainPanel = new JPanel();
-        mainPanel.setLayout(new FlowLayout());
+        mainPanel.setLayout(new GridLayout(0, 5));
         add(mainPanel, new GridBagConstraints(0, 1, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
 
         tick();
@@ -49,6 +49,7 @@ public class InstancesPanel extends JPanel {
         if (!shouldUpdateSupplier.get()) {
             return;
         }
+
         List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
 
         if (instancePanels.size() != instances.size()) {
@@ -58,6 +59,7 @@ public class InstancesPanel extends JPanel {
             while (instancePanels.size() > instances.size()) {
                 mainPanel.remove(instancePanels.remove(0));
             }
+            mainPanel.setLayout(new GridLayout(0, Math.max(1, Math.min(instances.size(), 5))));
             revalidate();
         }
         int i = 0;

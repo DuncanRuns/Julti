@@ -6,19 +6,18 @@ import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
@@ -49,9 +48,10 @@ public final class JultiOptions {
     public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
 
     // OBS
-    public boolean obsPressHotkey = true;
+    public boolean obsPressHotkeys = true;
     public boolean obsUseNumpad = true;
     public boolean obsUseAlt = false;
+    public List<Integer> switchToWallHotkey = Collections.singletonList(Win32Con.VK_F12);
 
     // Other
     public boolean autoClearWorlds = true;
@@ -93,7 +93,10 @@ public final class JultiOptions {
             } catch (Exception ignored) {
             }
         } else {
-            changeProfile("default");
+            try {
+                FileUtil.writeString(selectedFilePath, "default");
+            } catch (IOException ignored) {
+            }
         }
         return jultiDir.resolve("profiles").resolve("default.json");
     }
@@ -131,6 +134,36 @@ public final class JultiOptions {
         // Special care is needed to make a .Julti folder for some reason...
         // Using Files.createDirectories on a path.getParent() would create .Julti as a file for some reason.
         new File((System.getProperty("user.home") + "/.Julti/").replace("\\", "/").replace("//", "/")).mkdirs();
+    }
+
+    /**
+     * Returns a String array of profile names where the first element is the name of the currently selected array.
+     *
+     * @return a String array of profile names where the first element is the name of the currently selected array.
+     */
+    public static String[] getProfileNames() {
+        ArrayList<String> names = new ArrayList<>();
+        String first = getSelectedProfileName();
+        names.add(first);
+        Arrays.stream(getJultiDir().resolve("profiles").toFile().list()).iterator().forEachRemaining(s -> {
+            if (s.endsWith(".json")) {
+                String nextName = s.substring(0, s.length() - 5);
+                if (!nextName.equals(first))
+                    names.add(nextName);
+            }
+        });
+        return names.toArray(new String[0]);
+    }
+
+    public static String getSelectedProfileName() {
+        Path selectedPath = getSelectedProfilePath();
+        String fileName = selectedPath.getName(selectedPath.getNameCount() - 1).toString();
+        return fileName.substring(0, fileName.length() - 5);
+    }
+
+    public static boolean removeProfile(String profileName) {
+        Path resolve = getSelectedProfilePath().resolveSibling(profileName + ".json");
+        return resolve.toFile().delete();
     }
 
     public String testJson() {
@@ -252,6 +285,16 @@ public final class JultiOptions {
                 optionField.set(this, valueString);
                 return true;
             }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    public boolean trySetHotkey(String optionName, List<Integer> keys) {
+        try {
+            Field optionField = getClass().getField(optionName);
+            optionField.set(this, keys);
+            return true;
         } catch (Exception ignored) {
         }
         return false;
