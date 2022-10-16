@@ -7,6 +7,7 @@ import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.ScreenCapUtil;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -206,14 +207,18 @@ public class Wall extends JFrame {
 
     public void lockInstance(int screenX, int screenY) {
         MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
+        if (clickedInstance == null) return;
         lockedInstances.add(clickedInstance);
     }
 
+    @Nullable
     private MinecraftInstance getSelectedInstance(int screenX, int screenY) {
         Point windowPos = getLocation();
 
         int x = screenX - windowPos.x;
         int y = screenY - windowPos.y;
+
+        if (!getBounds().contains(screenX, screenY)) return null;
 
         List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
 
@@ -227,11 +232,14 @@ public class Wall extends JFrame {
         int column = x / iWidth;
         int instanceIndex = row * totalColumns + column;
 
+        if (instanceIndex >= instances.size()) return null;
+
         return instances.get(instanceIndex);
     }
 
     public void playInstance(int screenX, int screenY) {
         MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
+        if (clickedInstance == null) return;
         clickedInstance.activate();
         julti.switchScene(clickedInstance);
         lockedInstances.remove(clickedInstance);
@@ -264,6 +272,7 @@ public class Wall extends JFrame {
 
     public void resetInstance(int x, int y) {
         MinecraftInstance instance = getSelectedInstance(x, y);
+        if (instance == null) return;
         lockedInstances.remove(instance);
         instance.reset();
     }
