@@ -14,12 +14,16 @@ public class WindowOptionComponent extends JPanel {
     public WindowOptionComponent() {
         setLayout(new BoxLayout(this, 1));
 
-        JPanel positionPanel = getPositionPanel();
+        reload();
+    }
 
+    public void reload() {
+        removeAll();
         add(GUIUtil.leftJustify(new JLabel("Window Position")));
-        add(GUIUtil.leftJustify(positionPanel));
+        add(GUIUtil.leftJustify(getPositionPanel()));
         add(GUIUtil.leftJustify(new JLabel("Window Size")));
         add(GUIUtil.leftJustify(getSizePanel()));
+
     }
 
     private static JPanel getPositionPanel() {
@@ -103,5 +107,4 @@ public class WindowOptionComponent extends JPanel {
         yField.getDocument().addDocumentListener(documentListener);
         return positionPanel;
     }
-
 }

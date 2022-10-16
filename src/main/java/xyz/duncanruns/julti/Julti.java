@@ -36,8 +36,10 @@ public class Julti {
     private Pointer selectedHwnd;
     private Wall wall = null;
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
+    private boolean stopped;
 
     public Julti() {
+        stopped = false;
         instanceManager = null;
         tickExecutor = null;
         logCheckExecutor = null;
@@ -70,6 +72,7 @@ public class Julti {
         JultiOptions.changeProfile(newName);
         log(Level.INFO, "Switched to profile \"" + newName + "\"");
         reloadInstanceManager();
+        setupHotkeys();
     }
 
     private HashMap<String, Consumer<String[]>> getCommandMap() {
@@ -716,6 +719,7 @@ public class Julti {
         }
         HotkeyUtil.stopGlobalHotkeyChecker();
         JultiOptions.getInstance().trySave();
+        stopped = true;
     }
 
     public void storeLastInstances() {
@@ -724,6 +728,10 @@ public class Julti {
             instanceStrings.add(instance.getInstancePath().toString());
         }
         JultiOptions.getInstance().lastInstances = Collections.unmodifiableList(instanceStrings);
+    }
+
+    public boolean isStopped() {
+        return stopped;
     }
 
 

@@ -47,21 +47,21 @@ public final class GUIUtil {
         return b;
     }
 
-    public static JButton createHotkeyChangeButton(final String optionName, Julti julti) {
+    public static JButton createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
         JButton button = new JButton();
+        final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO: find suitable shouldContinue
-                HotkeyUtil.onNextHotkey(() -> true, hotkey -> {
+                HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
                     JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
-                    button.setText(HotkeyUtil.formatKeys(hotkey.getKeys()));
+                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
                     julti.setupHotkeys();
                 });
-                button.setText("...");
+                button.setText(hotkeyPrefix + "...");
             }
         });
-        button.setText(HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
+        button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
         return button;
     }
 }

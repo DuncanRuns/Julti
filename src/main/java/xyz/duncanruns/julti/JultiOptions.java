@@ -39,12 +39,12 @@ public final class JultiOptions {
     public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
 
     // Hotkeys
-    public List<Integer> resetHotkey = Collections.singletonList(0x55);
+    public List<Integer> resetHotkey = Collections.singletonList((int) 'U');
     public List<Integer> bgResetHotkey = Collections.singletonList(0xDB);
-    public List<Integer> wallResetHotkey = Collections.singletonList(0x55);
+    public List<Integer> wallResetHotkey = Collections.singletonList((int) 'T');
     public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');
     public List<Integer> wallLockHotkey = Collections.singletonList(1);
-    public List<Integer> wallPlayHotkey = Collections.singletonList(2);
+    public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
     public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
 
     // OBS
