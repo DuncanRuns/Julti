@@ -355,7 +355,7 @@ public class MinecraftInstance {
                     } else if (advancementsLoadedPattern.matcher(line).matches()) {
                         inPreview = false;
                         worldLoaded = true;
-                        if (pauseOnLoad && !HwndUtil.getCurrentHwnd().equals(hwnd)) {
+                        if (pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
                             if (options.useF3) {
                                 pressF3Esc();
                             } else {
