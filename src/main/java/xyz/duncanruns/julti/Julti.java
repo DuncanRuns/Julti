@@ -517,12 +517,7 @@ public class Julti {
             if (!(JultiOptions.getInstance().useWall && isWallActive())) {
                 return;
             }
-
-            List<MinecraftInstance> lockedInstances = wall.getLockedInstances();
-            for (MinecraftInstance instance : instanceManager.getInstances()) {
-                if (lockedInstances.contains(instance)) continue;
-                instance.reset();
-            }
+            wall.fullReset(instanceManager.getInstances());
         } catch (Exception e) {
             log(Level.ERROR, "Error during wall reset:\n" + e.getMessage());
         }
@@ -622,7 +617,6 @@ public class Julti {
     }
 
     private boolean wallReset() {
-        JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
         // Return if no instances
         if (instances.size() == 0) {

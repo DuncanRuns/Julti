@@ -45,6 +45,7 @@ public class MinecraftInstance {
     private boolean inPreview = false;
     private boolean worldLoaded = false;
     private boolean pauseOnLoad = false; // this may have the same name as the JultiOptions entry but behaves differently
+    private long lastPreviewStart = -1L;
 
     // Log tracking
     private long logProgress = -1;
@@ -75,6 +76,10 @@ public class MinecraftInstance {
         this.titleInfo = new WindowTitleInfo();
         this.instancePath = instancePath;
         this.notMC = false;
+    }
+
+    public long getLastPreviewStart() {
+        return lastPreviewStart;
     }
 
     public String getOriginalTitle() {
@@ -281,6 +286,7 @@ public class MinecraftInstance {
             }
             pauseOnLoad = (!singleInstance) && JultiOptions.getInstance().pauseOnLoad;
             worldLoaded = false;
+            setInPreview(false);
             log(Level.INFO, "Reset instance " + getName());
         } else {
             log(Level.INFO, "Could not reset instance " + getName() + " (not opened)");
@@ -339,6 +345,11 @@ public class MinecraftInstance {
         HwndUtil.showHwnd(hwnd);
     }
 
+    private void setInPreview(boolean inPreview) {
+        if (inPreview && !this.inPreview) lastPreviewStart = System.currentTimeMillis();
+        this.inPreview = inPreview;
+    }
+
     public void checkLog() {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
@@ -347,13 +358,13 @@ public class MinecraftInstance {
                 for (String line : newLogContents.split("\n")) {
                     line = line.trim();
                     if (startPreviewPattern.matcher(line).matches()) {
-                        inPreview = true;
+                        setInPreview(true);
                         worldLoaded = false;
                         if (options.useF3) {
                             pressF3Esc();
                         }
                     } else if (advancementsLoadedPattern.matcher(line).matches()) {
-                        inPreview = false;
+                        setInPreview(false);
                         worldLoaded = true;
                         if (pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
                             if (options.useF3) {
@@ -474,6 +485,10 @@ public class MinecraftInstance {
 
     public boolean isBorderless() {
         return HwndUtil.isHwndBorderless(hwnd);
+    }
+
+    public boolean hasPreviewEverStarted() {
+        return lastPreviewStart != -1L;
     }
 
     private enum ResetType {

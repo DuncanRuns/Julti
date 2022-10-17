@@ -245,21 +245,17 @@ public class Wall extends JFrame {
         lockedInstances.remove(clickedInstance);
     }
 
-    public List<MinecraftInstance> getLockedInstances() {
-        return Collections.unmodifiableList(new ArrayList<>(lockedInstances));
-    }
-
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         // If using One At A Time, just reset all instances
         if (JultiOptions.getInstance().wallOneAtATime) {
-            instances.forEach(MinecraftInstance::reset);
             requestFocus();
+            instances.forEach(MinecraftInstance::reset);
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
             return;
         }
 
-        selectedInstance.reset();
+        resetInstance(selectedInstance);
         if (lockedInstances.isEmpty()) {
             requestFocus();
         } else {
@@ -270,14 +266,31 @@ public class Wall extends JFrame {
         }
     }
 
+    private void resetInstance(MinecraftInstance instance) {
+        lockedInstances.remove(instance);
+        if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown))
+            instance.reset();
+    }
+
     public void resetInstance(int x, int y) {
         MinecraftInstance instance = getSelectedInstance(x, y);
         if (instance == null) return;
-        lockedInstances.remove(instance);
-        instance.reset();
+        resetInstance(instance);
     }
 
     public boolean isClosed() {
         return closed;
+    }
+
+    public void fullReset(List<MinecraftInstance> instances) {
+        List<MinecraftInstance> lockedInstances = getLockedInstances();
+        for (MinecraftInstance instance : instances) {
+            if (lockedInstances.contains(instance)) continue;
+            resetInstance(instance);
+        }
+    }
+
+    public List<MinecraftInstance> getLockedInstances() {
+        return Collections.unmodifiableList(new ArrayList<>(lockedInstances));
     }
 }

@@ -10,11 +10,13 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +37,37 @@ public class OptionsGUI extends JFrame {
         return Box.createRigidArea(new Dimension(0, 5));
     }
 
+    private static JFormattedTextField getWRCDField() {
+        NumberFormat format = NumberFormat.getInstance();
+        format.setGroupingUsed(false);
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Long.class);
+        formatter.setCommitsOnValidEdit(true);
+        JFormattedTextField field = new JFormattedTextField(formatter);
+        field.setValue(JultiOptions.getInstance().wallResetCooldown);
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
+                JultiOptions.getInstance().wallResetCooldown = (long) field.getValue();
+            }
+        });
+        return field;
+    }
+
     private void setupWindow() {
         setLayout(null);
         setTitle("Julti Options");
@@ -44,7 +77,7 @@ public class OptionsGUI extends JFrame {
                 onClose();
             }
         });
-        setSize(400, 300);
+        setSize(500, 300);
         setVisible(true);
     }
 
@@ -54,6 +87,7 @@ public class OptionsGUI extends JFrame {
         setContentPane(tabbedPane);
         addComponentsProfile();
         addComponentsReset();
+        addComponentsWall();
         addComponentsWindow();
         addComponentsHotkey();
         addComponentsOBS();
@@ -268,6 +302,22 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
+    private void addComponentsWall() {
+        JPanel panel = createNewOptionsPanel("Wall");
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
+        panel.add(createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Wall", "useWall")));
+        panel.add(createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Wall One At A Time", "wallOneAtATime")));
+        panel.add(createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
+        panel.add(GUIUtil.leftJustify(getWRCDField()));
+
+    }
+
     private void addComponentsReset() {
         JPanel panel = createNewOptionsPanel("Resetting");
 
@@ -277,11 +327,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause On Load", "pauseOnLoad")));
         panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use F3", "useF3")));
-        panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Wall", "useWall")));
-        panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Wall One At A Time", "wallOneAtATime")));
-
         panel.add(createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Clipboard on Reset:")));
