@@ -310,11 +310,21 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Wall", "useWall")));
         panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Wall One At A Time", "wallOneAtATime")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("\"One At A Time\" Mode", "wallOneAtATime")));
         panel.add(createSpacerBox());
-
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
+        panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(getWRCDField()));
+        panel.add(createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcon")));
+        panel.add(createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances", "wallDarkenLocked")));
+        panel.add(createSpacerBox());
+        JSlider darkenSlider = new JSlider(0, 0, 255, JultiOptions.getInstance().darkenLevel);
+        darkenSlider.addChangeListener(e -> {
+            JultiOptions.getInstance().darkenLevel = darkenSlider.getValue();
+        });
+        panel.add(GUIUtil.leftJustify(darkenSlider));
 
     }
 

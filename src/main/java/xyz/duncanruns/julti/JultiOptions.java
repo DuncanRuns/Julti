@@ -29,10 +29,15 @@ public final class JultiOptions {
     // Reset
     public boolean pauseOnLoad = true;
     public boolean useF3 = true;
+    public String clipboardOnReset = "";
+
+    // Wall
     public boolean useWall = false;
     public boolean wallOneAtATime = false;
     public long wallResetCooldown = 150L;
-    public String clipboardOnReset = "";
+    public boolean wallShowLockIcon = true;
+    public boolean wallDarkenLocked = false;
+    public int darkenLevel = 128;
 
     // Window
     public boolean useBorderless = false;

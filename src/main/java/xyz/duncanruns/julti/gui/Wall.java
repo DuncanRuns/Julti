@@ -178,11 +178,18 @@ public class Wall extends JFrame {
 
     private void drawInstance(Graphics graphics, int iWidth, int iHeight, BufferedImage image, int x, int y, MinecraftInstance instance) {
         if (lockedInstances.contains(instance)) {
+            // Create Graphics from image
             Graphics imageG = image.getGraphics();
-            //imageG.setColor(new Color(0, 0, 0, 128));
-            //imageG.fillRect(0, 0, image.getWidth(), image.getHeight());
-            imageG.drawImage(LOCK_IMAGE, 0, 0, this);
+            // Draw Lock
+            if (JultiOptions.getInstance().wallDarkenLocked) {
+                imageG.setColor(new Color(0, 0, 0, JultiOptions.getInstance().darkenLevel));
+                imageG.fillRect(0, 0, image.getWidth(), image.getHeight());
+            }
+            if (JultiOptions.getInstance().wallShowLockIcon) {
+                imageG.drawImage(LOCK_IMAGE, 0, 0, this);
+            }
         }
+        // Draw image
         graphics.drawImage(image, iWidth * x, iHeight * y, iWidth, iHeight, this);
     }
 
