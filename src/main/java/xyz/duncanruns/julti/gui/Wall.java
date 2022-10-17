@@ -256,6 +256,7 @@ public class Wall extends JFrame {
         }
 
         resetInstance(selectedInstance);
+        lockedInstances.remove(selectedInstance);
         if (lockedInstances.isEmpty()) {
             requestFocus();
         } else {

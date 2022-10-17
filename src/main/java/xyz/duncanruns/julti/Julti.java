@@ -391,7 +391,7 @@ public class Julti {
             }
             keys.add(keyToPress);
             KeyboardUtil.pressKeysForTime(keys, 100);
-        } else {
+        } else if (i > 9) {
             log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
     }
