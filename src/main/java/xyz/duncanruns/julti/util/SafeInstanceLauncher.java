@@ -9,7 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public final class SafeInstanceLauncher {
-    // Safely launches instance(s) so that multimc/polymc does not crash.
+    // Safely launches instance(s) so that MultiMC does not crash.
     private SafeInstanceLauncher() {
     }
 

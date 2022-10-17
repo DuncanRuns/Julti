@@ -105,7 +105,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Clear Worlds", "autoClearWorlds")));
         panel.add(createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("MultiMC/PolyMC Executable Path:")));
+        panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path:")));
 
         JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath, 20);
         mmcField.getDocument().addDocumentListener(new DocumentListener() {
@@ -135,7 +135,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {
-        List<String> appNames = Arrays.asList("polymc.exe,multimc.exe".split(","));
+        List<String> appNames = Arrays.asList("multimc.exe".split(","));
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
         possibleLocations.add(userHome.resolve("Desktop"));
@@ -164,7 +164,7 @@ public class OptionsGUI extends JFrame {
             }
         }
         if (candidates.size() == 0) {
-            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC/PolyMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                 browseForMMCExecutable(mmcField);
             }
             return;
@@ -179,7 +179,7 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC/PolyMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
         if (ans == candidates.size()) {
             browseForMMCExecutable(mmcField);
         } else {
@@ -192,7 +192,7 @@ public class OptionsGUI extends JFrame {
     private void browseForMMCExecutable(JTextField mmcField) {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose MultiMC/PolyMC Executable");
+        jfc.setDialogTitle("Julti: Choose MultiMC Executable");
         jfc.setAcceptAllFileFilterUsed(false);
         jfc.addChoosableFileFilter(new FileNameExtensionFilter("Executables", "exe"));
 
