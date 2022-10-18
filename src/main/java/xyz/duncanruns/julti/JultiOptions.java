@@ -151,7 +151,11 @@ public final class JultiOptions {
         ArrayList<String> names = new ArrayList<>();
         String first = getSelectedProfileName();
         names.add(first);
-        Arrays.stream(getJultiDir().resolve("profiles").toFile().list()).iterator().forEachRemaining(s -> {
+        String[] profiles = getJultiDir().resolve("profiles").toFile().list();
+        if (profiles == null || profiles.length == 0) {
+            profiles = new String[]{"default"};
+        }
+        Arrays.stream(profiles).iterator().forEachRemaining(s -> {
             if (s.endsWith(".json")) {
                 String nextName = s.substring(0, s.length() - 5);
                 if (!nextName.equals(first))
