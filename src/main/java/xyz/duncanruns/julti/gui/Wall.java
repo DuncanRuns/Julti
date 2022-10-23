@@ -266,6 +266,7 @@ public class Wall extends JFrame {
         lockedInstances.remove(selectedInstance);
         if (lockedInstances.isEmpty()) {
             requestFocus();
+            julti.switchToWallScene();
         } else {
             MinecraftInstance nextInstance = lockedInstances.iterator().next();
             lockedInstances.remove(nextInstance);
