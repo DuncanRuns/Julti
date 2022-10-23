@@ -44,7 +44,6 @@ public class MinecraftInstance {
     // State tracking
     private boolean inPreview = false;
     private boolean worldLoaded = false;
-    private boolean pauseOnLoad = false; // this may have the same name as the JultiOptions entry but behaves differently
     private long lastPreviewStart = -1L;
 
     // Log tracking
@@ -212,7 +211,6 @@ public class MinecraftInstance {
                 sleep(50);// Magic number; without this, the mouse does not get locked into MC
                 pressEsc();
             }
-            pauseOnLoad = false;
             log(Level.INFO, "Activated instance " + getName());
         } else {
             log(Level.WARN, "Could not activate instance " + getName() + " (not opened)");
@@ -284,7 +282,6 @@ public class MinecraftInstance {
                 case EXIT_WORLD:
                     runNoAtumLeave();
             }
-            pauseOnLoad = (!singleInstance) && JultiOptions.getInstance().pauseOnLoad;
             worldLoaded = false;
             setInPreview(false);
             log(Level.INFO, "Reset instance " + getName());
@@ -366,7 +363,7 @@ public class MinecraftInstance {
                     } else if (advancementsLoadedPattern.matcher(line).matches()) {
                         setInPreview(false);
                         worldLoaded = true;
-                        if (pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
+                        if (JultiOptions.getInstance().pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
                             if (options.useF3) {
                                 pressF3Esc();
                             } else {
