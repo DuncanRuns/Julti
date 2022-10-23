@@ -492,7 +492,6 @@ public class MinecraftInstance {
     }
 
     private enum ResetType {
-
         EXIT_WORLD, // Esc+Shift+Tab+Enter always
         HAS_PREVIEW, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
         NEW_ATUM // Use createWorldKey always
