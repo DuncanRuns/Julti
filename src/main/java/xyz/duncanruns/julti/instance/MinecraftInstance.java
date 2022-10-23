@@ -77,7 +77,7 @@ public class MinecraftInstance {
         this.notMC = false;
     }
 
-    public long getLastPreviewStart() {
+    synchronized public long getLastPreviewStart() {
         return lastPreviewStart;
     }
 
@@ -203,7 +203,7 @@ public class MinecraftInstance {
         return "Instance \"" + getName() + "\"";
     }
 
-    public void activate() {
+    synchronized public void activate() {
         if (hasWindow()) {
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
@@ -262,11 +262,11 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_F3, true);
     }
 
-    public void reset() {
+    synchronized public void reset() {
         reset(false);
     }
 
-    public void reset(boolean singleInstance) {
+    synchronized public void reset(boolean singleInstance) {
         // If no window, do nothing
         if (hasWindow()) {
             switch (getResetType()) {
@@ -342,7 +342,7 @@ public class MinecraftInstance {
         HwndUtil.showHwnd(hwnd);
     }
 
-    private void setInPreview(boolean inPreview) {
+    synchronized private void setInPreview(boolean inPreview) {
         if (inPreview && !this.inPreview) lastPreviewStart = System.currentTimeMillis();
         this.inPreview = inPreview;
     }
@@ -350,25 +350,29 @@ public class MinecraftInstance {
     public void checkLog() {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
-            if (!newLogContents.isEmpty()) {
-                JultiOptions options = JultiOptions.getInstance();
-                for (String line : newLogContents.split("\n")) {
-                    line = line.trim();
-                    if (startPreviewPattern.matcher(line).matches()) {
-                        setInPreview(true);
-                        worldLoaded = false;
+            JultiOptions options = JultiOptions.getInstance();
+            updateStatesWithLog(newLogContents, options);
+        }
+    }
+
+    synchronized private void updateStatesWithLog(String newLogContents, JultiOptions options) {
+        if (!newLogContents.isEmpty()) {
+            for (String line : newLogContents.split("\n")) {
+                line = line.trim();
+                if (startPreviewPattern.matcher(line).matches()) {
+                    setInPreview(true);
+                    worldLoaded = false;
+                    if (options.useF3) {
+                        pressF3Esc();
+                    }
+                } else if (advancementsLoadedPattern.matcher(line).matches()) {
+                    setInPreview(false);
+                    worldLoaded = true;
+                    if (JultiOptions.getInstance().pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
                         if (options.useF3) {
                             pressF3Esc();
-                        }
-                    } else if (advancementsLoadedPattern.matcher(line).matches()) {
-                        setInPreview(false);
-                        worldLoaded = true;
-                        if (JultiOptions.getInstance().pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
-                            if (options.useF3) {
-                                pressF3Esc();
-                            } else {
-                                pressEsc();
-                            }
+                        } else {
+                            pressEsc();
                         }
                     }
                 }
@@ -376,7 +380,7 @@ public class MinecraftInstance {
         }
     }
 
-    public String getNewLogContents() {
+    String getNewLogContents() {
         Path logPath = getLogPath();
 
         // If log progress has not been jumped, jump and return
@@ -472,11 +476,11 @@ public class MinecraftInstance {
         }
     }
 
-    public boolean isWorldLoaded() {
+    synchronized public boolean isWorldLoaded() {
         return worldLoaded;
     }
 
-    public boolean isPreviewLoaded() {
+    synchronized public boolean isPreviewLoaded() {
         return inPreview;
     }
 
@@ -484,7 +488,7 @@ public class MinecraftInstance {
         return HwndUtil.isHwndBorderless(hwnd);
     }
 
-    public boolean hasPreviewEverStarted() {
+    synchronized public boolean hasPreviewEverStarted() {
         return lastPreviewStart != -1L;
     }
 
