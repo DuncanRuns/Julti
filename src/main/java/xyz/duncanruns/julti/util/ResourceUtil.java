@@ -5,7 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
-public class ResourceUtil {
+public final class ResourceUtil {
+    private ResourceUtil() {
+
+    }
 
     public static BufferedImage getImageResource(String name) throws IOException {
         return ImageIO.read(getResource(name));

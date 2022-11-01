@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +33,23 @@ public class InstanceManager {
 
     public InstanceManager() {
         instances = new ArrayList<>();
+    }
+
+
+    @Nullable
+    public MinecraftInstance getSelectedInstance() {
+        Pointer hwnd = HwndUtil.getCurrentHwnd();
+        List<MinecraftInstance> instances = getInstances();
+        for (MinecraftInstance instance : instances) {
+            if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
+                return instance;
+            }
+        }
+        return null;
+    }
+
+    synchronized public List<MinecraftInstance> getInstances() {
+        return Collections.unmodifiableList(new ArrayList<>(instances));
     }
 
     synchronized public void redetectInstances() {
@@ -83,11 +101,6 @@ public class InstanceManager {
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
     }
-
-    synchronized public List<MinecraftInstance> getInstances() {
-        return Collections.unmodifiableList(new ArrayList<>(instances));
-    }
-
 
     public void manageMissingInstances() {
         manageMissingInstances(minecraftInstance -> {

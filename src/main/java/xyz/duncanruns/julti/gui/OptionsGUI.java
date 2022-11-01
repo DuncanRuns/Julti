@@ -17,11 +17,13 @@ import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.*;
 
 public class OptionsGUI extends JFrame {
+    private static final String[] RESET_MODES = new String[]{"Multi", "Wall"};
+
     private boolean closed = false;
     private final Julti julti;
     private JTabbedPane tabbedPane;
@@ -66,6 +68,10 @@ public class OptionsGUI extends JFrame {
             }
         });
         return field;
+    }
+
+    private JTabbedPane getTabbedPane() {
+        return tabbedPane;
     }
 
     private void setupWindow() {
@@ -308,8 +314,26 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         panel.add(createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Wall", "useWall")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
+            julti.checkWallWindow();
+            if (b) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        requestFocus();
+                    }
+                }, 100);
+
+            }
+        })));
         panel.add(createSpacerBox());
+
+        if (JultiOptions.getInstance().resetMode != 1) {
+            panel.add(GUIUtil.leftJustify(new JLabel("Wall resetting mode is disabled.")));
+            panel.add(GUIUtil.leftJustify(new JLabel("You can still render the")));
+            panel.add(GUIUtil.leftJustify(new JLabel("wall window with the above setting. ")));
+            return;
+        }
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("\"One At A Time\" Mode", "wallOneAtATime")));
         panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
@@ -332,6 +356,19 @@ public class OptionsGUI extends JFrame {
         JPanel panel = createNewOptionsPanel("Resetting");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Settings")));
+        panel.add(createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Style:")));
+        JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
+        resetStyleBox.setSelectedItem(RESET_MODES[JultiOptions.getInstance().resetMode]);
+        resetStyleBox.addActionListener(e -> {
+            JultiOptions.getInstance().resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+            reloadComponents();
+            getTabbedPane().setSelectedIndex(1);
+            julti.reloadResetManager();
+        });
+
+        panel.add(GUIUtil.leftJustify(resetStyleBox));
         panel.add(createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause On Load", "pauseOnLoad")));

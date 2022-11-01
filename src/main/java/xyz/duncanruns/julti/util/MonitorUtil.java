@@ -8,7 +8,7 @@ public final class MonitorUtil {
     private MonitorUtil() {
     }
 
-    public static Monitor getDefaultMonitor() {
+    public static Monitor getPrimaryMonitor() {
         return new Monitor(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds());
     }
 
@@ -28,6 +28,7 @@ public final class MonitorUtil {
         public final int y;
         public final int width;
         public final int height;
+        public final Rectangle bounds;
 
         private Monitor(Rectangle bounds) {
             this(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -41,6 +42,7 @@ public final class MonitorUtil {
 
             this.position = new int[]{x, y};
             this.size = new int[]{width, height};
+            bounds = new Rectangle(x, y, width, height);
         }
 
         @Override

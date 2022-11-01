@@ -7,7 +7,6 @@ import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.ScreenCapUtil;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -17,13 +16,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Wall extends JFrame {
+public class WallWindow extends JFrame {
     private static final Image LOCK_IMAGE;
 
     static {
@@ -40,10 +40,9 @@ public class Wall extends JFrame {
     private boolean drewBack = false;
     private final List<Long> frameTimeQueue = new ArrayList<>(21);
     private double fps = 0.0;
-    private final Set<MinecraftInstance> lockedInstances = new HashSet<>();
     private boolean closed;
 
-    public Wall(Julti julti) {
+    public WallWindow(Julti julti) {
         super();
         closed = false;
         this.julti = julti;
@@ -59,7 +58,7 @@ public class Wall extends JFrame {
     }
 
     private void setToPrimaryMonitor() {
-        MonitorUtil.Monitor mainMonitor = MonitorUtil.getDefaultMonitor();
+        MonitorUtil.Monitor mainMonitor = MonitorUtil.getPrimaryMonitor();
         setLocation(mainMonitor.x, mainMonitor.y);
         setSize(mainMonitor.width, mainMonitor.height);
         totalWidth = mainMonitor.width;
@@ -105,7 +104,7 @@ public class Wall extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        if ((!JultiOptions.getInstance().wallOneAtATime) || isActive()) {
+        if ((!JultiOptions.getInstance().wallOneAtATime) || isActive() || JultiOptions.getInstance().resetMode != 1) {
             drawWall(g);
         }
     }
@@ -121,7 +120,7 @@ public class Wall extends JFrame {
             List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
             if (instances.size() == 0) return;
 
-            final int totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
+            final int totalRows = getTotalRows(instances);
             final int totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
 
             final int iWidth = totalWidth / totalColumns;
@@ -163,6 +162,16 @@ public class Wall extends JFrame {
         }
     }
 
+    private static int getTotalRows(List<MinecraftInstance> instances) {
+        JultiOptions options = JultiOptions.getInstance();
+
+        if (options.overrideRows) {
+            return options.overrideRowsAmount;
+        }
+
+        return (int) Math.ceil(Math.sqrt(instances.size()));
+    }
+
     private static void setImageRGB(BufferedImage image, ScreenCapUtil.ImageInfo imageInfo) {
         WritableRaster raster = image.getRaster();
         int[] ints = imageInfo.pixels;
@@ -177,7 +186,7 @@ public class Wall extends JFrame {
     }
 
     private void drawInstance(Graphics graphics, int iWidth, int iHeight, BufferedImage image, int x, int y, MinecraftInstance instance) {
-        if (lockedInstances.contains(instance)) {
+        if (Collections.unmodifiableList(new ArrayList<>(julti.getResetManager().getLockedInstances())).contains(instance)) {
             // Create Graphics from image
             Graphics imageG = image.getGraphics();
             // Draw Lock
@@ -212,94 +221,9 @@ public class Wall extends JFrame {
         graphics.drawString("FPS: " + fps, 0, totalHeight);
     }
 
-    public void lockInstance(int screenX, int screenY) {
-        MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
-        if (clickedInstance == null) return;
-        lockedInstances.add(clickedInstance);
-    }
-
-    @Nullable
-    private MinecraftInstance getSelectedInstance(int screenX, int screenY) {
-        Point windowPos = getLocation();
-
-        int x = screenX - windowPos.x;
-        int y = screenY - windowPos.y;
-
-        if (!getBounds().contains(screenX, screenY)) return null;
-
-        List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
-
-        final int totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
-        final int totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
-
-        final int iWidth = totalWidth / totalColumns;
-        final int iHeight = totalHeight / totalRows;
-
-        int row = y / iHeight;
-        int column = x / iWidth;
-        int instanceIndex = row * totalColumns + column;
-
-        if (instanceIndex >= instances.size()) return null;
-
-        return instances.get(instanceIndex);
-    }
-
-    public void playInstance(int screenX, int screenY) {
-        MinecraftInstance clickedInstance = getSelectedInstance(screenX, screenY);
-        if (clickedInstance == null) return;
-        clickedInstance.activate();
-        julti.switchScene(clickedInstance);
-        lockedInstances.remove(clickedInstance);
-    }
-
-    public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
-        // If using One At A Time, just reset all instances
-        if (JultiOptions.getInstance().wallOneAtATime) {
-            requestFocus();
-            instances.forEach(MinecraftInstance::reset);
-            // Clear out locked instances since all instances reset.
-            lockedInstances.clear();
-            return;
-        }
-
-        resetInstance(selectedInstance);
-        lockedInstances.remove(selectedInstance);
-        if (lockedInstances.isEmpty()) {
-            requestFocus();
-            julti.switchToWallScene();
-        } else {
-            MinecraftInstance nextInstance = lockedInstances.iterator().next();
-            lockedInstances.remove(nextInstance);
-            nextInstance.activate();
-            julti.switchScene(nextInstance);
-        }
-    }
-
-    private void resetInstance(MinecraftInstance instance) {
-        lockedInstances.remove(instance);
-        if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown))
-            instance.reset();
-    }
-
-    public void resetInstance(int x, int y) {
-        MinecraftInstance instance = getSelectedInstance(x, y);
-        if (instance == null) return;
-        resetInstance(instance);
-    }
 
     public boolean isClosed() {
         return closed;
     }
 
-    public void fullReset(List<MinecraftInstance> instances) {
-        List<MinecraftInstance> lockedInstances = getLockedInstances();
-        for (MinecraftInstance instance : instances) {
-            if (lockedInstances.contains(instance)) continue;
-            resetInstance(instance);
-        }
-    }
-
-    public List<MinecraftInstance> getLockedInstances() {
-        return Collections.unmodifiableList(new ArrayList<>(lockedInstances));
-    }
 }

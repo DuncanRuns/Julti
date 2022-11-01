@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 public final class HwndUtil {
@@ -43,6 +44,31 @@ public final class HwndUtil {
         return User32.INSTANCE.GetForegroundWindow();
     }
 
+    public static Pointer getOBSWallHwnd() {
+        AtomicReference<Pointer> out = new AtomicReference<>(null);
+        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
+            String title = getHwndTitle(hWnd).toLowerCase();
+            if (title.contains("projector (scene)") && title.contains("wall")) {
+                out.set(hWnd);
+                return false;
+            }
+            return true;
+        }, null);
+        return out.get();
+    }
+
+    public static String getHwndTitle(Pointer hwnd) {
+        byte[] x = new byte[128];
+        User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
+        StringBuilder out = new StringBuilder();
+        for (byte a : x) {
+            if (a == 0)
+                break;
+            out.append((char) a);
+        }
+        return out.toString();
+    }
+
     public static List<Pointer> getAllMinecraftHwnds() {
         return getAllHwnds(MC_PATTERN);
     }
@@ -57,18 +83,6 @@ public final class HwndUtil {
             return true;
         }, null);
         return list;
-    }
-
-    public static String getHwndTitle(Pointer hwnd) {
-        byte[] x = new byte[128];
-        User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
-        StringBuilder out = new StringBuilder();
-        for (byte a : x) {
-            if (a == 0)
-                break;
-            out.append((char) a);
-        }
-        return out.toString();
     }
 
     public static boolean hwndExists(Pointer hwnd) {

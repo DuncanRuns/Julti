@@ -21,9 +21,16 @@ public final class GUIUtil {
         return t;
     }
 
+
     public static JCheckBox createCheckBoxFromOption(String label, String optionName) {
+        return createCheckBoxFromOption(label, optionName, null);
+    }
+
+    public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
         return createCheckBox(label, (Boolean) JultiOptions.getInstance().getValue(optionName), val -> {
             JultiOptions.getInstance().trySetValue(optionName, String.valueOf(val));
+            if (afterSet != null)
+                afterSet.accept(val);
         });
     }
 

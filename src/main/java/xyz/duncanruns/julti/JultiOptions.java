@@ -30,10 +30,13 @@ public final class JultiOptions {
     public boolean pauseOnLoad = true;
     public boolean useF3 = true;
     public String clipboardOnReset = "";
+    public int resetMode = 0; // 0 = Multi, 1 = Wall
 
     // Wall
-    public boolean useWall = false;
+    public boolean useJultiWallWindow = false;
     public boolean wallOneAtATime = false;
+    public boolean overrideRows = false;
+    public int overrideRowsAmount = 3;
     public long wallResetCooldown = 150L;
     public boolean wallShowLockIcon = true;
     public boolean wallDarkenLocked = false;
@@ -41,8 +44,8 @@ public final class JultiOptions {
 
     // Window
     public boolean useBorderless = false;
-    public int[] windowPos = MonitorUtil.getDefaultMonitor().position;
-    public int[] windowSize = MonitorUtil.getDefaultMonitor().size;
+    public int[] windowPos = MonitorUtil.getPrimaryMonitor().position;
+    public int[] windowSize = MonitorUtil.getPrimaryMonitor().size;
 
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList((int) 'U');

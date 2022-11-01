@@ -10,9 +10,13 @@ import xyz.duncanruns.julti.win32.GDI32Extra;
 import xyz.duncanruns.julti.win32.User32;
 import xyz.duncanruns.julti.win32.WinGDIExtra;
 
-public class ScreenCapUtil {
+public final class ScreenCapUtil {
     private static WinDef.HBITMAP hBitmap = null;
     private static int width, height;
+
+    private ScreenCapUtil() {
+
+    }
 
     public static ImageInfo capture(Pointer hwnd) {
         return capture(new WinDef.HWND(hwnd));
