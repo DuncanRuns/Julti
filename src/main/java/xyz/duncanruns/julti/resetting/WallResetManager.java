@@ -50,6 +50,7 @@ public class WallResetManager extends ResetManager {
             instances.forEach(MinecraftInstance::reset);
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
+            julti.switchToWallScene();
             return;
         }
 

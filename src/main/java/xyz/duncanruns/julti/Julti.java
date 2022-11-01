@@ -17,6 +17,7 @@ import xyz.duncanruns.julti.win32.Win32Con;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -27,15 +28,19 @@ import java.util.function.Consumer;
 public class Julti {
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
     private static final String VERSION = getVersion();
+    private static final Path stateOutputPath = JultiOptions.getJultiDir().resolve("state");
+
     private InstanceManager instanceManager;
     private ResetManager resetManager;
     private ScheduledExecutorService tickExecutor;
     private ScheduledExecutorService logCheckExecutor;
     private long last2SecCycle;
+    private long lastStateOutput;
     private long lastWorldClear;
     private WallWindow wallWindow = null;
-    private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
     private boolean stopped;
+    private String currentSceneId = "W";
+    private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
     public Julti() {
         stopped = false;
@@ -44,6 +49,7 @@ public class Julti {
         logCheckExecutor = null;
 
         last2SecCycle = 0;
+        lastStateOutput = 0;
         lastWorldClear = 0;
     }
 
@@ -392,6 +398,7 @@ public class Julti {
         } else if (i > 9) {
             log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
+        currentSceneId = String.valueOf(i);
     }
 
     public InstanceManager getInstanceManager() {
@@ -409,6 +416,7 @@ public class Julti {
             KeyboardUtil.releaseAllModifiers();
             KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
         }
+        currentSceneId = "W";
     }
 
     public void start() {
@@ -535,17 +543,23 @@ public class Julti {
 
     private void tick() {
         JultiOptions options = JultiOptions.getInstance();
-        if (System.currentTimeMillis() - last2SecCycle > 2000) {
-            last2SecCycle = System.currentTimeMillis();
+        long current = System.currentTimeMillis();
+        if (current - last2SecCycle > 2000) {
+            last2SecCycle = current;
 
             instanceManager.manageMissingInstances(this::onInstanceLoad);
 
             checkWallWindow();
         }
 
-        if (options.autoClearWorlds && (System.currentTimeMillis() - lastWorldClear) > 20000) {
-            lastWorldClear = System.currentTimeMillis();
+        if (options.autoClearWorlds && (current - lastWorldClear) > 20000) {
+            lastWorldClear = current;
             instanceManager.clearAllWorlds();
+        }
+
+        if (current - lastStateOutput > 50) {
+            lastStateOutput = current;
+            tryOutputState();
         }
     }
 
@@ -568,6 +582,19 @@ public class Julti {
             startWall();
         } else if ((!options.useJultiWallWindow) && !(wallWindow == null || wallWindow.isClosed())) {
             wallWindow.dispose();
+        }
+    }
+
+    private void tryOutputState() {
+        // Lazy try except (I sorry)
+        try {
+            StringBuilder out = new StringBuilder(currentSceneId);
+            Set<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
+            for (MinecraftInstance instance : instanceManager.getInstances()) {
+                out.append(lockedInstances.contains(instance) ? "1" : "0");
+            }
+            FileUtil.writeString(stateOutputPath, out.toString());
+        } catch (Exception ignored) {
         }
     }
 
