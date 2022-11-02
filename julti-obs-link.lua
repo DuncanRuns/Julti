@@ -154,6 +154,12 @@ function script_update(settings)
     wall_scene = obs.obs_data_get_string(settings, "wall_scene")
     first_scene = obs.obs_data_get_string(settings, "first_scene")
     first_lock = obs.obs_data_get_string(settings, "first_lock")
+end
+
+function script_load(settings)
+    wall_scene = obs.obs_data_get_string(settings, "wall_scene")
+    first_scene = obs.obs_data_get_string(settings, "first_scene")
+    first_lock = obs.obs_data_get_string(settings, "first_lock")
 
     if timers_activated then
         return
@@ -199,7 +205,6 @@ function script_update(settings)
             break
         end
     end
-
 end
 
 -- Loop Functions --
