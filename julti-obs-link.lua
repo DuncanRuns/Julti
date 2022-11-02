@@ -159,7 +159,7 @@ function script_update(settings)
         return
     end
 
-    -- Schedule Activate Loop Functions -- 
+    -- Schedule Activate Loop Functions --
 
     obs.timer_add(loop20thsec, 50)
     obs.timer_add(loophalfsec, 500)
@@ -167,7 +167,7 @@ function script_update(settings)
     timers_activated = true
 
     -- Switch to Wall Scene & Disable All Lock Icons --
-    
+
     if (wall_scene == "") then
         return
     end
