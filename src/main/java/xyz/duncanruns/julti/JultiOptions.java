@@ -35,8 +35,9 @@ public final class JultiOptions {
     // Wall
     public boolean useJultiWallWindow = false;
     public boolean wallOneAtATime = false;
-    public boolean overrideRows = false;
+    public boolean autoCalcWallSize = false;
     public int overrideRowsAmount = 3;
+    public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
     public boolean wallShowLockIcon = true;
     public boolean wallDarkenLocked = false;

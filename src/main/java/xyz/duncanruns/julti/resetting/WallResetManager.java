@@ -146,8 +146,17 @@ public class WallResetManager extends ResetManager {
 
         List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
 
-        int totalRows = getTotalRows(instances);
-        final int totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
+        int totalRows;
+        int totalColumns;
+
+        JultiOptions options = JultiOptions.getInstance();
+        if (!options.autoCalcWallSize) {
+            totalRows = options.overrideRowsAmount;
+            totalColumns = options.overrideColumnsAmount;
+        } else {
+            totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
+            totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
+        }
 
         final int iWidth = bounds.width / totalColumns;
         final int iHeight = bounds.height / totalRows;
@@ -165,13 +174,4 @@ public class WallResetManager extends ResetManager {
         return julti.getWallBounds();
     }
 
-    private static int getTotalRows(List<MinecraftInstance> instances) {
-        JultiOptions options = JultiOptions.getInstance();
-
-        if (options.overrideRows) {
-            return options.overrideRowsAmount;
-        }
-
-        return (int) Math.ceil(Math.sqrt(instances.size()));
-    }
 }

@@ -120,8 +120,17 @@ public class WallWindow extends JFrame {
             List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
             if (instances.size() == 0) return;
 
-            final int totalRows = getTotalRows(instances);
-            final int totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
+            int totalRows;
+            int totalColumns;
+
+            JultiOptions options = JultiOptions.getInstance();
+            if (!options.autoCalcWallSize) {
+                totalRows = options.overrideRowsAmount;
+                totalColumns = options.overrideColumnsAmount;
+            } else {
+                totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
+                totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
+            }
 
             final int iWidth = totalWidth / totalColumns;
             final int iHeight = totalHeight / totalRows;
@@ -160,16 +169,6 @@ public class WallWindow extends JFrame {
             //drawFPS(graphics);
         } catch (Exception ignored) {
         }
-    }
-
-    private static int getTotalRows(List<MinecraftInstance> instances) {
-        JultiOptions options = JultiOptions.getInstance();
-
-        if (options.overrideRows) {
-            return options.overrideRowsAmount;
-        }
-
-        return (int) Math.ceil(Math.sqrt(instances.size()));
     }
 
     private static void setImageRGB(BufferedImage image, ScreenCapUtil.ImageInfo imageInfo) {

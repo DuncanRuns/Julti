@@ -83,7 +83,7 @@ public class OptionsGUI extends JFrame {
                 onClose();
             }
         });
-        setSize(500, 300);
+        setSize(500, 350);
         setVisible(true);
     }
 
@@ -91,18 +91,19 @@ public class OptionsGUI extends JFrame {
         getContentPane().removeAll();
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         setContentPane(tabbedPane);
-        addComponentsProfile();
-        addComponentsReset();
-        addComponentsWall();
-        addComponentsWindow();
-        addComponentsHotkey();
-        addComponentsOBS();
-        addComponentsOther();
+        int i = 0;
+        addComponentsProfile(i++);
+        addComponentsReset(i++);
+        addComponentsWall(i++);
+        addComponentsWindow(i++);
+        addComponentsHotkey(i++);
+        addComponentsOBS(i++);
+        addComponentsOther(i++);
         revalidate();
         repaint();
     }
 
-    private void addComponentsOther() {
+    private void addComponentsOther(int panelNum) {
         JPanel panel = createNewOptionsPanel("Other");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
@@ -211,22 +212,24 @@ public class OptionsGUI extends JFrame {
         }
     }
 
-    private void addComponentsOBS() {
+    private void addComponentsOBS(int panelNum) {
         JPanel panel = createNewOptionsPanel("OBS");
 
         panel.add(GUIUtil.leftJustify(new JLabel("OBS Settings")));
         panel.add(createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys")));
-        panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
-        panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt", "obsUseAlt")));
-        panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", julti)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reloadAndSwitch(panelNum))));
+        if (JultiOptions.getInstance().obsPressHotkeys) {
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt", "obsUseAlt")));
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", julti)));
+        }
     }
 
-    private void addComponentsHotkey() {
+    private void addComponentsHotkey(int panelNum) {
         JPanel panel = createNewOptionsPanel("Hotkeys");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Hotkeys")));
@@ -261,7 +264,7 @@ public class OptionsGUI extends JFrame {
         return panel;
     }
 
-    private void addComponentsProfile() {
+    private void addComponentsProfile(int panelNum) {
         JPanel panel = createNewOptionsPanel("Profile");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Profile")));
@@ -308,27 +311,14 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void addComponentsWall() {
+    private void addComponentsWall(int panelNum) {
         JPanel panel = createNewOptionsPanel("Wall");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         panel.add(createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
-            julti.checkWallWindow();
-            if (b) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        requestFocus();
-                    }
-                }, 100);
-
-            }
-        })));
-        panel.add(createSpacerBox());
-
         if (JultiOptions.getInstance().resetMode != 1) {
+            addUJWWOption(panelNum, panel);
             panel.add(GUIUtil.leftJustify(new JLabel("Wall resetting mode is disabled.")));
             panel.add(GUIUtil.leftJustify(new JLabel("You can still render the")));
             panel.add(GUIUtil.leftJustify(new JLabel("wall window with the above setting. ")));
@@ -337,22 +327,47 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("\"One At A Time\" Mode", "wallOneAtATime")));
         panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
-        panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(getWRCDField()));
         panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcon")));
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reloadAndSwitch(panelNum))));
         panel.add(createSpacerBox());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances", "wallDarkenLocked")));
-        panel.add(createSpacerBox());
-        JSlider darkenSlider = new JSlider(0, 0, 255, JultiOptions.getInstance().darkenLevel);
-        darkenSlider.addChangeListener(e -> {
-            JultiOptions.getInstance().darkenLevel = darkenSlider.getValue();
-        });
-        panel.add(GUIUtil.leftJustify(darkenSlider));
+        if(!JultiOptions.getInstance().autoCalcWallSize){
+            panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
+            panel.add(createSpacerBox());
+        }
+
+        addUJWWOption(panelNum, panel);
+
+        if (JultiOptions.getInstance().useJultiWallWindow) {
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcon")));
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances", "wallDarkenLocked")));
+            panel.add(createSpacerBox());
+            JSlider darkenSlider = new JSlider(0, 0, 255, JultiOptions.getInstance().darkenLevel);
+            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().darkenLevel = darkenSlider.getValue());
+            panel.add(GUIUtil.leftJustify(darkenSlider));
+        }
 
     }
 
-    private void addComponentsReset() {
+    private void addUJWWOption(int panelNum, JPanel panel) {
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
+            reloadAndSwitch(panelNum);
+            julti.checkWallWindow();
+            if (b) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        requestFocus();
+                    }
+                }, 100);
+            }
+        })));
+    }
+
+    private void addComponentsReset(int panelNum) {
         JPanel panel = createNewOptionsPanel("Resetting");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Settings")));
@@ -363,8 +378,7 @@ public class OptionsGUI extends JFrame {
         resetStyleBox.setSelectedItem(RESET_MODES[JultiOptions.getInstance().resetMode]);
         resetStyleBox.addActionListener(e -> {
             JultiOptions.getInstance().resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
-            reloadComponents();
-            getTabbedPane().setSelectedIndex(1);
+            reloadAndSwitch(panelNum);
             julti.reloadResetManager();
         });
 
@@ -403,40 +417,48 @@ public class OptionsGUI extends JFrame {
         panel.add(corField);
     }
 
-    private void addComponentsWindow() {
+    private void reloadAndSwitch(int panelNum) {
+        reloadComponents();
+        getTabbedPane().setSelectedIndex(panelNum);
+    }
+
+    private void addComponentsWindow(int panelNum) {
         JPanel panel = createNewOptionsPanel("Window");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
         panel.add(createSpacerBox());
 
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless", b -> reloadAndSwitch(panelNum))));
         panel.add(createSpacerBox());
 
-        WindowOptionComponent windowOptions = new WindowOptionComponent();
-        panel.add(windowOptions);
-        panel.add(createSpacerBox());
+        if (JultiOptions.getInstance().useBorderless) {
+            WindowOptionComponent windowOptions = new WindowOptionComponent();
+            panel.add(windowOptions);
+            panel.add(createSpacerBox());
 
-        OptionsGUI thisGUI = this;
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Choose Monitor"), actionEvent -> {
-            MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
-            StringBuilder monitorOptionsText = new StringBuilder();
-            Object[] buttons = new Object[monitors.length];
-            int i = 0;
-            for (MonitorUtil.Monitor monitor : monitors) {
-                buttons[i] = String.valueOf(i + 1);
-                monitorOptionsText.append("\n#").append(++i).append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
-            }
 
-            int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", -1, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
-            if (ans == -1) return;
-            JultiOptions options = JultiOptions.getInstance();
-            MonitorUtil.Monitor monitor = monitors[ans];
-            options.windowPos = monitor.position;
-            options.windowSize = monitor.size;
-            windowOptions.reload();
-            revalidate();
-        })));
+            OptionsGUI thisGUI = this;
+            panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Choose Monitor"), actionEvent -> {
+                MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
+                StringBuilder monitorOptionsText = new StringBuilder();
+                Object[] buttons = new Object[monitors.length];
+                int i = 0;
+                for (MonitorUtil.Monitor monitor : monitors) {
+                    buttons[i] = String.valueOf(i + 1);
+                    monitorOptionsText.append("\n#").append(++i).append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
+                }
+
+                int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", -1, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
+                if (ans == -1) return;
+                JultiOptions options = JultiOptions.getInstance();
+                MonitorUtil.Monitor monitor = monitors[ans];
+                options.windowPos = monitor.position;
+                options.windowSize = monitor.size;
+                windowOptions.reload();
+                revalidate();
+            })));
+        }
     }
 
     public boolean isClosed() {
