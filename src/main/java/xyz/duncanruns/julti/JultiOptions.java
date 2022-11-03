@@ -66,6 +66,7 @@ public final class JultiOptions {
     // Other
     public boolean autoClearWorlds = true;
     public String multiMCPath = "";
+    public boolean useAffinity = true;
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();

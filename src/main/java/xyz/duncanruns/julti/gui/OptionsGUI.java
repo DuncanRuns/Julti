@@ -112,6 +112,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Clear Worlds", "autoClearWorlds")));
         panel.add(createSpacerBox());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity")));
+        panel.add(createSpacerBox());
+
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path:")));
 
         JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath, 20);
@@ -136,8 +139,8 @@ public class OptionsGUI extends JFrame {
             }
         });
         panel.add(GUIUtil.leftJustify(mmcField));
-
         panel.add(createSpacerBox());
+
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> runMMCExecutableHelper(mmcField))));
     }
 

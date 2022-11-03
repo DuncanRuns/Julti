@@ -488,7 +488,7 @@ public class Julti {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             i++;
             try {
-                instance.checkLog();
+                instance.checkLog(this);
             } catch (Exception e) {
                 log(Level.ERROR, "Error while checking log for instance #" + i + ":\n" + e.getMessage());
             }
@@ -577,6 +577,7 @@ public class Julti {
         } else if (minecraftInstance.isBorderless()) {
             minecraftInstance.undoBorderless();
         }
+        AffinityUtil.setAffinity(minecraftInstance, AffinityUtil.highBitMask);
     }
 
     public void checkWallWindow() {

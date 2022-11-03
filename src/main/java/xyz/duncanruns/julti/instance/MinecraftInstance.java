@@ -4,6 +4,7 @@ import com.sun.jna.Pointer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
@@ -15,10 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -356,15 +354,15 @@ public class MinecraftInstance {
         this.inPreview = inPreview;
     }
 
-    public void checkLog() {
+    public void checkLog(Julti julti) {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
             JultiOptions options = JultiOptions.getInstance();
-            updateStatesWithLog(newLogContents, options);
+            updateStatesWithLog(newLogContents, options, julti);
         }
     }
 
-    synchronized private void updateStatesWithLog(String newLogContents, JultiOptions options) {
+    synchronized private void updateStatesWithLog(String newLogContents, JultiOptions options, final Julti julti) {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
@@ -374,6 +372,7 @@ public class MinecraftInstance {
                     if (options.useF3) {
                         pressF3Esc();
                     }
+                    julti.getResetManager().notifyPreviewLoaded(this);
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
@@ -384,6 +383,7 @@ public class MinecraftInstance {
                             pressEsc();
                         }
                     }
+                    julti.getResetManager().notifyWorldLoaded(this);
                 }
             }
         }

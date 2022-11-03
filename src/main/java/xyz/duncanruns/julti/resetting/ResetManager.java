@@ -49,4 +49,10 @@ public abstract class ResetManager {
     public Set<MinecraftInstance> getLockedInstances() {
         return Collections.emptySet();
     }
+
+    public void notifyPreviewLoaded(MinecraftInstance instance) {
+    }
+
+    public void notifyWorldLoaded(MinecraftInstance instance) {
+    }
 }
