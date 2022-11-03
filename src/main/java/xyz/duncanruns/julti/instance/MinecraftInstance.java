@@ -49,6 +49,7 @@ public class MinecraftInstance {
     // Log tracking
     private long logProgress = -1;
     private FileTime lastLogModify = null;
+    private Integer pid = null;
 
 
     public MinecraftInstance(Pointer hwnd) {
@@ -132,12 +133,20 @@ public class MinecraftInstance {
 
         if (notMC || !hasWindow()) return null;
 
-        instancePath = HwndUtil.getInstancePathFromPid(HwndUtil.getPidFromHwnd(hwnd));
+        instancePath = HwndUtil.getInstancePathFromPid(getPid());
         if (instancePath == null) {
             notMC = true;
         }
 
         return instancePath;
+    }
+
+    public int getPid() {
+        if (pid == null) {
+            pid = HwndUtil.getPidFromHwnd(hwnd);
+            return pid;
+        }
+        return pid;
     }
 
     public Pointer getHwnd() {
