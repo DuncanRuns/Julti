@@ -332,7 +332,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reloadAndSwitch(panelNum))));
         panel.add(createSpacerBox());
-        if(!JultiOptions.getInstance().autoCalcWallSize){
+        if (!JultiOptions.getInstance().autoCalcWallSize) {
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
             panel.add(createSpacerBox());
         }
@@ -379,7 +379,7 @@ public class OptionsGUI extends JFrame {
         resetStyleBox.addActionListener(e -> {
             JultiOptions.getInstance().resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
             reloadAndSwitch(panelNum);
-            julti.reloadResetManager();
+            julti.reloadManagers();
         });
 
         panel.add(GUIUtil.leftJustify(resetStyleBox));

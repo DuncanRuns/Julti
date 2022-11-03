@@ -74,8 +74,7 @@ public class Julti {
         JultiOptions.getInstance().trySave();
         JultiOptions.changeProfile(newName);
         log(Level.INFO, "Switched to profile \"" + newName + "\"");
-        reloadInstanceManager();
-        reloadResetManager();
+        reloadManagers();
         setupHotkeys();
     }
 
@@ -421,8 +420,7 @@ public class Julti {
 
     public void start() {
         stopExecutors();
-        reloadInstanceManager();
-        reloadResetManager();
+        reloadManagers();
         setupHotkeys();
         tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         tryTick();
@@ -447,22 +445,9 @@ public class Julti {
         }
     }
 
-    /**
-     * Replaces the instanceManager in this Julti object with a new one based on saved instance paths.
-     */
-    public void reloadInstanceManager() {
-        instanceManager = new InstanceManager(JultiOptions.getInstance().getLastInstancePaths());
-    }
-
-    public void reloadResetManager() {
-        switch (JultiOptions.getInstance().resetMode) {
-            case 0:
-                resetManager = new MultiResetManager(this);
-                break;
-            case 1:
-                resetManager = new WallResetManager(this);
-                break;
-        }
+    public void reloadManagers() {
+        reloadInstanceManager();
+        reloadResetManager();
     }
 
     public void setupHotkeys() {
@@ -507,6 +492,24 @@ public class Julti {
             } catch (Exception e) {
                 log(Level.ERROR, "Error while checking log for instance #" + i + ":\n" + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Replaces the instanceManager in this Julti object with a new one based on saved instance paths.
+     */
+    private void reloadInstanceManager() {
+        instanceManager = new InstanceManager(JultiOptions.getInstance().getLastInstancePaths());
+    }
+
+    private void reloadResetManager() {
+        switch (JultiOptions.getInstance().resetMode) {
+            case 0:
+                resetManager = new MultiResetManager(this);
+                break;
+            case 1:
+                resetManager = new WallResetManager(this);
+                break;
         }
     }
 
