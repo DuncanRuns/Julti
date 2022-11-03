@@ -169,42 +169,9 @@ function script_load(settings)
 
     obs.timer_add(loop20thsec, 50)
     obs.timer_add(loophalfsec, 500)
+    obs.timer_add(aftersec, 1000)
 
     timers_activated = true
-
-    -- Switch to Wall Scene & Disable All Lock Icons --
-
-    if (wall_scene == "") then
-        return
-    end
-
-    local scene_source = obs.obs_get_source_by_name(wall_scene)
-    obs.obs_frontend_set_current_scene(scene_source)
-    obs.obs_source_release(scene_source)
-
-    if (first_lock == "") then
-        return
-    end
-
-    -- Should loop until finding a scene item that does not exist but checking 101 happens basically instantly anyway plus I'm lazy.
-    local i = 0
-    while true do
-        i = i + 1
-        local lock_name = first_lock:sub(1, -2) .. tostring(i)
-        local scene_source = obs.obs_get_source_by_name(wall_scene)
-        local scene = obs.obs_scene_from_source(scene_source)
-        local scene_items = obs.obs_scene_enum_items(scene)
-        for _, scene_item in ipairs(scene_items) do
-            if (lock_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
-                obs.obs_sceneitem_set_visible(scene_item, false)
-            end
-        end
-        obs.sceneitem_list_release(scene_items)
-        obs.obs_source_release(scene_source)
-        if i > 100 then
-            break
-        end
-    end
 end
 
 -- Loop Functions --
@@ -274,4 +241,44 @@ function loophalfsec()
         end
     end
     write_new_lock()
+end
+
+function aftersec()
+
+    obs.timer_remove(aftersec)
+    
+    -- Switch to Wall Scene & Disable All Lock Icons --
+
+    if (wall_scene == "") then
+        return
+    end
+
+    local scene_source = obs.obs_get_source_by_name(wall_scene)
+    obs.obs_frontend_set_current_scene(scene_source)
+    obs.obs_source_release(scene_source)
+
+    if (first_lock == "") then
+        return
+    end
+
+    -- Should loop until finding a scene item that does not exist but checking 101 happens basically instantly anyway plus I'm lazy.
+    local i = 0
+    while true do
+        i = i + 1
+        local lock_name = first_lock:sub(1, -2) .. tostring(i)
+        local scene_source = obs.obs_get_source_by_name(wall_scene)
+        local scene = obs.obs_scene_from_source(scene_source)
+        local scene_items = obs.obs_scene_enum_items(scene)
+        for _, scene_item in ipairs(scene_items) do
+            if (lock_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
+                obs.obs_sceneitem_set_visible(scene_item, false)
+            end
+        end
+        obs.sceneitem_list_release(scene_items)
+        obs.obs_source_release(scene_source)
+        if i > 100 then
+            break
+        end
+    end
+    obs.script_log(300,"Switched to wall scene and cleared locks.")
 end
