@@ -69,18 +69,13 @@ function split_string(inp, sep)
     return t
 end
 
-function read_file(filename)
+function read_first_line(filename)
     local rfile = io.open(filename, "r")
     if rfile == nil then
         return ""
     end
     io.input(rfile)
-    local out = ""
-    local next = io.read()
-    while not (next == nil) do
-        out = out .. next .. "\n"
-        next = io.read()
-    end
+    local out = io.read()
     io.close(rfile)
     return out
 end
@@ -97,7 +92,7 @@ function get_julti_file(filename)
 end
 
 function can_take_lock()
-    local last_update = tonumber(read_file(get_julti_file("scriptlock")))
+    local last_update = tonumber(read_first_line(get_julti_file("scriptlock")))
     if (last_update == nil) then
         return true
     end
@@ -192,7 +187,7 @@ function loop20thsec()
         return
     end
 
-    local new_text = read_file(get_julti_file("state"))
+    local new_text = read_first_line(get_julti_file("state"))
 
 
     if (new_text == nil) or (new_text == old_text) then
@@ -200,7 +195,11 @@ function loop20thsec()
     end
     old_text = new_text
 
-    local scene_id = split_string(new_text," ")[1]
+    local state_args = split_string(new_text, " ")
+
+    local scene_id = state_args[1]
+
+    -- obs.script_log(300,"scene_id:"..scene_id..", new_text:"..new_text..",state_args:"..state_args[1]..","..state_args[2])
 
     if not (scene_id == "W") then
         if not (first_scene == "") then
@@ -225,7 +224,7 @@ function loop20thsec()
     end
 
     local i = 0
-    for c in split_string(new_text," ")[2]:gmatch(".") do
+    for c in ((state_args[2]):gmatch(".")) do
         i = i + 1
         local lock_name = first_lock:sub(1, -2) .. tostring(i)
         local scene_source = obs.obs_get_source_by_name(wall_scene)
