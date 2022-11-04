@@ -385,17 +385,19 @@ public class Julti {
 
     public void switchScene(final int i) {
         JultiOptions options = JultiOptions.getInstance();
-        if (options.obsPressHotkeys && i <= 9) {
-            KeyboardUtil.releaseAllModifiers();
-            int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
-            List<Integer> keys = new ArrayList<>();
-            if (options.obsUseAlt) {
-                keys.add(Win32Con.VK_MENU);
+        if (options.obsPressHotkeys) {
+            if (i <= 9) {
+                KeyboardUtil.releaseAllModifiers();
+                int keyToPress = (options.obsUseNumpad ? KeyEvent.VK_NUMPAD0 : KeyEvent.VK_0) + i;
+                List<Integer> keys = new ArrayList<>();
+                if (options.obsUseAlt) {
+                    keys.add(Win32Con.VK_MENU);
+                }
+                keys.add(keyToPress);
+                KeyboardUtil.pressKeysForTime(keys, 100);
+            } else {
+                log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
             }
-            keys.add(keyToPress);
-            KeyboardUtil.pressKeysForTime(keys, 100);
-        } else if (i > 9) {
-            log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
         }
         currentSceneId = String.valueOf(i);
     }
@@ -592,7 +594,7 @@ public class Julti {
     private void tryOutputState() {
         // Lazy try except (I sorry)
         try {
-            StringBuilder out = new StringBuilder(currentSceneId);
+            StringBuilder out = new StringBuilder(currentSceneId).append(" ");
             Set<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
                 out.append(lockedInstances.contains(instance) ? "1" : "0");

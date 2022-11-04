@@ -58,6 +58,17 @@ old_text         = ""
 
 -- Functions --
 
+function split_string(inp, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t = {}
+    for str in string.gmatch(inp, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
 function read_file(filename)
     local rfile = io.open(filename, "r")
     if rfile == nil then
@@ -189,7 +200,7 @@ function loop20thsec()
     end
     old_text = new_text
 
-    local scene_id = string.sub(new_text, 1, 1)
+    local scene_id = split_string(new_text," ")[1]
 
     if not (scene_id == "W") then
         if not (first_scene == "") then
@@ -214,7 +225,7 @@ function loop20thsec()
     end
 
     local i = 0
-    for c in new_text:sub(2, -1):gmatch(".") do
+    for c in split_string(new_text," ")[2]:gmatch(".") do
         i = i + 1
         local lock_name = first_lock:sub(1, -2) .. tostring(i)
         local scene_source = obs.obs_get_source_by_name(wall_scene)
