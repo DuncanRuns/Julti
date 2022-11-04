@@ -506,5 +506,4 @@ public class MinecraftInstance {
         HAS_PREVIEW, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
         NEW_ATUM // Use createWorldKey always
     }
-
 }
