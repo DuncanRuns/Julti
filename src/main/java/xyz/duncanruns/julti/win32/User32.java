@@ -57,6 +57,8 @@ public interface User32 extends StdCallLibrary {
 
     int ReleaseDC(HWND hWnd, HDC hDC);
 
+    int FillRect(HDC hdc, RECT rect, HBRUSH hbrush);
+
     interface WNDENUMPROC extends StdCallCallback {
         boolean callback(Pointer hWnd, Pointer arg);
     }
