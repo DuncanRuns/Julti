@@ -70,6 +70,13 @@ public class OptionsGUI extends JFrame {
         return field;
     }
 
+    private void warnUnverifiable() {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.useJultiWallWindow && options.pauseRenderingDuringPlay && !options.wallResetAllAfterPlaying) {
+            JOptionPane.showMessageDialog(this, "Warning: Any instances that are not being actively played will not be rendered and will be considered unverifiable, please enable \"Reset All After Playing\" OR disable \"Pause Rendering During Play\".", "Julti - Verification Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
     private JTabbedPane getTabbedPane() {
         return tabbedPane;
     }
@@ -327,7 +334,14 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(new JLabel("wall window with the above setting. ")));
             return;
         }
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("\"One At A Time\" Mode", "wallOneAtATime")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
+            warnUnverifiable();
+            reloadAndSwitch(panelNum);
+        })));
+        if (!JultiOptions.getInstance().wallResetAllAfterPlaying) {
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass")));
+        }
         panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
         panel.add(GUIUtil.leftJustify(getWRCDField()));
@@ -344,12 +358,14 @@ public class OptionsGUI extends JFrame {
 
         if (JultiOptions.getInstance().useJultiWallWindow) {
             panel.add(createSpacerBox());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcon")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause Rendering During Play", "pauseRenderingDuringPlay", b -> warnUnverifiable())));
+            panel.add(createSpacerBox());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcons")));
             panel.add(createSpacerBox());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances", "wallDarkenLocked")));
             panel.add(createSpacerBox());
-            JSlider darkenSlider = new JSlider(0, 0, 255, JultiOptions.getInstance().darkenLevel);
-            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().darkenLevel = darkenSlider.getValue());
+            JSlider darkenSlider = new JSlider(0, 0, 100, JultiOptions.getInstance().wallDarkenLevel);
+            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().wallDarkenLevel = darkenSlider.getValue());
             panel.add(GUIUtil.leftJustify(darkenSlider));
         }
 
@@ -367,6 +383,8 @@ public class OptionsGUI extends JFrame {
                     }
                 }, 100);
             }
+            warnUnverifiable();
+            requestFocus();
         })));
     }
 

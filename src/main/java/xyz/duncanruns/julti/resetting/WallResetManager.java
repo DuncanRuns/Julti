@@ -48,14 +48,15 @@ public class WallResetManager extends ResetManager {
 
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         // If using One At A Time, just reset all instances
-        if (JultiOptions.getInstance().useAffinity)
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.useAffinity)
             AffinityUtil.setAffinities(instances, lockedInstances);
-        if (JultiOptions.getInstance().wallOneAtATime) {
+        if (options.wallResetAllAfterPlaying) {
             julti.focusWall();
             instances.forEach(MinecraftInstance::reset);
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
-            if (JultiOptions.getInstance().useAffinity)
+            if (options.useAffinity)
                 AffinityUtil.setAffinities(instances, lockedInstances);
             julti.switchToWallScene();
             return;
@@ -63,10 +64,10 @@ public class WallResetManager extends ResetManager {
 
         resetInstance(selectedInstance, lockedInstances.isEmpty());
         lockedInstances.remove(selectedInstance);
-        if (lockedInstances.isEmpty()) {
+        if (!options.wallBypass || lockedInstances.isEmpty()) {
             julti.focusWall();
             julti.switchToWallScene();
-            if (JultiOptions.getInstance().useAffinity)
+            if (options.useAffinity)
                 AffinityUtil.setAffinities(instances, lockedInstances);
         } else {
             MinecraftInstance nextInstance = lockedInstances.iterator().next();

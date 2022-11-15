@@ -104,7 +104,7 @@ public class WallWindow extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        if ((!JultiOptions.getInstance().wallOneAtATime) || isActive() || JultiOptions.getInstance().resetMode != 1) {
+        if ((!JultiOptions.getInstance().wallResetAllAfterPlaying) || isActive() || JultiOptions.getInstance().resetMode != 1) {
             drawWall(g);
         }
     }
@@ -190,10 +190,10 @@ public class WallWindow extends JFrame {
             Graphics imageG = image.getGraphics();
             // Draw Lock
             if (JultiOptions.getInstance().wallDarkenLocked) {
-                imageG.setColor(new Color(0, 0, 0, JultiOptions.getInstance().darkenLevel));
+                imageG.setColor(new Color(0, 0, 0, JultiOptions.getInstance().wallDarkenLevel));
                 imageG.fillRect(0, 0, image.getWidth(), image.getHeight());
             }
-            if (JultiOptions.getInstance().wallShowLockIcon) {
+            if (JultiOptions.getInstance().wallShowLockIcons) {
                 imageG.drawImage(LOCK_IMAGE, 0, 0, this);
             }
         }

@@ -235,4 +235,31 @@ public final class HwndUtil {
     public static boolean isHwndMinimized(Pointer hwnd) {
         return User32.INSTANCE.IsIconic(hwnd);
     }
+
+    /**
+     * Waits for a window with an exact name. Once the window appears, the window handle is returned.
+     * <p>
+     * DO NOT use this method unless you are certain that the window will be present.
+     *
+     * @param exactName the exact name of the window
+     * @return the window handle
+     */
+    public static Pointer waitForWindow(String exactName) {
+        AtomicReference<Pointer> out = new AtomicReference<>(null);
+        while (out.get() == null) {
+            try {
+                Thread.sleep(1000 / 20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            User32.INSTANCE.EnumWindows((hWnd, arg) -> {
+                if (HwndUtil.getHwndTitle(hWnd).equals(exactName)) {
+                    out.set(hWnd);
+                    return false;
+                }
+                return true;
+            }, null);
+        }
+        return out.get();
+    }
 }
