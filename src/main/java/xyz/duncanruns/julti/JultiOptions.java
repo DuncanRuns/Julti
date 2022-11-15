@@ -37,7 +37,7 @@ public final class JultiOptions {
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallBypass = true;
     public boolean pauseRenderingDuringPlay = false;
-    public boolean autoCalcWallSize = false;
+    public boolean autoCalcWallSize = true;
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
@@ -60,7 +60,7 @@ public final class JultiOptions {
     public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
 
     // OBS
-    public boolean obsPressHotkeys = true;
+    public boolean obsPressHotkeys = false;
     public boolean obsUseNumpad = true;
     public boolean obsUseAlt = false;
     public List<Integer> switchToWallHotkey = Collections.singletonList(Win32Con.VK_F12);
