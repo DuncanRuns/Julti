@@ -1,14 +1,19 @@
 package xyz.duncanruns.julti.gui;
 
+import com.sun.jna.platform.win32.GDI32;
+import com.sun.jna.platform.win32.WinDef;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.ResourceUtil;
-import xyz.duncanruns.julti.util.ScreenCapUtil;
+import xyz.duncanruns.julti.win32.GDI32Extra;
+import xyz.duncanruns.julti.win32.Msimg32;
+import xyz.duncanruns.julti.win32.User32;
+import xyz.duncanruns.julti.win32.WinGDIExtra;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -16,38 +21,35 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class WallWindow extends JFrame {
-    private static final Image LOCK_IMAGE;
+public class WallWindow extends Frame {
+    private static final WinDef.HBRUSH BLACK_BRUSH = new WinDef.HBRUSH(GDI32Extra.INSTANCE.GetStockObject(4));
+    private static final WinDef.HBRUSH WHITE_BRUSH = new WinDef.HBRUSH(GDI32Extra.INSTANCE.GetStockObject(0));
+    private static final WinDef.UINT WHITE = new WinDef.UINT(0xFFFFFF);
 
-    static {
-        try {
-            LOCK_IMAGE = getLockImage();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private WinDef.HDC lockIcon = null;
+    private int lockWidth, lockHeight;
 
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final Julti julti;
     private int totalWidth, totalHeight;
-    private boolean drewBack = false;
-    private final List<Long> frameTimeQueue = new ArrayList<>(21);
-    private double fps = 0.0;
+    private WinDef.RECT fullRect;
     private boolean closed;
+    private WinDef.HWND hwnd;
+    private WinDef.HDC bufferHdc;
 
     public WallWindow(Julti julti) {
         super();
-        closed = false;
         this.julti = julti;
+        closed = false;
         setToPrimaryMonitor();
-        executor.scheduleAtFixedRate(this::tick, 50_000_000, 1_000_000_000L / 60, TimeUnit.NANOSECONDS);
+        executor.scheduleAtFixedRate(this::tick, 50_000_000, 1_000_000_000L / 15, TimeUnit.NANOSECONDS);
         setupWindow();
         addWindowListener(new WindowAdapter() {
             @Override
@@ -63,10 +65,18 @@ public class WallWindow extends JFrame {
         setSize(mainMonitor.width, mainMonitor.height);
         totalWidth = mainMonitor.width;
         totalHeight = mainMonitor.height;
+
+        fullRect = new WinDef.RECT();
+        fullRect.left = mainMonitor.x;
+        fullRect.right = mainMonitor.x + mainMonitor.width;
+        fullRect.top = mainMonitor.y;
+        fullRect.bottom = mainMonitor.y + mainMonitor.height;
     }
 
     private void tick() {
-        repaint();
+        if (!(JultiOptions.getInstance().pauseRenderingDuringPlay && julti.getInstanceManager().getSelectedInstance() != null) || JultiOptions.getInstance().resetMode != 1) {
+            drawWall();
+        }
     }
 
     private void setupWindow() {
@@ -74,7 +84,11 @@ public class WallWindow extends JFrame {
         setUndecorated(true);
         setResizable(false);
         setVisible(true);
-        setTitle("Wall");
+        String tempTitle = "Julti Wall - " + new Random().nextInt();
+        setTitle(tempTitle);
+        this.hwnd = new WinDef.HWND(HwndUtil.waitForWindow(tempTitle));
+        this.bufferHdc = null;
+        setTitle("Julti Wall");
         try {
             setIconImage(ResourceUtil.getImageResource("/lock.png"));
         } catch (IOException e) {
@@ -82,147 +96,144 @@ public class WallWindow extends JFrame {
         }
     }
 
-    private void onClose() {
-        executor.shutdownNow();
+    public void onClose() {
         closed = true;
+        executor.shutdownNow();
+        GDI32Extra.INSTANCE.DeleteDC(bufferHdc);
+        GDI32Extra.INSTANCE.DeleteDC(lockIcon);
+        dispose();
     }
 
-    private static Image getLockImage() throws IOException {
-        File lockFile = new File(JultiOptions.getJultiDir().resolve("lock.png").toUri());
-        if (lockFile.isFile()) {
-            return ImageIO.read(lockFile);
+    private void drawWall() {
+        WinDef.HDC hdcOut = User32.INSTANCE.GetDC(hwnd);
+        if (bufferHdc == null) {
+            bufferHdc = GDI32.INSTANCE.CreateCompatibleDC(hdcOut);
+            WinDef.HBITMAP bufferBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(hdcOut, totalWidth, totalHeight);
+            GDI32.INSTANCE.SelectObject(bufferHdc, bufferBitmap);
+        }
+
+        // Fill Black
+        User32.INSTANCE.FillRect(bufferHdc, fullRect, BLACK_BRUSH);
+
+        // Draw Instances
+        drawAllInstances();
+
+        // Buffer to Window
+        GDI32Extra.INSTANCE.BitBlt(hdcOut, 0, 0, 1920, 1080, bufferHdc, 0, 0, GDI32.SRCCOPY);
+        // Release Window DC
+        User32.INSTANCE.ReleaseDC(hwnd, hdcOut);
+    }
+
+    private void drawAllInstances() {
+        List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
+        Set<MinecraftInstance> lockedInstances = julti.getResetManager().getLockedInstances();
+        if (instances.size() == 0) return;
+
+        int totalRows;
+        int totalColumns;
+
+        JultiOptions options = JultiOptions.getInstance();
+        if (!options.autoCalcWallSize) {
+            totalRows = options.overrideRowsAmount;
+            totalColumns = options.overrideColumnsAmount;
         } else {
-            return ResourceUtil.getImageResource("/lock.png");
+            totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
+            totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
+        }
+
+        final int iWidth = totalWidth / totalColumns;
+        final int iHeight = totalHeight / totalRows;
+
+        WinDef.HDC lockHDC = getLockHDC(bufferHdc);
+        int n = 0;
+        fullLoop:
+        for (int y = 0; y < totalRows; y++) {
+            for (int x = 0; x < totalColumns; x++) {
+                final MinecraftInstance instance = instances.get(n++);
+                if (!instance.hasWindowQuick()) return;
+                final boolean isLocked = lockedInstances.contains(instance);
+                final int prepSet = options.wallDarkenLocked && isLocked ? options.wallDarkenLevel : 0;
+                prepStretch(bufferHdc, prepSet);
+                drawInstance(instance, bufferHdc, x * iWidth, y * iHeight, iWidth, iHeight);
+                if (isLocked && options.wallShowLockIcons) {
+                    if (prepSet != 0) {
+                        prepStretch(bufferHdc, 0);
+                    }
+                    Msimg32.INSTANCE.TransparentBlt(bufferHdc, x * iWidth, y * iHeight, lockWidth / totalColumns, lockHeight / totalRows, lockHDC, 0, 0, lockWidth, lockHeight, WHITE);
+                }
+                if (n >= instances.size()) {
+                    break fullLoop;
+                }
+            }
         }
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        onClose();
-    }
+    private WinDef.HDC getLockHDC(WinDef.HDC baseHDC) {
+        if (lockIcon != null) return lockIcon;
 
-    @Override
-    public void paint(Graphics g) {
-        if ((!JultiOptions.getInstance().wallResetAllAfterPlaying) || isActive() || JultiOptions.getInstance().resetMode != 1) {
-            drawWall(g);
-        }
-    }
-
-    private void drawWall(Graphics graphics) {
         try {
-            if (!drewBack) {
-                graphics.setColor(Color.BLACK);
-                graphics.fillRect(0, 0, totalWidth, totalHeight);
-                drewBack = true;
+            File lockFile = JultiOptions.getJultiDir().resolve("lock.png").toFile();
+            if (!lockFile.exists()) {
+                BufferedImage image = ResourceUtil.getImageResource("/lock.png");
+                ImageIO.write(image, "png", lockFile);
             }
+            BufferedImage image = ImageIO.read(lockFile);
+            lockWidth = image.getWidth();
+            lockHeight = image.getHeight();
 
-            List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
-            if (instances.size() == 0) return;
+            lockIcon = GDI32.INSTANCE.CreateCompatibleDC(baseHDC);
 
-            int totalRows;
-            int totalColumns;
+            WinDef.HBITMAP hBitmap = GDI32.INSTANCE.CreateCompatibleBitmap(baseHDC, lockWidth, lockHeight);
+            GDI32.INSTANCE.SelectObject(lockIcon, hBitmap);
 
-            JultiOptions options = JultiOptions.getInstance();
-            if (!options.autoCalcWallSize) {
-                totalRows = options.overrideRowsAmount;
-                totalColumns = options.overrideColumnsAmount;
-            } else {
-                totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
-                totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
-            }
-
-            final int iWidth = totalWidth / totalColumns;
-            final int iHeight = totalHeight / totalRows;
-
-            //Thread[] threads = new Thread[instances.size()];
-
-            int n = 0;
-            fullLoop:
-            for (int y = 0; y < totalRows; y++) {
-                for (int x = 0; x < totalColumns; x++) {
-                    try {
-                        final MinecraftInstance instance = instances.get(n);
-                        if (instance.hasWindow()) {
-                            ScreenCapUtil.ImageInfo imageInfo = instance.captureScreen();
-                            BufferedImage image = new BufferedImage(imageInfo.width, imageInfo.height, BufferedImage.TYPE_INT_RGB);
-                            setImageRGB(image, imageInfo);
-                            //int finalX = x;
-                            //int finalY = y;
-                            //threads[n] = new Thread(() -> drawInstance(graphics, iWidth, iHeight, image, finalX, finalY, instance));
-                            //threads[n].start();
-                            drawInstance(graphics, iWidth, iHeight, image, x, y, instance);
-                        }
-                        n++;
-                        if (n >= instances.size()) {
-                            break fullLoop;
-                        }
-                    } catch (Exception ignored) {
+            WritableRaster raster = image.getRaster();
+            for (int x = 0; x < lockWidth; x++) {
+                for (int y = 0; y < lockHeight; y++) {
+                    int[] pixel = raster.getPixel(x, y, (int[]) null);
+                    if (pixel[3] > 128) {
+                        int color = (pixel[0]) + (pixel[1] << 8) + (pixel[2] << 16);
+                        GDI32Extra.INSTANCE.SetPixel(lockIcon, x, y, color);
+                    } else {
+                        GDI32Extra.INSTANCE.SetPixel(lockIcon, x, y, 0xFFFFFF);
                     }
                 }
             }
-
-            //for (Thread thread : threads) {
-            //        thread.join();
-            //    }
-            //measureFrames();
-            //drawFPS(graphics);
-        } catch (Exception ignored) {
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+        return lockIcon;
     }
 
-    private static void setImageRGB(BufferedImage image, ScreenCapUtil.ImageInfo imageInfo) {
-        WritableRaster raster = image.getRaster();
-        int[] ints = imageInfo.pixels;
-        int i = 0;
-        for (int y = 0; y < imageInfo.height; y++) {
-            for (int x = 0; x < imageInfo.width; x++) {
-                // Proper way is to use a ColorModel's getDataElements(int, Object), but that
-                // always returns an int list with just one element which is the input integer
-                raster.setDataElements(x, y, new int[]{ints[i++]});
-            }
-        }
-    }
-
-    private void drawInstance(Graphics graphics, int iWidth, int iHeight, BufferedImage image, int x, int y, MinecraftInstance instance) {
-        if (Collections.unmodifiableList(new ArrayList<>(julti.getResetManager().getLockedInstances())).contains(instance)) {
-            // Create Graphics from image
-            Graphics imageG = image.getGraphics();
-            // Draw Lock
-            if (JultiOptions.getInstance().wallDarkenLocked) {
-                imageG.setColor(new Color(0, 0, 0, JultiOptions.getInstance().wallDarkenLevel));
-                imageG.fillRect(0, 0, image.getWidth(), image.getHeight());
-            }
-            if (JultiOptions.getInstance().wallShowLockIcons) {
-                imageG.drawImage(LOCK_IMAGE, 0, 0, this);
-            }
-        }
-        // Draw image
-        graphics.drawImage(image, iWidth * x, iHeight * y, iWidth, iHeight, this);
-    }
-
-    private void measureFrames() {
-        frameTimeQueue.add(System.nanoTime());
-        if (frameTimeQueue.size() <= 21)
+    private static void prepStretch(WinDef.HDC hdc, int darkLevel) {
+        if (darkLevel == 0) {
+            GDI32Extra.INSTANCE.SetStretchBltMode(hdc, 3);
             return;
-        frameTimeQueue.remove(0);
-        int total = 0;
-        for (int i = 0; i < 20; i++) {
-            total += (int) (frameTimeQueue.get(i + 1) - frameTimeQueue.get(i));
         }
-        fps = total / 20_000_000f;
+        GDI32Extra.COLORADJUSTMENT ca = new GDI32Extra.COLORADJUSTMENT();
+        GDI32Extra.INSTANCE.GetColorAdjustment(hdc, ca);
+        GDI32Extra.INSTANCE.SetStretchBltMode(hdc, 4);
+        ca.caBrightness = new WinDef.SHORT(-darkLevel);
+        ca.caContrast = new WinDef.SHORT(-darkLevel);
+        GDI32Extra.INSTANCE.SetColorAdjustment(hdc, ca);
     }
 
-    private void drawFPS(Graphics graphics) {
-        graphics.setColor(Color.black);
-        graphics.fillRect(0, totalHeight - 10, totalWidth, 10);
-        graphics.setColor(Color.white);
-        graphics.drawString("FPS: " + fps, 0, totalHeight);
-    }
+    private void drawInstance(MinecraftInstance instance, WinDef.HDC hdc, int x, int y, int w, int h) {
+        WinDef.HWND hwndSrc = new WinDef.HWND(instance.getHwnd());
 
+        WinDef.HDC hdcSrc = User32.INSTANCE.GetDC(hwndSrc);
+
+        WinDef.RECT srcBounds = new WinDef.RECT();
+        User32.INSTANCE.GetClientRect(hwndSrc, srcBounds);
+        int srcWidth = srcBounds.right - srcBounds.left;
+        int srcHeight = srcBounds.bottom - srcBounds.top;
+
+        GDI32Extra.INSTANCE.StretchBlt(hdc, x, y, w, h, hdcSrc, 0, 0, srcWidth, srcHeight, WinGDIExtra.SRCCOPY);
+
+        User32.INSTANCE.ReleaseDC(hwndSrc, hdcSrc);
+    }
 
     public boolean isClosed() {
         return closed;
     }
-
 }

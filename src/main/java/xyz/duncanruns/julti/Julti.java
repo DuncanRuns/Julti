@@ -5,7 +5,7 @@ import com.sun.jna.Pointer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.gui.NewWallWindow;
+import xyz.duncanruns.julti.gui.WallWindow;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
@@ -37,7 +37,7 @@ public class Julti {
     private long last2SecCycle;
     private long lastStateOutput;
     private long lastWorldClear;
-    private NewWallWindow wallWindow = null;
+    private WallWindow wallWindow = null;
     private boolean stopped;
     private String currentSceneId = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
@@ -605,7 +605,7 @@ public class Julti {
     }
 
     public void startWall() {
-        wallWindow = new NewWallWindow(this);
+        wallWindow = new WallWindow(this);
     }
 
     public ResetManager getResetManager() {
