@@ -201,23 +201,22 @@ function loop20thsec()
 
     -- obs.script_log(300,"scene_id:"..scene_id..", new_text:"..new_text..",state_args:"..state_args[1]..","..state_args[2])
 
-    if not (scene_id == "W") then
-        if not (first_scene == "") then
-            local to_switch = (first_scene:sub(1, -2)) .. (scene_id)
-            local scene_source = obs.obs_get_source_by_name(to_switch)
-            obs.obs_frontend_set_current_scene(scene_source)
-            obs.obs_source_release(scene_source)
-        end
-        return
+    if (not (scene_id == "W")) and (not (first_scene == "")) then
+        local to_switch = (first_scene:sub(1, -2)) .. (scene_id)
+        local scene_source = obs.obs_get_source_by_name(to_switch)
+        obs.obs_frontend_set_current_scene(scene_source)
+        obs.obs_source_release(scene_source)
     end
 
     if (wall_scene == "") then
         return
     end
 
-    local scene_source = obs.obs_get_source_by_name(wall_scene)
-    obs.obs_frontend_set_current_scene(scene_source)
-    obs.obs_source_release(scene_source)
+    if (scene_id == "W") then
+        local scene_source = obs.obs_get_source_by_name(wall_scene)
+        obs.obs_frontend_set_current_scene(scene_source)
+        obs.obs_source_release(scene_source)
+    end
 
     if (first_lock == "") then
         return

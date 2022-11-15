@@ -555,6 +555,8 @@ public class Julti {
             instanceManager.manageMissingInstances(this::onInstanceLoad);
 
             checkWallWindow();
+
+            ensureCorrectSceneState();
         }
 
         if (options.autoClearWorlds && (current - lastWorldClear) > 20000) {
@@ -588,6 +590,19 @@ public class Julti {
             startWall();
         } else if ((!options.useJultiWallWindow) && !(wallWindow == null || wallWindow.isClosed())) {
             wallWindow.onClose();
+        }
+    }
+
+    private void ensureCorrectSceneState() {
+        MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
+        if (selectedInstance == null) {
+            if (isWallActive()) {
+                currentSceneId = "W";
+                System.out.println(currentSceneId);
+            }
+        } else {
+            currentSceneId = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
+            System.out.println(currentSceneId);
         }
     }
 
