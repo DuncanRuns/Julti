@@ -144,7 +144,6 @@ public class NewWallWindow extends Frame {
         final int iWidth = totalWidth / totalColumns;
         final int iHeight = totalHeight / totalRows;
 
-        //prepStretch(bufferHdc, options.wallDarkenLocked ? options.wallDarkenLevel : 0);
         WinDef.HDC lockHDC = getLockHDC(bufferHdc);
         int n = 0;
         fullLoop:
