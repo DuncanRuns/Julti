@@ -16,7 +16,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -74,6 +77,10 @@ public class MinecraftInstance {
         this.titleInfo = new WindowTitleInfo();
         this.instancePath = instancePath;
         this.notMC = false;
+    }
+
+    public boolean hasWindowQuick() {
+        return hwnd != null;
     }
 
     synchronized public long getLastPreviewStart() {

@@ -150,7 +150,8 @@ public class NewWallWindow extends Frame {
         fullLoop:
         for (int y = 0; y < totalRows; y++) {
             for (int x = 0; x < totalColumns; x++) {
-                final MinecraftInstance instance = instances.get(n);
+                final MinecraftInstance instance = instances.get(n++);
+                if (!instance.hasWindowQuick()) return;
                 final boolean isLocked = lockedInstances.contains(instance);
                 final int prepSet = options.wallDarkenLocked && isLocked ? options.wallDarkenLevel : 0;
                 prepStretch(bufferHdc, prepSet);
@@ -161,7 +162,7 @@ public class NewWallWindow extends Frame {
                     }
                     Msimg32.INSTANCE.TransparentBlt(bufferHdc, x * iWidth, y * iHeight, lockWidth / totalColumns, lockHeight / totalRows, lockHDC, 0, 0, lockWidth, lockHeight, WHITE);
                 }
-                if (++n >= instances.size()) {
+                if (n >= instances.size()) {
                     break fullLoop;
                 }
             }
