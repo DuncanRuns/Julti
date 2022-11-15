@@ -159,7 +159,7 @@ public class WallWindow extends Frame {
                     if (prepSet != 0) {
                         prepStretch(bufferHdc, 0);
                     }
-                    Msimg32.INSTANCE.TransparentBlt(bufferHdc, x * iWidth, y * iHeight, lockWidth / totalColumns, lockHeight / totalRows, lockHDC, 0, 0, lockWidth, lockHeight, WHITE);
+                    Msimg32.INSTANCE.TransparentBlt(bufferHdc, x * iWidth, y * iHeight, lockWidth, lockHeight, lockHDC, 0, 0, lockWidth, lockHeight, WHITE);
                 }
                 if (n >= instances.size()) {
                     break fullLoop;
