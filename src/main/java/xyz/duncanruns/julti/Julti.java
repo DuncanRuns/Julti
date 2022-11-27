@@ -124,7 +124,7 @@ public class Julti {
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallsinglereset");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
@@ -134,6 +134,7 @@ public class Julti {
                     "Reset Single (Wall): " + HotkeyUtil.formatKeys(options.wallSingleResetHotkey) + "\n" +
                     "Lock Instance (Wall): " + HotkeyUtil.formatKeys(options.wallLockHotkey) + "\n" +
                     "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
+                    "Focus Reset (Wall): " + HotkeyUtil.formatKeys(options.wallFocusResetHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
                     "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
             for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
@@ -165,6 +166,9 @@ public class Julti {
                         break;
                     case "wallplay":
                         jultiOptions.wallPlayHotkey = hotkey.getKeys();
+                        break;
+                    case "wallfocusreset":
+                        jultiOptions.wallFocusResetHotkey = hotkey.getKeys();
                         break;
                     case "custom":
                         StringBuilder commandBuilder = new StringBuilder();
@@ -308,7 +312,7 @@ public class Julti {
                 "option reload -> Reloads the current options json file\n" +
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
+                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
                 "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command\n" +
                 "hotkey remove <custom command> -> Removes a hotkey\n" +
                 "--------------------"
@@ -462,6 +466,7 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallSingleResetHotkey), () -> resetManager.doWallSingleReset());
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallLockHotkey), () -> resetManager.doWallLock());
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallPlayHotkey), () -> resetManager.doWallPlay());
+        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallFocusResetHotkey), () -> resetManager.doWallFocusReset());
 
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.resetHotkey), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.bgResetHotkey), () -> resetManager.doBGReset());

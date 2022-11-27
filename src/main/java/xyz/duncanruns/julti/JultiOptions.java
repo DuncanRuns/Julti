@@ -60,6 +60,7 @@ public final class JultiOptions {
     public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');
     public List<Integer> wallLockHotkey = Collections.singletonList(1);
     public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
+    public List<Integer> wallFocusResetHotkey = Collections.singletonList((int) 'F');
     public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
 
     // OBS

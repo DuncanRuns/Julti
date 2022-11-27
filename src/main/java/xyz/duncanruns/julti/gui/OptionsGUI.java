@@ -191,7 +191,7 @@ public class OptionsGUI extends JFrame {
         int i = 0;
         StringBuilder message = new StringBuilder("Please choose one of the following, or browse:");
         for (Path candidate : candidates) {
-            options[i++] = i + " - " + candidate.getName(candidate.getNameCount() - 1).toString();
+            options[i++] = i + " - " + candidate.getName(candidate.getNameCount() - 1);
             message.append("\n").append(i).append(" - ").append(candidate);
         }
         options[candidates.size()] = "Browse...";
@@ -260,6 +260,8 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", julti)));
         panel.add(createSpacerBox());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", julti)));
+        panel.add(createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", julti)));
 
     }
 

@@ -247,12 +247,16 @@ public class MinecraftInstance {
                 (options.useBorderless || options.useMaximize == isMaximized())
         ) return;
 
-        restore();
         if (options.useBorderless) setBorderless();
         else undoBorderless();
 
-        move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+
         if (options.useMaximize && !options.useBorderless) maximize();
+        else {
+            restore();
+            move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+        }
+
     }
 
     private static void sleep(long millis) {
@@ -283,10 +287,6 @@ public class MinecraftInstance {
         return HwndUtil.isHwndMaximized(hwnd);
     }
 
-    public void restore() {
-        HwndUtil.restoreHwnd(hwnd);
-    }
-
     public void setBorderless() {
         HwndUtil.setHwndBorderless(hwnd);
     }
@@ -295,12 +295,16 @@ public class MinecraftInstance {
         HwndUtil.undoHwndBorderless(hwnd);
     }
 
-    public void move(int x, int y, int w, int h) {
-        HwndUtil.moveHwnd(hwnd, x, y, w, h);
-    }
-
     public void maximize() {
         HwndUtil.maximizeHwnd(hwnd);
+    }
+
+    public void restore() {
+        HwndUtil.restoreHwnd(hwnd);
+    }
+
+    public void move(int x, int y, int w, int h) {
+        HwndUtil.moveHwnd(hwnd, x, y, w, h);
     }
 
     public void squish(float squish) {

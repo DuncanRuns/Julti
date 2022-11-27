@@ -42,6 +42,10 @@ public abstract class ResetManager {
         return false;
     }
 
+    public boolean doWallFocusReset() {
+        return false;
+    }
+
     public boolean doWallPlay() {
         return false;
     }
