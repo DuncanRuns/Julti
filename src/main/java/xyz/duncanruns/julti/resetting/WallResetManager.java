@@ -53,7 +53,7 @@ public class WallResetManager extends ResetManager {
             AffinityUtil.setAffinities(instances, lockedInstances);
         if (options.wallResetAllAfterPlaying) {
             julti.focusWall();
-            instances.forEach(MinecraftInstance::reset);
+            instances.forEach(instance -> instance.reset(instances.size() == 1));
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
             if (options.useAffinity)
@@ -81,7 +81,7 @@ public class WallResetManager extends ResetManager {
     private boolean resetInstance(MinecraftInstance instance, boolean willBeOnWall) {
         lockedInstances.remove(instance);
         if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
-            instance.reset();
+            instance.reset(instanceManager.getInstances().size() == 1);
             if (JultiOptions.getInstance().useAffinity) {
                 if (willBeOnWall) AffinityUtil.setAffinity(instance, AffinityUtil.highBitMask);
                 else AffinityUtil.setAffinity(instance, AffinityUtil.lowBitMask);

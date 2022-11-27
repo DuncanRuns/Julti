@@ -46,9 +46,12 @@ public final class JultiOptions {
     public int wallDarkenLevel = 25;
 
     // Window
+    public boolean letJultiMoveWindows = true;
     public boolean useBorderless = false;
+    public boolean useMaximize = false;
     public int[] windowPos = MonitorUtil.getPrimaryMonitor().position;
     public int[] windowSize = MonitorUtil.getPrimaryMonitor().size;
+    public float wideResetSquish = 1f;
 
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList((int) 'U');

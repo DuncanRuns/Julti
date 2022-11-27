@@ -129,8 +129,16 @@ public final class HwndUtil {
         setHwndStyle(hwnd, 382664704);
     }
 
-    public static void showHwnd(Pointer hwnd) {
+    public static void maximizeHwnd(Pointer hwnd) {
         User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
+    }
+
+    public static void showHwnd(Pointer hwnd) {
+        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOW);
+    }
+
+    public static void restoreHwnd(Pointer hwnd) {
+        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_NORMAL);
     }
 
     public static void setHwndTitle(Pointer hwnd, String title) {
@@ -234,6 +242,16 @@ public final class HwndUtil {
 
     public static boolean isHwndMinimized(Pointer hwnd) {
         return User32.INSTANCE.IsIconic(hwnd);
+    }
+
+    public static boolean isHwndMaximized(Pointer hwnd) {
+        return User32.INSTANCE.IsZoomed(hwnd);
+    }
+
+    public static Rectangle getHwndRectangle(Pointer hwnd) {
+        WinDef.RECT rect = new WinDef.RECT();
+        User32.INSTANCE.GetWindowRect(new WinDef.HWND(hwnd), rect);
+        return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
     }
 
     /**

@@ -36,6 +36,12 @@ public class ControlPanel extends JPanel {
                 instance.closeWindow();
             }
         }));
+        add(GUIUtil.getButtonWithMethod(new JButton("Reset Instance Positions"), actionEvent -> {
+            Thread.currentThread().setName("julti-gui");
+            for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
+                instance.ensureWindowState();
+            }
+        }));
         add(GUIUtil.getButtonWithMethod(new JButton("Options..."), actionEvent -> {
             if (optionsGUI == null || optionsGUI.isClosed()) {
                 optionsGUI = new OptionsGUI(julti, gui);

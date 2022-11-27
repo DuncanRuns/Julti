@@ -20,11 +20,12 @@ public class MultiResetManager extends ResetManager {
         }
 
         // Get selected instance and next instance, return if no selected instance,
-        // if there is only a single instance, reset it and return.
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
             return false;
         }
+
+        // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
             selectedInstance.reset(true);
             return true;
@@ -36,7 +37,7 @@ public class MultiResetManager extends ResetManager {
         nextInstance.activate();
         julti.switchScene(nextInstInd + 1);
 
-        selectedInstance.reset();
+        selectedInstance.reset(false);
 
         super.doReset();
         return true;
@@ -49,9 +50,10 @@ public class MultiResetManager extends ResetManager {
         if (selectedInstance == null) {
             return false;
         }
-        for (MinecraftInstance instance : instanceManager.getInstances()) {
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        for (MinecraftInstance instance : instances) {
             if (!instance.equals(selectedInstance)) {
-                instance.reset();
+                instance.reset(false);
             }
         }
         return true;

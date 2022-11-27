@@ -216,16 +216,16 @@ public class Julti {
             final String input = args[0];
             if ("all".equals(input)) {
                 for (MinecraftInstance instance : instances) {
-                    instance.reset();
+                    instance.reset(instances.size() == 1);
                 }
             } else if ("random".equals(input)) {
-                instances.get(new Random().nextInt(instances.size())).reset();
+                instances.get(new Random().nextInt(instances.size())).reset(instances.size() == 1);
             } else if ("unselected".equals(input)) {
                 resetManager.doBGReset();
             } else {
                 int index = indexFromArg(input);
                 if (index != -1)
-                    instances.get(index).reset();
+                    instances.get(index).reset(instances.size() == 1);
             }
         }
     }
@@ -575,12 +575,7 @@ public class Julti {
     }
 
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
-        JultiOptions options = JultiOptions.getInstance();
-        if (options.useBorderless) {
-            minecraftInstance.borderlessAndMove(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
-        } else if (minecraftInstance.isBorderless()) {
-            minecraftInstance.undoBorderless();
-        }
+        minecraftInstance.ensureWindowState();
         AffinityUtil.setAffinity(minecraftInstance, AffinityUtil.highBitMask);
     }
 
@@ -598,11 +593,9 @@ public class Julti {
         if (selectedInstance == null) {
             if (isWallActive()) {
                 currentSceneId = "W";
-                System.out.println(currentSceneId);
             }
         } else {
             currentSceneId = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
-            System.out.println(currentSceneId);
         }
     }
 
@@ -628,7 +621,7 @@ public class Julti {
     }
 
     public void reloadInstancePositions() {
-        instanceManager.getInstances().forEach(this::onInstanceLoad);
+        instanceManager.getInstances().forEach(MinecraftInstance::ensureWindowState);
     }
 
     public void stop() {

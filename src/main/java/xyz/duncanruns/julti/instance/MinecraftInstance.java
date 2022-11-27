@@ -9,6 +9,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -219,6 +220,7 @@ public class MinecraftInstance {
 
     synchronized public void activate() {
         if (hasWindow()) {
+            ensureWindowState();
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
@@ -229,6 +231,28 @@ public class MinecraftInstance {
         } else {
             log(Level.WARN, "Could not activate instance " + getName() + " (not opened)");
         }
+    }
+
+    public void ensureWindowState() {
+        JultiOptions options = JultiOptions.getInstance();
+
+        // "Do nothing" conditions
+        if (!options.letJultiMoveWindows) return;
+        Rectangle rectangle = getWindowRectangle();
+        if (options.windowPos[0] == rectangle.x &&
+                options.windowPos[1] == rectangle.y &&
+                options.windowSize[0] == rectangle.width &&
+                options.windowSize[1] == rectangle.height &&
+                options.useBorderless == isBorderless() &&
+                (options.useBorderless || options.useMaximize == isMaximized())
+        ) return;
+
+        restore();
+        if (options.useBorderless) setBorderless();
+        else undoBorderless();
+
+        move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+        if (options.useMaximize && !options.useBorderless) maximize();
     }
 
     private static void sleep(long millis) {
@@ -245,6 +269,51 @@ public class MinecraftInstance {
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
+    }
+
+    public Rectangle getWindowRectangle() {
+        return HwndUtil.getHwndRectangle(hwnd);
+    }
+
+    public boolean isBorderless() {
+        return HwndUtil.isHwndBorderless(hwnd);
+    }
+
+    public boolean isMaximized() {
+        return HwndUtil.isHwndMaximized(hwnd);
+    }
+
+    public void restore() {
+        HwndUtil.restoreHwnd(hwnd);
+    }
+
+    public void setBorderless() {
+        HwndUtil.setHwndBorderless(hwnd);
+    }
+
+    public void undoBorderless() {
+        HwndUtil.undoHwndBorderless(hwnd);
+    }
+
+    public void move(int x, int y, int w, int h) {
+        HwndUtil.moveHwnd(hwnd, x, y, w, h);
+    }
+
+    public void maximize() {
+        HwndUtil.maximizeHwnd(hwnd);
+    }
+
+    public void squish(float squish) {
+        if (squish == 1f) return;
+
+        JultiOptions options = JultiOptions.getInstance();
+        Rectangle resultRectangle = new Rectangle(options.windowPos[0], options.windowPos[1], options.windowSize[0], (int) (options.windowSize[1] / squish));
+        if (options.useMaximize && isMaximized()) {
+            restore();
+        } else {
+            if (getWindowRectangle().equals(resultRectangle)) return;
+        }
+        move(resultRectangle.x, resultRectangle.y, resultRectangle.width, resultRectangle.height);
     }
 
     public ScreenCapUtil.ImageInfo captureScreen() {
@@ -280,17 +349,19 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_F3);
     }
 
-    synchronized public void reset() {
-        reset(false);
-    }
-
     synchronized public void reset(boolean singleInstance) {
         // If no window, do nothing
-        if (!hasWindow()) log(Level.INFO, "Could not reset instance " + getName() + " (not opened)");
+        if (!hasWindow()) {
+            log(Level.INFO, "Could not reset instance " + getName() + " (not opened)");
+            return;
+        }
+
+        JultiOptions options = JultiOptions.getInstance();
+
+        if (!singleInstance && options.letJultiMoveWindows) squish(options.wideResetSquish);
 
         // Press f3 before reset to potentially get rid of pie chart
         pressF3();
-
 
         switch (getResetType()) {
             case NEW_ATUM:
@@ -307,7 +378,6 @@ public class MinecraftInstance {
         worldLoaded = false;
         setInPreview(false);
         log(Level.INFO, "Reset instance " + getName());
-
     }
 
     private void runNoAtumLeave() {
@@ -342,24 +412,6 @@ public class MinecraftInstance {
             }
         }
         return resetType;
-    }
-
-    public void borderlessAndMove(int x, int y, int w, int h) {
-        HwndUtil.setHwndBorderless(hwnd);
-        move(x, y, w, h);
-    }
-
-    public void move(int x, int y, int w, int h) {
-        HwndUtil.moveHwnd(hwnd, x, y, w, h);
-    }
-
-    public void undoBorderless() {
-        HwndUtil.undoHwndBorderless(hwnd);
-        maximize();
-    }
-
-    public void maximize() {
-        HwndUtil.showHwnd(hwnd);
     }
 
     synchronized private void setInPreview(boolean inPreview) {
@@ -504,10 +556,6 @@ public class MinecraftInstance {
 
     synchronized public boolean isPreviewLoaded() {
         return inPreview;
-    }
-
-    public boolean isBorderless() {
-        return HwndUtil.isHwndBorderless(hwnd);
     }
 
     synchronized public boolean hasPreviewEverStarted() {

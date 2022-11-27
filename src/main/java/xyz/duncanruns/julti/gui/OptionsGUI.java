@@ -449,37 +449,52 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
         panel.add(createSpacerBox());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reloadAndSwitch(panelNum))));
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless", b -> reloadAndSwitch(panelNum))));
+        if (!JultiOptions.getInstance().letJultiMoveWindows) return;
         panel.add(createSpacerBox());
 
-        if (JultiOptions.getInstance().useBorderless) {
-            WindowOptionComponent windowOptions = new WindowOptionComponent();
-            panel.add(windowOptions);
-            panel.add(createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
+        panel.add(createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize", "useMaximize")));
+        panel.add(createSpacerBox());
+
+        WindowOptionComponent windowOptions = new WindowOptionComponent();
+        panel.add(windowOptions);
+        panel.add(createSpacerBox());
+
+        OptionsGUI thisGUI = this;
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Choose Monitor"), actionEvent -> {
+            MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
+            StringBuilder monitorOptionsText = new StringBuilder();
+            Object[] buttons = new Object[monitors.length];
+            int i = 0;
+            for (MonitorUtil.Monitor monitor : monitors) {
+                buttons[i] = String.valueOf(i + 1);
+                monitorOptionsText.append("\n#").append(++i).append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
+            }
+
+            int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
+            if (ans == -1) return;
+            JultiOptions options = JultiOptions.getInstance();
+            MonitorUtil.Monitor monitor = monitors[ans];
+            options.windowPos = monitor.position;
+            options.windowSize = monitor.size;
+            windowOptions.reload();
+            revalidate();
+        })));
+        panel.add(createSpacerBox());
 
 
-            OptionsGUI thisGUI = this;
-            panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Choose Monitor"), actionEvent -> {
-                MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
-                StringBuilder monitorOptionsText = new StringBuilder();
-                Object[] buttons = new Object[monitors.length];
-                int i = 0;
-                for (MonitorUtil.Monitor monitor : monitors) {
-                    buttons[i] = String.valueOf(i + 1);
-                    monitorOptionsText.append("\n#").append(++i).append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
-                }
-
-                int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", -1, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
-                if (ans == -1) return;
-                JultiOptions options = JultiOptions.getInstance();
-                MonitorUtil.Monitor monitor = monitors[ans];
-                options.windowPos = monitor.position;
-                options.windowSize = monitor.size;
-                windowOptions.reload();
-                revalidate();
-            })));
-        }
+        final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
+        panel.add(GUIUtil.leftJustify(squishLabel));
+        JSlider squishSlider = new JSlider(0, 1000, 8000, (int) (JultiOptions.getInstance().wideResetSquish * 1000));
+        squishSlider.addChangeListener(e -> {
+            JultiOptions.getInstance().wideResetSquish = squishSlider.getValue() / 1000f;
+            squishLabel.setText("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
+        });
+        panel.add(GUIUtil.leftJustify(squishSlider));
     }
 
     public boolean isClosed() {

@@ -53,11 +53,15 @@ public interface User32 extends StdCallLibrary {
 
     boolean GetClientRect(HWND hWnd, RECT rect);
 
+    boolean GetWindowRect(HWND hWnd, RECT rect);
+
     HDC GetDC(HWND hWnd);
 
     int ReleaseDC(HWND hWnd, HDC hDC);
 
     int FillRect(HDC hdc, RECT rect, HBRUSH hbrush);
+
+    boolean IsZoomed(Pointer hWnd);
 
     interface WNDENUMPROC extends StdCallCallback {
         boolean callback(Pointer hWnd, Pointer arg);
