@@ -17,10 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -365,8 +363,21 @@ public class MinecraftInstance {
         if (!singleInstance && options.letJultiMoveWindows) squish(options.wideResetSquish);
 
         // Press f3 before reset to potentially get rid of pie chart
-        pressF3();
+        if (worldLoaded) {
+            pressF3();
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Thread.currentThread().setName("reset-finisher");
+                    finishReset();
+                }
+            }, 100);
+        } else {
+            finishReset();
+        }
+    }
 
+    private void finishReset() {
         switch (getResetType()) {
             case NEW_ATUM:
                 KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
