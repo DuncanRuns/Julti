@@ -276,32 +276,38 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_F3, true);
     }
 
+    private void pressF3() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_F3);
+    }
+
     synchronized public void reset() {
         reset(false);
     }
 
     synchronized public void reset(boolean singleInstance) {
         // If no window, do nothing
-        if (hasWindow()) {
-            switch (getResetType()) {
+        if (!hasWindow()) log(Level.INFO, "Could not reset instance " + getName() + " (not opened)");
 
-                case NEW_ATUM:
-                    KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
-                case HAS_PREVIEW:
-                    if (inPreview) {
-                        KeyboardUtil.sendKeyToHwnd(hwnd, getLeavePreviewKey());
-                    } else {
-                        runNoAtumLeave();
-                    }
-                case EXIT_WORLD:
+        // Press f3 before reset to potentially get rid of pie chart
+        pressF3();
+
+
+        switch (getResetType()) {
+            case NEW_ATUM:
+                KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
+            case HAS_PREVIEW:
+                if (inPreview) {
+                    KeyboardUtil.sendKeyToHwnd(hwnd, getLeavePreviewKey());
+                } else {
                     runNoAtumLeave();
-            }
-            worldLoaded = false;
-            setInPreview(false);
-            log(Level.INFO, "Reset instance " + getName());
-        } else {
-            log(Level.INFO, "Could not reset instance " + getName() + " (not opened)");
+                }
+            case EXIT_WORLD:
+                runNoAtumLeave();
         }
+        worldLoaded = false;
+        setInPreview(false);
+        log(Level.INFO, "Reset instance " + getName());
+
     }
 
     private void runNoAtumLeave() {
