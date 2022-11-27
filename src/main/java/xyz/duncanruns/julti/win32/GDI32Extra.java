@@ -14,7 +14,7 @@ import com.sun.jna.win32.W32APIOptions;
  * <p>
  * <a href="https://github.com/Lxnus/ScreenCapture4J/blob/master/screencapture4j/GDI32Extra.java">(Source)</a>
  *
- * @Author Lxnus
+ * @Author Lxnus & DuncanRuns
  */
 public interface GDI32Extra extends GDI32 {
 
