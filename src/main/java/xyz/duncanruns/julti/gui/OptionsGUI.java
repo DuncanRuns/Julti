@@ -152,7 +152,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {
-        List<String> appNames = Arrays.asList("multimc.exe".split(","));
+        List<String> appNames = Arrays.asList("multimc.exe,prismlauncher.exe".split(","));
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
         possibleLocations.add(userHome.resolve("Desktop"));
