@@ -26,12 +26,12 @@ public class WallResetManager extends ResetManager {
             return false;
         }
 
-        // Get selected instance and next instance, return if no selected instance,
-        // if there is only a single instance, reset it and return.
+        // Get selected instance, return if no selected instance
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
             return false;
         }
+        // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
             selectedInstance.reset(true);
             if (JultiOptions.getInstance().useAffinity)
@@ -214,10 +214,9 @@ public class WallResetManager extends ResetManager {
     }
 
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
-        // If using One At A Time, just reset all instances
         JultiOptions options = JultiOptions.getInstance();
-        if (options.useAffinity)
-            AffinityUtil.setAffinities(instances, lockedInstances);
+
+        // Reset all after playing mode
         if (options.wallResetAllAfterPlaying) {
             julti.focusWall();
             instances.forEach(instance -> instance.reset(instances.size() == 1));
@@ -229,15 +228,19 @@ public class WallResetManager extends ResetManager {
             return;
         }
 
+        // Reset and unlock
         resetInstance(selectedInstance, lockedInstances.isEmpty());
         lockedInstances.remove(selectedInstance);
-        if (!options.wallBypass || lockedInstances.isEmpty()) {
+
+
+        MinecraftInstance nextInstance = getNextPlayableLockedInstance();
+        if (!options.wallBypass || nextInstance == null) {
+            // No more instances to play
             julti.focusWall();
             julti.switchToWallScene();
             if (options.useAffinity)
                 AffinityUtil.setAffinities(instances, lockedInstances);
         } else {
-            MinecraftInstance nextInstance = lockedInstances.iterator().next();
             lockedInstances.remove(nextInstance);
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
             AffinityUtil.setPlayingAffinities(nextInstance, instances);
@@ -256,5 +259,18 @@ public class WallResetManager extends ResetManager {
             return true;
         }
         return false;
+    }
+
+    @Nullable
+    private MinecraftInstance getNextPlayableLockedInstance() {
+        // If empty return null
+        if (lockedInstances.isEmpty()) return null;
+
+        // Return any loaded instances
+        for (MinecraftInstance instance : lockedInstances) {
+            if (instance.isWorldLoaded()) return instance;
+        }
+        // Just return any instance otherwise
+        return lockedInstances.iterator().next();
     }
 }

@@ -19,7 +19,7 @@ public class MultiResetManager extends ResetManager {
             return false;
         }
 
-        // Get selected instance and next instance, return if no selected instance,
+        // Get selected instance, return if no selected instance,
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
             return false;
