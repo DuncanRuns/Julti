@@ -261,11 +261,13 @@ public class Julti {
         } else {
             final String input = args[0];
             if ("random".equals(input)) {
-                instances.get(new Random().nextInt(instances.size())).activate();
+                MinecraftInstance toActivate = instances.get(new Random().nextInt(instances.size()));
+                toActivate.activate(instances.indexOf(toActivate) + 1);
             } else {
                 int index = indexFromArg(input);
                 if (index != -1) {
-                    instances.get(index).activate();
+                    MinecraftInstance toActivate = instances.get(index);
+                    toActivate.activate(instances.indexOf(toActivate) + 1);
                     switchScene(index + 1);
                 }
             }

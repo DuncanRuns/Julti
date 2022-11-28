@@ -49,6 +49,7 @@ public class WallResetManager extends ResetManager {
     @Override
     public boolean doBGReset() {
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
+        if (selectedInstance == null) return false;
         resetNonLockedExcept(selectedInstance);
         return true;
     }
@@ -106,7 +107,7 @@ public class WallResetManager extends ResetManager {
     }
 
     private void playInstanceFromWall(MinecraftInstance instance) {
-        instance.activate();
+        instance.activate(instanceManager.getInstances().indexOf(instance) + 1);
         AffinityUtil.setPlayingAffinities(instance, instanceManager.getInstances());
         julti.switchScene(instance);
         lockedInstances.remove(instance);
@@ -238,7 +239,7 @@ public class WallResetManager extends ResetManager {
         } else {
             MinecraftInstance nextInstance = lockedInstances.iterator().next();
             lockedInstances.remove(nextInstance);
-            nextInstance.activate();
+            nextInstance.activate(instances.indexOf(nextInstance) + 1);
             AffinityUtil.setPlayingAffinities(nextInstance, instances);
             julti.switchScene(nextInstance);
         }

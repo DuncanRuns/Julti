@@ -43,7 +43,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == 1) {
             Thread.currentThread().setName("julti-gui");
-            instance.activate();
+            instance.activate(julti.getInstanceManager().getInstances().indexOf(instance) + 1);
         }
     }
 

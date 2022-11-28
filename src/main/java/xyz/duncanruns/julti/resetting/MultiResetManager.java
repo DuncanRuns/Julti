@@ -34,7 +34,7 @@ public class MultiResetManager extends ResetManager {
         int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
         MinecraftInstance nextInstance = instances.get(nextInstInd);
 
-        nextInstance.activate();
+        nextInstance.activate(instances.indexOf(nextInstance) + 1);
         julti.switchScene(nextInstInd + 1);
 
         selectedInstance.reset(false);

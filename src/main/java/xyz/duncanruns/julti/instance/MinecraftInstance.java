@@ -93,12 +93,6 @@ public class MinecraftInstance {
         return titleInfo.getOriginalTitle();
     }
 
-    public void setWindowTitle(String title) {
-        if (hasWindow()) {
-            HwndUtil.setHwndTitle(hwnd, title);
-        }
-    }
-
     private Integer getCreateWorldKey() {
         if (createWorldKey == null) {
             createWorldKey = getKey("key_Create New World");
@@ -216,7 +210,10 @@ public class MinecraftInstance {
         return "Instance \"" + getName() + "\"";
     }
 
-    synchronized public void activate() {
+    /**
+     * @param instanceNum -1 for not updating title, otherwise the real instance number (index + 1).
+     */
+    synchronized public void activate(int instanceNum) {
         if (hasWindow()) {
             ensureWindowState();
             HwndUtil.showHwnd(hwnd);
@@ -225,6 +222,7 @@ public class MinecraftInstance {
                 sleep(50);// Magic number; without this, the mouse does not get locked into MC
                 pressEsc();
             }
+            if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
             log(Level.INFO, "Activated instance " + getName());
         } else {
             log(Level.WARN, "Could not activate instance " + getName() + " (not opened)");
@@ -266,6 +264,12 @@ public class MinecraftInstance {
 
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
+    }
+
+    public void setWindowTitle(String title) {
+        if (hasWindow()) {
+            HwndUtil.setHwndTitle(hwnd, title);
+        }
     }
 
     public static void log(Level level, String message) {
