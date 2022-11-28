@@ -7,6 +7,8 @@ public interface Win32Con {
     int VK_RBUTTON = 2;
     int VK_CANCEL = 3;
     int VK_MBUTTON = 4;
+    int VK_XBUTTON1 = 5;
+    int VK_XBUTTON2 = 6;
     int VK_BACK = 8;
     int VK_TAB = 9;
     int VK_CLEAR = 12;

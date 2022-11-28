@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.*;
 import com.sun.jna.platform.win32.WinUser.INPUT;
 import com.sun.jna.ptr.IntByReference;
@@ -63,8 +64,18 @@ public interface User32 extends StdCallLibrary {
 
     boolean IsZoomed(Pointer hWnd);
 
+    BOOL GetCursorInfo(CURSORINFO pci);
+
     interface WNDENUMPROC extends StdCallCallback {
         boolean callback(Pointer hWnd, Pointer arg);
+    }
+
+    @Structure.FieldOrder({"cbSize", "flags", "hCursor", "ptScreenPos"})
+    public class CURSORINFO extends Structure {
+        public DWORD cbSize;
+        public DWORD flags;
+        public HCURSOR hCursor;
+        public POINT ptScreenPos;
     }
 
     // This may somehow cause a system exit, removed for safety.

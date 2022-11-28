@@ -219,8 +219,16 @@ public class MinecraftInstance {
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
-                sleep(50);// Magic number; without this, the mouse does not get locked into MC
-                pressEsc();
+                new Thread(() -> {
+                    sleep(70);// Magic number; without this, the mouse does not get locked into MC
+                    pressEsc();
+                    sleep(70);
+                    while (MouseUtil.isMouseVisible() && isActive()) {
+                        MouseUtil.keyDown(Win32Con.VK_XBUTTON1);
+                        MouseUtil.keyUp(Win32Con.VK_XBUTTON1);
+                        sleep(70);
+                    }
+                }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
             log(Level.INFO, "Activated instance " + getName());
@@ -264,6 +272,10 @@ public class MinecraftInstance {
 
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
+    }
+
+    private boolean isActive() {
+        return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
     }
 
     public void setWindowTitle(String title) {
