@@ -364,7 +364,7 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
 
-        if (!singleInstance && options.letJultiMoveWindows) squish(options.wideResetSquish);
+        if (!singleInstance && options.letJultiMoveWindows) new Thread(() -> squish(options.wideResetSquish)).start();
 
         // Press f3 before reset to potentially get rid of pie chart
         if (worldLoaded) {
