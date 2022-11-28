@@ -215,7 +215,7 @@ public class MinecraftInstance {
      */
     synchronized public void activate(int instanceNum) {
         if (hasWindow()) {
-            ensureWindowState();
+            new Thread(this::ensureWindowState).start();
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
