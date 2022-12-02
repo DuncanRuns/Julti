@@ -122,7 +122,6 @@ public final class HotkeyUtil {
     public static class Hotkey {
 
         protected final List<Integer> keys;
-
         private boolean hasBeenPressed;
 
         // Should only be used in extended classes
@@ -223,6 +222,25 @@ public final class HotkeyUtil {
                 out.append(KeyboardUtil.getKeyName(vKey));
             }
             return out.toString();
+        }
+    }
+
+    /**
+     * Much like the regular Hotkey class, except ignores extra pressed modifier keys.
+     */
+    public static class HotkeyIM extends Hotkey {
+
+        public HotkeyIM(List<Integer> keys) {
+            super(keys);
+        }
+
+        @Override
+        public boolean isPressed() {
+            // If any keys belonging to the hotkey are not pressed, return false
+            for (int vKey : keys) {
+                if (!KeyboardUtil.isPressed(vKey)) return false;
+            }
+            return true;
         }
     }
 }

@@ -6,7 +6,6 @@ import xyz.duncanruns.julti.JultiOptions;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
 import java.util.function.Consumer;
 
 public final class GUIUtil {
@@ -54,7 +53,7 @@ public final class GUIUtil {
         return b;
     }
 
-    public static JButton createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
+    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
         button.addActionListener(new AbstractAction() {
@@ -68,7 +67,7 @@ public final class GUIUtil {
                 button.setText(hotkeyPrefix + "...");
             }
         });
-        button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
+        button.setText(hotkeyPrefix + JultiOptions.getInstance().getHotkeyFromSetting(optionName));
         return button;
     }
 }

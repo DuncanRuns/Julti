@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
 import xyz.duncanruns.julti.util.FileUtil;
+import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
@@ -17,7 +18,10 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
@@ -61,7 +65,14 @@ public final class JultiOptions {
     public List<Integer> wallLockHotkey = Collections.singletonList(1);
     public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
     public List<Integer> wallFocusResetHotkey = Collections.singletonList((int) 'F');
-    public HashMap<String, List<Integer>> extraHotkeys = new HashMap<>();
+
+    public boolean resetHotkeyIM = false;
+    public boolean bgResetHotkeyIM = false;
+    public boolean wallResetHotkeyIM = false;
+    public boolean wallSingleResetHotkeyIM = false;
+    public boolean wallLockHotkeyIM = false;
+    public boolean wallPlayHotkeyIM = false;
+    public boolean wallFocusResetHotkeyIM = false;
 
     // OBS
     public boolean obsPressHotkeys = false;
@@ -259,6 +270,12 @@ public final class JultiOptions {
             }
         }
         return null;
+    }
+
+    public HotkeyUtil.Hotkey getHotkeyFromSetting(String name) {
+        List<Integer> keys = (List<Integer>) getValue(name);
+        boolean ignoreModifiers = (Boolean) getValue(name + "IM");
+        return ignoreModifiers ? new HotkeyUtil.HotkeyIM(keys) : new HotkeyUtil.Hotkey(keys);
     }
 
     @Override

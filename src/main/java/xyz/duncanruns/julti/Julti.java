@@ -124,7 +124,7 @@ public class Julti {
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "custom", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
@@ -137,9 +137,6 @@ public class Julti {
                     "Focus Reset (Wall): " + HotkeyUtil.formatKeys(options.wallFocusResetHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
                     "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
-            for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
-                out.append("\nCommand \"").append(entry.getKey()).append("\": ").append(HotkeyUtil.formatKeys(entry.getValue()));
-            }
             log(Level.INFO, out.toString());
         } else if (setHotkeyArgs.contains(args[0])) {
             log(Level.INFO, "Waiting 1 second to not pick up accidental keypress...");
@@ -170,31 +167,11 @@ public class Julti {
                     case "wallfocusreset":
                         jultiOptions.wallFocusResetHotkey = hotkey.getKeys();
                         break;
-                    case "custom":
-                        StringBuilder commandBuilder = new StringBuilder();
-                        for (String a : withoutFirst(args)) {
-                            commandBuilder.append(a).append(" ");
-                        }
-                        String command = commandBuilder.toString().trim();
-                        jultiOptions.extraHotkeys.put(command, hotkey.getKeys());
-                        break;
                 }
                 log(Level.INFO, "Hotkey Set.");
                 hotkey.wasPressed();
                 setupHotkeys();
             });
-        } else if ("remove".equals(args[0])) {
-            StringBuilder commandBuilder = new StringBuilder();
-            for (String a : withoutFirst(args)) {
-                commandBuilder.append(a).append(" ");
-            }
-            String command = commandBuilder.toString().trim();
-            if (options.extraHotkeys.remove(command) == null) {
-                log(Level.ERROR, "Command \"" + command + "\" is not bound to any key.");
-            } else {
-                log(Level.INFO, "Removed binding for command \"" + command + "\".");
-            }
-            setupHotkeys();
         } else {
             log(Level.ERROR, "Unknown arg \"" + args[0] + "\".");
         }
@@ -315,8 +292,6 @@ public class Julti {
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
                 "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
-                "hotkey custom <custom command> -> Bind a hotkey to a command. After running the command, press the wanted hotkey for the chosen command\n" +
-                "hotkey remove <custom command> -> Removes a hotkey\n" +
                 "--------------------"
         );
     }
@@ -464,22 +439,14 @@ public class Julti {
 
         JultiOptions options = JultiOptions.getInstance();
 
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallResetHotkey), () -> resetManager.doWallFullReset());
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallSingleResetHotkey), () -> resetManager.doWallSingleReset());
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallLockHotkey), () -> resetManager.doWallLock());
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallPlayHotkey), () -> resetManager.doWallPlay());
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.wallFocusResetHotkey), () -> resetManager.doWallFocusReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallResetHotkey"), () -> resetManager.doWallFullReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallSingleResetHotkey"), () -> resetManager.doWallSingleReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallLockHotkey"), () -> resetManager.doWallLock());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> resetManager.doWallPlay());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> resetManager.doWallFocusReset());
 
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.resetHotkey), () -> resetManager.doReset());
-        HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(options.bgResetHotkey), () -> resetManager.doBGReset());
-
-        for (Map.Entry<String, List<Integer>> entry : options.extraHotkeys.entrySet()) {
-            HotkeyUtil.addGlobalHotkey(new HotkeyUtil.Hotkey(entry.getValue()), () -> {
-                if (isWallActive() || instanceManager.getSelectedInstance() != null) {
-                    this.runCommand(entry.getKey());
-                }
-            });
-        }
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
 
         HotkeyUtil.startGlobalHotkeyChecker();
     }
@@ -522,37 +489,6 @@ public class Julti {
         }
     }
 
-    public boolean isWallActive() {
-        if (JultiOptions.getInstance().useJultiWallWindow)
-            return wallWindow != null && wallWindow.isActive();
-        Pointer currentHwnd = HwndUtil.getCurrentHwnd();
-        if (currentHwnd != null && HwndUtil.hwndExists(currentHwnd)) {
-            String currentWindowTitle = HwndUtil.getHwndTitle(currentHwnd).toLowerCase();
-            return currentWindowTitle.contains("projector (scene)") && currentWindowTitle.contains("wall");
-        }
-        return false;
-    }
-
-    public void runCommand(final String commands) {
-        for (String command : commands.split(";")) {
-            command = command.trim();
-            String[] args = command.split(" ");
-            if (args.length == 0 || "".equals(args[0].trim())) {
-                return;
-            }
-            Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
-            if (commandConsumer == null) {
-                log(Level.ERROR, "Unknown Command \"" + command + "\"");
-            } else {
-                try {
-                    commandConsumer.accept(withoutFirst(args));
-                } catch (Exception e) {
-                    log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
-                }
-            }
-        }
-    }
-
     private void tick() {
         JultiOptions options = JultiOptions.getInstance();
         long current = System.currentTimeMillis();
@@ -575,10 +511,6 @@ public class Julti {
             lastStateOutput = current;
             tryOutputState();
         }
-    }
-
-    private static String[] withoutFirst(String[] args) {
-        return Arrays.copyOfRange(args, 1, args.length);
     }
 
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
@@ -621,6 +553,41 @@ public class Julti {
 
     public void startWall() {
         wallWindow = new WallWindow(this);
+    }
+
+    public boolean isWallActive() {
+        if (JultiOptions.getInstance().useJultiWallWindow)
+            return wallWindow != null && wallWindow.isActive();
+        Pointer currentHwnd = HwndUtil.getCurrentHwnd();
+        if (currentHwnd != null && HwndUtil.hwndExists(currentHwnd)) {
+            String currentWindowTitle = HwndUtil.getHwndTitle(currentHwnd).toLowerCase();
+            return currentWindowTitle.contains("projector (scene)") && currentWindowTitle.contains("wall");
+        }
+        return false;
+    }
+
+    public void runCommand(final String commands) {
+        for (String command : commands.split(";")) {
+            command = command.trim();
+            String[] args = command.split(" ");
+            if (args.length == 0 || "".equals(args[0].trim())) {
+                return;
+            }
+            Consumer<String[]> commandConsumer = commandMap.getOrDefault(args[0], null);
+            if (commandConsumer == null) {
+                log(Level.ERROR, "Unknown Command \"" + command + "\"");
+            } else {
+                try {
+                    commandConsumer.accept(withoutFirst(args));
+                } catch (Exception e) {
+                    log(Level.ERROR, "Error while running command \"" + command + "\":\n" + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private static String[] withoutFirst(String[] args) {
+        return Arrays.copyOfRange(args, 1, args.length);
     }
 
     public ResetManager getResetManager() {
