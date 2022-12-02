@@ -48,6 +48,7 @@ obs = obslua
 first_scene = ""
 wall_scene  = ""
 first_lock  = ""
+second_obs_scene  = ""
 
 -- Variables --
 
@@ -137,8 +138,6 @@ function script_properties()
     end
     obs.source_list_release(scenes)
 
-
-
     local p = obs.obs_properties_add_list(props, "first_lock", "First Lock Source", obs.OBS_COMBO_TYPE_EDITABLE,
         obs.OBS_COMBO_FORMAT_STRING)
     local sources = obs.obs_enum_sources()
@@ -153,6 +152,17 @@ function script_properties()
     end
     obs.source_list_release(sources)
 
+    local p = obs.obs_properties_add_list(props, "second_obs_scene", "2nd OBS Scene", obs.OBS_COMBO_TYPE_EDITABLE,
+        obs.OBS_COMBO_FORMAT_STRING)
+    local scenes = obs.obs_frontend_get_scenes()
+    if scenes ~= nil then
+        for _, scene in ipairs(scenes) do
+            local name = obs.obs_source_get_name(scene)
+            obs.obs_property_list_add_string(p, name, name)
+        end
+    end
+    obs.source_list_release(scenes)
+
     return props
 end
 
@@ -160,12 +170,14 @@ function script_update(settings)
     wall_scene = obs.obs_data_get_string(settings, "wall_scene")
     first_scene = obs.obs_data_get_string(settings, "first_scene")
     first_lock = obs.obs_data_get_string(settings, "first_lock")
+    second_obs_scene = obs.obs_data_get_string(settings, "second_obs_scene")
 end
 
 function script_load(settings)
     wall_scene = obs.obs_data_get_string(settings, "wall_scene")
     first_scene = obs.obs_data_get_string(settings, "first_scene")
     first_lock = obs.obs_data_get_string(settings, "first_lock")
+    second_obs_scene = obs.obs_data_get_string(settings, "second_obs_scene")
 
     if timers_activated then
         return
@@ -258,19 +270,23 @@ function aftersec()
     
     -- Switch to Wall Scene & Disable All Lock Icons --
 
-    if (wall_scene == "") then
+    if (second_obs_scene == "") then
         return
     end
 
-    local scene_source = obs.obs_get_source_by_name(wall_scene)
+    local scene_source = obs.obs_get_source_by_name(second_obs_scene)
     obs.obs_frontend_set_current_scene(scene_source)
     obs.obs_source_release(scene_source)
+
+    if (wall_scene == "") then
+        return
+    end
 
     if (first_lock == "") then
         return
     end
 
-    -- Should loop until finding a scene item that does not exist but checking 101 happens basically instantly anyway plus I'm lazy.
+    -- I should loop until finding a scene item that does not exist but checking 101 happens basically instantly anyway plus I'm lazy.
     local i = 0
     while true do
         i = i + 1
