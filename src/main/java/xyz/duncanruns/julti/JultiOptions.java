@@ -39,7 +39,9 @@ public final class JultiOptions {
     // Wall
     public boolean useJultiWallWindow = false;
     public boolean wallResetAllAfterPlaying = false;
+    public boolean wallLockInsteadOfPlay = true;
     public boolean wallBypass = true;
+    public boolean returnToWallIfNoneLoaded = true;
     public boolean pauseRenderingDuringPlay = false;
     public boolean autoCalcWallSize = true;
     public int overrideRowsAmount = 3;

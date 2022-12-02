@@ -107,6 +107,10 @@ public class WallResetManager extends ResetManager {
     }
 
     private void playInstanceFromWall(MinecraftInstance instance) {
+        if (JultiOptions.getInstance().wallLockInsteadOfPlay && !instance.isWorldLoaded()) {
+            return;
+        }
+
         instance.activate(instanceManager.getInstances().indexOf(instance) + 1);
         AffinityUtil.setPlayingAffinities(instance, instanceManager.getInstances());
         julti.switchScene(instance);
@@ -233,7 +237,7 @@ public class WallResetManager extends ResetManager {
         lockedInstances.remove(selectedInstance);
 
 
-        MinecraftInstance nextInstance = getNextPlayableLockedInstance();
+        MinecraftInstance nextInstance = getNextPlayableLockedInstance(options.returnToWallIfNoneLoaded);
         if (!options.wallBypass || nextInstance == null) {
             // No more instances to play
             julti.focusWall();
@@ -262,7 +266,7 @@ public class WallResetManager extends ResetManager {
     }
 
     @Nullable
-    private MinecraftInstance getNextPlayableLockedInstance() {
+    private MinecraftInstance getNextPlayableLockedInstance(boolean onlyConsiderLoaded) {
         // If empty return null
         if (lockedInstances.isEmpty()) return null;
 
@@ -270,6 +274,11 @@ public class WallResetManager extends ResetManager {
         for (MinecraftInstance instance : lockedInstances) {
             if (instance.isWorldLoaded()) return instance;
         }
+
+        // Return null if only considering loaded instances
+        if (onlyConsiderLoaded)
+            return null;
+
         // Just return any instance otherwise
         return lockedInstances.iterator().next();
     }

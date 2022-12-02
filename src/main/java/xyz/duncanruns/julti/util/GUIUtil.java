@@ -77,4 +77,8 @@ public final class GUIUtil {
     public static JCheckBox createCheckBoxFromOption(String label, String optionName) {
         return createCheckBoxFromOption(label, optionName, null);
     }
+
+    public static Component createSpacerBox() {
+        return Box.createRigidArea(new Dimension(0, 5));
+    }
 }
