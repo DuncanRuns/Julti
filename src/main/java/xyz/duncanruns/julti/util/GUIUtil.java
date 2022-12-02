@@ -20,9 +20,37 @@ public final class GUIUtil {
         return t;
     }
 
+    public static Component leftJustify(Component component) {
+        Box b = Box.createHorizontalBox();
+        b.add(component);
+        b.add(Box.createHorizontalGlue());
+        return b;
+    }
 
-    public static JCheckBox createCheckBoxFromOption(String label, String optionName) {
-        return createCheckBoxFromOption(label, optionName, null);
+    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
+        JButton button = new JButton();
+        final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
+        button.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
+                    JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
+                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
+                    julti.setupHotkeys();
+                });
+                button.setText(hotkeyPrefix + "...");
+            }
+        });
+        button.setText(hotkeyPrefix + JultiOptions.getInstance().getHotkeyFromSetting(optionName));
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JCheckBox checkBox = createCheckBoxFromOption("", optionName + "IM", b -> julti.setupHotkeys());
+        checkBox.setToolTipText("Ignore Extra Keys");
+        panel.add(checkBox);
+        panel.add(button);
+
+        return panel;
     }
 
     public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
@@ -46,28 +74,7 @@ public final class GUIUtil {
         return jCheckBox;
     }
 
-    public static Component leftJustify(Component component) {
-        Box b = Box.createHorizontalBox();
-        b.add(component);
-        b.add(Box.createHorizontalGlue());
-        return b;
-    }
-
-    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
-        JButton button = new JButton();
-        final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
-        button.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
-                    JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
-                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
-                    julti.setupHotkeys();
-                });
-                button.setText(hotkeyPrefix + "...");
-            }
-        });
-        button.setText(hotkeyPrefix + JultiOptions.getInstance().getHotkeyFromSetting(optionName));
-        return button;
+    public static JCheckBox createCheckBoxFromOption(String label, String optionName) {
+        return createCheckBoxFromOption(label, optionName, null);
     }
 }
