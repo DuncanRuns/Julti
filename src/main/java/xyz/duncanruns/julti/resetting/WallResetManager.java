@@ -85,10 +85,14 @@ public class WallResetManager extends ResetManager {
         }
         MinecraftInstance clickedInstance = getHoveredWallInstance();
         if (clickedInstance == null) return false;
-        lockedInstances.add(clickedInstance);
-        if (JultiOptions.getInstance().useAffinity)
-            AffinityUtil.setAffinity(clickedInstance, AffinityUtil.lockBitMask);
+        lockInstance(clickedInstance);
         return true;
+    }
+
+    private void lockInstance(MinecraftInstance instance) {
+        lockedInstances.add(instance);
+        if (JultiOptions.getInstance().useAffinity)
+            AffinityUtil.setAffinity(instance, AffinityUtil.lockBitMask);
     }
 
     @Override
@@ -108,6 +112,7 @@ public class WallResetManager extends ResetManager {
 
     private void playInstanceFromWall(MinecraftInstance instance) {
         if (JultiOptions.getInstance().wallLockInsteadOfPlay && !instance.isWorldLoaded()) {
+            lockInstance(instance);
             return;
         }
 
