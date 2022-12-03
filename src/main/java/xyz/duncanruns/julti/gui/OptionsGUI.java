@@ -342,7 +342,7 @@ public class OptionsGUI extends JFrame {
         if (!JultiOptions.getInstance().wallResetAllAfterPlaying) {
             panel.add(GUIUtil.createSpacerBox());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reloadAndSwitch(panelNum))));
-            if(JultiOptions.getInstance().wallBypass){
+            if (JultiOptions.getInstance().wallBypass) {
                 panel.add(GUIUtil.createSpacerBox());
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
             }
