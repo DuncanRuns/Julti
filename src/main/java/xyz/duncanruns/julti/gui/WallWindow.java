@@ -119,7 +119,7 @@ public class WallWindow extends Frame {
         drawAllInstances();
 
         // Buffer to Window
-        GDI32Extra.INSTANCE.BitBlt(hdcOut, 0, 0, 1920, 1080, bufferHdc, 0, 0, GDI32.SRCCOPY);
+        GDI32Extra.INSTANCE.BitBlt(hdcOut, 0, 0, totalWidth, totalHeight, bufferHdc, 0, 0, GDI32.SRCCOPY);
         // Release Window DC
         User32.INSTANCE.ReleaseDC(hwnd, hdcOut);
     }
