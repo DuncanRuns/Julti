@@ -1,0 +1,52 @@
+Changes in v0.8.0:
+- Fixed a crash when enabling OBS hotkeys
+- Added better affinity with options (#6) (Thanks @jojoe77777)
+- Julti Wall now works with more monitor sizes (you should still probably use OBS wall)
+
+Changes in v0.7.0:
+- Added option to lock instance instead of playing when the instance is still loading (#29)
+- Added a bypass option to return to wall if there are no locked instances that are loaded
+- Added a checkbox next to every hotkey to allow it to work regardless of extra pressed keys (#31)
+
+Changes in v0.6.3:
+- Link script now has 2nd obs scene choice
+- Undone fix to #18, as it slows resets
+
+Changes in v0.6.2:
+- Attempt to fix some issues with mouse focus
+
+Changes in v0.6.1:
+- Speed up wide resets (#25)
+- Prioritize loaded instances when doing bypass (#26)
+
+Changes in v0.6.0:
+- Added wide resets (#12)
+- Added support for non-borderless windows (#10)
+- Added support for maximized windows
+- Added Focus Reset Key (#7)
+- Added Basic background resetting on wall (#21)
+- Added support for [Prism Launcher](https://prismlauncher.org/) in auto-detect
+- Fix pie chart on wall bug (#18)
+
+Changes in v0.5.1:
+- Added darkening warning
+- Lock Icon will now render exactly the same size as the file
+- Default lock icon scaled down 2x
+- Changed a few defaults
+
+Changes in v0.5.0:
+- MAJOR optimizations to the built-in wall (#1)
+- Wall Bypass is now toggle-able (#15)
+- Reorganized some options in the Wall tab
+
+Changes in v0.4.1:
+- Fixed obs link issues
+- Fixed error logging for > 9 instances
+
+Changes in v0.4.0:
+- Added Affinity (Thanks to specnr wall)
+- Created the Julti OBS Link Script (websocket but 1000x better and easier). Save it somewhere safe, and add it to OBS in Tools -> Scripts.
+
+Changes in v0.3.0:
+- Massive changes to the code to allow for more thingies to happen
+- The ability to use obs wall
