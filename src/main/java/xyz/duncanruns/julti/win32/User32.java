@@ -71,7 +71,7 @@ public interface User32 extends StdCallLibrary {
     }
 
     @Structure.FieldOrder({"cbSize", "flags", "hCursor", "ptScreenPos"})
-    public class CURSORINFO extends Structure {
+    class CURSORINFO extends Structure {
         public DWORD cbSize;
         public DWORD flags;
         public HCURSOR hCursor;
