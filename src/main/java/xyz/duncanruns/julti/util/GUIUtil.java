@@ -6,6 +6,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.function.Consumer;
 
 public final class GUIUtil {
@@ -27,7 +28,7 @@ public final class GUIUtil {
         return b;
     }
 
-    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti) {
+    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
         button.addActionListener(new AbstractAction() {
@@ -41,7 +42,9 @@ public final class GUIUtil {
                 button.setText(hotkeyPrefix + "...");
             }
         });
-        button.setText(hotkeyPrefix + JultiOptions.getInstance().getHotkeyFromSetting(optionName));
+        button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
+
+        if (!includeIMOption) return button;
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
