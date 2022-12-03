@@ -17,11 +17,11 @@ import java.util.*;
 
 public final class KeyboardUtil {
 
-    public static final List<Integer> ALL_MODIFIERS = Collections.unmodifiableList(Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_SHIFT, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_MENU, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3));
+    public static final List<Integer> ALL_MODIFIERS = List.of(Win32Con.VK_CONTROL, Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_SHIFT, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_MENU, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
     // Modifier keys which capture multiple keys
-    public static final List<Integer> BROAD_MODIFIERS = Collections.unmodifiableList(Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_SHIFT, Win32Con.VK_MENU));
+    public static final List<Integer> BROAD_MODIFIERS = List.of(Win32Con.VK_CONTROL, Win32Con.VK_SHIFT, Win32Con.VK_MENU);
     // Modifier keys which reference only single keys
-    public static final List<Integer> SINGLE_MODIFIERS = Collections.unmodifiableList(Arrays.asList(Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3));
+    public static final List<Integer> SINGLE_MODIFIERS = List.of(Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
     private static final String[] KEY_NAMES = getKeyNamesArray();
 
     private KeyboardUtil() {

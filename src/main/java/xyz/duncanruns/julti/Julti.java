@@ -404,6 +404,8 @@ public class Julti {
     public void start() {
         stopExecutors();
         reloadManagers();
+        if (JultiOptions.getInstance().useAffinity)
+            AffinityManager.start(this);
         setupHotkeys();
         tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         tryTick();

@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.resetting;
 
+import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.InstanceManager;
@@ -55,8 +56,15 @@ public abstract class ResetManager {
     }
 
     public void notifyPreviewLoaded(MinecraftInstance instance) {
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+            AffinityManager.ping(julti, 301);
+        }
     }
 
     public void notifyWorldLoaded(MinecraftInstance instance) {
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
     }
 }

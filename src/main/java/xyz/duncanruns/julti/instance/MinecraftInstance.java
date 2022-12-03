@@ -591,8 +591,12 @@ public class MinecraftInstance {
         return inPreview;
     }
 
-    synchronized public boolean hasPreviewEverStarted() {
+    public boolean hasPreviewEverStarted() {
         return lastPreviewStart != -1L;
+    }
+
+    public boolean wasPreviewInLastMillis(int millis) {
+        return System.currentTimeMillis() - lastPreviewStart < millis;
     }
 
     private enum ResetType {

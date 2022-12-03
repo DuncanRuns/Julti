@@ -10,7 +10,6 @@ import xyz.duncanruns.julti.util.LogReceiver;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -48,8 +47,8 @@ public class InstanceManager {
         return null;
     }
 
-    synchronized public List<MinecraftInstance> getInstances() {
-        return Collections.unmodifiableList(new ArrayList<>(instances));
+    public List<MinecraftInstance> getInstances() {
+        return List.copyOf(instances);
     }
 
     synchronized public void redetectInstances() {

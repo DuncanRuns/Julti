@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
+import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.GUIUtil;
@@ -113,9 +114,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Clear Worlds", "autoClearWorlds")));
         panel.add(GUIUtil.createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity")));
-        panel.add(GUIUtil.createSpacerBox());
-
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path:")));
 
         JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath, 20);
@@ -143,6 +141,28 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> runMMCExecutableHelper(mmcField))));
+        panel.add(GUIUtil.createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
+            reloadAndSwitch(panelNum);
+            if (b) {
+                AffinityManager.start(julti);
+            } else {
+                AffinityManager.stop();
+                AffinityManager.release(julti);
+            }
+        })));
+
+        if (!JultiOptions.getInstance().useAffinity) return;
+        panel.add(GUIUtil.createSpacerBox());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Currently Playing", "threadsPlaying")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Before Preview", "threadsPrePreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Start of Preview", "threadsStartPreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Rest of Preview", "threadsPreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Locked", "threadsLocked")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Background", "threadsBackground")));
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {
@@ -191,6 +211,7 @@ public class OptionsGUI extends JFrame {
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
         int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        if (ans == -1) return;
         if (ans == candidates.size()) {
             browseForMMCExecutable(mmcField);
         } else {
@@ -266,7 +287,7 @@ public class OptionsGUI extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         outerPanel.add(panel);
-        tabbedPane.add(name, outerPanel);
+        tabbedPane.add(name, new JScrollPane(outerPanel));
         return panel;
     }
 
@@ -494,9 +515,9 @@ public class OptionsGUI extends JFrame {
 
         final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
         panel.add(GUIUtil.leftJustify(squishLabel));
-        JSlider squishSlider = new JSlider(0, 1000, 8000, (int) (JultiOptions.getInstance().wideResetSquish * 1000));
+        JSlider squishSlider = new JSlider(0, 10, 80, (int) (JultiOptions.getInstance().wideResetSquish * 10));
         squishSlider.addChangeListener(e -> {
-            JultiOptions.getInstance().wideResetSquish = squishSlider.getValue() / 1000f;
+            JultiOptions.getInstance().wideResetSquish = squishSlider.getValue() / 10f;
             squishLabel.setText("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
         });
         panel.add(GUIUtil.leftJustify(squishSlider));

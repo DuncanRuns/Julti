@@ -132,14 +132,6 @@ public class WallResetManager extends ResetManager {
         return Collections.unmodifiableSet(lockedInstances);
     }
 
-    @Override
-    public void notifyPreviewLoaded(final MinecraftInstance instance) {
-    }
-
-    @Override
-    public void notifyWorldLoaded(final MinecraftInstance instance) {
-    }
-
     @Nullable
     private MinecraftInstance getHoveredWallInstance() {
         Point point = MouseInfo.getPointerInfo().getLocation();

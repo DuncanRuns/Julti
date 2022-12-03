@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.util;
 
+import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 
@@ -83,5 +84,30 @@ public final class GUIUtil {
 
     public static Component createSpacerBox() {
         return Box.createRigidArea(new Dimension(0, 5));
+    }
+
+    public static Component createThreadsSlider(String displayName, String optionName) {
+        JultiOptions options = JultiOptions.getInstance();
+        int current = (Integer) options.getValue(optionName);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JLabel label = new JLabel();
+        label.setText(displayName + " (" + current + ")");
+
+        JSlider slider = new JSlider(JSlider.HORIZONTAL, 1, AffinityManager.AVAILABLE_THREADS, current);
+        slider.setPaintLabels(true);
+        slider.setPaintTicks(true);
+        slider.setSnapToTicks(true);
+        slider.addChangeListener(e -> {
+            int newCurrent = slider.getValue();
+            JultiOptions.getInstance().trySetValue(optionName, String.valueOf(newCurrent));
+            label.setText(displayName + " (" + newCurrent + ")");
+        });
+
+        panel.add(slider);
+        panel.add(label);
+
+        return panel;
     }
 }

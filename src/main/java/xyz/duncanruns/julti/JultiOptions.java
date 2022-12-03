@@ -68,13 +68,13 @@ public final class JultiOptions {
     public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
     public List<Integer> wallFocusResetHotkey = Collections.singletonList((int) 'F');
 
-    public boolean resetHotkeyIM = false;
-    public boolean bgResetHotkeyIM = false;
-    public boolean wallResetHotkeyIM = false;
-    public boolean wallSingleResetHotkeyIM = false;
-    public boolean wallLockHotkeyIM = false;
-    public boolean wallPlayHotkeyIM = false;
-    public boolean wallFocusResetHotkeyIM = false;
+    public boolean resetHotkeyIM = true;
+    public boolean bgResetHotkeyIM = true;
+    public boolean wallResetHotkeyIM = true;
+    public boolean wallSingleResetHotkeyIM = true;
+    public boolean wallLockHotkeyIM = true;
+    public boolean wallPlayHotkeyIM = true;
+    public boolean wallFocusResetHotkeyIM = true;
 
     // OBS
     public boolean obsPressHotkeys = false;
@@ -86,6 +86,15 @@ public final class JultiOptions {
     public boolean autoClearWorlds = true;
     public String multiMCPath = "";
     public boolean useAffinity = true;
+
+
+    // Affinity
+    public int threadsPlaying = AffinityManager.AVAILABLE_THREADS;
+    public int threadsPrePreview = AffinityManager.AVAILABLE_THREADS * 30 / 32;
+    public int threadsStartPreview = AffinityManager.AVAILABLE_THREADS * 28 / 32;
+    public int threadsPreview = AffinityManager.AVAILABLE_THREADS * 18 / 32;
+    public int threadsLocked = AffinityManager.AVAILABLE_THREADS * 30 / 32;
+    public int threadsBackground = AffinityManager.AVAILABLE_THREADS * 8 / 32;
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
