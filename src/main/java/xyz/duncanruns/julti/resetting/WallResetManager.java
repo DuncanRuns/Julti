@@ -3,7 +3,6 @@ package xyz.duncanruns.julti.resetting;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.AffinityUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -34,8 +33,6 @@ public class WallResetManager extends ResetManager {
         // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
             selectedInstance.reset(true);
-            if (JultiOptions.getInstance().useAffinity)
-                AffinityUtil.setAffinity(selectedInstance, AffinityUtil.playBitMask);
             return true;
         }
 
@@ -91,8 +88,6 @@ public class WallResetManager extends ResetManager {
 
     private void lockInstance(MinecraftInstance instance) {
         lockedInstances.add(instance);
-        if (JultiOptions.getInstance().useAffinity)
-            AffinityUtil.setAffinity(instance, AffinityUtil.lockBitMask);
     }
 
     @Override
@@ -117,7 +112,6 @@ public class WallResetManager extends ResetManager {
         }
 
         instance.activate(instanceManager.getInstances().indexOf(instance) + 1);
-        AffinityUtil.setPlayingAffinities(instance, instanceManager.getInstances());
         julti.switchScene(instance);
         lockedInstances.remove(instance);
     }
@@ -140,34 +134,10 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public void notifyPreviewLoaded(final MinecraftInstance instance) {
-        if (JultiOptions.getInstance().useAffinity)
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (instanceManager.getSelectedInstance() != null)
-                        AffinityUtil.setAffinity(instance, AffinityUtil.lowBitMask);
-                    else AffinityUtil.setAffinity(instance, AffinityUtil.midBitMask);
-                }
-            }, 400);
     }
 
     @Override
     public void notifyWorldLoaded(final MinecraftInstance instance) {
-        if (JultiOptions.getInstance().useAffinity)
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
-                    if (instance.equals(selectedInstance))
-                        AffinityUtil.setAffinity(instance, AffinityUtil.playBitMask);
-                    else if (selectedInstance != null)
-                        AffinityUtil.setAffinity(instance, AffinityUtil.superLowBitMask);
-                    else if (lockedInstances.contains(instance))
-                        AffinityUtil.setAffinity(instance, AffinityUtil.lockBitMask);
-                    else
-                        AffinityUtil.setAffinity(instance, AffinityUtil.lowBitMask);
-                }
-            }, 400);
     }
 
     @Nullable
@@ -231,8 +201,6 @@ public class WallResetManager extends ResetManager {
             instances.forEach(instance -> instance.reset(instances.size() == 1));
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
-            if (options.useAffinity)
-                AffinityUtil.setAffinities(instances, lockedInstances);
             julti.switchToWallScene();
             return;
         }
@@ -247,12 +215,9 @@ public class WallResetManager extends ResetManager {
             // No more instances to play
             julti.focusWall();
             julti.switchToWallScene();
-            if (options.useAffinity)
-                AffinityUtil.setAffinities(instances, lockedInstances);
         } else {
             lockedInstances.remove(nextInstance);
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
-            AffinityUtil.setPlayingAffinities(nextInstance, instances);
             julti.switchScene(nextInstance);
         }
     }
@@ -261,10 +226,6 @@ public class WallResetManager extends ResetManager {
         lockedInstances.remove(instance);
         if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
             instance.reset(instanceManager.getInstances().size() == 1);
-            if (JultiOptions.getInstance().useAffinity) {
-                if (willBeOnWall) AffinityUtil.setAffinity(instance, AffinityUtil.highBitMask);
-                else AffinityUtil.setAffinity(instance, AffinityUtil.lowBitMask);
-            }
             return true;
         }
         return false;

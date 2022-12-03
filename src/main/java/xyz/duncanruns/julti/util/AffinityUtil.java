@@ -54,17 +54,6 @@ public final class AffinityUtil {
     }
 
     public static void setAffinities(List<MinecraftInstance> instances, Set<MinecraftInstance> lockedInstances) {
-        for (MinecraftInstance instance : instances) {
-            if (instance.isWorldLoaded() && !lockedInstances.contains(instance)) {
-                setAffinity(instance, lowBitMask);
-            } else if (!(instance.isWorldLoaded() || instance.isPreviewLoaded())) {
-                setAffinity(instance, highBitMask);
-            } else if (lockedInstances.contains(instance)) {
-                setAffinity(instance, lockBitMask);
-            } else if (instance.isPreviewLoaded()) {
-                setAffinity(instance, midBitMask);
-            }
-        }
     }
 
     public static void main(String[] args) {

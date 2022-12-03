@@ -129,15 +129,15 @@ public class Julti {
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
         } else if ("list".equals(args[0])) {
-            StringBuilder out = new StringBuilder("Hotkeys:\n" +
+            String out = "Hotkeys:\n" +
                     "Reset All (Wall): " + HotkeyUtil.formatKeys(options.wallResetHotkey) + "\n" +
                     "Reset Single (Wall): " + HotkeyUtil.formatKeys(options.wallSingleResetHotkey) + "\n" +
                     "Lock Instance (Wall): " + HotkeyUtil.formatKeys(options.wallLockHotkey) + "\n" +
                     "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
                     "Focus Reset (Wall): " + HotkeyUtil.formatKeys(options.wallFocusResetHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
-                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey));
-            log(Level.INFO, out.toString());
+                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey);
+            log(Level.INFO, out);
         } else if (setHotkeyArgs.contains(args[0])) {
             log(Level.INFO, "Waiting 1 second to not pick up accidental keypress...");
             sleep(1000);
@@ -515,7 +515,6 @@ public class Julti {
 
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
         minecraftInstance.ensureWindowState();
-        AffinityUtil.setAffinity(minecraftInstance, AffinityUtil.highBitMask);
     }
 
     public void checkWallWindow() {
