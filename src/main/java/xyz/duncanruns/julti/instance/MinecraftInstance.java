@@ -456,11 +456,11 @@ public class MinecraftInstance {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
             JultiOptions options = JultiOptions.getInstance();
-            updateStatesWithLog(newLogContents, options, julti);
+            runLogCheck(newLogContents, options, julti);
         }
     }
 
-    synchronized private void updateStatesWithLog(String newLogContents, JultiOptions options, final Julti julti) {
+    synchronized private void runLogCheck(String newLogContents, JultiOptions options, final Julti julti) {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
