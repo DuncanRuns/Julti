@@ -501,7 +501,9 @@ public class Julti {
 
             checkWallWindow();
 
-            ensureCorrectSceneState();
+            MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
+            ensureCorrectSceneState(selectedInstance);
+            ensureSleepBG(selectedInstance);
         }
 
         if (options.autoClearWorlds && (current - lastWorldClear) > 20000) {
@@ -528,14 +530,21 @@ public class Julti {
         }
     }
 
-    private void ensureCorrectSceneState() {
-        MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
+    private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
         if (selectedInstance == null) {
             if (isWallActive()) {
                 currentSceneId = "W";
             }
         } else {
             currentSceneId = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
+        }
+    }
+
+    private void ensureSleepBG(MinecraftInstance selectedInstance) {
+        if (selectedInstance == null) {
+            SleepBGUtil.disableLock();
+        } else {
+            SleepBGUtil.enableLock();
         }
     }
 
@@ -606,6 +615,7 @@ public class Julti {
         }
         HotkeyUtil.stopGlobalHotkeyChecker();
         JultiOptions.getInstance().trySave();
+        SleepBGUtil.disableLock();
         stopped = true;
     }
 
