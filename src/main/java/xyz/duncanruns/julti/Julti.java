@@ -643,6 +643,7 @@ public class Julti {
     }
 
     public void focusWall() {
+        SleepBGUtil.disableLock();
         if (JultiOptions.getInstance().useJultiWallWindow) {
             wallWindow.requestFocus();
         } else {

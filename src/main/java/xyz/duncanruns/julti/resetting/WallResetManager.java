@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.resetting;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -114,6 +115,7 @@ public class WallResetManager extends ResetManager {
         instance.activate(instanceManager.getInstances().indexOf(instance) + 1);
         julti.switchScene(instance);
         lockedInstances.remove(instance);
+        SleepBGUtil.enableLock();
     }
 
     @Override
