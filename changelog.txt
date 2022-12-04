@@ -1,3 +1,7 @@
+Changes in v0.8.1:
+- Fixed MIDNIGHT BUG!!!! (#33)
+- Added Sleep Background Lock support
+
 Changes in v0.8.0:
 - Fixed a crash when enabling OBS hotkeys
 - Added better affinity with options (#6) (Thanks @jojoe77777)
