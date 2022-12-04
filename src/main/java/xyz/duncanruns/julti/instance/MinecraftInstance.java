@@ -508,6 +508,18 @@ public class MinecraftInstance {
             return "";
         }
 
+        // If file size is significantly less than log progress, reset log progress
+        try {
+            long size = Files.size(logPath);
+            if (size < (logProgress / 2)) {
+                tryJumpLogProgress();
+                log(Level.INFO, "Log reading restarted! (" + getName() + ")");
+                return "";
+            }
+        } catch (IOException ignored) {
+        }
+
+
         // Read new bytes then format and return as a string
         try (InputStream stream = Files.newInputStream(logPath)) {
             stream.skip(logProgress);
