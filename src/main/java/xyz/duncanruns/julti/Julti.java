@@ -616,6 +616,8 @@ public class Julti {
         HotkeyUtil.stopGlobalHotkeyChecker();
         JultiOptions.getInstance().trySave();
         SleepBGUtil.disableLock();
+        AffinityManager.stop();
+        AffinityManager.release(this);
         stopped = true;
     }
 
