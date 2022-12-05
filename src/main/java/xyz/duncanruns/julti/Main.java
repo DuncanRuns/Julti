@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.util.LogReceiver;
+import xyz.duncanruns.julti.util.UpdateUtil;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -21,6 +22,7 @@ public class Main {
         JultiGUI gui = new JultiGUI(julti);
         julti.start();
         gui.requestFocus();
+        UpdateUtil.checkForUpdates(gui);
         // Command line included in GUI
         // runJultiCLI(julti);
     }
