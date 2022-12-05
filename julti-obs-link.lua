@@ -62,7 +62,7 @@ old_text         = ""
 
 
 
-function managelocks(instancestates)
+function manage_locks(instancestates)
     if (wall_scene == "" or first_lock == "") then
         return
     end
@@ -83,7 +83,7 @@ function managelocks(instancestates)
     end
 end
 
-function managedirts(instancestates)
+function manage_dirts(instancestates)
     if (wall_scene == "" or first_dirt == "") then
         return
     end
@@ -100,6 +100,14 @@ function managedirts(instancestates)
             end
         end
         obs.sceneitem_list_release(scene_items)
+        obs.obs_source_release(scene_source)
+    end
+end
+
+function on_lock_gain()
+    if not (wall_scene == "") then
+        local scene_source = obs.obs_get_source_by_name(wall_scene)
+        obs.obs_frontend_set_current_scene(scene_source)
         obs.obs_source_release(scene_source)
     end
 end
@@ -299,10 +307,10 @@ function loop20thsec()
     end
 
     if not (first_lock == "") then
-        managelocks(state_args[2])
+        manage_locks(state_args[2])
     end
     if not (first_dirt == "") then
-        managedirts(state_args[2])
+        manage_dirts(state_args[2])
     end
 
 end
@@ -312,6 +320,7 @@ function loophalfsec()
         if can_take_lock() then
             has_lock = true
             obs.script_log(300, "Julti script lock obtained!")
+            on_lock_gain()
         else
             return
         end
@@ -323,7 +332,7 @@ function aftersec()
 
     obs.timer_remove(aftersec)
 
-    -- Switch to Wall Scene & Disable All Lock Icons --
+    -- Switch to 2nd OBS Scene & Disable All Lock Icons --
 
     if not (second_obs_scene == "") then
         local scene_source = obs.obs_get_source_by_name(second_obs_scene)
@@ -339,7 +348,7 @@ function aftersec()
         i = i + 1
         fakestate = fakestate .. fakestate
     end
-    managedirts(fakestate)
-    managelocks(fakestate)
+    manage_dirts(fakestate)
+    manage_locks(fakestate)
     obs.script_log(300, "Switched to wall scene and cleared locks/dirt covers.")
 end
