@@ -22,7 +22,7 @@ public class Main {
         JultiGUI gui = new JultiGUI(julti);
         julti.start();
         gui.requestFocus();
-        UpdateUtil.checkForUpdates(gui);
+        new Thread(() -> UpdateUtil.checkForUpdates(gui)).start();
         // Command line included in GUI
         // runJultiCLI(julti);
     }
