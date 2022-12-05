@@ -1,6 +1,8 @@
 package xyz.duncanruns.julti.resetting;
 
+import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.util.List;
@@ -40,6 +42,9 @@ public class MultiResetManager extends ResetManager {
         selectedInstance.reset(false);
 
         super.doReset();
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
@@ -55,6 +60,9 @@ public class MultiResetManager extends ResetManager {
             if (!instance.equals(selectedInstance)) {
                 instance.reset(false);
             }
+        }
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
         }
         return true;
     }

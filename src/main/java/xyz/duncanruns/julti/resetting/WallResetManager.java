@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.resetting;
 
+import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -49,6 +50,9 @@ public class WallResetManager extends ResetManager {
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) return false;
         resetNonLockedExcept(selectedInstance);
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
@@ -62,6 +66,9 @@ public class WallResetManager extends ResetManager {
             if (lockedInstances.contains(instance)) continue;
             resetInstance(instance, true);
         }
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
@@ -73,6 +80,9 @@ public class WallResetManager extends ResetManager {
         MinecraftInstance selectedInstance = getHoveredWallInstance();
         if (selectedInstance == null)
             return false;
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return resetInstance(selectedInstance, true);
     }
 
@@ -84,6 +94,9 @@ public class WallResetManager extends ResetManager {
         MinecraftInstance clickedInstance = getHoveredWallInstance();
         if (clickedInstance == null) return false;
         lockInstance(clickedInstance);
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
@@ -103,6 +116,9 @@ public class WallResetManager extends ResetManager {
 
         // Reset all others
         resetNonLockedExcept(clickedInstance);
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
@@ -126,6 +142,9 @@ public class WallResetManager extends ResetManager {
         MinecraftInstance clickedInstance = getHoveredWallInstance();
         if (clickedInstance == null) return false;
         playInstanceFromWall(clickedInstance);
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
         return true;
     }
 
