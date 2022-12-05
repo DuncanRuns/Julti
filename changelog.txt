@@ -2,6 +2,14 @@ Changes in v0.8.1:
 - Fixed MIDNIGHT BUG!!!! (#33)
 - Added Sleep Background Lock support
 
+Changes in v0.9.0:
+- Added Dirt Covers (#30)
+- Added Update Checker (#32)
+- Large link script updates
+    - More error checking and general code improvement
+    - Support dirt covers
+    - Main OBS will switch to wall scene upon finding that it is the main OBS
+
 Changes in v0.8.0:
 - Fixed a crash when enabling OBS hotkeys
 - Added better affinity with options (#6) (Thanks @jojoe77777)
