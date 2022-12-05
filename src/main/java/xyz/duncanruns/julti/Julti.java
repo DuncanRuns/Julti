@@ -26,8 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Julti {
+    public static final String VERSION = getVersion();
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
-    private static final String VERSION = getVersion();
     private static final Path stateOutputPath = JultiOptions.getJultiDir().resolve("state");
 
     private InstanceManager instanceManager;
@@ -554,7 +554,7 @@ public class Julti {
             StringBuilder out = new StringBuilder(currentSceneId).append(" ");
             Set<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
-                out.append(lockedInstances.contains(instance) ? "1" : "0");
+                out.append((lockedInstances.contains(instance) ? 1 : 0) + (instance.shouldDirtCover() ? 2 : 0));
             }
             FileUtil.writeString(stateOutputPath, out.toString());
         } catch (Exception ignored) {

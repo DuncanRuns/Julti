@@ -45,10 +45,11 @@ obs = obslua
 
 -- Properties --
 
-first_scene = ""
-wall_scene  = ""
-first_lock  = ""
-second_obs_scene  = ""
+first_scene      = ""
+wall_scene       = ""
+first_lock       = ""
+first_dirt       = ""
+second_obs_scene = ""
 
 -- Variables --
 
@@ -58,6 +59,50 @@ julti_dir        = os.getenv("UserProfile") .. "\\.Julti\\"
 old_text         = ""
 
 -- Functions --
+
+
+
+function managelocks(instancestates)
+    if (wall_scene == "" or first_lock == "") then
+        return
+    end
+    local i = 0
+    for c in ((instancestates):gmatch(".")) do
+        i = i + 1
+        local lock_name = first_lock:sub(1, -2) .. tostring(i)
+        local scene_source = obs.obs_get_source_by_name(wall_scene)
+        local scene = obs.obs_scene_from_source(scene_source)
+        local scene_items = obs.obs_scene_enum_items(scene)
+        for _, scene_item in ipairs(scene_items) do
+            if (lock_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
+                obs.obs_sceneitem_set_visible(scene_item, (c == "1") or (c == "3"))
+            end
+        end
+        obs.sceneitem_list_release(scene_items)
+        obs.obs_source_release(scene_source)
+    end
+end
+
+function managedirts(instancestates)
+    if (wall_scene == "" or first_dirt == "") then
+        return
+    end
+    local i = 0
+    for c in ((instancestates):gmatch(".")) do
+        i = i + 1
+        local dirt_name = first_dirt:sub(1, -2) .. tostring(i)
+        local scene_source = obs.obs_get_source_by_name(wall_scene)
+        local scene = obs.obs_scene_from_source(scene_source)
+        local scene_items = obs.obs_scene_enum_items(scene)
+        for _, scene_item in ipairs(scene_items) do
+            if (dirt_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
+                obs.obs_sceneitem_set_visible(scene_item, (c == "2") or (c == "3"))
+            end
+        end
+        obs.sceneitem_list_release(scene_items)
+        obs.obs_source_release(scene_source)
+    end
+end
 
 function split_string(inp, sep)
     if sep == nil then
@@ -93,13 +138,22 @@ function get_julti_file(filename)
 end
 
 function can_take_lock()
-    local last_update = tonumber(read_first_line(get_julti_file("scriptlock")))
+    local ok, last_update = pcall(function()
+        return tonumber(read_first_line(get_julti_file("scriptlock")))
+    end)
+
+    if not ok then
+        return false
+    end
+
     if (last_update == nil) then
         return true
     end
+
     if ((os.time() - last_update) > 3) then
         return true
     end
+
     return false
 end
 
@@ -152,6 +206,20 @@ function script_properties()
     end
     obs.source_list_release(sources)
 
+    local p = obs.obs_properties_add_list(props, "first_dirt", "First Dirt Cover Source", obs.OBS_COMBO_TYPE_EDITABLE,
+        obs.OBS_COMBO_FORMAT_STRING)
+    local sources = obs.obs_enum_sources()
+    if sources ~= nil then
+        for _, source in ipairs(sources) do
+            local source_id = obs.obs_source_get_id(source)
+            if source_id == "image_source" then
+                local name = obs.obs_source_get_name(source)
+                obs.obs_property_list_add_string(p, name, name)
+            end
+        end
+    end
+    obs.source_list_release(sources)
+
     local p = obs.obs_properties_add_list(props, "second_obs_scene", "2nd OBS Scene", obs.OBS_COMBO_TYPE_EDITABLE,
         obs.OBS_COMBO_FORMAT_STRING)
     local scenes = obs.obs_frontend_get_scenes()
@@ -170,6 +238,7 @@ function script_update(settings)
     wall_scene = obs.obs_data_get_string(settings, "wall_scene")
     first_scene = obs.obs_data_get_string(settings, "first_scene")
     first_lock = obs.obs_data_get_string(settings, "first_lock")
+    first_dirt = obs.obs_data_get_string(settings, "first_dirt")
     second_obs_scene = obs.obs_data_get_string(settings, "second_obs_scene")
 end
 
@@ -177,6 +246,7 @@ function script_load(settings)
     wall_scene = obs.obs_data_get_string(settings, "wall_scene")
     first_scene = obs.obs_data_get_string(settings, "first_scene")
     first_lock = obs.obs_data_get_string(settings, "first_lock")
+    first_dirt = obs.obs_data_get_string(settings, "first_dirt")
     second_obs_scene = obs.obs_data_get_string(settings, "second_obs_scene")
 
     if timers_activated then
@@ -211,8 +281,6 @@ function loop20thsec()
 
     local scene_id = state_args[1]
 
-    -- obs.script_log(300,"scene_id:"..scene_id..", new_text:"..new_text..",state_args:"..state_args[1]..","..state_args[2])
-
     if (not (scene_id == "W")) and (not (first_scene == "")) then
         local to_switch = (first_scene:sub(1, -2)) .. (scene_id)
         local scene_source = obs.obs_get_source_by_name(to_switch)
@@ -230,24 +298,11 @@ function loop20thsec()
         obs.obs_source_release(scene_source)
     end
 
-    if (first_lock == "") then
-        return
+    if not (first_lock == "") then
+        managelocks(state_args[2])
     end
-
-    local i = 0
-    for c in ((state_args[2]):gmatch(".")) do
-        i = i + 1
-        local lock_name = first_lock:sub(1, -2) .. tostring(i)
-        local scene_source = obs.obs_get_source_by_name(wall_scene)
-        local scene = obs.obs_scene_from_source(scene_source)
-        local scene_items = obs.obs_scene_enum_items(scene)
-        for _, scene_item in ipairs(scene_items) do
-            if (lock_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
-                obs.obs_sceneitem_set_visible(scene_item, (c == "1"))
-            end
-        end
-        obs.sceneitem_list_release(scene_items)
-        obs.obs_source_release(scene_source)
+    if not (first_dirt == "") then
+        managedirts(state_args[2])
     end
 
 end
@@ -267,43 +322,24 @@ end
 function aftersec()
 
     obs.timer_remove(aftersec)
-    
+
     -- Switch to Wall Scene & Disable All Lock Icons --
 
-    if (second_obs_scene == "") then
-        return
-    end
-
-    local scene_source = obs.obs_get_source_by_name(second_obs_scene)
-    obs.obs_frontend_set_current_scene(scene_source)
-    obs.obs_source_release(scene_source)
-
-    if (wall_scene == "") then
-        return
-    end
-
-    if (first_lock == "") then
-        return
+    if not (second_obs_scene == "") then
+        local scene_source = obs.obs_get_source_by_name(second_obs_scene)
+        obs.obs_frontend_set_current_scene(scene_source)
+        obs.obs_source_release(scene_source)
     end
 
     -- I should loop until finding a scene item that does not exist but checking 101 happens basically instantly anyway plus I'm lazy.
     local i = 0
-    while true do
+    local fakestate = "0"
+    -- this loop makes fakestate into 128 0's lmao
+    while (i < 7) do
         i = i + 1
-        local lock_name = first_lock:sub(1, -2) .. tostring(i)
-        local scene_source = obs.obs_get_source_by_name(wall_scene)
-        local scene = obs.obs_scene_from_source(scene_source)
-        local scene_items = obs.obs_scene_enum_items(scene)
-        for _, scene_item in ipairs(scene_items) do
-            if (lock_name == obs.obs_source_get_name(obs.obs_sceneitem_get_source(scene_item))) then
-                obs.obs_sceneitem_set_visible(scene_item, false)
-            end
-        end
-        obs.sceneitem_list_release(scene_items)
-        obs.obs_source_release(scene_source)
-        if i > 100 then
-            break
-        end
+        fakestate = fakestate .. fakestate
     end
-    obs.script_log(300,"Switched to wall scene and cleared locks.")
+    managedirts(fakestate)
+    managelocks(fakestate)
+    obs.script_log(300, "Switched to wall scene and cleared locks/dirt covers.")
 end

@@ -28,6 +28,7 @@ public class MinecraftInstance {
     private static final Logger LOGGER = LogManager.getLogger("MinecraftInstance");
     private static final Pattern advancementsLoadedPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.+/INFO]: Loaded 0 advancements$");
     private static final Pattern startPreviewPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\)$");
+    private static final Pattern startWorldGenPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Preparing start region for dimension minecraft:overworld$");
 
     // Basic instance information
     private final WindowTitleInfo titleInfo;
@@ -46,6 +47,7 @@ public class MinecraftInstance {
     // State tracking
     private boolean inPreview = false;
     private boolean worldLoaded = false;
+    private boolean worldGenerating = false;
     private long lastPreviewStart = -1L;
 
     // Log tracking
@@ -409,6 +411,7 @@ public class MinecraftInstance {
                 runNoAtumLeave();
         }
         worldLoaded = false;
+        worldGenerating = false;
         setInPreview(false);
         log(Level.INFO, "Reset instance " + getName());
     }
@@ -460,6 +463,26 @@ public class MinecraftInstance {
         }
     }
 
+    public boolean shouldDirtCover() {
+        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded());
+    }
+
+    public boolean hasPreviewEverStarted() {
+        return lastPreviewStart != -1L;
+    }
+
+    public boolean isWorldGenerating() {
+        return worldGenerating;
+    }
+
+    synchronized public boolean isWorldLoaded() {
+        return worldLoaded;
+    }
+
+    synchronized public boolean isPreviewLoaded() {
+        return inPreview;
+    }
+
     synchronized private void runLogCheck(String newLogContents, JultiOptions options, final Julti julti) {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
@@ -474,6 +497,7 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
+                    worldGenerating = false;
                     if (JultiOptions.getInstance().pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
                         if (options.useF3) {
                             pressF3Esc();
@@ -482,6 +506,8 @@ public class MinecraftInstance {
                         }
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
+                } else if (startWorldGenPattern.matcher(line).matches()) {
+                    worldGenerating = true;
                 }
             }
         }
@@ -593,18 +619,6 @@ public class MinecraftInstance {
                     .map(Path::toFile)
                     .forEach(File::delete);
         }
-    }
-
-    synchronized public boolean isWorldLoaded() {
-        return worldLoaded;
-    }
-
-    synchronized public boolean isPreviewLoaded() {
-        return inPreview;
-    }
-
-    public boolean hasPreviewEverStarted() {
-        return lastPreviewStart != -1L;
     }
 
     public boolean wasPreviewInLastMillis(int millis) {
