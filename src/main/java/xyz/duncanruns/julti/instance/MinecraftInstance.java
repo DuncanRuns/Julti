@@ -29,6 +29,7 @@ public class MinecraftInstance {
     private static final Pattern advancementsLoadedPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.+/INFO]: Loaded 0 advancements$");
     private static final Pattern startPreviewPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\)$");
     private static final Pattern startWorldGenPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Preparing start region for dimension minecraft:overworld$");
+    private static final Pattern openToLanPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Started serving on \\d+$");
 
     // Basic instance information
     private final WindowTitleInfo titleInfo;
@@ -508,6 +509,8 @@ public class MinecraftInstance {
                     julti.getResetManager().notifyWorldLoaded(this);
                 } else if (startWorldGenPattern.matcher(line).matches()) {
                     worldGenerating = true;
+                } else if (JultiOptions.getInstance().noCopeMode && openToLanPattern.matcher(line).matches()) {
+                    julti.getResetManager().doReset();
                 }
             }
         }
