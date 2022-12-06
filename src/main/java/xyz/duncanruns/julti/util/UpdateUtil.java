@@ -28,7 +28,7 @@ public final class UpdateUtil {
     public static void checkForUpdates(JultiGUI gui) {
         try {
             if (Julti.VERSION.equals("DEV")) {
-                log(Level.INFO,"No updates because Julti is in DEV version.");
+                log(Level.INFO, "No updates because Julti is in DEV version.");
                 return;
             }
 
@@ -55,6 +55,11 @@ public final class UpdateUtil {
         }
     }
 
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
+    }
+
     private static int[] getVersionNums(String versionString) {
         // Remove v prefix
         versionString = versionString.startsWith("v") ? versionString.substring(1) : versionString;
@@ -68,10 +73,5 @@ public final class UpdateUtil {
             if (latestVersionNums[i] < currentVersionNums[i]) isGreater = false;
         }
         return isGreater;
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 }
