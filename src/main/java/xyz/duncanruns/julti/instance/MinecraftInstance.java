@@ -219,20 +219,19 @@ public class MinecraftInstance {
      * @param instanceNum -1 for not updating title, otherwise the real instance number (index + 1).
      */
     synchronized public void activate(int instanceNum) {
+        JultiOptions options = JultiOptions.getInstance();
         if (hasWindow()) {
             new Thread(this::ensureWindowState).start();
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
                 new Thread(() -> {
-                    sleep(70);// Magic number; without this, the mouse does not get locked into MC
-                    pressEsc();
-                    sleep(70);
-                    while (MouseUtil.isMouseVisible() && isActive()) {
-                        MouseUtil.keyDown(Win32Con.VK_XBUTTON1);
-                        MouseUtil.keyUp(Win32Con.VK_XBUTTON1);
-                        sleep(70);
+                    int i = 100;
+                    while (!isActive() && i > 0) {
+                        sleep(10);
+                        i--;
                     }
+                    pressEsc();
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -268,6 +267,10 @@ public class MinecraftInstance {
 
     }
 
+    private boolean isActive() {
+        return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
+    }
+
     private static void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -279,8 +282,16 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
     }
 
-    private boolean isActive() {
-        return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
+    public void openToLan() {
+        KeyboardUtil.releaseAllModifiers();
+        pressEsc();
+        pressTab(7);
+        pressEnter();
+        pressShiftTab(1);
+        pressEnter();
+        pressTab(1);
+        pressEnter();
+
     }
 
     public void setWindowTitle(String title) {
@@ -324,6 +335,21 @@ public class MinecraftInstance {
 
     public void move(int x, int y, int w, int h) {
         HwndUtil.moveHwnd(hwnd, x, y, w, h);
+    }
+
+    private void pressTab(int tabTimes) {
+        for (int i = 0; i < tabTimes; i++)
+            KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_TAB);
+    }
+
+    private void pressEnter() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_RETURN);
+    }
+
+    private void pressShiftTab(int tabTimes) {
+        KeyboardUtil.sendKeyDownToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
+        pressTab(tabTimes);
+        KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
     }
 
     public void squish(float squish) {
@@ -422,20 +448,18 @@ public class MinecraftInstance {
 
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
         if (version.getMajor() > 12) {
-            KeyboardUtil.sendKeyDownToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
-            KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_TAB);
-            KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
+            pressShiftTab(1);
         } else if (version.getMajor() == 8 && version.getMinor() == 9) {
             sleep(70); // Magic Number
             // Anchiale Support
             for (int i = 0; i < 7; i++) {
-                KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_TAB);
+                pressTab(1);
             }
         } else {
             sleep(70); // Magic Number
-            KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_TAB);
+            pressTab(1);
         }
-        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_RETURN);
+        pressEnter();
     }
 
     private ResetType getResetType() {
