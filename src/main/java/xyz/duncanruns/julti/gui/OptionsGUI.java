@@ -436,6 +436,8 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacerBox());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use F3", "useF3")));
         panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode")));
+        panel.add(GUIUtil.createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Clipboard on Reset:")));
 

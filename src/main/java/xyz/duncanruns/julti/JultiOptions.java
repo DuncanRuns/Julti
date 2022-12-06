@@ -35,6 +35,7 @@ public final class JultiOptions {
     public boolean useF3 = true;
     public String clipboardOnReset = "";
     public int resetMode = 0; // 0 = Multi, 1 = Wall
+    public boolean coopMode = false;
 
     // Wall
     public boolean useJultiWallWindow = false;
