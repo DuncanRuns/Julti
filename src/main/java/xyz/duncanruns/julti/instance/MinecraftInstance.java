@@ -232,6 +232,9 @@ public class MinecraftInstance {
                         i--;
                     }
                     pressEsc();
+                    if (options.coopMode) {
+                        openToLan();
+                    }
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -523,17 +526,19 @@ public class MinecraftInstance {
                     setInPreview(false);
                     worldLoaded = true;
                     worldGenerating = false;
-                    if (JultiOptions.getInstance().pauseOnLoad && !Objects.equals(hwnd, HwndUtil.getCurrentHwnd())) {
+                    if (options.pauseOnLoad && !isActive()) {
                         if (options.useF3) {
                             pressF3Esc();
                         } else {
                             pressEsc();
                         }
+                    } else if (options.coopMode) {
+                        openToLan();
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
                 } else if (startWorldGenPattern.matcher(line).matches()) {
                     worldGenerating = true;
-                } else if (JultiOptions.getInstance().noCopeMode && openToLanPattern.matcher(line).matches()) {
+                } else if ((!options.coopMode) && options.noCopeMode && openToLanPattern.matcher(line).matches()) {
                     julti.getResetManager().doReset();
                 }
             }

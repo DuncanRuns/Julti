@@ -64,7 +64,7 @@ public class WallResetManager extends ResetManager {
         List<MinecraftInstance> lockedInstances = new ArrayList<>(getLockedInstances());
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (lockedInstances.contains(instance)) continue;
-            resetInstance(instance, true);
+            resetInstance(instance);
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
@@ -83,7 +83,7 @@ public class WallResetManager extends ResetManager {
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return resetInstance(selectedInstance, true);
+        return resetInstance(selectedInstance);
     }
 
     @Override
@@ -201,7 +201,7 @@ public class WallResetManager extends ResetManager {
     private void resetNonLockedExcept(MinecraftInstance clickedInstance) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
-            resetInstance(instance, false);
+            resetInstance(instance);
         }
     }
 
@@ -218,30 +218,29 @@ public class WallResetManager extends ResetManager {
             return;
         }
 
-        // Reset and unlock
-        resetInstance(selectedInstance, lockedInstances.isEmpty());
+        // Get next instance
+        MinecraftInstance nextInstance = getNextPlayableLockedInstance(options.returnToWallIfNoneLoaded);
+
+        // Unlock instance
         lockedInstances.remove(selectedInstance);
 
+        if (options.coopMode) {
+            // Coop Mode
 
-        MinecraftInstance nextInstance = getNextPlayableLockedInstance(options.returnToWallIfNoneLoaded);
-        if (!options.wallBypass || nextInstance == null) {
-            // No more instances to play
-            julti.focusWall();
-            julti.switchToWallScene();
+            // Reset
+            resetInstance(selectedInstance);
+            // Wait
+            sleep(70);
+            // Activate Next
+            activateNextInstance(instances, nextInstance);
         } else {
-            lockedInstances.remove(nextInstance);
-            nextInstance.activate(instances.indexOf(nextInstance) + 1);
-            julti.switchScene(nextInstance);
-        }
-    }
+            // Not Coop Mode
 
-    private boolean resetInstance(MinecraftInstance instance, boolean willBeOnWall) {
-        lockedInstances.remove(instance);
-        if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
-            instance.reset(instanceManager.getInstances().size() == 1);
-            return true;
+            // Activate
+            activateNextInstance(instances, nextInstance);
+            // Reset
+            resetInstance(selectedInstance);
         }
-        return false;
     }
 
     @Nullable
@@ -260,5 +259,39 @@ public class WallResetManager extends ResetManager {
 
         // Just return any instance otherwise
         return lockedInstances.iterator().next();
+    }
+
+    private boolean resetInstance(MinecraftInstance instance) {
+        lockedInstances.remove(instance);
+        if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
+            instance.reset(instanceManager.getInstances().size() == 1);
+            return true;
+        }
+        return false;
+    }
+
+    private static void sleep(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param instances    Minecraft instances involved
+     * @param nextInstance The next potential instance.
+     */
+    private void activateNextInstance(List<MinecraftInstance> instances, @Nullable MinecraftInstance nextInstance) {
+        JultiOptions options = JultiOptions.getInstance();
+        if (!options.wallBypass || nextInstance == null) {
+            // No more instances to play
+            julti.focusWall();
+            julti.switchToWallScene();
+        } else {
+            lockedInstances.remove(nextInstance);
+            nextInstance.activate(instances.indexOf(nextInstance) + 1);
+            julti.switchScene(nextInstance);
+        }
     }
 }
