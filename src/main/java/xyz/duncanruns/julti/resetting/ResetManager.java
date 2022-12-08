@@ -51,10 +51,6 @@ public abstract class ResetManager {
         return false;
     }
 
-    public Set<MinecraftInstance> getLockedInstances() {
-        return Collections.emptySet();
-    }
-
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
@@ -66,5 +62,16 @@ public abstract class ResetManager {
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
+    }
+
+    public boolean shouldDirtCover(MinecraftInstance instance) {
+        if (JultiOptions.getInstance().resetForBeach) {
+            return instance.hasPreviewEverStarted() && (((!getLockedInstances().contains(instance)) && !instance.isPreviewLoaded()) || instance.shouldDirtCover());
+        }
+        return instance.shouldDirtCover();
+    }
+
+    public Set<MinecraftInstance> getLockedInstances() {
+        return Collections.emptySet();
     }
 }

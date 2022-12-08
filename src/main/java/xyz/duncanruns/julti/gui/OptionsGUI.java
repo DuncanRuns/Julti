@@ -114,7 +114,7 @@ public class OptionsGUI extends JFrame {
 
         JButton counterButton = new JButton("Set Reset Counter");
         counterButton.addActionListener(e -> {
-            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, new Integer(JultiOptions.getInstance().resetCounter));
+            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().resetCounter);
             ResetCounter.set(Integer.parseInt(ans));
         });
         panel.add(GUIUtil.leftJustify(counterButton));

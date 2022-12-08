@@ -522,6 +522,9 @@ public class MinecraftInstance {
                 } else if (options.resetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
+                    if (options.useF3) {
+                        pressF3Esc();
+                    }
                     String[] args = line.split(" ");
                     biome = args[args.length - 1];
                     julti.getResetManager().notifyPreviewLoaded(this);

@@ -556,7 +556,7 @@ public class Julti {
             StringBuilder out = new StringBuilder(currentSceneId).append(" ");
             Set<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
-                out.append((lockedInstances.contains(instance) ? 1 : 0) + (instance.shouldDirtCover() ? 2 : 0));
+                out.append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0));
             }
             Files.writeString(stateOutputPath, out.toString());
         } catch (Exception ignored) {
