@@ -128,7 +128,7 @@ public final class JultiOptions {
         Path selectedFilePath = jultiDir.resolve("selectedprofile.txt");
         if (Files.isRegularFile(selectedFilePath)) {
             try {
-                String name = FileUtil.readString(selectedFilePath);
+                String name = Files.readString(selectedFilePath);
                 if (name.isEmpty()) {
                     name = "default";
                 }
@@ -137,7 +137,7 @@ public final class JultiOptions {
             }
         } else {
             try {
-                FileUtil.writeString(selectedFilePath, "default");
+                Files.writeString(selectedFilePath, "default");
             } catch (IOException ignored) {
             }
         }
@@ -149,7 +149,7 @@ public final class JultiOptions {
             try {
                 // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(FileUtil.readString(location), JultiOptions.class);
+                gson.fromJson(Files.readString(location), JultiOptions.class);
                 return true;
             } catch (Exception ignored) {
             }
@@ -165,7 +165,7 @@ public final class JultiOptions {
         Path selectedFilePath = getJultiDir().resolve("selectedprofile.txt");
         try {
             ensureJultiDir();
-            FileUtil.writeString(selectedFilePath, profileName);
+            Files.writeString(selectedFilePath, profileName);
             INSTANCE = null;
             return true;
         } catch (Exception ignored) {
@@ -221,7 +221,7 @@ public final class JultiOptions {
         try {
             ensureJultiDir();
             Files.createDirectories(location.getParent());
-            FileUtil.writeString(location, GSON_WRITER.toJson(this));
+            Files.writeString(location, GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;
@@ -357,7 +357,7 @@ public final class JultiOptions {
         try {
             ensureJultiDir();
             Files.createDirectories(location.getParent());
-            FileUtil.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
+            Files.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;

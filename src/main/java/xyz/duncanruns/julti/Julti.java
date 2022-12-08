@@ -17,6 +17,7 @@ import xyz.duncanruns.julti.win32.Win32Con;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.*;
@@ -556,7 +557,7 @@ public class Julti {
             for (MinecraftInstance instance : instanceManager.getInstances()) {
                 out.append((lockedInstances.contains(instance) ? 1 : 0) + (instance.shouldDirtCover() ? 2 : 0));
             }
-            FileUtil.writeString(stateOutputPath, out.toString());
+            Files.writeString(stateOutputPath, out.toString());
         } catch (Exception ignored) {
         }
     }
