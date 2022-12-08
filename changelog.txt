@@ -1,3 +1,6 @@
+Changes in v0.11.1:
+- Major dirt cover fix, whoopsie
+
 Changes in v0.11.0:
 - Added instance syncing (copy mods/config from instance 1 to all others)
 - Added reset counter (#27)

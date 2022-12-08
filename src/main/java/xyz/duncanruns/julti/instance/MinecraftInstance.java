@@ -436,6 +436,7 @@ public class MinecraftInstance {
         }
         worldLoaded = false;
         worldGenerating = false;
+        loadingPercent = -1;
         setInPreview(false);
         log(Level.INFO, "Reset instance " + getName());
     }
@@ -486,7 +487,7 @@ public class MinecraftInstance {
     }
 
     public boolean shouldDirtCover() {
-        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded()) && (getLoadingPercent() >= JultiOptions.getInstance().dirtReleasePercent);
+        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded()) && (getLoadingPercent() < JultiOptions.getInstance().dirtReleasePercent);
     }
 
     public boolean hasPreviewEverStarted() {
@@ -547,7 +548,7 @@ public class MinecraftInstance {
                         openToLan();
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
-                } else if (spawnAreaPattern.matcher(line).matches()) {
+                } else if (isPreviewLoaded() && spawnAreaPattern.matcher(line).matches()) {
                     worldGenerating = true;
                     String[] args = line.split(" ");
                     try {
