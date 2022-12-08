@@ -157,11 +157,11 @@ public class WallResetManager extends ResetManager {
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
         if (JultiOptions.getInstance().resetForBeach) {
-            if (!(instance.getBiome().contains("beach")))
-                resetInstance(instance, true);
-            else {
+            if (!(instance.getBiome().contains("beach"))) {
+                if (julti.isWallActive())
+                    resetInstance(instance, true);
+            } else {
                 lockInstance(instance);
-
             }
         }
     }
@@ -296,6 +296,9 @@ public class WallResetManager extends ResetManager {
             // No more instances to play
             julti.focusWall();
             julti.switchToWallScene();
+            if (options.resetForBeach) {
+                instances.stream().filter(instance -> !lockedInstances.contains(instance)).forEach(instance -> resetInstance(instance, true));
+            }
         } else {
             lockedInstances.remove(nextInstance);
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
