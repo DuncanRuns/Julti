@@ -4,6 +4,7 @@ import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.ResetCounter;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 
@@ -109,6 +110,14 @@ public class OptionsGUI extends JFrame {
         JPanel panel = createNewOptionsPanel("Other");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
+        panel.add(GUIUtil.createSpacerBox());
+
+        JButton counterButton = new JButton("Set Reset Counter");
+        counterButton.addActionListener(e -> {
+            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, new Integer(JultiOptions.getInstance().resetCounter));
+            ResetCounter.set(Integer.parseInt(ans));
+        });
+        panel.add(GUIUtil.leftJustify(counterButton));
         panel.add(GUIUtil.createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Clear Worlds", "autoClearWorlds")));

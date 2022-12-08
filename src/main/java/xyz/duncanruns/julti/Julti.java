@@ -77,6 +77,7 @@ public class Julti {
         log(Level.INFO, "Switched to profile \"" + newName + "\"");
         reloadManagers();
         setupHotkeys();
+        ResetCounter.updateFile();
     }
 
     private HashMap<String, Consumer<String[]>> getCommandMap() {

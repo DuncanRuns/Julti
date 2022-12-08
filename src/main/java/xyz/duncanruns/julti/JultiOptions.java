@@ -86,6 +86,7 @@ public final class JultiOptions {
     public boolean autoClearWorlds = true;
     public String multiMCPath = "";
     public boolean useAffinity = true;
+    public int resetCounter = 0;
 
 
     // Affinity

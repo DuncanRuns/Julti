@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.ResetCounter;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
 
@@ -414,19 +415,9 @@ public class MinecraftInstance {
 
         if (!singleInstance && options.letJultiMoveWindows) new Thread(() -> squish(options.wideResetSquish)).start();
 
-        // Press f3 before reset to potentially get rid of pie chart
-        //if (worldLoaded) {
-        //    pressF3();
-        //    new Timer().schedule(new TimerTask() {
-        //        @Override
-        //        public void run() {
-        //            Thread.currentThread().setName("reset-finisher");
-        //            finishReset();
-        //        }
-        //    }, 100);
-        //} else
         finishReset();
 
+        ResetCounter.increment();
     }
 
     private void finishReset() {
