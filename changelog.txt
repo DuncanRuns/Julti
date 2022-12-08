@@ -1,3 +1,9 @@
+Changes in v0.11.0:
+- Added instance syncing (copy mods/config from instance 1 to all others)
+- Added reset counter (#27)
+- Dirt covers now disappear when spawn area is 1% or more (Customizable to any %) (Old default was 0%)
+- Added "Open Folder" button to instance right click menu from the main GUI
+
 Changes in v0.10.0:
 - Added Coop Mode (#16)
 - Solved mouse focus issues once and for all (#34)
