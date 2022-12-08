@@ -77,6 +77,7 @@ public final class JultiOptions {
     public boolean wallFocusResetHotkeyIM = true;
 
     // OBS
+    public int dirtReleasePercent = 1;
     public boolean obsPressHotkeys = false;
     public boolean obsUseNumpad = true;
     public boolean obsUseAlt = false;

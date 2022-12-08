@@ -115,6 +115,7 @@ public class OptionsGUI extends JFrame {
         JButton counterButton = new JButton("Set Reset Counter");
         counterButton.addActionListener(e -> {
             String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().resetCounter);
+            if(ans == null || ans.equals("")) return;
             ResetCounter.set(Integer.parseInt(ans));
         });
         panel.add(GUIUtil.leftJustify(counterButton));
@@ -250,6 +251,16 @@ public class OptionsGUI extends JFrame {
         JPanel panel = createNewOptionsPanel("OBS");
 
         panel.add(GUIUtil.leftJustify(new JLabel("OBS Settings")));
+        panel.add(GUIUtil.createSpacerBox());
+
+        JButton dirtCoverButton = new JButton("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
+        dirtCoverButton.addActionListener(e -> {
+            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the minimum percentage for removing dirt covers.", "Julti: Set Dirt Cover Release Percentage", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().dirtReleasePercent);
+            if(ans == null || ans.equals("")) return;
+            JultiOptions.getInstance().dirtReleasePercent = Integer.parseInt(ans);
+            dirtCoverButton.setText("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
+        });
+        panel.add(GUIUtil.leftJustify(dirtCoverButton));
         panel.add(GUIUtil.createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reloadAndSwitch(panelNum))));
