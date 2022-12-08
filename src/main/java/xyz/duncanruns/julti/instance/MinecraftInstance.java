@@ -486,7 +486,7 @@ public class MinecraftInstance {
     }
 
     public boolean shouldDirtCover() {
-        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded()) && (getLoadingPercent() > JultiOptions.getInstance().dirtReleasePercent);
+        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded()) && (getLoadingPercent() >= JultiOptions.getInstance().dirtReleasePercent);
     }
 
     public boolean hasPreviewEverStarted() {
