@@ -149,11 +149,6 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public Set<MinecraftInstance> getLockedInstances() {
-        return Collections.unmodifiableSet(lockedInstances);
-    }
-
-    @Override
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
         if (JultiOptions.getInstance().resetForBeach) {
@@ -164,6 +159,11 @@ public class WallResetManager extends ResetManager {
                 lockInstance(instance);
             }
         }
+    }
+
+    @Override
+    public Set<MinecraftInstance> getLockedInstances() {
+        return Collections.unmodifiableSet(lockedInstances);
     }
 
     @Nullable

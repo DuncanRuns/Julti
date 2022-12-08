@@ -112,11 +112,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
         panel.add(GUIUtil.createSpacerBox());
 
-        JButton counterButton = new JButton("Set Reset Counter");
+        JButton counterButton = new JButton("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
         counterButton.addActionListener(e -> {
             String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().resetCounter);
-            if(ans == null || ans.equals("")) return;
+            if (ans == null || ans.equals("")) return;
             ResetCounter.set(Integer.parseInt(ans));
+            counterButton.setText("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
         });
         panel.add(GUIUtil.leftJustify(counterButton));
         panel.add(GUIUtil.createSpacerBox());
@@ -256,7 +257,7 @@ public class OptionsGUI extends JFrame {
         JButton dirtCoverButton = new JButton("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
         dirtCoverButton.addActionListener(e -> {
             String ans = (String) JOptionPane.showInputDialog(this, "Please enter the minimum percentage for removing dirt covers.", "Julti: Set Dirt Cover Release Percentage", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().dirtReleasePercent);
-            if(ans == null || ans.equals("")) return;
+            if (ans == null || ans.equals("")) return;
             JultiOptions.getInstance().dirtReleasePercent = Integer.parseInt(ans);
             dirtCoverButton.setText("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
         });
