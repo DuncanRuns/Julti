@@ -30,6 +30,7 @@ public class MinecraftInstance {
     private static final Pattern startPreviewPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\)$");
     private static final Pattern startWorldGenPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Preparing spawn area: 0%$");
     private static final Pattern openToLanPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Started serving on \\d+$");
+    private static final Pattern biomePattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Spawn biome: biome\\.minecraft\\..+$");
 
     // Basic instance information
     private final WindowTitleInfo titleInfo;
@@ -50,6 +51,7 @@ public class MinecraftInstance {
     private boolean worldLoaded = false;
     private boolean worldGenerating = false;
     private long lastPreviewStart = -1L;
+    private String biome = "";
 
     // Log tracking
     private long logProgress = -1;
@@ -511,16 +513,26 @@ public class MinecraftInstance {
         return inPreview;
     }
 
+    public String getBiome() {
+        return biome;
+    }
+
     synchronized private void runLogCheck(String newLogContents, JultiOptions options, final Julti julti) {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
-                if (startPreviewPattern.matcher(line).matches()) {
+                if (!options.resetForBeach && startPreviewPattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
                     if (options.useF3) {
                         pressF3Esc();
                     }
+                    julti.getResetManager().notifyPreviewLoaded(this);
+                } else if (options.resetForBeach && biomePattern.matcher(line).matches()) {
+                    setInPreview(true);
+                    worldLoaded = false;
+                    String[] args = line.split("\\.");
+                    biome = args[args.length - 1];
                     julti.getResetManager().notifyPreviewLoaded(this);
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);

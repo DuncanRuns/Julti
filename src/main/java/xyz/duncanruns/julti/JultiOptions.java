@@ -101,6 +101,7 @@ public final class JultiOptions {
     public List<String> lastInstances = new ArrayList<>();
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
+    public boolean resetForBeach = false;
 
     public JultiOptions(Path location) {
         this.location = location;

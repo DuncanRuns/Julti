@@ -153,6 +153,19 @@ public class WallResetManager extends ResetManager {
         return Collections.unmodifiableSet(lockedInstances);
     }
 
+    @Override
+    public void notifyPreviewLoaded(MinecraftInstance instance) {
+        super.notifyPreviewLoaded(instance);
+        if (JultiOptions.getInstance().resetForBeach) {
+            if (!(instance.getBiome().contains("beach")))
+                resetInstance(instance, true);
+            else {
+                lockInstance(instance);
+
+            }
+        }
+    }
+
     @Nullable
     private MinecraftInstance getHoveredWallInstance() {
         Point point = MouseInfo.getPointerInfo().getLocation();
@@ -262,12 +275,7 @@ public class WallResetManager extends ResetManager {
     }
 
     private boolean resetInstance(MinecraftInstance instance) {
-        lockedInstances.remove(instance);
-        if (!instance.hasPreviewEverStarted() || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
-            instance.reset(instanceManager.getInstances().size() == 1);
-            return true;
-        }
-        return false;
+        return resetInstance(instance, false);
     }
 
     private static void sleep(long sleepTime) {
@@ -293,5 +301,14 @@ public class WallResetManager extends ResetManager {
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
             julti.switchScene(nextInstance);
         }
+    }
+
+    private boolean resetInstance(MinecraftInstance instance, boolean bypassCooldown) {
+        lockedInstances.remove(instance);
+        if (bypassCooldown || (!instance.hasPreviewEverStarted()) || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
+            instance.reset(instanceManager.getInstances().size() == 1);
+            return true;
+        }
+        return false;
     }
 }
