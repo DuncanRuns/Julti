@@ -31,7 +31,7 @@ public class MinecraftInstance {
     private static final Pattern startPreviewPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\)$");
     private static final Pattern startWorldGenPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Preparing spawn area: 0%$");
     private static final Pattern openToLanPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Started serving on \\d+$");
-    private static final Pattern biomePattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Spawn biome: biome\\.minecraft\\..+$");
+    private static final Pattern startPreviewWithBiomePattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\) in biome .+$");
 
     // Basic instance information
     private final WindowTitleInfo titleInfo;
@@ -519,10 +519,10 @@ public class MinecraftInstance {
                         pressF3Esc();
                     }
                     julti.getResetManager().notifyPreviewLoaded(this);
-                } else if (options.resetForBeach && biomePattern.matcher(line).matches()) {
+                } else if (options.resetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
-                    String[] args = line.split("\\.");
+                    String[] args = line.split(" ");
                     biome = args[args.length - 1];
                     julti.getResetManager().notifyPreviewLoaded(this);
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
