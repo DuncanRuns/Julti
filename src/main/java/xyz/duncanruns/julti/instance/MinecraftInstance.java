@@ -236,6 +236,9 @@ public class MinecraftInstance {
                         i--;
                     }
                     pressEsc();
+                    // 2 Extra Escape Presses to make sure mouse is centered on next menu open
+                    pressEsc();
+                    pressEsc();
                     if (options.coopMode) {
                         openToLan();
                     }
