@@ -79,6 +79,14 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             open.setText("Launch");
             popupMenu.add(open);
         }
+        JMenuItem openFolder = new JMenuItem();
+        openFolder.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                instance.openFolder();
+            }
+        });
+        openFolder.setText("Open Folder");
         JMenuItem remove = new JMenuItem();
         remove.setAction(new AbstractAction() {
             @Override
@@ -88,6 +96,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             }
         });
         remove.setText("Remove");
+        popupMenu.add(openFolder);
         popupMenu.add(remove);
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
     }

@@ -669,6 +669,14 @@ public class MinecraftInstance {
         return System.currentTimeMillis() - lastPreviewStart < millis;
     }
 
+    public void openFolder() {
+        try {
+            Desktop.getDesktop().browse(getInstancePath().toUri());
+        } catch (IOException ignored) {
+
+        }
+    }
+
     private enum ResetType {
         EXIT_WORLD, // Esc+Shift+Tab+Enter always
         HAS_PREVIEW, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
