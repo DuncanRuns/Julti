@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
-import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
