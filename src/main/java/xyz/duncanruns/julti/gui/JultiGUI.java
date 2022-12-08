@@ -1,6 +1,10 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.util.LogReceiver;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class JultiGUI extends JFrame {
+    private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
     private final Julti julti;
     private boolean closed;
     private ControlPanel controlPanel;
@@ -90,5 +95,10 @@ public class JultiGUI extends JFrame {
         closed = true;
         julti.stop();
         System.exit(0);
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 }

@@ -1,13 +1,17 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatMarginBorder;
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
+import xyz.duncanruns.julti.util.SyncUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
 public class ControlPanel extends JPanel {
     private final Julti julti;
@@ -40,6 +44,21 @@ public class ControlPanel extends JPanel {
             Thread.currentThread().setName("julti-gui");
             for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
                 instance.ensureWindowState();
+            }
+        }));
+        add(GUIUtil.getButtonWithMethod(new JButton("Sync Instances"), actionEvent -> {
+            Thread.currentThread().setName("julti-gui");
+            List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
+            int ans = JOptionPane.showConfirmDialog(this, "Copy mods and config from " + instances.get(0) + " to all other instances?", "Julti: Sync Instances", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (ans == 0) {
+                new Thread(() -> {
+                    Thread.currentThread().setName("instance-sync");
+                    try {
+                        SyncUtil.sync(instances, instances.get(0), true, true);
+                    } catch (IOException e) {
+                        JultiGUI.log(Level.ERROR, "Failed to copy files:\n" + e.getMessage());
+                    }
+                }).start();
             }
         }));
         add(GUIUtil.getButtonWithMethod(new JButton("Options..."), actionEvent -> {
