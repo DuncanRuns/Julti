@@ -50,7 +50,6 @@ public class MinecraftInstance {
     // State tracking
     private boolean inPreview = false;
     private boolean worldLoaded = false;
-    private boolean worldGenerating = false;
     private long lastPreviewStart = -1L;
     private String biome = "";
     private int loadingPercent = 0;
@@ -440,7 +439,6 @@ public class MinecraftInstance {
                 runNoAtumLeave();
         }
         worldLoaded = false;
-        worldGenerating = false;
         loadingPercent = -1;
         setInPreview(false);
         log(Level.INFO, "Reset instance " + getName());
@@ -492,15 +490,11 @@ public class MinecraftInstance {
     }
 
     public boolean shouldDirtCover() {
-        return hasPreviewEverStarted() && (!isWorldGenerating()) && (!isWorldLoaded()) && (!isPreviewLoaded()) && (getLoadingPercent() < JultiOptions.getInstance().dirtReleasePercent);
+        return hasPreviewEverStarted() && (!isWorldLoaded()) && (getLoadingPercent() < JultiOptions.getInstance().dirtReleasePercent);
     }
 
     public boolean hasPreviewEverStarted() {
         return lastPreviewStart != -1L;
-    }
-
-    public boolean isWorldGenerating() {
-        return worldGenerating;
     }
 
     synchronized public boolean isWorldLoaded() {
@@ -542,7 +536,6 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
-                    worldGenerating = false;
                     if (options.pauseOnLoad && !isActive()) {
                         if (options.useF3) {
                             pressF3Esc();
@@ -554,7 +547,6 @@ public class MinecraftInstance {
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
                 } else if (isPreviewLoaded() && spawnAreaPattern.matcher(line).matches()) {
-                    worldGenerating = true;
                     String[] args = line.split(" ");
                     try {
                         loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
