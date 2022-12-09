@@ -1,3 +1,6 @@
+Changes in v0.11.2:
+- Dirt Cover % setting now actually works
+
 Changes in v0.11.1:
 - Major dirt cover fix, whoopsie
 
