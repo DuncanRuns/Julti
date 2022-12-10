@@ -29,6 +29,21 @@ public final class GUIUtil {
         return b;
     }
 
+    public static JPanel withConstantSize(Component component, Dimension dimension) {
+        JPanel panel = new JPanel();
+        panel.getInsets().set(0, 0, 0, 0);
+        panel.setSize(dimension);
+        panel.setPreferredSize(dimension);
+        panel.add(component);
+        return panel;
+    }
+
+    public static JSeparator createSeparator() {
+        JSeparator jSeparator = new JSeparator();
+        jSeparator.setMaximumSize(new Dimension(10000, 2));
+        return jSeparator;
+    }
+
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
@@ -82,7 +97,7 @@ public final class GUIUtil {
         return createCheckBoxFromOption(label, optionName, null);
     }
 
-    public static Component createSpacerBox() {
+    public static Component createSpacer() {
         return Box.createRigidArea(new Dimension(0, 5));
     }
 
@@ -105,9 +120,17 @@ public final class GUIUtil {
             label.setText(displayName + " (" + newCurrent + ")");
         });
 
+        GUIUtil.setActualSize(slider, 200, 23);
         panel.add(slider);
         panel.add(label);
 
         return panel;
+    }
+
+    public static void setActualSize(JComponent component, int x, int y) {
+        Dimension d = new Dimension(x, y);
+        component.setSize(d);
+        component.setMaximumSize(d);
+        component.setPreferredSize(d);
     }
 }

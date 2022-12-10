@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.gui;
 
-import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -13,11 +12,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.NumberFormatter;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Timer;
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class OptionsGUI extends JFrame {
         reloadComponents();
     }
 
-    private static JFormattedTextField getWRCDField() {
+    private static Component getWRCDField() {
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
         NumberFormatter formatter = new NumberFormatter(format);
@@ -63,6 +64,7 @@ public class OptionsGUI extends JFrame {
                 JultiOptions.getInstance().wallResetCooldown = (long) field.getValue();
             }
         });
+        GUIUtil.setActualSize(field, 50, 23);
         return field;
     }
 
@@ -93,24 +95,26 @@ public class OptionsGUI extends JFrame {
     private void reloadComponents() {
         getContentPane().removeAll();
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         setContentPane(tabbedPane);
-        int i = 0;
-        addComponentsProfile(i++);
-        addComponentsReset(i++);
-        addComponentsWall(i++);
-        addComponentsWindow(i++);
-        addComponentsHotkey(i++);
-        addComponentsOBS(i++);
-        addComponentsOther(i++);
+        addComponentsProfile();
+        addComponentsReset();
+        addComponentsWall();
+        addComponentsWindow();
+        addComponentsHotkey();
+        addComponentsOBS();
+        addComponentsOther();
         revalidate();
         repaint();
     }
 
-    private void addComponentsOther(int panelNum) {
+    private void addComponentsOther() {
         JPanel panel = createNewOptionsPanel("Other");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         JButton counterButton = new JButton("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
         counterButton.addActionListener(e -> {
@@ -120,14 +124,20 @@ public class OptionsGUI extends JFrame {
             counterButton.setText("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
         });
         panel.add(GUIUtil.leftJustify(counterButton));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Clear Worlds", "autoClearWorlds")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path:")));
+        panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path (.exe):")));
+        panel.add(GUIUtil.createSpacer());
 
-        JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath, 20);
+        JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath);
+        GUIUtil.setActualSize(mmcField, 300, 23);
         mmcField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -148,11 +158,13 @@ public class OptionsGUI extends JFrame {
                 JultiOptions.getInstance().multiMCPath = mmcField.getText();
             }
         });
-        panel.add(GUIUtil.leftJustify(mmcField));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add((GUIUtil.leftJustify(mmcField)));
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> runMMCExecutableHelper(mmcField))));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
             reload();
@@ -165,7 +177,7 @@ public class OptionsGUI extends JFrame {
         })));
 
         if (!JultiOptions.getInstance().useAffinity) return;
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Currently Playing", "threadsPlaying")));
@@ -184,6 +196,8 @@ public class OptionsGUI extends JFrame {
         possibleLocations.add(userHome.resolve("Documents"));
         possibleLocations.add(userHome.resolve("AppData").resolve("Roaming"));
         possibleLocations.add(userHome.resolve("AppData").resolve("Local").resolve("Programs"));
+        possibleLocations.add(userHome.resolve("Downloads"));
+        possibleLocations.add(Paths.get("C:\\"));
 
         List<Path> candidates = new ArrayList<>();
         for (Path possibleLocation : possibleLocations) {
@@ -248,11 +262,13 @@ public class OptionsGUI extends JFrame {
         }
     }
 
-    private void addComponentsOBS(int panelNum) {
+    private void addComponentsOBS() {
         JPanel panel = createNewOptionsPanel("OBS");
 
         panel.add(GUIUtil.leftJustify(new JLabel("OBS Settings")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         JButton dirtCoverButton = new JButton("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
         dirtCoverButton.addActionListener(e -> {
@@ -262,70 +278,81 @@ public class OptionsGUI extends JFrame {
             dirtCoverButton.setText("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
         });
         panel.add(GUIUtil.leftJustify(dirtCoverButton));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reload())));
         if (JultiOptions.getInstance().obsPressHotkeys) {
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt", "obsUseAlt")));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", julti, false)));
         }
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("No settings here are required to use the OBS Link Script.")));
     }
 
-    private void addComponentsHotkey(int panelNum) {
+    private void addComponentsHotkey() {
         JPanel panel = createNewOptionsPanel("Hotkeys");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Hotkeys")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("In-Game Hotkeys")));
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("resetHotkey", "Reset", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Hotkeys")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallResetHotkey", "Full Reset", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallSingleResetHotkey", "Reset Instance", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", julti, true)));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", julti, true)));
 
     }
 
     private JPanel createNewOptionsPanel(String name) {
         JPanel panel = new JPanel();
-        JPanel outerPanel = new JPanel();
-        outerPanel.setBorder(new FlatBorder());
-        panel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        outerPanel.add(panel);
-        tabbedPane.add(name, new JScrollPane(outerPanel));
+        tabbedPane.add(name, new JScrollPane(panel));
         return panel;
     }
 
-    private void addComponentsProfile(int panelNum) {
+    private void addComponentsProfile() {
         JPanel panel = createNewOptionsPanel("Profile");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Profile")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         JComboBox<String> profileSelectBox = new JComboBox<>(JultiOptions.getProfileNames());
+        GUIUtil.setActualSize(profileSelectBox, 200, 22);
         profileSelectBox.addActionListener(e -> {
             julti.changeProfile(profileSelectBox.getSelectedItem().toString());
             reloadComponents();
         });
 
         panel.add(GUIUtil.leftJustify(profileSelectBox));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         OptionsGUI thisGUI = this;
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), actionEvent -> {
@@ -344,7 +371,7 @@ public class OptionsGUI extends JFrame {
             reloadComponents();
         })));
 
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("New"), actionEvent -> {
             String newName = JOptionPane.showInputDialog(thisGUI, "Enter a new profile name:", "Julti: New Profile", JOptionPane.QUESTION_MESSAGE);
             if (newName != null) {
@@ -359,14 +386,16 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void addComponentsWall(int panelNum) {
+    private void addComponentsWall() {
         JPanel panel = createNewOptionsPanel("Wall");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         if (JultiOptions.getInstance().resetMode != 1) {
-            addUJWWOption(panelNum, panel);
+            addUJWWOption(panel);
             panel.add(GUIUtil.leftJustify(new JLabel("Wall resetting mode is disabled.")));
             panel.add(GUIUtil.leftJustify(new JLabel("You can still render the")));
             panel.add(GUIUtil.leftJustify(new JLabel("wall window with the above setting. ")));
@@ -377,48 +406,56 @@ public class OptionsGUI extends JFrame {
             reload();
         })));
 
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay")));
 
 
         if (!JultiOptions.getInstance().wallResetAllAfterPlaying) {
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reload())));
             if (JultiOptions.getInstance().wallBypass) {
-                panel.add(GUIUtil.createSpacerBox());
+                panel.add(GUIUtil.createSpacer());
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
             }
         }
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
         panel.add(GUIUtil.leftJustify(getWRCDField()));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reload())));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         if (!JultiOptions.getInstance().autoCalcWallSize) {
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
         }
 
-        addUJWWOption(panelNum, panel);
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        addUJWWOption(panel);
 
         if (JultiOptions.getInstance().useJultiWallWindow) {
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause Rendering During Play", "pauseRenderingDuringPlay", b -> warnUnverifiable())));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcons")));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances (May lag)", "wallDarkenLocked")));
-            panel.add(GUIUtil.createSpacerBox());
+            panel.add(GUIUtil.createSpacer());
             JSlider darkenSlider = new JSlider(0, 0, 100, JultiOptions.getInstance().wallDarkenLevel);
             darkenSlider.addChangeListener(e -> JultiOptions.getInstance().wallDarkenLevel = darkenSlider.getValue());
+            GUIUtil.setActualSize(darkenSlider, 200, 23);
             panel.add(GUIUtil.leftJustify(darkenSlider));
         }
 
     }
 
-    private void addUJWWOption(int panelNum, JPanel panel) {
+    private void addUJWWOption(JPanel panel) {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
             reload();
             julti.checkWallWindow();
@@ -435,13 +472,16 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void addComponentsReset(int panelNum) {
+    private void addComponentsReset() {
         JPanel panel = createNewOptionsPanel("Resetting");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Settings")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Style:")));
+
         JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
         resetStyleBox.setSelectedItem(RESET_MODES[JultiOptions.getInstance().resetMode]);
         resetStyleBox.addActionListener(e -> {
@@ -449,20 +489,25 @@ public class OptionsGUI extends JFrame {
             reload();
             julti.reloadManagers();
         });
+        GUIUtil.setActualSize(resetStyleBox, 100, 23);
 
         panel.add(GUIUtil.leftJustify(resetStyleBox));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause On Load", "pauseOnLoad")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use F3", "useF3")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Clipboard on Reset:")));
 
-        JTextField corField = new JTextField(JultiOptions.getInstance().clipboardOnReset, 20);
+        JTextField corField = new JTextField(JultiOptions.getInstance().clipboardOnReset);
         corField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -483,8 +528,8 @@ public class OptionsGUI extends JFrame {
                 JultiOptions.getInstance().clipboardOnReset = corField.getText();
             }
         });
-
-        panel.add(corField);
+        GUIUtil.setActualSize(corField, 200, 23);
+        panel.add(GUIUtil.leftJustify(corField));
     }
 
     private void reload() {
@@ -501,26 +546,30 @@ public class OptionsGUI extends JFrame {
 
     }
 
-    private void addComponentsWindow(int panelNum) {
+    private void addComponentsWindow() {
         JPanel panel = createNewOptionsPanel("Window");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reload())));
 
         if (!JultiOptions.getInstance().letJultiMoveWindows) return;
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize", "useMaximize")));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
         WindowOptionComponent windowOptions = new WindowOptionComponent();
         panel.add(windowOptions);
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
 
         OptionsGUI thisGUI = this;
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Choose Monitor"), actionEvent -> {
@@ -542,7 +591,9 @@ public class OptionsGUI extends JFrame {
             windowOptions.reload();
             revalidate();
         })));
-        panel.add(GUIUtil.createSpacerBox());
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
 
 
         final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
@@ -552,6 +603,7 @@ public class OptionsGUI extends JFrame {
             JultiOptions.getInstance().wideResetSquish = squishSlider.getValue() / 10f;
             squishLabel.setText("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
         });
+        GUIUtil.setActualSize(squishSlider, 200, 23);
         panel.add(GUIUtil.leftJustify(squishSlider));
     }
 

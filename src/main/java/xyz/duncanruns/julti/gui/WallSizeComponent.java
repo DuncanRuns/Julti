@@ -24,8 +24,8 @@ public class WallSizeComponent extends JPanel {
     }
 
     private static JPanel getSizePanel() {
-        JPanel positionPanel = new JPanel();
-        positionPanel.setLayout(new BoxLayout(positionPanel, 0));
+        JPanel sizePanel = new JPanel();
+        sizePanel.setLayout(new BoxLayout(sizePanel, 0));
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
         NumberFormatter formatter = new NumberFormatter(format);
@@ -33,8 +33,10 @@ public class WallSizeComponent extends JPanel {
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField rowField = new JFormattedTextField(formatter);
         JFormattedTextField columnField = new JFormattedTextField(formatter);
-        positionPanel.add(rowField);
-        positionPanel.add(columnField);
+        GUIUtil.setActualSize(rowField, 50, 23);
+        GUIUtil.setActualSize(columnField, 50, 23);
+        sizePanel.add(rowField);
+        sizePanel.add(columnField);
         JultiOptions options = JultiOptions.getInstance();
         rowField.setValue(options.overrideRowsAmount);
         columnField.setValue(options.overrideColumnsAmount);
@@ -62,6 +64,7 @@ public class WallSizeComponent extends JPanel {
         };
         rowField.getDocument().addDocumentListener(documentListener);
         columnField.getDocument().addDocumentListener(documentListener);
-        return positionPanel;
+        GUIUtil.setActualSize(sizePanel, 200, 23);
+        return sizePanel;
     }
 }

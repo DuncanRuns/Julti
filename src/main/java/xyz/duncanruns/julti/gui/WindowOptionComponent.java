@@ -36,6 +36,8 @@ public class WindowOptionComponent extends JPanel {
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField xField = new JFormattedTextField(formatter);
         JFormattedTextField yField = new JFormattedTextField(formatter);
+        GUIUtil.setActualSize(xField, 50, 23);
+        GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
         int[] windowPos = JultiOptions.getInstance().windowPos;
@@ -64,6 +66,7 @@ public class WindowOptionComponent extends JPanel {
         };
         xField.getDocument().addDocumentListener(documentListener);
         yField.getDocument().addDocumentListener(documentListener);
+        GUIUtil.setActualSize(positionPanel, 200, 23);
         return positionPanel;
     }
 
@@ -77,6 +80,8 @@ public class WindowOptionComponent extends JPanel {
         formatter.setCommitsOnValidEdit(true);
         JFormattedTextField xField = new JFormattedTextField(formatter);
         JFormattedTextField yField = new JFormattedTextField(formatter);
+        GUIUtil.setActualSize(xField, 50, 23);
+        GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
         final int[] windowSize = JultiOptions.getInstance().windowSize;
@@ -105,6 +110,7 @@ public class WindowOptionComponent extends JPanel {
         };
         xField.getDocument().addDocumentListener(documentListener);
         yField.getDocument().addDocumentListener(documentListener);
+        GUIUtil.setActualSize(positionPanel, 200, 23);
         return positionPanel;
     }
 }
