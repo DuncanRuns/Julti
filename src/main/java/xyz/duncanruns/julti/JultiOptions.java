@@ -100,6 +100,7 @@ public final class JultiOptions {
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
+    public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
     public boolean resetForBeach = false;

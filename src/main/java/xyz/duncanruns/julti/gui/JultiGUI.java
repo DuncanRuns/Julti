@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 import javax.swing.*;
@@ -72,6 +73,8 @@ public class JultiGUI extends JFrame {
 
     private void setupWindow() {
         setSize(672, 378);
+        int[] lastGUIPos = JultiOptions.getInstance().lastGUIPos;
+        setLocation(lastGUIPos[0], lastGUIPos[1]);
         setTitle("Julti");
         setVisible(true);
         addWindowListener(new WindowAdapter() {
@@ -93,6 +96,7 @@ public class JultiGUI extends JFrame {
 
     private void onClose() {
         closed = true;
+        JultiOptions.getInstance().lastGUIPos = new int[]{getLocation().x, getLocation().y};
         julti.stop();
         System.exit(0);
     }
