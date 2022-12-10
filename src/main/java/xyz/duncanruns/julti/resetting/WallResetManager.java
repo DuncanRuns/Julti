@@ -152,7 +152,7 @@ public class WallResetManager extends ResetManager {
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
         if (JultiOptions.getInstance().resetForBeach) {
-            if (!(instance.getBiome().contains("beach"))) {
+            if (!(instance.getBiome().equals("beach"))) {
                 if (julti.isWallActive())
                     resetInstance(instance, true);
             } else {
