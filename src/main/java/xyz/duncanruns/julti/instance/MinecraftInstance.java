@@ -235,7 +235,7 @@ public class MinecraftInstance {
                         i--;
                     }
                     pressEsc();
-                    if(options.wideResetSquish > 1.0) {
+                    if (options.wideResetSquish > 1.0) {
                         // 2 Extra Escape Presses to make sure mouse is centered on next menu open
                         pressEsc();
                         pressEsc();
@@ -501,12 +501,12 @@ public class MinecraftInstance {
         return worldLoaded;
     }
 
-    synchronized public boolean isPreviewLoaded() {
-        return inPreview;
-    }
-
     public int getLoadingPercent() {
         return loadingPercent;
+    }
+
+    synchronized public boolean isPreviewLoaded() {
+        return inPreview;
     }
 
     public String getBiome() {
