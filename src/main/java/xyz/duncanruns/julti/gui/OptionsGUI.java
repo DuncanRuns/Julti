@@ -155,7 +155,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacerBox());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
-            reloadAndSwitch(panelNum);
+            reload();
             if (b) {
                 AffinityManager.start(julti);
             } else {
@@ -264,7 +264,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(dirtCoverButton));
         panel.add(GUIUtil.createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reloadAndSwitch(panelNum))));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reload())));
         if (JultiOptions.getInstance().obsPressHotkeys) {
             panel.add(GUIUtil.createSpacerBox());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
@@ -374,7 +374,7 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
             warnUnverifiable();
-            reloadAndSwitch(panelNum);
+            reload();
         })));
 
         panel.add(GUIUtil.createSpacerBox());
@@ -383,7 +383,7 @@ public class OptionsGUI extends JFrame {
 
         if (!JultiOptions.getInstance().wallResetAllAfterPlaying) {
             panel.add(GUIUtil.createSpacerBox());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reloadAndSwitch(panelNum))));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reload())));
             if (JultiOptions.getInstance().wallBypass) {
                 panel.add(GUIUtil.createSpacerBox());
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
@@ -394,7 +394,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(getWRCDField()));
         panel.add(GUIUtil.createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reloadAndSwitch(panelNum))));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reload())));
         panel.add(GUIUtil.createSpacerBox());
         if (!JultiOptions.getInstance().autoCalcWallSize) {
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
@@ -420,7 +420,7 @@ public class OptionsGUI extends JFrame {
 
     private void addUJWWOption(int panelNum, JPanel panel) {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
-            reloadAndSwitch(panelNum);
+            reload();
             julti.checkWallWindow();
             if (b) {
                 new Timer().schedule(new TimerTask() {
@@ -446,7 +446,7 @@ public class OptionsGUI extends JFrame {
         resetStyleBox.setSelectedItem(RESET_MODES[JultiOptions.getInstance().resetMode]);
         resetStyleBox.addActionListener(e -> {
             JultiOptions.getInstance().resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
-            reloadAndSwitch(panelNum);
+            reload();
             julti.reloadManagers();
         });
 
@@ -487,9 +487,18 @@ public class OptionsGUI extends JFrame {
         panel.add(corField);
     }
 
-    private void reloadAndSwitch(int panelNum) {
+    private void reload() {
+        // Get current index
+        int index = getTabbedPane().getSelectedIndex();
+        // Get current scroll
+        int s = ((JScrollPane) getTabbedPane().getSelectedComponent()).getVerticalScrollBar().getValue();
+        // Reload
         reloadComponents();
-        getTabbedPane().setSelectedIndex(panelNum);
+        // Set index
+        getTabbedPane().setSelectedIndex(index);
+        // Set scroll
+        ((JScrollPane) getTabbedPane().getSelectedComponent()).getVerticalScrollBar().setValue(s);
+
     }
 
     private void addComponentsWindow(int panelNum) {
@@ -498,7 +507,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
         panel.add(GUIUtil.createSpacerBox());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reloadAndSwitch(panelNum))));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reload())));
 
         if (!JultiOptions.getInstance().letJultiMoveWindows) return;
         panel.add(GUIUtil.createSpacerBox());
