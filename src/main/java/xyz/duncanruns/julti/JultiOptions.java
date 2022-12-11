@@ -102,8 +102,11 @@ public final class JultiOptions {
     public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
-    public boolean resetForBeach = false;
+
+    // Auto Reset
+    public boolean autoResetForBeach = false;
     public boolean autoResetBackground = true;
+    public boolean autoCheckAllOnWall = true;
 
     public JultiOptions(Path location) {
         this.location = location;

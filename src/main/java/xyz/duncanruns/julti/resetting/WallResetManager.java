@@ -100,10 +100,6 @@ public class WallResetManager extends ResetManager {
         return true;
     }
 
-    private void lockInstance(MinecraftInstance instance) {
-        lockedInstances.add(instance);
-    }
-
     @Override
     public boolean doWallFocusReset() {
         if (!julti.isWallActive()) {
@@ -152,12 +148,14 @@ public class WallResetManager extends ResetManager {
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
         JultiOptions options = JultiOptions.getInstance();
-        if (options.resetForBeach) {
+        if (options.autoResetForBeach) {
             if (!(instance.getBiome().equals("beach"))) {
                 if (options.autoResetBackground || julti.isWallActive())
                     resetInstance(instance, true);
             } else {
-                lockInstance(instance);
+                if ((!options.autoCheckAllOnWall) || julti.getInstanceManager().getSelectedInstance() == null) {
+                    lockInstance(instance);
+                }
             }
         }
     }
@@ -297,7 +295,9 @@ public class WallResetManager extends ResetManager {
             // No more instances to play
             julti.focusWall();
             julti.switchToWallScene();
-            if (options.resetForBeach) {
+            if (options.autoResetForBeach) {
+                if (options.autoCheckAllOnWall)
+                    instances.stream().filter(instance -> instance.getBiome().equals("beach")).forEach(this::lockInstance);
                 instances.stream().filter(instance -> !lockedInstances.contains(instance)).forEach(instance -> resetInstance(instance, true));
             }
         } else {
@@ -314,5 +314,9 @@ public class WallResetManager extends ResetManager {
             return true;
         }
         return false;
+    }
+
+    private void lockInstance(MinecraftInstance instance) {
+        lockedInstances.add(instance);
     }
 }

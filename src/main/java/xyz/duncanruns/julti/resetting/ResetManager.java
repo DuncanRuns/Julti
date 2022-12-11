@@ -65,7 +65,7 @@ public abstract class ResetManager {
     }
 
     public boolean shouldDirtCover(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().resetForBeach) {
+        if (JultiOptions.getInstance().autoResetForBeach) {
             return instance.hasPreviewEverStarted() && (((!getLockedInstances().contains(instance)) && (!instance.isPreviewLoaded()) && (!instance.isWorldLoaded())) || instance.shouldDirtCover());
         }
         return instance.shouldDirtCover();

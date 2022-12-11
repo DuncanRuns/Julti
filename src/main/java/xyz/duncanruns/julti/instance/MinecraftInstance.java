@@ -517,14 +517,14 @@ public class MinecraftInstance {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
-                if (!options.resetForBeach && startPreviewPattern.matcher(line).matches()) {
+                if (!options.autoResetForBeach && startPreviewPattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
                     if (options.useF3) {
                         pressF3Esc();
                     }
                     julti.getResetManager().notifyPreviewLoaded(this);
-                } else if (options.resetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
+                } else if (options.autoResetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
                     if (options.useF3) {
