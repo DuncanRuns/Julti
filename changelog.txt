@@ -1,3 +1,7 @@
+v0.11.4:
+- Removed maximize option, now on by default for non-borderless
+- Added Herobrine
+
 v0.11.3:
 - Overhauled the options GUI visuals
 - Julti GUI will now remember the location it was in when re-opened
