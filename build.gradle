@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '0.11.2'
+version '0.11.3'
 
 tasks.withType(JavaCompile) {
     options.release = 11

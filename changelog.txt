@@ -1,3 +1,8 @@
+v0.11.3:
+- Overhauled the options GUI visuals
+- Julti GUI will now remember the location it was in when re-opened
+- Added more locations for auto-detecting MultiMC/Prism Launcher.
+
 Changes in v0.11.2:
 - Dirt Cover % setting now actually works
 
