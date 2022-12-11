@@ -151,9 +151,10 @@ public class WallResetManager extends ResetManager {
     @Override
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
-        if (JultiOptions.getInstance().resetForBeach) {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.resetForBeach) {
             if (!(instance.getBiome().equals("beach"))) {
-                if (julti.isWallActive())
+                if (options.autoResetBackground || julti.isWallActive())
                     resetInstance(instance, true);
             } else {
                 lockInstance(instance);

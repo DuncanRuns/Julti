@@ -104,6 +104,7 @@ public final class JultiOptions {
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
     public boolean resetForBeach = false;
+    public boolean autoResetBackground = true;
 
     public JultiOptions(Path location) {
         this.location = location;
