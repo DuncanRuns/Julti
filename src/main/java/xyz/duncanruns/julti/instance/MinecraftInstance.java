@@ -263,14 +263,14 @@ public class MinecraftInstance {
                 options.windowSize[0] == rectangle.width &&
                 options.windowSize[1] == rectangle.height &&
                 options.useBorderless == isBorderless() &&
-                (options.useBorderless || options.useMaximize == isMaximized())
+                (options.useBorderless || isMaximized())
         ) return;
 
         if (options.useBorderless) setBorderless();
         else undoBorderless();
 
 
-        if (options.useMaximize && !options.useBorderless) maximize();
+        if (!options.useBorderless) maximize();
         else {
             restore();
             move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
@@ -368,7 +368,7 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
         Rectangle resultRectangle = new Rectangle(options.windowPos[0], options.windowPos[1], options.windowSize[0], (int) (options.windowSize[1] / squish));
-        if (options.useMaximize && isMaximized()) {
+        if (isMaximized()) {
             restore();
         } else {
             if (getWindowRectangle().equals(resultRectangle)) return;

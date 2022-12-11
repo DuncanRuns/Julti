@@ -562,8 +562,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize", "useMaximize")));
-        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
