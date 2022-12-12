@@ -659,7 +659,12 @@ public class MinecraftInstance {
         for (int i = 0; i < 6 && !worldsToRemove.isEmpty(); i++) {
             worldsToRemove.remove(0);
         }
+        int i = 0;
+        int total = worldsToRemove.size();
         for (Path path : worldsToRemove) {
+            if (i++ % 50 == 0) {
+                InstanceManager.log(Level.INFO, (100 * i / total) + "%");
+            }
             Files.walk(path)
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)

@@ -186,9 +186,13 @@ public class InstanceManager {
     }
 
     public void clearAllWorlds() {
-        for (MinecraftInstance instance : new ArrayList<>(instances)) {
-            instance.tryClearWorlds();
-        }
+        new Thread(() -> {
+            Thread.currentThread().setName("world-clearing");
+            for (MinecraftInstance instance : new ArrayList<>(instances)) {
+                log(Level.INFO, "Clearing worlds for " + instance + "...");
+                instance.tryClearWorlds();
+            }
+        }).start();
     }
 
     synchronized public void removeInstance(MinecraftInstance instance) {

@@ -83,7 +83,6 @@ public final class JultiOptions {
     public List<Integer> switchToWallHotkey = Collections.singletonList(Win32Con.VK_F12);
 
     // Other
-    public boolean autoClearWorlds = true;
     public String multiMCPath = "";
     public boolean useAffinity = true;
     public int resetCounter = 0;

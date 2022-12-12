@@ -98,7 +98,11 @@ public final class GUIUtil {
     }
 
     public static Component createSpacer() {
-        return Box.createRigidArea(new Dimension(0, 5));
+        return createSpacer(5);
+    }
+
+    public static Component createSpacer(int height) {
+        return Box.createRigidArea(new Dimension(0, height));
     }
 
     public static Component createThreadsSlider(String displayName, String optionName) {
@@ -127,7 +131,7 @@ public final class GUIUtil {
         return panel;
     }
 
-    public static void setActualSize(JComponent component, int x, int y) {
+    public static void setActualSize(Component component, int x, int y) {
         Dimension d = new Dimension(x, y);
         component.setSize(d);
         component.setMaximumSize(d);

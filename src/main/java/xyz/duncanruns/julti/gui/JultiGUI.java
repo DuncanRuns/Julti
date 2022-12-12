@@ -46,7 +46,7 @@ public class JultiGUI extends JFrame {
                 1,
                 0,
                 1,
-                1,
+                2,
                 0,
                 0,
                 11,
@@ -59,7 +59,7 @@ public class JultiGUI extends JFrame {
         add(new InstancesPanel(julti, () -> isActive() || isOptionsActive(), this::isClosed), new GridBagConstraints(
                 0,
                 1,
-                2,
+                1,
                 1,
                 0,
                 0,
@@ -72,7 +72,7 @@ public class JultiGUI extends JFrame {
     }
 
     private void setupWindow() {
-        setSize(672, 378);
+        setSize(800, 420);
         int[] lastGUIPos = JultiOptions.getInstance().lastGUIPos;
         setLocation(lastGUIPos[0], lastGUIPos[1]);
         setTitle("Julti");

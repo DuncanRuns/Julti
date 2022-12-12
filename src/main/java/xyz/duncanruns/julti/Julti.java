@@ -37,7 +37,6 @@ public class Julti {
     private ScheduledExecutorService logCheckExecutor;
     private long last2SecCycle;
     private long lastStateOutput;
-    private long lastWorldClear;
     private WallWindow wallWindow = null;
     private boolean stopped;
     private String currentSceneId = "W";
@@ -51,7 +50,6 @@ public class Julti {
 
         last2SecCycle = 0;
         lastStateOutput = 0;
-        lastWorldClear = 0;
     }
 
     private static String getVersion() {
@@ -506,11 +504,6 @@ public class Julti {
             MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
             ensureCorrectSceneState(selectedInstance);
             ensureSleepBG(selectedInstance);
-        }
-
-        if (options.autoClearWorlds && (current - lastWorldClear) > 20000) {
-            lastWorldClear = current;
-            instanceManager.clearAllWorlds();
         }
 
         if (current - lastStateOutput > 50) {

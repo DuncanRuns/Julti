@@ -1,3 +1,8 @@
+v0.11.5:
+- Removed auto clear worlds option, replacing with a clear worlds button on the main GUI.
+- Sorted main menu buttons
+- Addeded Herobrine
+
 v0.11.4:
 - Removed maximize option, now on by default for non-borderless
 - Added Herobrine
