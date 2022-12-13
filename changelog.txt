@@ -1,5 +1,10 @@
+v0.12.0:
+- Added OBS projector name format option
+- Changed wall activation method for Julti wall to fix it sometimes failing to activate
+- Removed Hero
+
 v0.11.5:
-- Removed auto clear worlds option, replacing with a clear worlds button on the main GUI.
+- Removed auto clear worlds option, replacing with a clear worlds button on the main GUI
 - Sorted main menu buttons
 - Addeded Herobrine
 
