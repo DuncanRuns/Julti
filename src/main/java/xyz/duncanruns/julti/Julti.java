@@ -564,7 +564,7 @@ public class Julti {
         if (JultiOptions.getInstance().useJultiWallWindow)
             return wallWindow != null && wallWindow.isActive();
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
-        if (currentHwnd != null && HwndUtil.hwndExists(currentHwnd)) {
+        if (HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd)) {
             String currentWindowTitle = HwndUtil.getHwndTitle(currentHwnd).toLowerCase();
             return currentWindowTitle.contains("projector (scene)") && currentWindowTitle.contains("wall");
         }
@@ -638,11 +638,8 @@ public class Julti {
     }
 
     public void focusWall() {
+        JultiOptions options = JultiOptions.getInstance();
         SleepBGUtil.disableLock();
-        if (JultiOptions.getInstance().useJultiWallWindow) {
-            wallWindow.requestFocus();
-        } else {
-            HwndUtil.activateHwnd(HwndUtil.getOBSWallHwnd());
-        }
+        HwndUtil.activateHwnd(options.useJultiWallWindow ? wallWindow.getHwnd() : HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat));
     }
 }

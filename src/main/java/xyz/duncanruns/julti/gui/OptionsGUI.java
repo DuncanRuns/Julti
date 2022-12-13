@@ -276,6 +276,33 @@ public class OptionsGUI extends JFrame {
         });
         panel.add(GUIUtil.leftJustify(dirtCoverButton));
         panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Projector Name Format:")));
+        JTextField ownfField = new JTextField(JultiOptions.getInstance().obsWindowNameFormat);
+        ownfField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
+                JultiOptions.getInstance().obsWindowNameFormat = ownfField.getText();
+            }
+        });
+        GUIUtil.setActualSize(ownfField, 200, 23);
+        panel.add(GUIUtil.leftJustify(ownfField));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 

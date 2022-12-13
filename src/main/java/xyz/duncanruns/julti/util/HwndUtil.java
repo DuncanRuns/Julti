@@ -23,6 +23,7 @@ public final class HwndUtil {
     private static final Pattern MC_PATTERN = Pattern.compile("(^Minecraft\\* - Instance \\d\\d?$)|(^Minecraft\\*? 1\\.[1-9]\\d*(\\.[1-9]\\d*)?( - .+)?$)");
     private static final Robot ROBOT;
     private static final PowerShell POWER_SHELL;
+    private static Pointer obsHwnd = null;
 
     static {
         try {
@@ -44,17 +45,34 @@ public final class HwndUtil {
         return User32.INSTANCE.GetForegroundWindow();
     }
 
-    public static Pointer getOBSWallHwnd() {
-        AtomicReference<Pointer> out = new AtomicReference<>(null);
+    public static Pointer getOBSWallHwnd(String projectorFormat) {
+
+        if (obsHwnd != null) {
+            if (hwndExists(obsHwnd) && isOBSWallHwnd(projectorFormat, obsHwnd)) {
+                return obsHwnd;
+            }
+        }
+
+        obsHwnd = null;
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
             String title = getHwndTitle(hWnd).toLowerCase();
-            if (title.contains("projector (scene)") && title.contains("wall")) {
-                out.set(hWnd);
+            if (isOBSWallHwnd(projectorFormat, hWnd)) {
+                obsHwnd = hWnd;
                 return false;
             }
             return true;
         }, null);
-        return out.get();
+        return obsHwnd;
+    }
+
+    public static boolean hwndExists(Pointer hwnd) {
+        return User32.INSTANCE.IsWindow(hwnd);
+    }
+
+    public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
+        if (hwnd == null) return false;
+        final Pattern pattern = Pattern.compile('^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$');
+        return pattern.matcher(getHwndTitle(hwnd).toLowerCase()).matches();
     }
 
     public static String getHwndTitle(Pointer hwnd) {
@@ -83,10 +101,6 @@ public final class HwndUtil {
             return true;
         }, null);
         return list;
-    }
-
-    public static boolean hwndExists(Pointer hwnd) {
-        return User32.INSTANCE.IsWindow(hwnd);
     }
 
     // Sets a window to be borderless but does not move it.
@@ -148,9 +162,11 @@ public final class HwndUtil {
     public static void activateHwnd(Pointer hwnd) {
         // Windows requires alt to be pressed to switch to a window.... maybe?
         // It needed it in the python implementation but apparently not here. Will keep it anyway.
+        if (hwnd == null) return;
         ROBOT.keyPress(KeyEvent.VK_ALT);
         ROBOT.keyRelease(KeyEvent.VK_ALT);
         User32.INSTANCE.SetForegroundWindow(hwnd);
+        User32.INSTANCE.BringWindowToTop(hwnd);
     }
 
     public static void moveHwnd(Pointer hwnd, int x, int y, int w, int h) {

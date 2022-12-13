@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.WinDef;
 import xyz.duncanruns.julti.Julti;
@@ -231,6 +232,10 @@ public class WallWindow extends Frame {
         GDI32Extra.INSTANCE.StretchBlt(hdc, x, y, w, h, hdcSrc, 0, 0, srcWidth, srcHeight, WinGDIExtra.SRCCOPY);
 
         User32.INSTANCE.ReleaseDC(hwndSrc, hdcSrc);
+    }
+
+    public Pointer getHwnd() {
+        return hwnd.getPointer();
     }
 
     public boolean isClosed() {

@@ -38,6 +38,8 @@ public interface User32 extends StdCallLibrary {
 
     int SetForegroundWindow(Pointer hWnd);
 
+    boolean BringWindowToTop(Pointer hWnd);
+
     boolean MoveWindow(Pointer hWnd, int x, int y, int nWidth, int nHeight, boolean bRepaint);
 
     boolean IsIconic(Pointer hWnd);

@@ -77,6 +77,7 @@ public final class JultiOptions {
 
     // OBS
     public int dirtReleasePercent = 1;
+    public String obsWindowNameFormat = "* projector (scene) - *";
     public boolean obsPressHotkeys = false;
     public boolean obsUseNumpad = true;
     public boolean obsUseAlt = false;
