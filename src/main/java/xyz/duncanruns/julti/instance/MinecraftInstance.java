@@ -538,7 +538,10 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
-                    dirtCover = false;
+                    // Check loading percent progress before removing dirt cover in case of badly timed reset
+                    if (loadingPercent > 50) {
+                        dirtCover = false;
+                    }
                     if (options.pauseOnLoad && !isActive()) {
                         if (options.useF3) {
                             pressF3Esc();
