@@ -2,7 +2,7 @@ v0.12.0:
 - Big refactor and changes to the way switching to wall works:
     - Added OBS projector name format option
     - Changed wall activation method for Julti wall to fix it sometimes failing to activate
-- Refactor dirt cover and potentially fix a dirt cover issue (#36)
+- Refactor dirt cover logic and potentially fix a dirt cover issue (#36)
 - Removed Hero
 
 v0.11.5:
