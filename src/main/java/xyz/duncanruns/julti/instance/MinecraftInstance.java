@@ -53,6 +53,7 @@ public class MinecraftInstance {
     private long lastPreviewStart = -1L;
     private String biome = "";
     private int loadingPercent = 0;
+    private boolean dirtCover = false;
 
     // Log tracking
     private long logProgress = -1;
@@ -441,6 +442,7 @@ public class MinecraftInstance {
         worldLoaded = false;
         loadingPercent = -1;
         setInPreview(false);
+        dirtCover = true;
         log(Level.INFO, "Reset instance " + getName());
     }
 
@@ -490,7 +492,7 @@ public class MinecraftInstance {
     }
 
     public boolean shouldDirtCover() {
-        return hasPreviewEverStarted() && (!isWorldLoaded()) && (getLoadingPercent() < JultiOptions.getInstance().dirtReleasePercent);
+        return dirtCover;
     }
 
     public boolean hasPreviewEverStarted() {
@@ -536,6 +538,7 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
+                    dirtCover = false;
                     if (options.pauseOnLoad && !isActive()) {
                         if (options.useF3) {
                             pressF3Esc();
@@ -551,6 +554,9 @@ public class MinecraftInstance {
                     try {
                         loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
                     } catch (Exception ignored) {
+                    }
+                    if (loadingPercent >= JultiOptions.getInstance().dirtReleasePercent) {
+                        dirtCover = false;
                     }
                 } else if ((!options.coopMode) && options.noCopeMode && openToLanPattern.matcher(line).matches()) {
                     julti.getResetManager().doReset();
