@@ -1,4 +1,5 @@
 v0.12.0:
+- Big refactor of some wall window stuff
 - Added OBS projector name format option
 - Changed wall activation method for Julti wall to fix it sometimes failing to activate
 - Removed Hero
