@@ -55,7 +55,6 @@ public final class HwndUtil {
 
         obsHwnd = null;
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
-            String title = getHwndTitle(hWnd).toLowerCase();
             if (isOBSWallHwnd(projectorFormat, hWnd)) {
                 obsHwnd = hWnd;
                 return false;

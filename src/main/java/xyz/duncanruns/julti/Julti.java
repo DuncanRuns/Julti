@@ -640,6 +640,15 @@ public class Julti {
     public void focusWall() {
         JultiOptions options = JultiOptions.getInstance();
         SleepBGUtil.disableLock();
-        HwndUtil.activateHwnd(options.useJultiWallWindow ? wallWindow.getHwnd() : HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat));
+        if (options.useJultiWallWindow) {
+            HwndUtil.activateHwnd(wallWindow.getHwnd());
+        } else {
+            Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+            if (hwnd == null) {
+                log(Level.WARN,"No OBS Window found!");
+                return;
+            }
+            HwndUtil.activateHwnd(hwnd);
+        }
     }
 }
