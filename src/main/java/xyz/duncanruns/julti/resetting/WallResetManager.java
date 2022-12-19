@@ -220,10 +220,15 @@ public class WallResetManager extends ResetManager {
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         JultiOptions options = JultiOptions.getInstance();
 
+        boolean resetFirst = options.coopMode || options.useFullscreen;
+
         // Reset all after playing mode
         if (options.wallResetAllAfterPlaying) {
+            if (resetFirst)
+                instances.forEach(instance -> instance.reset(instances.size() == 1));
             julti.focusWall();
-            instances.forEach(instance -> instance.reset(instances.size() == 1));
+            if (!resetFirst)
+                instances.forEach(instance -> instance.reset(instances.size() == 1));
             // Clear out locked instances since all instances reset.
             lockedInstances.clear();
             julti.switchToWallScene();
@@ -236,13 +241,13 @@ public class WallResetManager extends ResetManager {
         // Unlock instance
         lockedInstances.remove(selectedInstance);
 
-        if (options.coopMode) {
-            // Coop Mode
-
+        if (resetFirst) {
             // Reset
             resetInstance(selectedInstance);
             // Wait
             sleep(70);
+            if (options.useFullscreen)
+                sleep(70);
             // Activate Next
             activateNextInstance(instances, nextInstance);
         } else {

@@ -45,6 +45,7 @@ public class MinecraftInstance {
     // Information to be discovered
     private ResetType resetType = null;
     private Integer createWorldKey = null;
+    private Integer fullscreenKey = null;
     private Integer leavePreviewKey = null;
 
     // State tracking
@@ -87,6 +88,13 @@ public class MinecraftInstance {
         this.notMC = false;
     }
 
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
     public boolean hasWindowQuick() {
         return hwnd != null;
     }
@@ -107,20 +115,6 @@ public class MinecraftInstance {
             createWorldKey = getKey("key_Create New World");
         }
         return createWorldKey;
-    }
-
-    private Integer getKey(String keybindingTranslation) {
-        Path optionsPath = getInstancePath().resolve("options.txt");
-        try {
-            for (String line : Files.readAllLines(optionsPath)) {
-                String[] args = line.split(":");
-                if (args.length > 1 && keybindingTranslation.equals(args[0])) {
-                    return McKeyUtil.getVkFromMCTranslation(args[1]);
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
     }
 
     private Integer getLeavePreviewKey() {
@@ -200,6 +194,31 @@ public class MinecraftInstance {
         return false;
     }
 
+    public void pressFullscreenKey() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, getFullscreenKey());
+    }
+
+    private Integer getFullscreenKey() {
+        if (fullscreenKey == null) {
+            fullscreenKey = getKey("key_key.fullscreen");
+        }
+        return fullscreenKey;
+    }
+
+    private Integer getKey(String keybindingTranslation) {
+        Path optionsPath = getInstancePath().resolve("options.txt");
+        try {
+            for (String line : Files.readAllLines(optionsPath)) {
+                String[] args = line.split(":");
+                if (args.length > 1 && keybindingTranslation.equals(args[0])) {
+                    return McKeyUtil.getVkFromMCTranslation(args[1]);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -244,6 +263,9 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan();
                     }
+                    if (options.useFullscreen) {
+                        pressFullscreenKey();
+                    }
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -283,13 +305,6 @@ public class MinecraftInstance {
         return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
     }
 
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
     }
@@ -310,11 +325,6 @@ public class MinecraftInstance {
         if (hasWindow()) {
             HwndUtil.setHwndTitle(hwnd, title);
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     public Rectangle getWindowRectangle() {
@@ -390,6 +400,11 @@ public class MinecraftInstance {
         }
     }
 
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
+    }
+
     public void launch() {
         try {
             String multiMCPath = JultiOptions.getInstance().multiMCPath;
@@ -419,14 +434,30 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
 
-        if (!singleInstance && options.letJultiMoveWindows) new Thread(() -> squish(options.wideResetSquish)).start();
+        pressResetKey();
+        worldLoaded = false;
+        loadingPercent = -1;
+        setInPreview(false);
+        dirtCover = true;
+        log(Level.INFO, "Reset instance " + getName());
 
-        finishReset();
+
+        new Thread(() -> {
+            if (options.useFullscreen) {
+                sleep(100);
+                if (options.useBorderless) {
+                    setBorderless();
+                }
+            }
+            if (!singleInstance && options.letJultiMoveWindows)
+                squish(options.wideResetSquish);
+        }).start();
+
 
         ResetCounter.increment();
     }
 
-    private void finishReset() {
+    private void pressResetKey() {
         switch (getResetType()) {
             case NEW_ATUM:
                 KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
@@ -439,11 +470,6 @@ public class MinecraftInstance {
             case EXIT_WORLD:
                 runNoAtumLeave();
         }
-        worldLoaded = false;
-        loadingPercent = -1;
-        setInPreview(false);
-        dirtCover = true;
-        log(Level.INFO, "Reset instance " + getName());
     }
 
     private void runNoAtumLeave() {
@@ -542,14 +568,18 @@ public class MinecraftInstance {
                     if (loadingPercent > 50) {
                         dirtCover = false;
                     }
-                    if (options.pauseOnLoad && !isActive()) {
+                    boolean active = isActive();
+                    if (options.pauseOnLoad && !active) {
                         if (options.useF3) {
                             pressF3Esc();
                         } else {
                             pressEsc();
                         }
-                    } else if (options.coopMode) {
-                        openToLan();
+                    } else if (active) {
+                        if (options.coopMode)
+                            openToLan();
+                        if (options.useFullscreen)
+                            pressFullscreenKey();
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
                 } else if (isPreviewLoaded() && spawnAreaPattern.matcher(line).matches()) {
