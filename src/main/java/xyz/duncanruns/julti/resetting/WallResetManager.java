@@ -245,8 +245,8 @@ public class WallResetManager extends ResetManager {
             // Reset
             resetInstance(selectedInstance);
             // Wait
-            if (options.coopMode)
-                //Maybe fullscreen needs a fuckin delay too TODO
+            sleep(70);
+            if (options.useFullscreen)
                 sleep(70);
             // Activate Next
             activateNextInstance(instances, nextInstance);

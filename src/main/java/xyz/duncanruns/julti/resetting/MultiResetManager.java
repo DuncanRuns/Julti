@@ -36,18 +36,23 @@ public class MultiResetManager extends ResetManager {
             return true;
         }
 
-        if (resetFirst) {
-            selectedInstance.reset(false);
-        }
 
         int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
         MinecraftInstance nextInstance = instances.get(nextInstInd);
 
-        nextInstance.activate(instances.indexOf(nextInstance) + 1);
-        julti.switchScene(nextInstInd + 1);
-
-        if (!resetFirst)
+        if (resetFirst) {
             selectedInstance.reset(false);
+            sleep(70);
+            if (options.useFullscreen) {
+                sleep(70);
+            }
+            nextInstance.activate(instances.indexOf(nextInstance) + 1);
+            julti.switchScene(nextInstInd + 1);
+        } else {
+            nextInstance.activate(instances.indexOf(nextInstance) + 1);
+            selectedInstance.reset(false);
+            julti.switchScene(nextInstInd + 1);
+        }
 
         super.doReset();
 
@@ -55,6 +60,14 @@ public class MultiResetManager extends ResetManager {
             AffinityManager.ping(julti);
         }
         return true;
+    }
+
+    private static void sleep(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
