@@ -14,7 +14,10 @@ public class MultiResetManager extends ResetManager {
 
     @Override
     public boolean doReset() {
+        JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
+
+        boolean resetFirst = options.coopMode || options.useFullscreen;
 
         // Return if no instances
         if (instances.size() == 0) {
@@ -33,16 +36,22 @@ public class MultiResetManager extends ResetManager {
             return true;
         }
 
+        if (resetFirst) {
+            selectedInstance.reset(false);
+        }
+
         int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
         MinecraftInstance nextInstance = instances.get(nextInstInd);
 
         nextInstance.activate(instances.indexOf(nextInstance) + 1);
         julti.switchScene(nextInstInd + 1);
 
-        selectedInstance.reset(false);
+        if (!resetFirst)
+            selectedInstance.reset(false);
 
         super.doReset();
-        if (JultiOptions.getInstance().useAffinity) {
+
+        if (options.useAffinity) {
             AffinityManager.ping(julti);
         }
         return true;
