@@ -54,6 +54,7 @@ public final class JultiOptions {
     // Window
     public boolean letJultiMoveWindows = true;
     public boolean useBorderless = false;
+    public boolean useFullscreen = false;
     public int[] windowPos = MonitorUtil.getPrimaryMonitor().position;
     public int[] windowSize = MonitorUtil.getPrimaryMonitor().size;
     public float wideResetSquish = 1f;
