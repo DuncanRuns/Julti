@@ -171,7 +171,7 @@ public class WallResetManager extends ResetManager {
         int screenX = point.x;
         int screenY = point.y;
 
-        Rectangle bounds = getBounds();
+        Rectangle bounds = julti.getWallBounds();
         if (bounds == null) return null;
         Point windowPos = bounds.getLocation();
 
@@ -205,10 +205,6 @@ public class WallResetManager extends ResetManager {
         if (instanceIndex >= instances.size()) return null;
 
         return instances.get(instanceIndex);
-    }
-
-    private Rectangle getBounds() {
-        return julti.getWallBounds();
     }
 
     private void resetNonLockedExcept(MinecraftInstance clickedInstance) {

@@ -242,6 +242,10 @@ public class WallWindow extends Frame {
         User32.INSTANCE.ReleaseDC(hwndSrc, hdcSrc);
     }
 
+    public Rectangle getIntendedBounds() {
+        return new Rectangle(fullRect.left, fullRect.top, fullRect.right - fullRect.left, fullRect.bottom - fullRect.top);
+    }
+
     public Pointer getHwnd() {
         return hwnd.getPointer();
     }

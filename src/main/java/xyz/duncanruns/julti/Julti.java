@@ -625,11 +625,10 @@ public class Julti {
     }
 
     public Rectangle getWallBounds() {
-
         JultiOptions options = JultiOptions.getInstance();
         if (options.useJultiWallWindow) {
             if (wallWindow != null && !wallWindow.isClosed()) {
-                return wallWindow.getBounds();
+                return wallWindow.getIntendedBounds();
             }
         }
         Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
