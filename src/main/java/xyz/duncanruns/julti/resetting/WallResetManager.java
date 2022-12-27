@@ -1,9 +1,11 @@
 package xyz.duncanruns.julti.resetting;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.MouseUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
@@ -167,7 +169,7 @@ public class WallResetManager extends ResetManager {
 
     @Nullable
     private MinecraftInstance getHoveredWallInstance() {
-        Point point = MouseInfo.getPointerInfo().getLocation();
+        Point point = MouseUtil.getMousePos();
         int screenX = point.x;
         int screenY = point.y;
 

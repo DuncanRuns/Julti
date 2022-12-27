@@ -7,6 +7,8 @@ import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.julti.win32.User32;
 import xyz.duncanruns.julti.win32.Win32Con;
 
+import java.awt.*;
+
 public final class MouseUtil {
     private MouseUtil() {
 
@@ -76,5 +78,11 @@ public final class MouseUtil {
 
     public static void keyUp(int vk) {
         changeKeyState(vk, false);
+    }
+
+    public static Point getMousePos() {
+        WinDef.POINT p = new WinDef.POINT();
+        User32.INSTANCE.GetCursorPos(p);
+        return new Point(p.x, p.y);
     }
 }
