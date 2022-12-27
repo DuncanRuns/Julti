@@ -172,6 +172,7 @@ public class WallResetManager extends ResetManager {
         int screenY = point.y;
 
         Rectangle bounds = getBounds();
+        if (bounds == null) return null;
         Point windowPos = bounds.getLocation();
 
 

@@ -49,7 +49,7 @@ public class WallWindow extends Frame {
         super();
         this.julti = julti;
         closed = false;
-        setToPrimaryMonitor();
+        setWindowSize();
         executor.scheduleAtFixedRate(this::tick, 50_000_000, 1_000_000_000L / 15, TimeUnit.NANOSECONDS);
         setupWindow();
         addWindowListener(new WindowAdapter() {
@@ -60,18 +60,26 @@ public class WallWindow extends Frame {
         });
     }
 
-    private void setToPrimaryMonitor() {
-        MonitorUtil.Monitor mainMonitor = MonitorUtil.getPrimaryMonitor();
-        setLocation(mainMonitor.x, mainMonitor.y);
-        setSize(mainMonitor.width, mainMonitor.height);
-        totalWidth = mainMonitor.width;
-        totalHeight = mainMonitor.height;
+    private void setWindowSize() {
+        JultiOptions options = JultiOptions.getInstance();
+
+        Rectangle rectangle;
+        if (options.jwUseWindowSize) {
+            rectangle = new Rectangle(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+        } else {
+            rectangle = MonitorUtil.getPrimaryMonitor().bounds;
+        }
+
+        setLocation(rectangle.x, rectangle.y);
+        setSize(rectangle.width, rectangle.height);
+        totalWidth = rectangle.width;
+        totalHeight = rectangle.height;
 
         fullRect = new WinDef.RECT();
-        fullRect.left = mainMonitor.x;
-        fullRect.right = mainMonitor.x + mainMonitor.width;
-        fullRect.top = mainMonitor.y;
-        fullRect.bottom = mainMonitor.y + mainMonitor.height;
+        fullRect.left = rectangle.x;
+        fullRect.right = rectangle.x + rectangle.width;
+        fullRect.top = rectangle.y;
+        fullRect.bottom = rectangle.y + rectangle.height;
     }
 
     private void tick() {
@@ -153,10 +161,10 @@ public class WallWindow extends Frame {
                 final MinecraftInstance instance = instances.get(n++);
                 if (!instance.hasWindowQuick()) return;
                 final boolean isLocked = lockedInstances.contains(instance);
-                final int prepSet = options.wallDarkenLocked && isLocked ? options.wallDarkenLevel : 0;
+                final int prepSet = options.jwDarkenLocked && isLocked ? options.jwDarkenLevel : 0;
                 prepStretch(bufferHdc, prepSet);
                 drawInstance(instance, bufferHdc, x * iWidth, y * iHeight, iWidth, iHeight);
-                if (isLocked && options.wallShowLockIcons) {
+                if (isLocked && options.jwShowLockIcons) {
                     if (prepSet != 0) {
                         prepStretch(bufferHdc, 0);
                     }

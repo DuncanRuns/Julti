@@ -47,9 +47,10 @@ public final class JultiOptions {
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
-    public boolean wallShowLockIcons = false;
-    public boolean wallDarkenLocked = true;
-    public int wallDarkenLevel = 25;
+    public boolean jwUseWindowSize = true;
+    public boolean jwShowLockIcons = false;
+    public boolean jwDarkenLocked = true;
+    public int jwDarkenLevel = 25;
 
     // Window
     public boolean letJultiMoveWindows = true;

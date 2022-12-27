@@ -564,11 +564,7 @@ public class Julti {
         if (JultiOptions.getInstance().useJultiWallWindow)
             return wallWindow != null && wallWindow.isActive();
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
-        if (HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd)) {
-            String currentWindowTitle = HwndUtil.getHwndTitle(currentHwnd).toLowerCase();
-            return currentWindowTitle.contains("projector (scene)") && currentWindowTitle.contains("wall");
-        }
-        return false;
+        return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
 
     public void runCommand(final String commands) {
@@ -629,12 +625,16 @@ public class Julti {
     }
 
     public Rectangle getWallBounds() {
-        if (JultiOptions.getInstance().useJultiWallWindow) {
+
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.useJultiWallWindow) {
             if (wallWindow != null && !wallWindow.isClosed()) {
                 return wallWindow.getBounds();
             }
         }
-        return MonitorUtil.getPrimaryMonitor().bounds;
+        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        if (obsWallHwnd == null) return null;
+        return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
     public void focusWall() {
@@ -645,7 +645,7 @@ public class Julti {
         } else {
             Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
             if (hwnd == null) {
-                log(Level.WARN,"No OBS Window found!");
+                log(Level.WARN, "No OBS Window found!");
                 return;
             }
             HwndUtil.activateHwnd(hwnd);

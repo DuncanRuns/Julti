@@ -467,12 +467,14 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause Rendering During Play", "pauseRenderingDuringPlay", b -> warnUnverifiable())));
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "wallShowLockIcons")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Window Settings for Wall Window Size", "jwUseWindowSize")));
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances (May lag)", "wallDarkenLocked")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "jwShowLockIcons")));
             panel.add(GUIUtil.createSpacer());
-            JSlider darkenSlider = new JSlider(0, 0, 100, JultiOptions.getInstance().wallDarkenLevel);
-            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().wallDarkenLevel = darkenSlider.getValue());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances (May lag)", "jwDarkenLocked")));
+            panel.add(GUIUtil.createSpacer());
+            JSlider darkenSlider = new JSlider(0, 0, 100, JultiOptions.getInstance().jwDarkenLevel);
+            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().jwDarkenLevel = darkenSlider.getValue());
             GUIUtil.setActualSize(darkenSlider, 200, 23);
             panel.add(GUIUtil.leftJustify(darkenSlider));
         }
