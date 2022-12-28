@@ -531,6 +531,8 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use F3", "useF3")));
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unpause on Switch", "unpauseOnSwitch")));
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());

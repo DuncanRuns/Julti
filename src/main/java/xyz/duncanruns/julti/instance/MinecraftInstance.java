@@ -82,10 +82,6 @@ public class MinecraftInstance {
         }
     }
 
-    public boolean isFullscreen() {
-        return fullscreen;
-    }
-
     public MinecraftInstance(Path instancePath) {
         this.hwnd = null;
         this.titleInfo = new WindowTitleInfo();
@@ -98,6 +94,10 @@ public class MinecraftInstance {
             Thread.sleep(millis);
         } catch (InterruptedException ignored) {
         }
+    }
+
+    public boolean isFullscreen() {
+        return fullscreen;
     }
 
     public boolean hasWindowQuick() {
@@ -260,14 +260,16 @@ public class MinecraftInstance {
                         sleep(10);
                         i--;
                     }
-                    pressEsc();
-                    if (options.wideResetSquish > 1.0) {
-                        // 2 Extra Escape Presses to make sure mouse is centered on next menu open
+                    if (options.unpauseOnSwitch) {
                         pressEsc();
-                        pressEsc();
+                        if (options.wideResetSquish > 1.0) {
+                            // 2 Extra Escape Presses to make sure mouse is centered on next menu open
+                            pressEsc();
+                            pressEsc();
+                        }
                     }
                     if (options.coopMode) {
-                        openToLan();
+                        openToLan(!options.unpauseOnSwitch);
                     }
                     if (options.useFullscreen) {
                         pressFullscreenKey();
@@ -315,9 +317,10 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
     }
 
-    public void openToLan() {
+    public void openToLan(boolean alreadyInMenu) {
         KeyboardUtil.releaseAllModifiers();
-        pressEsc();
+        if (!alreadyInMenu)
+            pressEsc();
         pressTab(7);
         pressEnter();
         pressShiftTab(1);
@@ -584,7 +587,7 @@ public class MinecraftInstance {
                         dirtCover = false;
                     }
                     boolean active = isActive();
-                    if (options.pauseOnLoad && !active) {
+                    if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
                         if (options.useF3) {
                             pressF3Esc();
                         } else {
@@ -592,7 +595,7 @@ public class MinecraftInstance {
                         }
                     } else if (active) {
                         if (options.coopMode)
-                            openToLan();
+                            openToLan(!options.unpauseOnSwitch);
                         if (options.useFullscreen)
                             pressFullscreenKey();
                     }
