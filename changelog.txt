@@ -1,3 +1,8 @@
+v0.14.0:
+- Added some guide text to hotkey settings
+- Added fullscreen hotkey (don't set to the same as the in-game hotkey, and only use the julti hotkey, so it knows when you are in fullscreen)
+- Added option for Unpause on Switch (#40)
+
 v0.13.1:
 - Now asking Windows where the mouse is because sometimes java doesn't have a good answer
 - Made resetting a fullscreened instance potentially less jank as frick
