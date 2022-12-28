@@ -1,6 +1,9 @@
 v0.14.0:
 - Added some guide text to hotkey settings
-- Added fullscreen hotkey (don't set to the same as the in-game hotkey, and only use the julti hotkey, so it knows when you are in fullscreen)
+- Added fullscreen hotkey
+    - Should not be the same as the actual fullscreen hotkey
+    - Lets Julti know that MC is in fullscreen so it can handle the resetting
+    - Lets you turn off the "use fullscreen" option so you can have the benefits of ultra speed borderless resetting but still use fullscreen in the run
 - Added option for Unpause on Switch (#40)
 - Removed brine
 
