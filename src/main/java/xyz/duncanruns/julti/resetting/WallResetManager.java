@@ -244,9 +244,7 @@ public class WallResetManager extends ResetManager {
             // Reset
             resetInstance(selectedInstance);
             // Wait
-            sleep(70);
-            if (options.useFullscreen)
-                sleep(70);
+            sleep(100);
             // Activate Next
             activateNextInstance(instances, nextInstance);
         } else {

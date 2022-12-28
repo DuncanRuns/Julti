@@ -42,10 +42,7 @@ public class MultiResetManager extends ResetManager {
 
         if (resetFirst) {
             selectedInstance.reset(false);
-            sleep(70);
-            if (options.useFullscreen) {
-                sleep(70);
-            }
+            sleep(100);
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
             julti.switchScene(nextInstInd + 1);
         } else {

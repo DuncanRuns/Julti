@@ -1,3 +1,7 @@
+v0.13.1:
+- Now asking Windows where the mouse is because sometimes java doesn't have a good answer
+- Made resetting a fullscreened instance potentially less jank as frick
+
 v0.13.0:
 - Added fullscreen mode (experimental)
 - Cleaned up a some built in wall code and options

@@ -55,6 +55,7 @@ public class MinecraftInstance {
     private String biome = "";
     private int loadingPercent = 0;
     private boolean dirtCover = false;
+    boolean fullscreen = false;
 
     // Log tracking
     private long logProgress = -1;
@@ -196,6 +197,7 @@ public class MinecraftInstance {
 
     public void pressFullscreenKey() {
         KeyboardUtil.sendKeyToHwnd(hwnd, getFullscreenKey());
+        fullscreen = !fullscreen;
     }
 
     private Integer getFullscreenKey() {
@@ -441,13 +443,22 @@ public class MinecraftInstance {
         dirtCover = true;
         log(Level.INFO, "Reset instance " + getName());
 
+        // Wait until safe to continue
+        if (fullscreen) {
+            int ogx = getWindowRectangle().x;
+            // Wait until window actually un-fullscreens
+            // Or until 2 ish seconds have passed
+            for (int i = 0; i < 200; i++) {
+                if (getWindowRectangle().x != ogx) break;
+                sleep(10);
+            }
+            fullscreen = false;
+        }
+
 
         new Thread(() -> {
-            if (options.useFullscreen) {
-                sleep(100);
-                if (options.useBorderless) {
-                    setBorderless();
-                }
+            if (options.useFullscreen && options.useBorderless) {
+                setBorderless();
             }
             if (!singleInstance && options.letJultiMoveWindows)
                 squish(options.wideResetSquish);
