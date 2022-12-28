@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.resetting;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -219,7 +218,7 @@ public class WallResetManager extends ResetManager {
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         JultiOptions options = JultiOptions.getInstance();
 
-        boolean resetFirst = options.coopMode || options.useFullscreen;
+        boolean resetFirst = options.coopMode || selectedInstance.isFullscreen();
 
         // Reset all after playing mode
         if (options.wallResetAllAfterPlaying) {

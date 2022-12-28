@@ -136,7 +136,8 @@ public class Julti {
                     "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
                     "Focus Reset (Wall): " + HotkeyUtil.formatKeys(options.wallFocusResetHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
-                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey);
+                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey) + "\n" +
+                    "Go Fullscreen: " + HotkeyUtil.formatKeys(options.fullscreenHotkey);
             log(Level.INFO, out);
         } else if (setHotkeyArgs.contains(args[0])) {
             log(Level.INFO, "Waiting 1 second to not pick up accidental keypress...");
@@ -151,6 +152,9 @@ public class Julti {
                         break;
                     case "bgreset":
                         jultiOptions.bgResetHotkey = hotkey.getKeys();
+                        break;
+                    case "fullscreen":
+                        jultiOptions.fullscreenHotkey = hotkey.getKeys();
                         break;
                     case "wallreset":
                         jultiOptions.wallResetHotkey = hotkey.getKeys();
@@ -449,6 +453,7 @@ public class Julti {
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("fullscreenHotkey"), () -> resetManager.doFullscreen());
 
         HotkeyUtil.startGlobalHotkeyChecker();
     }

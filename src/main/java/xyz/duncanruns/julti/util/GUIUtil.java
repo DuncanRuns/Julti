@@ -7,6 +7,9 @@ import xyz.duncanruns.julti.JultiOptions;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -47,6 +50,17 @@ public final class GUIUtil {
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    HotkeyUtil.Hotkey hotkey = new HotkeyUtil.Hotkey(Collections.emptyList());
+                    JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
+                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
+                    julti.setupHotkeys();
+                }
+            }
+        });
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {

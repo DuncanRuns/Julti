@@ -56,8 +56,8 @@ public final class HotkeyUtil {
      * @param runnable the method to be run when the hotkey is pressed
      */
     public static void addGlobalHotkey(Hotkey hotkey, Runnable runnable) {
+        if (hotkey.isEmpty()) return;
         GLOBAL_HOTKEYS.add(new SingleHotkeyChecker(hotkey, runnable));
-
     }
 
     /**
@@ -222,6 +222,10 @@ public final class HotkeyUtil {
                 out.append(KeyboardUtil.getKeyName(vKey));
             }
             return out.toString();
+        }
+
+        public boolean isEmpty() {
+            return keys.size() == 0;
         }
     }
 

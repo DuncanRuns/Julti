@@ -82,6 +82,10 @@ public class MinecraftInstance {
         }
     }
 
+    public boolean isFullscreen() {
+        return fullscreen;
+    }
+
     public MinecraftInstance(Path instancePath) {
         this.hwnd = null;
         this.titleInfo = new WindowTitleInfo();

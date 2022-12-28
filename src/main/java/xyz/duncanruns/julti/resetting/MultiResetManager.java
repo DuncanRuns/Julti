@@ -17,7 +17,6 @@ public class MultiResetManager extends ResetManager {
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
 
-        boolean resetFirst = options.coopMode || options.useFullscreen;
 
         // Return if no instances
         if (instances.size() == 0) {
@@ -29,6 +28,8 @@ public class MultiResetManager extends ResetManager {
         if (selectedInstance == null) {
             return false;
         }
+
+        boolean resetFirst = options.coopMode || selectedInstance.isFullscreen();
 
         // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
