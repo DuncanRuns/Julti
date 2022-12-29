@@ -37,7 +37,11 @@ public class ControlPanel extends JPanel {
 
         add(GUIUtil.getButtonWithMethod(new JButton("Launch All Instances"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");
-            SafeInstanceLauncher.launchInstances(julti.getInstanceManager().getInstances());
+            if(SafeInstanceLauncher.launchInstances(julti.getInstanceManager().getInstances())){
+                JultiGUI.log(Level.INFO,"Instances launched");
+            }else{
+                JultiGUI.log(Level.WARN,"Cannot launch instances! Is your MultiMC.exe path set?");
+            }
         }), gbc);
 
         add(GUIUtil.getButtonWithMethod(new JButton("Close All Instances"), actionEvent -> {

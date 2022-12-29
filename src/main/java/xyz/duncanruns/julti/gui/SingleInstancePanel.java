@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
 import javax.swing.*;
 import java.awt.*;
@@ -73,7 +74,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    instance.launch();
+                    SafeInstanceLauncher.launchInstance(instance);
                 }
             });
             open.setText("Launch");

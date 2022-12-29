@@ -90,13 +90,6 @@ public class MinecraftInstance {
         this.notMC = false;
     }
 
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
     public boolean isFullscreen() {
         return fullscreen;
     }
@@ -315,6 +308,13 @@ public class MinecraftInstance {
         return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
     }
 
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
     }
@@ -336,6 +336,11 @@ public class MinecraftInstance {
         if (hasWindow()) {
             HwndUtil.setHwndTitle(hwnd, title);
         }
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     public Rectangle getWindowRectangle() {
@@ -409,11 +414,6 @@ public class MinecraftInstance {
         } else {
             log(Level.WARN, "Could not close " + getName() + " because it is not open.");
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     public void launch() {

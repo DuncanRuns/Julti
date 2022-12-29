@@ -14,6 +14,7 @@ public final class SafeInstanceLauncher {
     }
 
     public static boolean launchInstance(MinecraftInstance instance) {
+        if (instance.hasWindow()) return false;
         String multiMCPath = JultiOptions.getInstance().multiMCPath;
         if (multiMCPath.isEmpty()) {
             return false;
@@ -47,6 +48,7 @@ public final class SafeInstanceLauncher {
             @Override
             public void run() {
                 for (MinecraftInstance instance : instances) {
+                    if (instance.hasWindow()) continue;
                     sleep(500);
                     instance.launch();
                 }

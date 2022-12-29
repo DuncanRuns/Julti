@@ -1,7 +1,8 @@
 v0.1x.x:
+- **Removed fullscreen mode**. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
+- "Launch All Instances" button will now only try to launch instances that are not open.
 - Lots of code cleanup regarding resetting, some stuff slightly adjusted to match intended functionality
 - Fixed #41, and an unlisted bug where windows would lose their borderless when resetting from a fullscreened window sometimes
-- **Removed fullscreen mode**. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
 
 v0.14.1:
 - Made a work-around for #41, but still not solved. You shouldn't have to restart instances or Julti to continue using an instance which is stuck.
