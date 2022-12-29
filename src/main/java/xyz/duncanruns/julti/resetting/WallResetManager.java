@@ -227,16 +227,7 @@ public class WallResetManager extends ResetManager {
 
         // Reset all after playing mode
         if (options.wallResetAllAfterPlaying) {
-            if (resetFirst) {
-                instances.forEach(instance -> instance.reset(instances.size() == 1));
-                sleep(100);
-            }
-            julti.focusWall();
-            if (!resetFirst)
-                instances.forEach(instance -> instance.reset(instances.size() == 1));
-            // Clear out locked instances since all instances reset.
-            lockedInstances.clear();
-            julti.switchToWallScene();
+            leaveInstanceRAAPMode(instances, resetFirst);
             return;
         }
 
@@ -255,12 +246,17 @@ public class WallResetManager extends ResetManager {
             resetInstance(selectedInstance, true);
     }
 
-    private static void sleep(long sleepTime) {
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    private void leaveInstanceRAAPMode(List<MinecraftInstance> instances, boolean resetFirst) {
+        if (resetFirst) {
+            instances.forEach(instance -> instance.reset(instances.size() == 1));
+            sleep(100);
         }
+        julti.focusWall();
+        if (!resetFirst)
+            instances.forEach(instance -> instance.reset(instances.size() == 1));
+        // Clear out locked instances since all instances reset.
+        lockedInstances.clear();
+        julti.switchToWallScene();
     }
 
     @Nullable
@@ -292,6 +288,14 @@ public class WallResetManager extends ResetManager {
             return true;
         }
         return false;
+    }
+
+    private static void sleep(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
