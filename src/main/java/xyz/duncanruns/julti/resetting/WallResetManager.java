@@ -19,6 +19,14 @@ public class WallResetManager extends ResetManager {
         super(julti);
     }
 
+    private static void sleep(long sleepTime) {
+        try {
+            Thread.sleep(sleepTime);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public boolean doReset() {
 
@@ -166,6 +174,10 @@ public class WallResetManager extends ResetManager {
         return Collections.unmodifiableSet(lockedInstances);
     }
 
+    private void lockInstance(MinecraftInstance instance) {
+        lockedInstances.add(instance);
+    }
+
     @Nullable
     private MinecraftInstance getHoveredWallInstance() {
         Point point = MouseUtil.getMousePos();
@@ -213,6 +225,35 @@ public class WallResetManager extends ResetManager {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
             resetInstance(instance);
         }
+    }
+
+    private boolean resetInstance(MinecraftInstance instance) {
+        return resetInstance(instance, false);
+    }
+
+    private boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
+        lockedInstances.remove(instance);
+        if (bypassConditions || shouldResetInstance(instance)) {
+            instance.reset(instanceManager.getInstances().size() == 1);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean shouldResetInstance(MinecraftInstance instance) {
+        // Preview never started; first reset
+        if (!instance.hasPreviewEverStarted()) return true;
+
+        // World is loaded
+        if (instance.isWorldLoaded()) return true;
+
+        // Preview is loaded
+        if (instance.isPreviewLoaded()) {
+            // Return true if cooldown has passed, otherwise return false
+            return System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown;
+        }
+        // At this point, neither the preview nor world is loaded, which is a small space of time, if the time this is happening exceeds 5 seconds, allow resetting in case the instance is stuck
+        return System.currentTimeMillis() - instance.getLastResetPress() > 5000;
     }
 
     public void onLeaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
@@ -274,18 +315,6 @@ public class WallResetManager extends ResetManager {
         return lockedInstances.iterator().next();
     }
 
-    private boolean resetInstance(MinecraftInstance instance) {
-        return resetInstance(instance, false);
-    }
-
-    private static void sleep(long sleepTime) {
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * @param instances    Minecraft instances involved
      * @param nextInstance The next potential instance.
@@ -306,18 +335,5 @@ public class WallResetManager extends ResetManager {
             nextInstance.activate(instances.indexOf(nextInstance) + 1);
             julti.switchScene(nextInstance);
         }
-    }
-
-    private boolean resetInstance(MinecraftInstance instance, boolean bypassCooldown) {
-        lockedInstances.remove(instance);
-        if (bypassCooldown || (!instance.hasPreviewEverStarted()) || instance.isWorldLoaded() || (instance.isPreviewLoaded() && System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown)) {
-            instance.reset(instanceManager.getInstances().size() == 1);
-            return true;
-        }
-        return false;
-    }
-
-    private void lockInstance(MinecraftInstance instance) {
-        lockedInstances.add(instance);
     }
 }

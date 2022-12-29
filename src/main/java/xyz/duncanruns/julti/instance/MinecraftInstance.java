@@ -52,6 +52,7 @@ public class MinecraftInstance {
     private boolean inPreview = false;
     private boolean worldLoaded = false;
     private long lastPreviewStart = -1L;
+    private long lastResetPress = -1L;
     private String biome = "";
     private int loadingPercent = 0;
     private boolean dirtCover = false;
@@ -106,6 +107,10 @@ public class MinecraftInstance {
 
     synchronized public long getLastPreviewStart() {
         return lastPreviewStart;
+    }
+
+    public long getLastResetPress() {
+        return lastResetPress;
     }
 
     public String getOriginalTitle() {
@@ -476,6 +481,7 @@ public class MinecraftInstance {
     }
 
     private void pressResetKey() {
+        lastResetPress = System.currentTimeMillis();
         switch (getResetType()) {
             case NEW_ATUM:
                 KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
