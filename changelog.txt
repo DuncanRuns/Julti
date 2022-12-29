@@ -1,4 +1,7 @@
 v0.14.0:
+- Made a work-around for #41, but still not solved. You shouldn't have to restart instances or Julti to continue using an instance which is stuck.
+
+v0.14.0:
 - Added some guide text to hotkey settings
 - Added fullscreen hotkey
     - Should not be the same as the actual fullscreen hotkey
