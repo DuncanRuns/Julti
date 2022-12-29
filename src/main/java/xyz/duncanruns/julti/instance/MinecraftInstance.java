@@ -448,29 +448,35 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
 
+        // Before taking any action, store some info usefull for fullscreen management
+        final boolean wasFullscreen = fullscreen;
+        Rectangle ogRect = null;
+        if (wasFullscreen) {
+            ogRect = getWindowRectangle();
+        }
+
         pressResetKey();
+
+        //Update states
         worldLoaded = false;
         loadingPercent = -1;
         setInPreview(false);
         dirtCover = true;
-        log(Level.INFO, "Reset instance " + getName());
 
-        final boolean wasFullscreen = fullscreen;
-
-        // Wait until safe to continue
         if (wasFullscreen) {
-            int ogx = getWindowRectangle().x;
             // Wait until window actually un-fullscreens
             // Or until 2 ish seconds have passed
             for (int i = 0; i < 200; i++) {
-                if (getWindowRectangle().x != ogx) break;
+                if (!Objects.equals(ogRect, getWindowRectangle())) break;
                 sleep(10);
             }
             fullscreen = false;
         }
 
 
+        // Window resizing
         new Thread(() -> {
+            if (!options.letJultiMoveWindows) return;
             if (wasFullscreen && options.useBorderless) {
                 setBorderless();
             }
@@ -478,7 +484,8 @@ public class MinecraftInstance {
                 squish(options.wideResetSquish);
         }).start();
 
-
+        // Log and reset counter update
+        log(Level.INFO, "Reset instance " + getName());
         ResetCounter.increment();
     }
 
