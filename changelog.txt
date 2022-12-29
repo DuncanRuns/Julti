@@ -1,4 +1,4 @@
-v0.14.0:
+v0.14.1:
 - Made a work-around for #41, but still not solved. You shouldn't have to restart instances or Julti to continue using an instance which is stuck.
 
 v0.14.0:
