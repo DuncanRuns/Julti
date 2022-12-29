@@ -455,8 +455,10 @@ public class MinecraftInstance {
         dirtCover = true;
         log(Level.INFO, "Reset instance " + getName());
 
+        final boolean wasFullscreen = fullscreen;
+
         // Wait until safe to continue
-        if (fullscreen) {
+        if (wasFullscreen) {
             int ogx = getWindowRectangle().x;
             // Wait until window actually un-fullscreens
             // Or until 2 ish seconds have passed
@@ -469,7 +471,7 @@ public class MinecraftInstance {
 
 
         new Thread(() -> {
-            if (options.useFullscreen && options.useBorderless) {
+            if (wasFullscreen && options.useBorderless) {
                 setBorderless();
             }
             if (!singleInstance && options.letJultiMoveWindows)
