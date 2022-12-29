@@ -477,6 +477,8 @@ public class MinecraftInstance {
         // Window resizing
         new Thread(() -> {
             if (!options.letJultiMoveWindows) return;
+            // Wait a bit before resizing, not waiting may cause the reset key to fail (as far as I know)
+            sleep(50);
             if (wasFullscreen && options.useBorderless) {
                 setBorderless();
             }
