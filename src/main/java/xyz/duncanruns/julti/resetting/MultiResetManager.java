@@ -37,20 +37,19 @@ public class MultiResetManager extends ResetManager {
             return true;
         }
 
-
         int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
+        int nextInsNum = nextInstInd + 1;
         MinecraftInstance nextInstance = instances.get(nextInstInd);
 
         if (resetFirst) {
             selectedInstance.reset(false);
             sleep(100);
-            nextInstance.activate(instances.indexOf(nextInstance) + 1);
-            julti.switchScene(nextInstInd + 1);
-        } else {
-            nextInstance.activate(instances.indexOf(nextInstance) + 1);
-            selectedInstance.reset(false);
-            julti.switchScene(nextInstInd + 1);
         }
+        nextInstance.activate(nextInsNum);
+        if (!resetFirst) {
+            selectedInstance.reset(false);
+        }
+        julti.switchScene(nextInstInd + 1);
 
         super.doReset();
 
