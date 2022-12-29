@@ -276,9 +276,6 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan(!options.unpauseOnSwitch);
                     }
-                    if (options.useFullscreen) {
-                        pressFullscreenKey();
-                    }
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -613,8 +610,6 @@ public class MinecraftInstance {
                     } else if (active) {
                         if (options.coopMode)
                             openToLan(!options.unpauseOnSwitch);
-                        if (options.useFullscreen)
-                            pressFullscreenKey();
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
                 } else if (isPreviewLoaded() && spawnAreaPattern.matcher(line).matches()) {
