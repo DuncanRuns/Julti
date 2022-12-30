@@ -615,13 +615,15 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(JultiOptions options, Julti julti) {
+        // Return if reset is supposed to happen
+        if (loadingPercent == -1) return;
+
         setInPreview(false);
         worldLoaded = true;
         worldEverLoaded = true;
-        if(loadingPercent >= 50) {
-            dirtCover = false;
-            loadingPercent = 100;
-        }
+        dirtCover = false;
+        loadingPercent = 100;
+
         if (options.pieChartOnLoad) {
             pressShiftF3();
             shouldPressDelayedWLKeys = true;
