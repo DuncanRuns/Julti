@@ -618,12 +618,14 @@ public class MinecraftInstance {
         // Return if reset is supposed to happen
         if (loadingPercent == -1) return;
 
+        // Update states
         setInPreview(false);
         worldLoaded = true;
         worldEverLoaded = true;
         dirtCover = false;
         loadingPercent = 100;
 
+        // Key press shenanigans
         if (options.pieChartOnLoad) {
             pressShiftF3();
             shouldPressDelayedWLKeys = true;
