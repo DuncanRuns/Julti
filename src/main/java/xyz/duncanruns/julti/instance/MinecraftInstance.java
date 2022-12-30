@@ -591,58 +591,74 @@ public class MinecraftInstance {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
                 if (isUsingWorldPreview() && !options.autoResetForBeach && startPreviewPattern.matcher(line).matches()) {
-                    setInPreview(true);
-                    worldLoaded = false;
-                    if (options.useF3) {
-                        pressF3Esc();
-                    }
-                    julti.getResetManager().notifyPreviewLoaded(this);
+                    onPreviewLoad(options, julti);
                 } else if (isUsingWorldPreview() && options.autoResetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
-                    setInPreview(true);
-                    worldLoaded = false;
-                    if (options.useF3) {
-                        pressF3Esc();
-                    }
-                    String[] args = line.split(" ");
-                    biome = args[args.length - 1];
-                    julti.getResetManager().notifyPreviewLoaded(this);
+                    onPreviewLoadWithBiome(options, julti, line);
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
-                    setInPreview(false);
-                    worldLoaded = true;
-                    worldEverLoaded = true;
-                    // Check loading percent progress before removing dirt cover in case of badly timed reset
-                    if (loadingPercent > 50) {
-                        dirtCover = false;
-                    }
-                    boolean active = isActive();
-                    if (options.pieChartOnLoad) {
-                        pressShiftF3();
-                    }
-                    if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
-                        if (options.useF3) {
-                            pressF3Esc();
-                        } else {
-                            pressEsc();
-                        }
-                    } else if (active) {
-                        if (options.coopMode)
-                            openToLan(!options.unpauseOnSwitch);
-                    }
-                    julti.getResetManager().notifyWorldLoaded(this);
+                    onWorldLoad(options, julti);
                 } else if ((isPreviewLoaded() || !isUsingWorldPreview()) && spawnAreaPattern.matcher(line).matches()) {
-                    String[] args = line.split(" ");
-                    try {
-                        loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
-                    } catch (Exception ignored) {
-                    }
-                    if (loadingPercent >= JultiOptions.getInstance().dirtReleasePercent) {
-                        dirtCover = false;
-                    }
+                    onPercentLoadingLog(line);
                 } else if ((!options.coopMode) && options.noCopeMode && openToLanPattern.matcher(line).matches()) {
                     julti.getResetManager().doReset();
                 }
             }
         }
+    }
+
+    private void onPercentLoadingLog(String line) {
+        String[] args = line.split(" ");
+        try {
+            loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
+        } catch (Exception ignored) {
+        }
+        if (loadingPercent >= JultiOptions.getInstance().dirtReleasePercent) {
+            dirtCover = false;
+        }
+    }
+
+    private void onWorldLoad(JultiOptions options, Julti julti) {
+        setInPreview(false);
+        worldLoaded = true;
+        worldEverLoaded = true;
+        // Check loading percent progress before removing dirt cover in case of badly timed reset
+        if (loadingPercent > 50) {
+            dirtCover = false;
+        }
+        boolean active = isActive();
+        if (options.pieChartOnLoad) {
+            pressShiftF3();
+        }
+        if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
+            if (options.useF3) {
+                pressF3Esc();
+            } else {
+                pressEsc();
+            }
+        } else if (active) {
+            if (options.coopMode)
+                openToLan(!options.unpauseOnSwitch);
+        }
+        julti.getResetManager().notifyWorldLoaded(this);
+    }
+
+    private void onPreviewLoad(JultiOptions options, Julti julti) {
+        setInPreview(true);
+        worldLoaded = false;
+        if (options.useF3) {
+            pressF3Esc();
+        }
+        julti.getResetManager().notifyPreviewLoaded(this);
+    }
+
+    private void onPreviewLoadWithBiome(JultiOptions options, Julti julti, String line) {
+        setInPreview(true);
+        worldLoaded = false;
+        if (options.useF3) {
+            pressF3Esc();
+        }
+        String[] args = line.split(" ");
+        biome = args[args.length - 1];
+        julti.getResetManager().notifyPreviewLoaded(this);
     }
 
     private void pressShiftF3() {
