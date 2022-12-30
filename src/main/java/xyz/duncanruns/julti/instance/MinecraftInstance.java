@@ -615,6 +615,9 @@ public class MinecraftInstance {
                         dirtCover = false;
                     }
                     boolean active = isActive();
+                    if (options.pieChartOnLoad) {
+                        pressShiftF3();
+                    }
                     if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
                         if (options.useF3) {
                             pressF3Esc();
@@ -640,6 +643,12 @@ public class MinecraftInstance {
                 }
             }
         }
+    }
+
+    private void pressShiftF3() {
+        KeyboardUtil.sendKeyDownToHwnd(hwnd, Win32Con.VK_RSHIFT, true);
+        pressF3();
+        KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_RSHIFT, true);
     }
 
     String getNewLogContents() {

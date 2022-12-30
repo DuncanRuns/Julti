@@ -106,6 +106,7 @@ public final class JultiOptions {
     public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
+    public boolean pieChartOnLoad = false;
 
     // Auto Reset
     public boolean autoResetForBeach = false;
