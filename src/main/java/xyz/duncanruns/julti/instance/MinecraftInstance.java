@@ -18,10 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -58,6 +56,7 @@ public class MinecraftInstance {
     private boolean dirtCover = false;
     boolean fullscreen = false;
     boolean worldEverLoaded = false;
+    boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
 
     // Log tracking
     private long logProgress = -1;
@@ -446,6 +445,7 @@ public class MinecraftInstance {
         loadingPercent = -1;
         setInPreview(false);
         dirtCover = true;
+        shouldPressDelayedWLKeys = false;
 
         if (wasFullscreen) {
             // Wait until window actually un-fullscreens
@@ -609,10 +609,8 @@ public class MinecraftInstance {
         String[] args = line.split(" ");
         try {
             loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
+            dirtCover = loadingPercent < JultiOptions.getInstance().dirtReleasePercent;
         } catch (Exception ignored) {
-        }
-        if (loadingPercent >= JultiOptions.getInstance().dirtReleasePercent) {
-            dirtCover = false;
         }
     }
 
@@ -620,14 +618,27 @@ public class MinecraftInstance {
         setInPreview(false);
         worldLoaded = true;
         worldEverLoaded = true;
-        // Check loading percent progress before removing dirt cover in case of badly timed reset
-        if (loadingPercent > 50) {
+        if(loadingPercent >= 50) {
             dirtCover = false;
+            loadingPercent = 100;
         }
-        boolean active = isActive();
         if (options.pieChartOnLoad) {
             pressShiftF3();
+            shouldPressDelayedWLKeys = true;
+            new Timer("world-loader").schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (shouldPressDelayedWLKeys)
+                        worldLoadKeyPresses(options, julti);
+                }
+            }, 150);
+        } else {
+            worldLoadKeyPresses(options, julti);
         }
+    }
+
+    private void worldLoadKeyPresses(JultiOptions options, Julti julti) {
+        boolean active = isActive();
         if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
             if (options.useF3) {
                 pressF3Esc();
@@ -643,6 +654,8 @@ public class MinecraftInstance {
 
     private void onPreviewLoad(JultiOptions options, Julti julti) {
         setInPreview(true);
+        dirtCover = true;
+        loadingPercent = -1;
         worldLoaded = false;
         if (options.useF3) {
             pressF3Esc();
@@ -652,6 +665,8 @@ public class MinecraftInstance {
 
     private void onPreviewLoadWithBiome(JultiOptions options, Julti julti, String line) {
         setInPreview(true);
+        dirtCover = true;
+        loadingPercent = -1;
         worldLoaded = false;
         if (options.useF3) {
             pressF3Esc();
