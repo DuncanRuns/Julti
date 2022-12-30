@@ -1,8 +1,11 @@
-v0.1x.x:
+v0.15.0:
 - **Removed fullscreen mode**. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
+- Added support for instances that do not use the World Preview mod (will perhaps allow for stuff like pre-1.9 in the future) (#43)
+- Added Pie Chart On Load option, which is illegal for normal runs and is meant for superflat runs (apparently) (#42)
 - "Launch All Instances" button will now only try to launch instances that are not open.
 - Lots of code cleanup regarding resetting, some stuff slightly adjusted to match intended functionality
-- Fixed #41, and an unlisted bug where windows would lose their borderless when resetting from a fullscreened window sometimes
+- Fixed instances failing to reset sometimes (#41)
+- Fixed a bug where windows would lose their borderless-ness when resetting from a fullscreened window sometimes
 
 v0.14.1:
 - Made a work-around for #41, but still not solved. You shouldn't have to restart instances or Julti to continue using an instance which is stuck.
