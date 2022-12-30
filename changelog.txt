@@ -1,5 +1,5 @@
 v0.15.0:
-- **Removed fullscreen mode**. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
+- **Removed fullscreen mode** due to it being too slow and jank. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
 - Added support for instances that do not use the World Preview mod (will perhaps allow for stuff like pre-1.9 in the future) (#43)
 - Added Pie Chart On Load option, which is illegal for normal runs and is meant for superflat runs (apparently) (#42)
 - "Launch All Instances" button will now only try to launch instances that are not open.
