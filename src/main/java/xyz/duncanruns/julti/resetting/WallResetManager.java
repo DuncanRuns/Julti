@@ -321,8 +321,13 @@ public class WallResetManager extends ResetManager {
     }
 
     private boolean shouldResetInstance(MinecraftInstance instance) {
-        // Preview never started; first reset
-        if (!instance.hasPreviewEverStarted()) return true;
+        if (instance.isUsingWorldPreview()) {
+            // Preview never started; first reset
+            if (!instance.hasPreviewEverStarted()) return true;
+        } else {
+            // World never loaded, first reset
+            if (!instance.hasWorldEverLoaded()) return true;
+        }
 
         // World is loaded
         if (instance.isWorldLoaded()) return true;
@@ -332,8 +337,8 @@ public class WallResetManager extends ResetManager {
             // Return true if cooldown has passed, otherwise return false
             return System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown;
         }
-        // At this point, neither the preview nor world is loaded, which is a small space of time, if the time this is happening exceeds 5 seconds, allow resetting in case the instance is stuck
-        return System.currentTimeMillis() - instance.getLastResetPress() > 5000;
+        // At this point, neither the preview nor world is loaded, which is a small space of time, if the time this is happening exceeds 5 seconds (or 20 seconds for non-wp), allow resetting in case the instance is stuck
+        return System.currentTimeMillis() - instance.getLastResetPress() > (instance.isUsingWorldPreview() ? 5_000 : 20_000);
     }
 
     private void lockInstance(MinecraftInstance instance) {

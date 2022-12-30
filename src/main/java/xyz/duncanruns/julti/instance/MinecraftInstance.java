@@ -57,6 +57,7 @@ public class MinecraftInstance {
     private int loadingPercent = 0;
     private boolean dirtCover = false;
     boolean fullscreen = false;
+    boolean worldEverLoaded = false;
 
     // Log tracking
     private long logProgress = -1;
@@ -111,20 +112,6 @@ public class MinecraftInstance {
             titleInfo.provide(HwndUtil.getHwndTitle(hwnd));
         }
         return titleInfo.getOriginalTitle();
-    }
-
-    private Integer getCreateWorldKey() {
-        if (createWorldKey == null) {
-            createWorldKey = getKey("key_Create New World");
-        }
-        return createWorldKey;
-    }
-
-    private Integer getLeavePreviewKey() {
-        if (leavePreviewKey == null) {
-            leavePreviewKey = getKey("key_Leave Preview");
-        }
-        return leavePreviewKey;
     }
 
     public boolean isActuallyMC() {
@@ -523,6 +510,28 @@ public class MinecraftInstance {
         pressEnter();
     }
 
+    public boolean isUsingWorldPreview() {
+        return getLeavePreviewKey() != null;
+    }
+
+    private Integer getLeavePreviewKey() {
+        if (leavePreviewKey == null) {
+            leavePreviewKey = getKey("key_Leave Preview");
+        }
+        return leavePreviewKey;
+    }
+
+    public boolean isUsingAtum() {
+        return getCreateWorldKey() != null;
+    }
+
+    private Integer getCreateWorldKey() {
+        if (createWorldKey == null) {
+            createWorldKey = getKey("key_Create New World");
+        }
+        return createWorldKey;
+    }
+
     private ResetType getResetType() {
         if (resetType == null) {
             if (getCreateWorldKey() != null) {
@@ -557,6 +566,10 @@ public class MinecraftInstance {
         return lastPreviewStart != -1L;
     }
 
+    public boolean hasWorldEverLoaded() {
+        return worldEverLoaded;
+    }
+
     synchronized public boolean isWorldLoaded() {
         return worldLoaded;
     }
@@ -577,14 +590,14 @@ public class MinecraftInstance {
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
-                if (!options.autoResetForBeach && startPreviewPattern.matcher(line).matches()) {
+                if (isUsingWorldPreview() && !options.autoResetForBeach && startPreviewPattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
                     if (options.useF3) {
                         pressF3Esc();
                     }
                     julti.getResetManager().notifyPreviewLoaded(this);
-                } else if (options.autoResetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
+                } else if (isUsingWorldPreview() && options.autoResetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
                     setInPreview(true);
                     worldLoaded = false;
                     if (options.useF3) {
@@ -596,6 +609,7 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     setInPreview(false);
                     worldLoaded = true;
+                    worldEverLoaded = true;
                     // Check loading percent progress before removing dirt cover in case of badly timed reset
                     if (loadingPercent > 50) {
                         dirtCover = false;
@@ -612,7 +626,7 @@ public class MinecraftInstance {
                             openToLan(!options.unpauseOnSwitch);
                     }
                     julti.getResetManager().notifyWorldLoaded(this);
-                } else if (isPreviewLoaded() && spawnAreaPattern.matcher(line).matches()) {
+                } else if ((isPreviewLoaded() || !isUsingWorldPreview()) && spawnAreaPattern.matcher(line).matches()) {
                     String[] args = line.split(" ");
                     try {
                         loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
