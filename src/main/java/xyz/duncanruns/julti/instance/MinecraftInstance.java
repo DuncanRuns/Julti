@@ -418,10 +418,6 @@ public class MinecraftInstance {
         move(resultRectangle.x, resultRectangle.y, resultRectangle.width, resultRectangle.height);
     }
 
-    public ScreenCapUtil.ImageInfo captureScreen() {
-        return ScreenCapUtil.capture(this.hwnd);
-    }
-
     public void closeWindow() {
         if (hasWindow()) {
             HwndUtil.sendCloseMessage(hwnd);
