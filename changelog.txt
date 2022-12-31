@@ -1,3 +1,7 @@
+v0.1x.x:
+- Various code refactors and optimizations
+- Julti now checks for a MultiMC instance config to get the instance name, helping to launch instances
+
 v0.15.1:
 - Added a delay to world pause when pie chart is enabled
 - Added some more dirt cover checks to make it more stable
