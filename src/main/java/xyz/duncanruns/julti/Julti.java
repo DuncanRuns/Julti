@@ -458,12 +458,23 @@ public class Julti {
 
     private void logCheckTick() {
         int i = 0;
-        for (MinecraftInstance instance : instanceManager.getInstances()) {
-            i++;
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        Thread[] threads = new Thread[instances.size()];
+        for (MinecraftInstance instance : instances) {
+            Thread thread = new Thread(() -> {
+                try {
+                    instance.checkLog(this);
+                } catch (Exception e) {
+                    log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e.getMessage());
+                }
+            });
+            threads[i++] = thread;
+            thread.start();
+        }
+        for (Thread thread : threads) {
             try {
-                instance.checkLog(this);
-            } catch (Exception e) {
-                log(Level.ERROR, "Error while checking log for instance #" + i + ":\n" + e.getMessage());
+                thread.join();
+            } catch (InterruptedException ignored) {
             }
         }
     }
