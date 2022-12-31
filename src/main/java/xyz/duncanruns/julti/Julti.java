@@ -443,7 +443,7 @@ public class Julti {
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("fullscreenHotkey"), () -> resetManager.doFullscreen());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("fullscreenHotkey"), this::doFullscreen);
 
         HotkeyUtil.startGlobalHotkeyChecker();
     }
@@ -495,6 +495,13 @@ public class Julti {
                 resetManager = new WallResetManager(this);
                 break;
         }
+    }
+
+    public boolean doFullscreen() {
+        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
+        if (selectedInstance == null) return false;
+        selectedInstance.pressFullscreenKey();
+        return true;
     }
 
     private void tick() {

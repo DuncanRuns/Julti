@@ -27,13 +27,6 @@ public abstract class ResetManager {
         return true;
     }
 
-    public boolean doFullscreen() {
-        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
-        if (selectedInstance == null) return false;
-        selectedInstance.pressFullscreenKey();
-        return true;
-    }
-
     public boolean doBGReset() {
         return false;
     }
