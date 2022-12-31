@@ -47,6 +47,8 @@ public class MinecraftInstance {
     private Integer createWorldKey = null;
     private Integer fullscreenKey = null;
     private Integer leavePreviewKey = null;
+    private Boolean usingWorldPreview = null;
+    private Boolean usingAtum = null;
 
     // State tracking
     private boolean inPreview = false;
@@ -538,7 +540,9 @@ public class MinecraftInstance {
     }
 
     public boolean isUsingWorldPreview() {
-        return getLeavePreviewKey() != null;
+        if (usingWorldPreview != null) return usingWorldPreview;
+        usingWorldPreview = getLeavePreviewKey() != null;
+        return usingWorldPreview;
     }
 
     private Integer getLeavePreviewKey() {
@@ -549,7 +553,9 @@ public class MinecraftInstance {
     }
 
     public boolean isUsingAtum() {
-        return getCreateWorldKey() != null;
+        if (usingAtum != null) return usingAtum;
+        usingAtum = getCreateWorldKey() != null;
+        return usingAtum;
     }
 
     private Integer getCreateWorldKey() {
@@ -580,8 +586,7 @@ public class MinecraftInstance {
     public void checkLog(Julti julti) {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
-            JultiOptions options = JultiOptions.getInstance();
-            runLogCheck(newLogContents, options, julti);
+            runLogCheck(newLogContents, julti);
         }
     }
 
@@ -613,7 +618,8 @@ public class MinecraftInstance {
         return biome;
     }
 
-    synchronized private void runLogCheck(String newLogContents, JultiOptions options, final Julti julti) {
+    synchronized private void runLogCheck(String newLogContents, final Julti julti) {
+        JultiOptions options = JultiOptions.getInstance();
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
                 line = line.trim();
