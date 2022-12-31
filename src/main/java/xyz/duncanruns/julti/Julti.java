@@ -499,8 +499,15 @@ public class Julti {
 
     public boolean doFullscreen() {
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
+        JultiOptions options = JultiOptions.getInstance();
         if (selectedInstance == null) return false;
-        selectedInstance.pressFullscreenKey();
+
+        if (selectedInstance.getFullscreenKey().equals(options.fullscreenHotkey.get(options.fullscreenHotkey.size() - 1))) {
+            log(Level.WARN, "Your Go Fullscreen button is set to the same key as your in-game fullscreen hotkey! Please change either the Julti hotkey or the in-game keybinding.");
+            selectedInstance.fullscreenWasPressed();
+        } else {
+            selectedInstance.pressFullscreenKey();
+        }
         return true;
     }
 

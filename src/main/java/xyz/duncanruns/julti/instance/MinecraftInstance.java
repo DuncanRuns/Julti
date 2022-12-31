@@ -8,7 +8,10 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.ResetCounter;
-import xyz.duncanruns.julti.util.*;
+import xyz.duncanruns.julti.util.HwndUtil;
+import xyz.duncanruns.julti.util.KeyboardUtil;
+import xyz.duncanruns.julti.util.LogReceiver;
+import xyz.duncanruns.julti.util.McKeyUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.awt.*;
@@ -214,14 +217,18 @@ public class MinecraftInstance {
 
     public void pressFullscreenKey() {
         KeyboardUtil.sendKeyToHwnd(hwnd, getFullscreenKey());
-        fullscreen = !fullscreen;
+        fullscreenWasPressed();
     }
 
-    private Integer getFullscreenKey() {
+    public Integer getFullscreenKey() {
         if (fullscreenKey == null) {
             fullscreenKey = getKey("key_key.fullscreen");
         }
         return fullscreenKey;
+    }
+
+    public void fullscreenWasPressed() {
+        fullscreen = !fullscreen;
     }
 
     private Integer getKey(String keybindingTranslation) {
