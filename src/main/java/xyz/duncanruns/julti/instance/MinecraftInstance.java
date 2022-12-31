@@ -586,7 +586,7 @@ public class MinecraftInstance {
     public void checkLog(Julti julti) {
         if (hasWindow()) {
             String newLogContents = getNewLogContents();
-            runLogCheck(newLogContents, julti);
+            checkLogContents(newLogContents, julti);
         }
     }
 
@@ -618,7 +618,7 @@ public class MinecraftInstance {
         return biome;
     }
 
-    synchronized private void runLogCheck(String newLogContents, final Julti julti) {
+    synchronized private void checkLogContents(String newLogContents, final Julti julti) {
         JultiOptions options = JultiOptions.getInstance();
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
