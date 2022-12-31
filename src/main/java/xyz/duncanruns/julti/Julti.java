@@ -31,26 +31,16 @@ public class Julti {
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
     private static final Path stateOutputPath = JultiOptions.getJultiDir().resolve("state");
 
-    private InstanceManager instanceManager;
-    private ResetManager resetManager;
-    private ScheduledExecutorService tickExecutor;
-    private ScheduledExecutorService logCheckExecutor;
-    private long last2SecCycle;
-    private long lastStateOutput;
+    private InstanceManager instanceManager = null;
+    private ResetManager resetManager = null;
+    private ScheduledExecutorService tickExecutor = null;
+    private ScheduledExecutorService logCheckExecutor = null;
+    private long last2SecCycle = 0;
+    private long lastStateOutput = 0;
     private WallWindow wallWindow = null;
-    private boolean stopped;
+    private boolean stopped = false;
     private String currentSceneId = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
-
-    public Julti() {
-        stopped = false;
-        instanceManager = null;
-        tickExecutor = null;
-        logCheckExecutor = null;
-
-        last2SecCycle = 0;
-        lastStateOutput = 0;
-    }
 
     private static String getVersion() {
         // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
