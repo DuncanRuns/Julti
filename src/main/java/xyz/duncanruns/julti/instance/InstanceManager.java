@@ -185,13 +185,14 @@ public class InstanceManager {
         return out.toString();
     }
 
-    public void clearAllWorlds() {
+    synchronized public void clearAllWorlds() {
         new Thread(() -> {
             Thread.currentThread().setName("world-clearing");
             for (MinecraftInstance instance : new ArrayList<>(instances)) {
                 log(Level.INFO, "Clearing worlds for " + instance + "...");
                 instance.tryClearWorlds();
             }
+            log(Level.INFO, "Done clearing worlds!");
         }).start();
     }
 
