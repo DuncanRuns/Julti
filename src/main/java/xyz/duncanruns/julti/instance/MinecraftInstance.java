@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.instance;
 
 import com.sun.jna.Pointer;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +36,7 @@ public class MinecraftInstance {
     private final WindowTitleInfo titleInfo;
     private Pointer hwnd;
     private Path instancePath = null;
+    private String name = null;
 
     // Missing Window Stuff
     private boolean notMC = false; // true when a MinecraftInstance is constructed with a window handle which points to a non-mc window
@@ -161,14 +163,39 @@ public class MinecraftInstance {
     }
 
     public String getName() {
+        // Return existing name
+        if (name != null) {
+            return name;
+        }
+
+        // Get instance path
         Path instancePath = getInstancePath();
         if (instancePath == null) {
             return "Unknown Instance"; //This name should probably never be seen, regardless it is here.
         }
+
+        // Check MultiMC/Prism name
+
+        Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
+        if (Files.exists(mmcConfigPath)) {
+            try {
+                for (String line : Files.readAllLines(mmcConfigPath)) {
+                    line = line.trim();
+                    if (line.startsWith("name=")) {
+                        name = StringEscapeUtils.unescapeJson(line.split("=")[1]);
+                        return name;
+                    }
+                }
+            } catch (Exception ignored) {
+                // Fail, continue to get folder name instead
+            }
+        }
+
         if (instancePath.getName(instancePath.getNameCount() - 1).toString().equals(".minecraft")) {
             instancePath = instancePath.getParent();
+            // If this runs, instancePath is no longer an accurate variable name, and describes the parent path
         }
-        String name = instancePath.getName(instancePath.getNameCount() - 1).toString();
+        name = instancePath.getName(instancePath.getNameCount() - 1).toString();
         if (name.equals("Roaming")) {
             return "Default Launcher";
         }
@@ -616,7 +643,10 @@ public class MinecraftInstance {
 
     private void onWorldLoad(JultiOptions options, Julti julti) {
         // Return if reset is supposed to happen
-        if (loadingPercent == -1) return;
+        if (loadingPercent == -1) {
+            reset(false);
+            return;
+        }
 
         // Update states
         setInPreview(false);
