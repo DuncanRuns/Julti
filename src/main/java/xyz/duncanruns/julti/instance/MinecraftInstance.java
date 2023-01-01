@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 public class MinecraftInstance {
@@ -152,19 +153,28 @@ public class MinecraftInstance {
     }
 
     /**
-     * Returns a sorting number which can be summarized as follows: For each character in the instance name that is a
-     * number, add 11 plus the number itself. For example, "Multi 16 2" would be (11+1)+(11+6)+(11+2) = 42.
+     * Returns a sorting number which is the sum of all groups of digit characters.
+     * For example, "Multi 1.16 02" would be 1+16+2 = 19.
      *
      * @return a sorting number to correctly sort instances.
      */
     public int getSortingNum() {
-        int i = 0;
-        for (char c : getName().toCharArray()) {
-            if (c >= '0' && c <= '9') {
-                i += 11 + (c - '0');
+        AtomicInteger i = new AtomicInteger(0);
+        //for (char c : getName().toCharArray()) {
+        //    if (c >= '0' && c <= '9') {
+        //        i += 11 + (c - '0');
+        //    }
+        //}
+        String name = getName();
+        Pattern.compile("\\d+").matcher(name).results().forEach(matchResult -> {
+            String section = name.substring(matchResult.start(), matchResult.end());
+            if (section.length() == 0) return;
+            while (section.length() > 1 && section.startsWith("0")) {
+                section = section.substring(1);
             }
-        }
-        return i;
+            i.addAndGet(Integer.parseInt(section));
+        });
+        return i.get();
     }
 
     public String getName() {
