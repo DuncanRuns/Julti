@@ -1,6 +1,9 @@
-v0.1x.x:
+v0.15.2:
 - Various code refactors and optimizations
 - Julti now checks for a MultiMC instance config to get the instance name, helping to launch instances
+- Fix log reading for other languages (#47)
+- Now multi-threading log reading
+- Added fullscreen hotkey warning when the "Go Fullscreen" key is set to the same as the in-game key
 
 v0.15.1:
 - Added a delay to world pause when pie chart is enabled
