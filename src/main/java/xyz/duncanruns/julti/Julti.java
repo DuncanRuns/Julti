@@ -81,6 +81,7 @@ public class Julti {
         map.put("hotkey", this::runCommandHotkey);
         map.put("titles", this::runCommandTitles);
         map.put("profile", this::runCommandProfile);
+        map.put("sorting", this::runCommandSorting);
         return map;
     }
 
@@ -109,12 +110,19 @@ public class Julti {
         }
     }
 
+
+    private void runCommandSorting(String[] args) {
+        for (MinecraftInstance instance : instanceManager.getInstances()) {
+            log(Level.INFO, instance.getName() + " -> " + instance.getSortingNum());
+        }
+    }
+
     private void runCommandTitles(String[] args) {
         getInstanceManager().renameWindows();
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "fullscreen", "bgreset", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
@@ -285,7 +293,9 @@ public class Julti {
                 "option reload -> Reloads the current options json file\n" +
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
+                "hotkey <reset/fullscreen/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
+                "\n" +
+                "sorting -> List all sorting numbers for the current instances.\n" +
                 "--------------------"
         );
     }
