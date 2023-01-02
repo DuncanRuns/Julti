@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -135,7 +134,7 @@ public class WallWindow extends Frame {
 
     private void drawAllInstances() {
         List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
-        Set<MinecraftInstance> lockedInstances = julti.getResetManager().getLockedInstances();
+        List<MinecraftInstance> lockedInstances = julti.getResetManager().getLockedInstances();
         if (instances.size() == 0) return;
 
         int totalRows;

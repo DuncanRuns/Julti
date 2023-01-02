@@ -8,7 +8,7 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 public abstract class ResetManager {
     protected final InstanceManager instanceManager;
@@ -71,7 +71,7 @@ public abstract class ResetManager {
         return instance.shouldDirtCover();
     }
 
-    public Set<MinecraftInstance> getLockedInstances() {
-        return Collections.emptySet();
+    public List<MinecraftInstance> getLockedInstances() {
+        return Collections.emptyList();
     }
 }

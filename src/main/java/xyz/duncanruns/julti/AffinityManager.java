@@ -7,7 +7,6 @@ import com.sun.jna.platform.win32.WinNT;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +42,7 @@ public final class AffinityManager {
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
         MinecraftInstance selectedInstance = julti.getInstanceManager().getSelectedInstance();
-        Set<MinecraftInstance> lockedInstances = julti.getResetManager().getLockedInstances();
+        List<MinecraftInstance> lockedInstances = julti.getResetManager().getLockedInstances();
         if (selectedInstance != null) {
             setAffinity(selectedInstance, options.threadsPlaying);
             for (MinecraftInstance instance : instances) {

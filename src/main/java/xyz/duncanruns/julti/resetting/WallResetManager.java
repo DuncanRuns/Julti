@@ -9,11 +9,12 @@ import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
 
 public class WallResetManager extends ResetManager {
-    private final Set<MinecraftInstance> lockedInstances = new HashSet<>();
+    private final List<MinecraftInstance> lockedInstances = new ArrayList<>();
 
     public WallResetManager(Julti julti) {
         super(julti);
@@ -163,8 +164,8 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public Set<MinecraftInstance> getLockedInstances() {
-        return Collections.unmodifiableSet(lockedInstances);
+    public List<MinecraftInstance> getLockedInstances() {
+        return Collections.unmodifiableList(lockedInstances);
     }
 
     @Nullable

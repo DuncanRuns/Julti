@@ -577,7 +577,7 @@ public class Julti {
         // Lazy try except (I sorry)
         try {
             StringBuilder out = new StringBuilder(currentSceneId).append(" ");
-            Set<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
+            List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
                 out.append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0));
             }
