@@ -4,11 +4,9 @@ import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.MouseUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -166,47 +164,6 @@ public class WallResetManager extends ResetManager {
     @Override
     public List<MinecraftInstance> getLockedInstances() {
         return Collections.unmodifiableList(lockedInstances);
-    }
-
-    @Nullable
-    private MinecraftInstance getHoveredWallInstance() {
-        Point point = MouseUtil.getMousePos();
-        int screenX = point.x;
-        int screenY = point.y;
-
-        Rectangle bounds = julti.getWallBounds();
-        if (bounds == null) return null;
-
-
-        int x = screenX - bounds.x;
-        int y = screenY - bounds.y;
-
-        if (!bounds.contains(screenX, screenY)) return null;
-
-        List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
-
-        int totalRows;
-        int totalColumns;
-
-        JultiOptions options = JultiOptions.getInstance();
-        if (!options.autoCalcWallSize) {
-            totalRows = options.overrideRowsAmount;
-            totalColumns = options.overrideColumnsAmount;
-        } else {
-            totalRows = (int) Math.ceil(Math.sqrt(instances.size()));
-            totalColumns = (int) Math.ceil(instances.size() / (float) totalRows);
-        }
-
-        final int iWidth = bounds.width / totalColumns;
-        final int iHeight = bounds.height / totalRows;
-
-        int row = y / iHeight;
-        int column = x / iWidth;
-        int instanceIndex = row * totalColumns + column;
-
-        if (instanceIndex >= instances.size()) return null;
-
-        return instances.get(instanceIndex);
     }
 
     private void resetNonLockedExcept(MinecraftInstance clickedInstance) {
