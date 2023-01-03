@@ -160,11 +160,6 @@ public class MinecraftInstance {
      */
     public int getSortingNum() {
         AtomicInteger i = new AtomicInteger(0);
-        //for (char c : getName().toCharArray()) {
-        //    if (c >= '0' && c <= '9') {
-        //        i += 11 + (c - '0');
-        //    }
-        //}
         String name = getName();
         Pattern.compile("\\d+").matcher(name).results().forEach(matchResult -> {
             String section = name.substring(matchResult.start(), matchResult.end());
@@ -521,6 +516,8 @@ public class MinecraftInstance {
         lastResetPress = System.currentTimeMillis();
         switch (getResetType()) {
             case NEW_ATUM:
+                if (getLeavePreviewKey() != null)
+                    KeyboardUtil.sendKeyToHwnd(hwnd, getLeavePreviewKey());
                 KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
             case HAS_PREVIEW:
                 if (inPreview) {
@@ -579,14 +576,13 @@ public class MinecraftInstance {
     }
 
     private ResetType getResetType() {
-        if (resetType == null) {
-            if (getCreateWorldKey() != null) {
-                resetType = ResetType.NEW_ATUM;
-            } else if (getLeavePreviewKey() != null) {
-                resetType = ResetType.HAS_PREVIEW;
-            } else {
-                resetType = ResetType.EXIT_WORLD;
-            }
+        if (resetType != null) return resetType;
+        if (getCreateWorldKey() != null) {
+            resetType = ResetType.NEW_ATUM;
+        } else if (getLeavePreviewKey() != null) {
+            resetType = ResetType.HAS_PREVIEW;
+        } else {
+            resetType = ResetType.EXIT_WORLD;
         }
         return resetType;
     }
