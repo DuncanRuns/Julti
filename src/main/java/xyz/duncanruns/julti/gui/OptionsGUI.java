@@ -420,16 +420,13 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         panel.add(GUIUtil.createSpacer());
+        if (JultiOptions.getInstance().resetMode != 1) {
+            panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
+            panel.add(GUIUtil.createSpacer());
+        }
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        if (JultiOptions.getInstance().resetMode != 1) {
-            addUJWWOption(panel);
-            panel.add(GUIUtil.leftJustify(new JLabel("Wall resetting mode is disabled.")));
-            panel.add(GUIUtil.leftJustify(new JLabel("You can still render the")));
-            panel.add(GUIUtil.leftJustify(new JLabel("wall window with the above setting. ")));
-            return;
-        }
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
             warnUnverifiable();
             reload();
