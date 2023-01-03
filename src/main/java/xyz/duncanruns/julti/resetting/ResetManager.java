@@ -124,11 +124,13 @@ public abstract class ResetManager {
         int row = instanceInd / totalColumns;
         int col = instanceInd % totalColumns;
 
+        int x = (int) (col * iWidth);
+        int y = (int) (row * iHeight);
         return new Rectangle(
-                (int) (col * iWidth),
-                (int) (row * iHeight),
-                (int) ((col + 1) * iWidth),
-                (int) ((row + 1) * iHeight)
+                x,
+                y,
+                (int) ((col + 1) * iWidth) - x,
+                (int) ((row + 1) * iHeight) - y
         );
     }
 

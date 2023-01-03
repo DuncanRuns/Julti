@@ -34,12 +34,11 @@ public class Julti {
     private InstanceManager instanceManager = null;
     private ResetManager resetManager = null;
     private ScheduledExecutorService tickExecutor = null;
-    private ScheduledExecutorService logCheckExecutor = null;
+    private ScheduledExecutorService stateExecutor = null;
     private long last2SecCycle = 0;
-    private long lastStateOutput = 0;
     private WallWindow wallWindow = null;
     private boolean stopped = false;
-    private String currentSceneId = "W";
+    private String currentLocation = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
     private static String getVersion() {
@@ -384,7 +383,7 @@ public class Julti {
                 log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
             }
         }
-        currentSceneId = String.valueOf(i);
+        currentLocation = String.valueOf(i);
     }
 
     public InstanceManager getInstanceManager() {
@@ -402,7 +401,7 @@ public class Julti {
             KeyboardUtil.releaseAllModifiers();
             KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
         }
-        currentSceneId = "W";
+        currentLocation = "W";
     }
 
     public void start() {
@@ -414,8 +413,8 @@ public class Julti {
         tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         tryTick();
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
-        logCheckExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
-        logCheckExecutor.scheduleWithFixedDelay(this::logCheckTick, 12, 25, TimeUnit.MILLISECONDS);
+        stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
+        stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
         log(Level.INFO, "Welcome to Julti v" + VERSION + "!");
     }
 
@@ -426,9 +425,9 @@ public class Julti {
             } catch (Exception ignored) {
             }
         }
-        if (logCheckExecutor != null) {
+        if (stateExecutor != null) {
             try {
-                logCheckExecutor.shutdownNow();
+                stateExecutor.shutdownNow();
             } catch (Exception ignored) {
             }
         }
@@ -466,7 +465,7 @@ public class Julti {
         }
     }
 
-    private void logCheckTick() {
+    private void stateTick() {
         int i = 0;
         List<MinecraftInstance> instances = instanceManager.getInstances();
         Thread[] threads = new Thread[instances.size()];
@@ -487,6 +486,7 @@ public class Julti {
             } catch (InterruptedException ignored) {
             }
         }
+        tryOutputState();
     }
 
     /**
@@ -535,10 +535,34 @@ public class Julti {
             ensureCorrectSceneState(selectedInstance);
             ensureSleepBG(selectedInstance);
         }
+    }
 
-        if (current - lastStateOutput > 50) {
-            lastStateOutput = current;
-            tryOutputState();
+    private void tryOutputState() {
+        // Lazy try except (I sorry)
+        try {
+            StringBuilder out = new StringBuilder(currentLocation);
+            //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
+            Rectangle bounds = getWallBounds();
+            if (bounds == null) {
+                bounds = new Rectangle(0, 0, 1920, 1080);
+            }
+            List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
+            for (MinecraftInstance instance : instanceManager.getInstances()) {
+                Rectangle instancePos = resetManager.getInstancePosition(instance, bounds);
+                out.append(";")
+                        .append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0))
+                        .append(",")
+                        .append(instancePos.x)
+                        .append(",")
+                        .append(instancePos.y)
+                        .append(",")
+                        .append(instancePos.width)
+                        .append(",")
+                        .append(instancePos.height);
+            }
+            Files.writeString(stateOutputPath, out.toString());
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
     }
 
@@ -558,10 +582,10 @@ public class Julti {
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
         if (selectedInstance == null) {
             if (isWallActive()) {
-                currentSceneId = "W";
+                currentLocation = "W";
             }
         } else {
-            currentSceneId = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
+            currentLocation = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
         }
     }
 
@@ -573,17 +597,16 @@ public class Julti {
         }
     }
 
-    private void tryOutputState() {
-        // Lazy try except (I sorry)
-        try {
-            StringBuilder out = new StringBuilder(currentSceneId).append(" ");
-            List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
-            for (MinecraftInstance instance : instanceManager.getInstances()) {
-                out.append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0));
+    public Rectangle getWallBounds() {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.useJultiWallWindow) {
+            if (wallWindow != null && !wallWindow.isClosed()) {
+                return wallWindow.getIntendedBounds();
             }
-            Files.writeString(stateOutputPath, out.toString());
-        } catch (Exception ignored) {
         }
+        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        if (obsWallHwnd == null) return null;
+        return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
     public void startWall() {
@@ -652,18 +675,6 @@ public class Julti {
 
     public boolean isStopped() {
         return stopped;
-    }
-
-    public Rectangle getWallBounds() {
-        JultiOptions options = JultiOptions.getInstance();
-        if (options.useJultiWallWindow) {
-            if (wallWindow != null && !wallWindow.isClosed()) {
-                return wallWindow.getIntendedBounds();
-            }
-        }
-        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
-        if (obsWallHwnd == null) return null;
-        return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
     public void focusWall() {
