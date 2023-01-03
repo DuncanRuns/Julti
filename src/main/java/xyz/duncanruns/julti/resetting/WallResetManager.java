@@ -176,11 +176,10 @@ public class WallResetManager extends ResetManager {
 
         Rectangle bounds = julti.getWallBounds();
         if (bounds == null) return null;
-        Point windowPos = bounds.getLocation();
 
 
-        int x = screenX - windowPos.x;
-        int y = screenY - windowPos.y;
+        int x = screenX - bounds.x;
+        int y = screenY - bounds.y;
 
         if (!bounds.contains(screenX, screenY)) return null;
 
