@@ -299,6 +299,7 @@ public class WallResetManager extends ResetManager {
     }
 
     private void lockInstance(MinecraftInstance instance) {
-        lockedInstances.add(instance);
+        if (!lockedInstances.contains(instance))
+            lockedInstances.add(instance);
     }
 }
