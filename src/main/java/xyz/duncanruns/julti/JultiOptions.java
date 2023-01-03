@@ -98,6 +98,7 @@ public final class JultiOptions {
     public int threadsPrePreview = AffinityManager.AVAILABLE_THREADS * 31 / 32;
     public int threadsStartPreview = AffinityManager.AVAILABLE_THREADS * 28 / 32;
     public int threadsPreview = AffinityManager.AVAILABLE_THREADS * 10 / 32;
+    public int threadsWorldLoaded = Math.min(1, AffinityManager.AVAILABLE_THREADS / 32);
     public int threadsLocked = AffinityManager.AVAILABLE_THREADS * 31 / 32;
     public int threadsBackground = AffinityManager.AVAILABLE_THREADS * 8 / 32;
 

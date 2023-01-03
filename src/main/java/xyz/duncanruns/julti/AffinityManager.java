@@ -60,7 +60,7 @@ public final class AffinityManager {
             } else if (instance.isPreviewLoaded()) {
                 setAffinity(instance, options.threadsPreview);
             } else {
-                setAffinity(instance, options.threadsBackground);
+                setAffinity(instance, options.threadsWorldLoaded);
             }
         }
     }
