@@ -2,6 +2,7 @@ package xyz.duncanruns.julti;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.PsapiUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -36,6 +38,7 @@ public class Julti {
     private ScheduledExecutorService stateExecutor = null;
     private long last2SecCycle = 0;
     private boolean stopped = false;
+    private boolean foundOBS = false;
     private String currentLocation = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
 
@@ -403,7 +406,7 @@ public class Julti {
     }
 
     public void start() {
-        // TODO: generate image resources in .Julti
+        generateResources();
         stopExecutors();
         reloadManagers();
         if (JultiOptions.getInstance().useAffinity)
@@ -415,6 +418,41 @@ public class Julti {
         stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
         log(Level.INFO, "Welcome to Julti v" + VERSION + "!");
+    }
+
+    private static void generateResources() {
+        String[] filesToCopy = {
+                "dirtcover.png",
+                "lock.png",
+                "blacksmith_example.png",
+                "beach_example.png"
+        };
+
+        for (String name : filesToCopy) {
+            try {
+                Path dest = JultiOptions.getJultiDir().resolve(name);
+                if (dest.toFile().exists()) continue;
+                ResourceUtil.copyResourceToFile("/" + name, dest);
+                log(Level.INFO, "Generated .Julti file " + name);
+            } catch (Exception e) {
+                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            }
+        }
+
+        Path[] scriptLocations = {
+                JultiOptions.getJultiDir().resolve("julti-obs-link.lua"),
+                Paths.get(System.getProperty("user.home")).resolve("Documents").resolve("julti-obs-link.lua")
+        };
+
+        for (Path dest : scriptLocations) {
+            try {
+                String name = "julti-obs-link.lua";
+                ResourceUtil.copyResourceToFile("/" + name, dest);
+                log(Level.INFO, "Generated .Julti file " + name);
+            } catch (Exception e) {
+                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            }
+        }
     }
 
     private void stopExecutors() {
@@ -531,6 +569,9 @@ public class Julti {
             MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
             ensureCorrectSceneState(selectedInstance);
             ensureSleepBG(selectedInstance);
+
+            // We don't have permission to write to the obs scripts folder unfortunately, so I'll leave this commented out
+            // ensureScriptPlaced();
         }
     }
 
@@ -596,6 +637,28 @@ public class Julti {
     public boolean isWallActive() {
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
         return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
+    }
+
+    private void ensureScriptPlaced() {
+        if (foundOBS) return;
+        int[] processes = PsapiUtil.enumProcesses();
+        Path executablePath = null;
+        for (int process : processes) {
+            executablePath = Path.of(HwndUtil.getProcessExecutable(process));
+            String executablePathName = executablePath.getName(executablePath.getNameCount() - 1).toString();
+            if (executablePathName.equals("obs64.exe") || executablePathName.equals("obs32.exe")) {
+                foundOBS = true;
+                break;
+            }
+        }
+        if (!foundOBS) return;
+        assert executablePath != null;
+        Path scriptLocation = executablePath.getParent().getParent().getParent().resolve("data").resolve("obs-plugins").resolve("frontend-tools").resolve("scripts").resolve("julti-obs-link.lua");
+        try {
+            ResourceUtil.copyResourceToFile("/julti-obs-link.lua", scriptLocation);
+        } catch (IOException e) {
+            log(Level.ERROR, "Error while trying to copy link script to obs script folder, you can find the script in the .Julti folder or the documents folder");
+        }
     }
 
     public void runCommand(final String commands) {
