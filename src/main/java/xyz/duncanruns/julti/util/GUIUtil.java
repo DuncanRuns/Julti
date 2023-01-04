@@ -122,6 +122,7 @@ public final class GUIUtil {
     public static Component createThreadsSlider(String displayName, String optionName) {
         JultiOptions options = JultiOptions.getInstance();
         int current = (Integer) options.getValue(optionName);
+        current = Math.max(1, Math.min(AffinityManager.AVAILABLE_THREADS, current));
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
