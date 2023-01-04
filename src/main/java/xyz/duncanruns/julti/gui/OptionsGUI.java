@@ -18,9 +18,9 @@ import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.*;
 
 public class OptionsGUI extends JFrame {
     private static final String[] RESET_MODES = new String[]{"Multi", "Wall"};
@@ -66,13 +66,6 @@ public class OptionsGUI extends JFrame {
         });
         GUIUtil.setActualSize(field, 50, 23);
         return field;
-    }
-
-    private void warnUnverifiable() {
-        JultiOptions options = JultiOptions.getInstance();
-        if (options.useJultiWallWindow && options.pauseRenderingDuringPlay && !options.wallResetAllAfterPlaying) {
-            JOptionPane.showMessageDialog(this, "Warning: Any instances that are not being actively played will not be rendered and will be considered unverifiable, please enable \"Reset All After Playing\" OR disable \"Pause Rendering During Play\".", "Julti - Verification Warning", JOptionPane.WARNING_MESSAGE);
-        }
     }
 
     private JTabbedPane getTabbedPane() {
@@ -429,7 +422,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
-            warnUnverifiable();
             reload();
         })));
 
@@ -460,45 +452,6 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
             panel.add(GUIUtil.createSpacer());
         }
-
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-
-        addUJWWOption(panel);
-
-        if (JultiOptions.getInstance().useJultiWallWindow) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause Rendering During Play", "pauseRenderingDuringPlay", b -> warnUnverifiable())));
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Window Settings for Wall Window Size", "jwUseWindowSize")));
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Lock Icons", "jwShowLockIcons")));
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Darken Locked Instances (May lag)", "jwDarkenLocked")));
-            panel.add(GUIUtil.createSpacer());
-            JSlider darkenSlider = new JSlider(0, 0, 100, JultiOptions.getInstance().jwDarkenLevel);
-            darkenSlider.addChangeListener(e -> JultiOptions.getInstance().jwDarkenLevel = darkenSlider.getValue());
-            GUIUtil.setActualSize(darkenSlider, 200, 23);
-            panel.add(GUIUtil.leftJustify(darkenSlider));
-        }
-
-    }
-
-    private void addUJWWOption(JPanel panel) {
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Julti's Wall Window", "useJultiWallWindow", b -> {
-            reload();
-            julti.checkWallWindow();
-            if (b) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        requestFocus();
-                    }
-                }, 100);
-            }
-            warnUnverifiable();
-            requestFocus();
-        })));
     }
 
     private void addComponentsReset() {

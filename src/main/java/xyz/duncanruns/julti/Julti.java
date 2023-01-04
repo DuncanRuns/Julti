@@ -5,7 +5,6 @@ import com.sun.jna.Pointer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.gui.WallWindow;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
@@ -36,7 +35,6 @@ public class Julti {
     private ScheduledExecutorService tickExecutor = null;
     private ScheduledExecutorService stateExecutor = null;
     private long last2SecCycle = 0;
-    private WallWindow wallWindow = null;
     private boolean stopped = false;
     private String currentLocation = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
@@ -405,6 +403,7 @@ public class Julti {
     }
 
     public void start() {
+        // TODO: generate image resources in .Julti
         stopExecutors();
         reloadManagers();
         if (JultiOptions.getInstance().useAffinity)
@@ -529,8 +528,6 @@ public class Julti {
 
             instanceManager.manageMissingInstances(this::onInstanceLoad);
 
-            checkWallWindow();
-
             MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
             ensureCorrectSceneState(selectedInstance);
             ensureSleepBG(selectedInstance);
@@ -538,13 +535,14 @@ public class Julti {
     }
 
     private void tryOutputState() {
+        JultiOptions options = JultiOptions.getInstance();
         // Lazy try except (I sorry)
         try {
             StringBuilder out = new StringBuilder(currentLocation);
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
             Rectangle bounds = getWallBounds();
             if (bounds == null) {
-                bounds = new Rectangle(0, 0, 1920, 1080);
+                bounds = new Rectangle(0, 0, options.windowSize[0], options.windowSize[1]);
             }
             List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
@@ -570,15 +568,6 @@ public class Julti {
         minecraftInstance.ensureWindowState();
     }
 
-    public void checkWallWindow() {
-        JultiOptions options = JultiOptions.getInstance();
-        if (options.useJultiWallWindow && (wallWindow == null || wallWindow.isClosed())) {
-            startWall();
-        } else if ((!options.useJultiWallWindow) && !(wallWindow == null || wallWindow.isClosed())) {
-            wallWindow.onClose();
-        }
-    }
-
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
         if (selectedInstance == null) {
             if (isWallActive()) {
@@ -599,23 +588,12 @@ public class Julti {
 
     public Rectangle getWallBounds() {
         JultiOptions options = JultiOptions.getInstance();
-        if (options.useJultiWallWindow) {
-            if (wallWindow != null && !wallWindow.isClosed()) {
-                return wallWindow.getIntendedBounds();
-            }
-        }
         Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
         if (obsWallHwnd == null) return null;
         return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
-    public void startWall() {
-        wallWindow = new WallWindow(this);
-    }
-
     public boolean isWallActive() {
-        if (JultiOptions.getInstance().useJultiWallWindow)
-            return wallWindow != null && wallWindow.isActive();
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
         return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
@@ -680,15 +658,11 @@ public class Julti {
     public void focusWall() {
         JultiOptions options = JultiOptions.getInstance();
         SleepBGUtil.disableLock();
-        if (options.useJultiWallWindow) {
-            HwndUtil.activateHwnd(wallWindow.getHwnd());
-        } else {
-            Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
-            if (hwnd == null) {
-                log(Level.WARN, "No OBS Window found!");
-                return;
-            }
-            HwndUtil.activateHwnd(hwnd);
+        Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        if (hwnd == null) {
+            log(Level.WARN, "No OBS Window found!");
+            return;
         }
+        HwndUtil.activateHwnd(hwnd);
     }
 }

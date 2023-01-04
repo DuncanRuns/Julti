@@ -38,20 +38,14 @@ public final class JultiOptions {
     public boolean coopMode = false;
 
     // Wall
-    public boolean useJultiWallWindow = false;
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallLockInsteadOfPlay = true;
     public boolean wallBypass = true;
     public boolean returnToWallIfNoneLoaded = true;
-    public boolean pauseRenderingDuringPlay = false;
     public boolean autoCalcWallSize = true;
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
-    public boolean jwUseWindowSize = true;
-    public boolean jwShowLockIcons = false;
-    public boolean jwDarkenLocked = true;
-    public int jwDarkenLevel = 25;
 
     // Window
     public boolean letJultiMoveWindows = true;
