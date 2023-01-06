@@ -188,7 +188,7 @@ public class MinecraftInstance {
             return null;
         }
 
-        return getOptionFromString(optionName, out);
+        return getOptionFromString(optionName, out).trim();
     }
 
     private String getStandardOption(String optionName) {
