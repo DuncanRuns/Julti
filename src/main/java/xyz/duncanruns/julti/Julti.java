@@ -122,7 +122,7 @@ public class Julti {
     }
 
     private void runCommandHotkey(final String[] args) {
-        List<String> setHotkeyArgs = Arrays.asList("reset", "fullscreen", "bgreset", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
+        List<String> setHotkeyArgs = Arrays.asList("reset", "bgreset", "wallreset", "walllock", "wallplay", "wallfocusreset", "wallsinglereset");
         JultiOptions options = JultiOptions.getInstance();
         if (args.length == 0) {
             log(Level.ERROR, "No args given to hotkey command!");
@@ -134,8 +134,7 @@ public class Julti {
                     "Play Instance (Wall): " + HotkeyUtil.formatKeys(options.wallPlayHotkey) + "\n" +
                     "Focus Reset (Wall): " + HotkeyUtil.formatKeys(options.wallFocusResetHotkey) + "\n" +
                     "Reset: " + HotkeyUtil.formatKeys(options.resetHotkey) + "\n" +
-                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey) + "\n" +
-                    "Go Fullscreen: " + HotkeyUtil.formatKeys(options.fullscreenHotkey);
+                    "Background Reset: " + HotkeyUtil.formatKeys(options.bgResetHotkey);
             log(Level.INFO, out);
         } else if (setHotkeyArgs.contains(args[0])) {
             log(Level.INFO, "Waiting 1 second to not pick up accidental keypress...");
@@ -150,9 +149,6 @@ public class Julti {
                         break;
                     case "bgreset":
                         jultiOptions.bgResetHotkey = hotkey.getKeys();
-                        break;
-                    case "fullscreen":
-                        jultiOptions.fullscreenHotkey = hotkey.getKeys();
                         break;
                     case "wallreset":
                         jultiOptions.wallResetHotkey = hotkey.getKeys();
@@ -293,7 +289,7 @@ public class Julti {
                 "option reload -> Reloads the current options json file\n" +
                 "\n" +
                 "hotkey list -> List all hotkeys.\n" +
-                "hotkey <reset/fullscreen/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
+                "hotkey <reset/bgreset/wallreset/wallsinglereset/walllock/wallplay/wallfocusreset> -> Rebinds a hotkey. After running the command, press the wanted hotkey for the chosen function\n" +
                 "\n" +
                 "sorting -> List all sorting numbers for the current instances.\n" +
                 "--------------------"
@@ -489,7 +485,6 @@ public class Julti {
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("fullscreenHotkey"), this::doFullscreen);
 
         HotkeyUtil.startGlobalHotkeyChecker();
     }
@@ -542,20 +537,6 @@ public class Julti {
                 resetManager = new WallResetManager(this);
                 break;
         }
-    }
-
-    public boolean doFullscreen() {
-        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
-        JultiOptions options = JultiOptions.getInstance();
-        if (selectedInstance == null) return false;
-
-        if (selectedInstance.getFullscreenKey().equals(options.fullscreenHotkey.get(options.fullscreenHotkey.size() - 1))) {
-            log(Level.WARN, "Your Go Fullscreen button is set to the same key as your in-game fullscreen hotkey! Please change either the Julti hotkey or the in-game keybinding.");
-            selectedInstance.fullscreenWasPressed();
-        } else {
-            selectedInstance.pressFullscreenKey();
-        }
-        return true;
     }
 
     private void tick() {

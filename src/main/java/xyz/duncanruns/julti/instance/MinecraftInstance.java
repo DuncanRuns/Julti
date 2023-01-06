@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MinecraftInstance {
 
@@ -52,7 +54,6 @@ public class MinecraftInstance {
     private Integer fullscreenKey = null;
     private Integer leavePreviewKey = null;
     private Boolean usingWorldPreview = null;
-    private Boolean usingAtum = null;
 
     // State tracking
     private boolean inPreview = false;
@@ -62,7 +63,6 @@ public class MinecraftInstance {
     private String biome = "";
     private int loadingPercent = 0;
     private boolean dirtCover = false;
-    boolean fullscreen = false;
     boolean worldEverLoaded = false;
     boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
 
@@ -98,8 +98,62 @@ public class MinecraftInstance {
         this.notMC = false;
     }
 
+    private static String getOptionFromString(String optionName, String optionsString) {
+        String[] lines = optionsString.trim().split("\\n");
+        for (int i = lines.length - 1; i >= 0; i--) {
+            String line = lines[i];
+            if (line.startsWith(optionName + ":")) return line.split(":")[1];
+        }
+        return null;
+    }
+
     public boolean isFullscreen() {
-        return fullscreen;
+        return Objects.equals(getOption("fullscreen", false), "true");
+    }
+
+    public String getOption(String optionName, boolean tryUseSS) {
+        if (tryUseSS) {
+            String out = getStandardOption(optionName);
+            if (out != null) return out;
+        }
+
+        Path path = instancePath.resolve("options.txt");
+
+        if (!Files.exists(path)) return null;
+
+        String out;
+        try {
+            out = Files.readString(path);
+        } catch (IOException e) {
+            // This should never be reached
+            return null;
+        }
+
+        return getOptionFromString(optionName, out);
+    }
+
+    private String getStandardOption(String optionName) {
+        return getStandardOption(optionName, instancePath.resolve("config").resolve("standardoptions.txt"));
+    }
+
+    private String getStandardOption(String optionName, Path path) {
+        if (!Files.exists(path)) return null;
+
+        String out;
+        try {
+            out = Files.readString(path).trim();
+        } catch (IOException e) {
+            // This should never be reached
+            return null;
+        }
+
+        if (!out.contains("\n")) {
+            if (out.endsWith(".txt")) {
+                return getStandardOption(optionName, Path.of(out));
+            }
+        }
+
+        return getOptionFromString(optionName, out);
     }
 
     public boolean hasWindowQuick() {
@@ -222,7 +276,6 @@ public class MinecraftInstance {
 
     public void pressFullscreenKey() {
         KeyboardUtil.sendKeyToHwnd(hwnd, getFullscreenKey());
-        fullscreenWasPressed();
     }
 
     public Integer getFullscreenKey() {
@@ -230,24 +283,6 @@ public class MinecraftInstance {
             fullscreenKey = getKey("key_key.fullscreen");
         }
         return fullscreenKey;
-    }
-
-    public void fullscreenWasPressed() {
-        fullscreen = !fullscreen;
-    }
-
-    private Integer getKey(String keybindingTranslation) {
-        Path optionsPath = getInstancePath().resolve("options.txt");
-        try {
-            for (String line : Files.readAllLines(optionsPath)) {
-                String[] args = line.split(":");
-                if (args.length > 1 && keybindingTranslation.equals(args[0])) {
-                    return McKeyUtil.getVkFromMCTranslation(args[1]);
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
     }
 
     @Override
@@ -449,7 +484,6 @@ public class MinecraftInstance {
                 } else {
                     cmd = multiMCPath.trim() + " --launch \"" + getName() + "\" -o -n " + offlineName;
                 }
-                System.out.println(cmd);
                 Runtime.getRuntime().exec(cmd);
             }
         } catch (IOException e) {
@@ -477,12 +511,13 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
 
         // Before taking any action, store some info usefull for fullscreen management
-        final boolean wasFullscreen = fullscreen;
+        final boolean wasFullscreen = isFullscreen();
         Rectangle ogRect = null;
         if (wasFullscreen) {
             ogRect = getWindowRectangle();
         }
 
+        if (isFullscreen()) pressFullscreenKey();
         pressResetKey();
 
         //Update states
@@ -499,21 +534,20 @@ public class MinecraftInstance {
                 if (!Objects.equals(ogRect, getWindowRectangle())) break;
                 sleep(10);
             }
-            fullscreen = false;
         }
 
-
-        // Window resizing
-        new Thread(() -> {
-            if (!options.letJultiMoveWindows) return;
-            // Wait a bit before resizing, not waiting may cause the reset key to fail (as far as I know)
-            sleep(50);
-            if (wasFullscreen && options.useBorderless) {
-                setBorderless();
+        // Window Resizing and Shid
+        new Timer("delayed-window-fixer").schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!options.letJultiMoveWindows) return;
+                if (wasFullscreen && options.useBorderless) {
+                    setBorderless();
+                }
+                if (!singleInstance && options.letJultiMoveWindows)
+                    squish(options.wideResetSquish);
             }
-            if (!singleInstance && options.letJultiMoveWindows)
-                squish(options.wideResetSquish);
-        }).start();
+        }, 50);
 
         // Log and reset counter update
         log(Level.INFO, "Reset instance " + getName());
@@ -559,8 +593,19 @@ public class MinecraftInstance {
 
     public boolean isUsingWorldPreview() {
         if (usingWorldPreview != null) return usingWorldPreview;
-        usingWorldPreview = getLeavePreviewKey() != null;
-        return usingWorldPreview;
+
+        Path modsPath = instancePath.resolve("mods");
+        try (Stream<Path> list = Files.list(modsPath)) {
+            for (Path modPath : list.collect(Collectors.toList())) {
+                if (modPath.getName(modPath.getNameCount() - 1).toString().startsWith("worldpreview")) {
+                    usingWorldPreview = true;
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        usingWorldPreview = false;
+        return false;
     }
 
     private Integer getLeavePreviewKey() {
@@ -570,17 +615,17 @@ public class MinecraftInstance {
         return leavePreviewKey;
     }
 
-    public boolean isUsingAtum() {
-        if (usingAtum != null) return usingAtum;
-        usingAtum = getCreateWorldKey() != null;
-        return usingAtum;
-    }
-
     private Integer getCreateWorldKey() {
         if (createWorldKey == null) {
             createWorldKey = getKey("key_Create New World");
         }
         return createWorldKey;
+    }
+
+    private Integer getKey(String keybindingTranslation) {
+        String out = getOption(keybindingTranslation, true);
+        if (out == null) return null;
+        return McKeyUtil.getVkFromMCTranslation(out);
     }
 
     private ResetType getResetType() {

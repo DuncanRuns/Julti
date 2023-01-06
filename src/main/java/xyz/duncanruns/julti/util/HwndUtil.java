@@ -26,8 +26,8 @@ public final class HwndUtil {
     private static final Pattern MC_PATTERN = Pattern.compile("(^Minecraft\\* - Instance \\d\\d?$)|(^Minecraft\\*? 1\\.[1-9]\\d*(\\.[1-9]\\d*)?( - .+)?$)");
     private static final Robot ROBOT;
     private static final PowerShell POWER_SHELL;
-    private static Pointer obsHwnd = null;
     private static final byte[] executablePathBuffer = new byte[1024];
+    private static Pointer obsHwnd = null;
 
     static {
         try {

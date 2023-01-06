@@ -333,8 +333,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("fullscreenHotkey", "Go Fullscreen", julti, true)));
-        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 

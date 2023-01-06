@@ -57,7 +57,6 @@ public final class JultiOptions {
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList((int) 'U');
     public List<Integer> bgResetHotkey = Collections.emptyList();
-    public List<Integer> fullscreenHotkey = Collections.emptyList();
     public List<Integer> wallResetHotkey = Collections.singletonList((int) 'T');
     public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');
     public List<Integer> wallLockHotkey = Collections.singletonList(1);
@@ -66,7 +65,6 @@ public final class JultiOptions {
 
     public boolean resetHotkeyIM = true;
     public boolean bgResetHotkeyIM = true;
-    public boolean fullscreenHotkeyIM = true;
     public boolean wallResetHotkeyIM = true;
     public boolean wallSingleResetHotkeyIM = true;
     public boolean wallLockHotkeyIM = true;

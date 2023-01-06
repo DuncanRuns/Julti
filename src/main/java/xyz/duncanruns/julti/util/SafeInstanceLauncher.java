@@ -31,9 +31,9 @@ public final class SafeInstanceLauncher {
         }
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Path.of(multiMCPath);
-        if(launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount()-1).toString().contains("prism")){
+        if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
             launchOffline = false;
-            JultiGUI.log(Level.WARN,"Warning: Prism Launcher cannot use offline names!");
+            JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline names!");
         }
         boolean finalLaunchOffline = launchOffline;
         new Timer("delayed-launcher").schedule(new TimerTask() {
