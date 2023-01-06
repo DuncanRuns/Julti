@@ -54,6 +54,7 @@ public class MinecraftInstance {
     private Integer fullscreenKey = null;
     private Integer leavePreviewKey = null;
     private Boolean usingWorldPreview = null;
+    private Boolean usingStandardSettings = null;
 
     // State tracking
     private boolean inPreview = false;
@@ -71,31 +72,21 @@ public class MinecraftInstance {
     private FileTime lastLogModify = null;
     private Integer pid = null;
 
-
-    public MinecraftInstance(Pointer hwnd) {
-        this.hwnd = hwnd;
-        this.titleInfo = new WindowTitleInfo(getCurrentWindowTitle());
-    }
-
-    private String getCurrentWindowTitle() {
-        if (!hasWindow()) return "Missing Window";
-        return HwndUtil.getHwndTitle(hwnd);
-    }
-
-    public boolean hasWindow() {
-        if (hwnd != null && HwndUtil.hwndExists(hwnd)) {
-            return true;
-        } else {
-            hwnd = null;
-            return false;
-        }
-    }
-
     public MinecraftInstance(Path instancePath) {
         this.hwnd = null;
         this.titleInfo = new WindowTitleInfo();
         this.instancePath = instancePath;
         this.notMC = false;
+
+        ensureGoodStandardSettings();
+    }
+
+    public MinecraftInstance(Pointer hwnd) {
+        this.hwnd = hwnd;
+        this.titleInfo = new WindowTitleInfo(getCurrentWindowTitle());
+
+        getInstancePath();
+        ensureGoodStandardSettings();
     }
 
     private static String getOptionFromString(String optionName, String optionsString) {
@@ -105,6 +96,74 @@ public class MinecraftInstance {
             if (line.startsWith(optionName + ":")) return line.split(":")[1];
         }
         return null;
+    }
+
+    private void ensureGoodStandardSettings() {
+        if (!isUsingStandardSettings()) return;
+
+        String[] goodSettings = new String[]{
+                "f1:true",
+                "changeOnResize:true",
+                "fullscreen:false",
+                "pauseOnLostFocus:false",
+                "key_Cycle ChunkMap Positions:key.keyboard.unknown"
+        };
+
+        for (String setting : goodSettings) {
+
+            String[] settingVals = setting.split(":");
+            String optionName = settingVals[0];
+            String desiredValue = settingVals[1];
+            String currentValue = getStandardOption(optionName);
+
+            if (desiredValue.equals(currentValue)) continue;
+
+            forceStandardSetting(optionName, desiredValue);
+            log(Level.INFO, "Set \"" + optionName + "\" to \"" + desiredValue + "\" in standard settings for " + getName());
+        }
+    }
+
+    private void forceStandardSetting(String optionName, String optionValue) {
+        Path path = instancePath.resolve("config").resolve("standardoptions.txt");
+        while (true) {
+            try {
+                String contents = Files.readString(path).trim();
+                if (!contents.endsWith(".txt"))
+                    break;
+                Path deeperPath = Path.of(contents);
+                if (!Files.exists(deeperPath)) {
+                    break;
+                }
+                path = deeperPath;
+            } catch (IOException ignored) {
+                break;
+            }
+        }
+        List<String> currentLines;
+        try {
+            currentLines = Files.readAllLines(path);
+        } catch (IOException ignored) {
+            return;
+        }
+
+        StringBuilder out = new StringBuilder();
+
+        for (String currentLine : currentLines) {
+            if (!currentLine.startsWith(optionName + ":"))
+                out.append("\n").append(currentLine);
+        }
+        out.append("\n").append(optionName).append(":").append(optionValue);
+
+        try {
+            Files.writeString(path, out.toString().trim());
+        } catch (IOException ignored) {
+        }
+
+    }
+
+    private String getCurrentWindowTitle() {
+        if (!hasWindow()) return "Missing Window";
+        return HwndUtil.getHwndTitle(hwnd);
     }
 
     public boolean isFullscreen() {
@@ -133,7 +192,9 @@ public class MinecraftInstance {
     }
 
     private String getStandardOption(String optionName) {
-        return getStandardOption(optionName, instancePath.resolve("config").resolve("standardoptions.txt"));
+        String out = getStandardOption(optionName, instancePath.resolve("config").resolve("standardoptions.txt"));
+        if (out != null) return out.trim();
+        return null;
     }
 
     private String getStandardOption(String optionName, Path path) {
@@ -191,6 +252,15 @@ public class MinecraftInstance {
         }
 
         return instancePath;
+    }
+
+    public boolean hasWindow() {
+        if (hwnd != null && HwndUtil.hwndExists(hwnd)) {
+            return true;
+        } else {
+            hwnd = null;
+            return false;
+        }
     }
 
     public int getPid() {
@@ -331,6 +401,9 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan(!options.unpauseOnSwitch);
                     }
+                    if (isUsingStandardSettings()) {
+                        pressF1();
+                    }
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -394,6 +467,18 @@ public class MinecraftInstance {
 
     }
 
+    public boolean isUsingStandardSettings() {
+        if (usingStandardSettings != null) return usingStandardSettings;
+
+        boolean exists = doesModExist("standardsettings");
+        usingStandardSettings = exists;
+        return exists;
+    }
+
+    private void pressF1() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_F1);
+    }
+
     public void setWindowTitle(String title) {
         if (hasWindow()) {
             HwndUtil.setHwndTitle(hwnd, title);
@@ -450,6 +535,20 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyDownToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
         pressTab(tabTimes);
         KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
+    }
+
+    private boolean doesModExist(String modName) {
+        Path modsPath = instancePath.resolve("mods");
+        try (Stream<Path> list = Files.list(modsPath)) {
+            for (Path modPath : list.collect(Collectors.toList())) {
+                String jarName = modPath.getName(modPath.getNameCount() - 1).toString();
+                if (jarName.startsWith(modName) && jarName.endsWith(".jar")) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     public void squish(float squish) {
@@ -510,14 +609,21 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
 
-        // Before taking any action, store some info usefull for fullscreen management
+        // Before taking any action, store some info useful for fullscreen management
         final boolean wasFullscreen = isFullscreen();
         Rectangle ogRect = null;
         if (wasFullscreen) {
             ogRect = getWindowRectangle();
         }
 
-        if (isFullscreen()) pressFullscreenKey();
+        if (isWorldLoaded()) {
+            if (isFullscreen()) pressFullscreenKey();
+            if (isUsingStandardSettings()) {
+                pressF1();
+                // Delay is needed for f1/f3 to actually do something
+                sleep(50);
+            }
+        }
         pressResetKey();
 
         //Update states
@@ -594,18 +700,9 @@ public class MinecraftInstance {
     public boolean isUsingWorldPreview() {
         if (usingWorldPreview != null) return usingWorldPreview;
 
-        Path modsPath = instancePath.resolve("mods");
-        try (Stream<Path> list = Files.list(modsPath)) {
-            for (Path modPath : list.collect(Collectors.toList())) {
-                if (modPath.getName(modPath.getNameCount() - 1).toString().startsWith("worldpreview")) {
-                    usingWorldPreview = true;
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        usingWorldPreview = false;
-        return false;
+        boolean exists = doesModExist("worldpreview");
+        usingWorldPreview = exists;
+        return exists;
     }
 
     private Integer getLeavePreviewKey() {
@@ -741,6 +838,8 @@ public class MinecraftInstance {
 
     private void worldLoadKeyPresses(JultiOptions options, Julti julti) {
         boolean active = isActive();
+        if (active && isUsingStandardSettings())
+            pressF1();
         if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
             if (options.useF3) {
                 pressF3Esc();
