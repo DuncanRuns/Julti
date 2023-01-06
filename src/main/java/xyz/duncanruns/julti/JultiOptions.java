@@ -83,6 +83,8 @@ public final class JultiOptions {
 
     // Other
     public String multiMCPath = "";
+    public boolean launchOffline = false;
+    public String launchOfflinePrefix = "Instance";
     public boolean useAffinity = true;
     public int resetCounter = 0;
 

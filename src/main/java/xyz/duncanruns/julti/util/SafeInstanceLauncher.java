@@ -1,9 +1,13 @@
 package xyz.duncanruns.julti.util;
 
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,9 +17,10 @@ public final class SafeInstanceLauncher {
     private SafeInstanceLauncher() {
     }
 
-    public static boolean launchInstance(MinecraftInstance instance) {
+    public static boolean launchInstance(MinecraftInstance instance, Julti julti) {
         if (instance.hasWindow()) return false;
-        String multiMCPath = JultiOptions.getInstance().multiMCPath;
+        JultiOptions options = JultiOptions.getInstance();
+        String multiMCPath = options.multiMCPath;
         if (multiMCPath.isEmpty()) {
             return false;
         }
@@ -24,10 +29,19 @@ public final class SafeInstanceLauncher {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        boolean launchOffline = options.launchOffline;
+        Path multiMCActualPath = Path.of(multiMCPath);
+        if(launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount()-1).toString().contains("prism")){
+            launchOffline = false;
+            JultiGUI.log(Level.WARN,"Warning: Prism Launcher cannot use offline names!");
+        }
+        boolean finalLaunchOffline = launchOffline;
         new Timer("delayed-launcher").schedule(new TimerTask() {
             @Override
             public void run() {
-                instance.launch();
+
+                int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
+                instance.launch(finalLaunchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
             }
         }, 1000);
         return true;
@@ -35,7 +49,8 @@ public final class SafeInstanceLauncher {
 
     public static boolean launchInstances(List<MinecraftInstance> instances) {
 
-        String multiMCPath = JultiOptions.getInstance().multiMCPath;
+        JultiOptions options = JultiOptions.getInstance();
+        String multiMCPath = options.multiMCPath;
         if (multiMCPath.isEmpty()) {
             return false;
         }
@@ -48,12 +63,13 @@ public final class SafeInstanceLauncher {
             @Override
             public void run() {
                 for (MinecraftInstance instance : instances) {
+                    int instanceNum = instances.indexOf(instance) + 1;
                     if (instance.hasWindow()) continue;
                     sleep(500);
-                    instance.launch();
+                    instance.launch(options.launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
                 }
             }
-        }, 500);
+        }, 1000);
         return true;
     }
 

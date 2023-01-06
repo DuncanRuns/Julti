@@ -74,7 +74,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    SafeInstanceLauncher.launchInstance(instance);
+                    SafeInstanceLauncher.launchInstance(instance,julti);
                 }
             });
             open.setText("Launch");
