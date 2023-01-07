@@ -1,6 +1,8 @@
 v0.16.0:
 - Completely rewrote script system and OBS systems (#45), please watch tutorial video
 - Added "Reset Instance Data" button to clear any data stored about the instances such as detected standard options or mods.
+- Added customizable affinity "burst" (#54)
+- Added offline instance launching (#53)
 - Added World Loaded Affinity
 - Removed Built-in Wall
 - Removed fullscreen key, you can now just use the in-game key, and Julti will know (#49)
