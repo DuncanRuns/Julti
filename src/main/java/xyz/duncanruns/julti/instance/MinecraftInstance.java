@@ -125,7 +125,7 @@ public class MinecraftInstance {
 
         // Stupid compact logic, probably don't touch
         if (f1SS != -2) return f1SS != -1;
-        String out = getStandardOption("f1");
+        String out = tryGetStandardOption("f1");
         if (out == null) f1SS = -1;
         else if (out.equals("true")) f1SS = 1;
         else f1SS = 0;
@@ -148,7 +148,7 @@ public class MinecraftInstance {
             String[] settingVals = setting.split(":");
             String optionName = settingVals[0];
             String desiredValue = settingVals[1];
-            String currentValue = getStandardOption(optionName);
+            String currentValue = tryGetStandardOption(optionName);
 
             if (desiredValue.equals(currentValue)) continue;
 
@@ -196,12 +196,22 @@ public class MinecraftInstance {
     }
 
     public boolean isFullscreen() {
-        return Objects.equals(getOption("fullscreen", false), "true");
+        return Objects.equals(tryGetOption("fullscreen", false), "true");
+    }
+
+    public String tryGetOption(String optionName, boolean tryUseSS) {
+
+        // This should prevent any crazy out of pocket bullshits like 1 in a million parsing error situations
+        try {
+            return getOption(optionName, tryUseSS);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     public String getOption(String optionName, boolean tryUseSS) {
         if (tryUseSS) {
-            String out = getStandardOption(optionName);
+            String out = tryGetStandardOption(optionName);
             if (out != null) return out;
         }
 
@@ -218,6 +228,15 @@ public class MinecraftInstance {
         }
 
         return getOptionFromString(optionName, out).trim();
+    }
+
+
+    private String tryGetStandardOption(String optionName) {
+        try {
+            return getStandardOption(optionName);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private String getStandardOption(String optionName) {
@@ -758,7 +777,7 @@ public class MinecraftInstance {
     }
 
     private Integer getKey(String keybindingTranslation) {
-        String out = getOption(keybindingTranslation, true);
+        String out = tryGetOption(keybindingTranslation, true);
         if (out == null) return null;
         return McKeyUtil.getVkFromMCTranslation(out);
     }
