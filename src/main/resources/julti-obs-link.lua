@@ -319,8 +319,8 @@ function _setup_verification_scene()
         obs.script_log(200, "Warning: You have a lot of instances, your verification scene may require further setup!")
     end
 
-    local totalColumns = math.ceil(math.sqrt(instance_count))
-    local totalRows = math.ceil(instance_count / totalColumns)
+    local totalRows = math.ceil(math.sqrt(instance_count))
+    local totalColumns = math.ceil(instance_count / totalRows)
 
     local i_width = math.floor(total_width / totalColumns)
     local i_height = math.floor(total_height / totalRows)
