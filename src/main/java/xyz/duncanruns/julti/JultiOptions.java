@@ -88,13 +88,13 @@ public final class JultiOptions {
 
     // Affinity
     public boolean useAffinity = true;
-    public int threadsPlaying = AffinityManager.AVAILABLE_THREADS;
-    public int threadsPrePreview = AffinityManager.AVAILABLE_THREADS * 31 / 32;
-    public int threadsStartPreview = AffinityManager.AVAILABLE_THREADS * 28 / 32;
-    public int threadsPreview = AffinityManager.AVAILABLE_THREADS * 10 / 32;
-    public int threadsWorldLoaded = Math.max(1, AffinityManager.AVAILABLE_THREADS / 32);
-    public int threadsLocked = AffinityManager.AVAILABLE_THREADS * 31 / 32;
-    public int threadsBackground = AffinityManager.AVAILABLE_THREADS * 8 / 32;
+    public int threadsPlaying = Math.max(1, AffinityManager.AVAILABLE_THREADS);
+    public int threadsPrePreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 31 / 32);
+    public int threadsStartPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 28 / 32);
+    public int threadsPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 10 / 32);
+    public int threadsWorldLoaded = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
+    public int threadsLocked = Math.max(1, AffinityManager.AVAILABLE_THREADS * 31 / 32);
+    public int threadsBackground = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
     public int affinityBurst = 300;
 
     // Hidden
