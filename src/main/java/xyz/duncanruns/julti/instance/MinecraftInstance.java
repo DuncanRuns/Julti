@@ -104,7 +104,11 @@ public class MinecraftInstance {
         String[] lines = optionsString.trim().split("\\n");
         for (int i = lines.length - 1; i >= 0; i--) {
             String line = lines[i];
-            if (line.startsWith(optionName + ":")) return line.split(":")[1];
+            if (line.startsWith(optionName + ":")) {
+                String[] optionKeyValArr = line.split(":");
+                if (optionKeyValArr.length < 2) continue;
+                return optionKeyValArr[1];
+            }
         }
         return null;
     }

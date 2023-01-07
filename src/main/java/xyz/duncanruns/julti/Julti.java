@@ -506,7 +506,7 @@ public class Julti {
                 try {
                     instance.checkLog(this);
                 } catch (Exception e) {
-                    log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e.getMessage());
+                    log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e.getMessage() + " | " + Arrays.toString(e.getStackTrace()));
                 }
             });
             threads[i++] = thread;
