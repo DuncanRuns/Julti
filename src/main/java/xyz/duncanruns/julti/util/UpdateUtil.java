@@ -42,7 +42,9 @@ public final class UpdateUtil {
             int[] latestVersionNums = getVersionNums(latestVersion);
             int[] currentVersionNums = getVersionNums(Julti.VERSION);
 
-            if (isVersionGreater(latestVersionNums, currentVersionNums) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion))) {
+            boolean canBeEqual = Julti.VERSION.contains("-") || Julti.VERSION.contains("+");
+
+            if (isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual)) {
                 options.lastCheckedVersion = latestVersion;
                 if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + Julti.VERSION + ", and the latest version is " + latestVersion + ".\nWould you like to go to the releases page?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
                     Desktop.getDesktop().browse(new URI("https://github.com/DuncanRuns/Julti/releases"));
@@ -64,13 +66,23 @@ public final class UpdateUtil {
     private static int[] getVersionNums(String versionString) {
         // Remove v prefix
         versionString = versionString.startsWith("v") ? versionString.substring(1) : versionString;
+        // Remove suffix
+        for (char c : new char[]{'+', '-'}) {
+            if (versionString.contains("" + c)) {
+                versionString = versionString.substring(0, versionString.indexOf(c));
+            }
+        }
         return Arrays.stream(versionString.split("\\.")).mapToInt(Integer::parseInt).toArray();
     }
 
-    private static boolean isVersionGreater(int[] latestVersionNums, int[] currentVersionNums) {
+    private static boolean isVersionGreater(int[] latestVersionNums, int[] currentVersionNums, boolean canBeEqual) {
         boolean isGreater = false;
         for (int i = 2; i >= 0; i--) {
-            if (latestVersionNums[i] > currentVersionNums[i]) isGreater = true;
+            if (i == 2 && canBeEqual) {
+                if (latestVersionNums[i] >= currentVersionNums[i]) isGreater = true;
+            } else {
+                if (latestVersionNums[i] > currentVersionNums[i]) isGreater = true;
+            }
             if (latestVersionNums[i] < currentVersionNums[i]) isGreater = false;
         }
         return isGreater;
