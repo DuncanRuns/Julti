@@ -42,9 +42,11 @@ public final class UpdateUtil {
             int[] latestVersionNums = getVersionNums(latestVersion);
             int[] currentVersionNums = getVersionNums(Julti.VERSION);
 
+            // latestVersion usually starts with "v", Julti.VERSION does not, so using endswith basically checks equals ignoring the v
+            boolean isAlreadyExactlyLatest = latestVersion.endsWith(Julti.VERSION);
             boolean canBeEqual = Julti.VERSION.contains("-") || Julti.VERSION.contains("+");
 
-            if (isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual)) {
+            if ((!isAlreadyExactlyLatest) && isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual)) {
                 options.lastCheckedVersion = latestVersion;
                 if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + Julti.VERSION + ", and the latest version is " + latestVersion + ".\nWould you like to go to the releases page?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
                     Desktop.getDesktop().browse(new URI("https://github.com/DuncanRuns/Julti/releases"));
