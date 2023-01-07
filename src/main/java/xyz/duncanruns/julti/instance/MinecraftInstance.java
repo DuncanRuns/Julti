@@ -1047,7 +1047,7 @@ public class MinecraftInstance {
         int i = 0;
         int total = worldsToRemove.size();
         for (Path path : worldsToRemove) {
-            if (i++ % 50 == 0) {
+            if (++i % 50 == 0) {
                 InstanceManager.log(Level.INFO, "Clearing " + getName() + ": " + i + "/" + total);
             }
             Files.walk(path)
