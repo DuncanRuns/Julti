@@ -710,4 +710,12 @@ public class Julti {
         }
         HwndUtil.activateHwnd(hwnd);
     }
+
+    /**
+     * Replaces each MinecraftInstance object currently loaded with a new one only containing the instance path.
+     */
+    public void resetInstanceData() {
+        instanceManager.resetInstanceData();
+        instanceManager.manageMissingInstances(this::onInstanceLoad);
+    }
 }

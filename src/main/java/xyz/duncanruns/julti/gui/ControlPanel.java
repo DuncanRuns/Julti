@@ -29,11 +29,18 @@ public class ControlPanel extends JPanel {
         gbc.insets = new Insets(2, 0, 2, 0);
 
         setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
+
         add(GUIUtil.getButtonWithMethod(new JButton("Redetect Instances"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");
             if (0 == JOptionPane.showConfirmDialog(gui, "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.WARNING_MESSAGE))
                 julti.redetectInstances();
         }), gbc);
+
+        add(GUIUtil.getButtonWithMethod(new JButton("Reset Instance Data"), actionEvent -> {
+            Thread.currentThread().setName("julti-gui");
+            julti.resetInstanceData();
+        }), gbc);
+        add(GUIUtil.createSpacer(2), gbc2);
 
         add(GUIUtil.getButtonWithMethod(new JButton("Launch All Instances"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");

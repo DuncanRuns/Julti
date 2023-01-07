@@ -1,11 +1,12 @@
 v0.16.0:
 - Completely rewrote script system and OBS systems (#45), please watch tutorial video
+- Added "Reset Instance Data" button to clear any data stored about the instances such as detected standard options or mods.
+- Added World Loaded Affinity
 - Removed Built-in Wall
 - Removed fullscreen key, you can now just use the in-game key, and Julti will know (#49)
-- Added World Loaded Affinity
 - Script is now automatically placed in .Julti and Documents folders
-- Support for standard options, some values will automatically be set for the user to be compatible with Julti
-- Now using F1 to make the wall cleaner (#9)
+- Support for standard options, some values will automatically be set for the user to be compatible with Julti (#50, #51)
+- Now can use F1 to make the wall cleaner (#9)
 - Over a thousand lines of code changes sheeeeesh
 
 v0.15.2:

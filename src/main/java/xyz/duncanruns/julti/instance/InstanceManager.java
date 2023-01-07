@@ -212,4 +212,15 @@ public class InstanceManager {
         MinecraftInstance removed = instances.remove(ind);
         log(Level.INFO, "Removed Instance #" + (ind + 1) + ": " + removed.getName());
     }
+
+    /**
+     * Replaces each MinecraftInstance object currently loaded with a new one only containing the instance path.
+     */
+    synchronized public void resetInstanceData() {
+        instances.replaceAll(instance -> {
+            MinecraftInstance newInstance = new MinecraftInstance(instance.getInstancePath());
+            newInstance.justWentMissing();
+            return newInstance;
+        });
+    }
 }

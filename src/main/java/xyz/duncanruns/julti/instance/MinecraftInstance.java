@@ -67,6 +67,7 @@ public class MinecraftInstance {
     private boolean dirtCover = false;
     boolean worldEverLoaded = false;
     boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
+    boolean activeSinceLastReset = false;
 
     // Log tracking
     private long logProgress = -1;
@@ -394,6 +395,7 @@ public class MinecraftInstance {
      */
     synchronized public void activate(int instanceNum) {
         JultiOptions options = JultiOptions.getInstance();
+        activeSinceLastReset = true;
         if (hasWindow()) {
             new Thread(this::ensureWindowState).start();
             HwndUtil.showHwnd(hwnd);
@@ -618,15 +620,19 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
 
         // Before taking any action, store some info useful for fullscreen management
-        final boolean wasFullscreen = isFullscreen();
+        boolean wasFullscreen = false;
+        if (activeSinceLastReset) {
+            wasFullscreen = isFullscreen();
+        }
         Rectangle ogRect = null;
         if (wasFullscreen) {
             ogRect = getWindowRectangle();
         }
 
+        // This delay is only used for pressing keys before the reset key
         boolean shouldDelay = false;
         if (isWorldLoaded()) {
-            if (isFullscreen()) {
+            if (wasFullscreen) {
                 pressFullscreenKey();
                 shouldDelay = true;
             }
@@ -636,15 +642,16 @@ public class MinecraftInstance {
             }
         }
 
-        if(shouldDelay){
+        if (shouldDelay) {
             Rectangle finalOgRect = ogRect;
+            boolean finalWasFullscreen = wasFullscreen;
             new Timer("reset-finisher").schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    finishReset(singleInstance, options, wasFullscreen, finalOgRect);;
+                    finishReset(singleInstance, options, finalWasFullscreen, finalOgRect);
                 }
-            },50);
-        }else {
+            }, 50);
+        } else {
             finishReset(singleInstance, options, wasFullscreen, ogRect);
         }
     }
@@ -658,6 +665,7 @@ public class MinecraftInstance {
         setInPreview(false);
         dirtCover = true;
         shouldPressDelayedWLKeys = false;
+        activeSinceLastReset = false;
 
         if (wasFullscreen) {
             // Wait until window actually un-fullscreens
