@@ -3,7 +3,6 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.ResetCounter;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 
@@ -11,13 +10,10 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.NumberFormatter;
-import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,38 +30,6 @@ public class OptionsGUI extends JFrame {
         setLocation(gui.getLocation());
         setupWindow();
         reloadComponents();
-    }
-
-    private static Component getWRCDField() {
-        NumberFormat format = NumberFormat.getInstance();
-        format.setGroupingUsed(false);
-        NumberFormatter formatter = new NumberFormatter(format);
-        formatter.setValueClass(Long.class);
-        formatter.setCommitsOnValidEdit(true);
-        JFormattedTextField field = new JFormattedTextField(formatter);
-        field.setValue(JultiOptions.getInstance().wallResetCooldown);
-        field.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                update();
-            }
-
-            private void update() {
-                JultiOptions.getInstance().wallResetCooldown = (long) field.getValue();
-            }
-        });
-        GUIUtil.setActualSize(field, 50, 23);
-        return field;
     }
 
     private JTabbedPane getTabbedPane() {
@@ -109,14 +73,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        JButton counterButton = new JButton("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
-        counterButton.addActionListener(e -> {
-            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the amount of resets you want your counter to be at.", "Julti: Set Reset Counter", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().resetCounter);
-            if (ans == null || ans.equals("")) return;
-            ResetCounter.set(Integer.parseInt(ans));
-            counterButton.setText("Set Reset Counter (" + JultiOptions.getInstance().resetCounter + ")");
-        });
-        panel.add(GUIUtil.leftJustify(counterButton));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("resetCounter", "Reset Counter", this)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSpacer());
@@ -153,6 +110,15 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> runMMCExecutableHelper(mmcField))));
         panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Launch Instances Offline", "launchOffline", b -> reload())));
+        panel.add(GUIUtil.createSpacer());
+
+        if (JultiOptions.getInstance().launchOffline) {
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflinePrefix", "Offline Name Prefix", this)));
+            panel.add(GUIUtil.createSpacer());
+        }
+
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
@@ -177,6 +143,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("World Loaded", "threadsWorldLoaded")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Locked", "threadsLocked")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Background", "threadsBackground")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("affinityBurst", "Affinity Burst", this, "ms")));
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {
@@ -261,40 +228,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        JButton dirtCoverButton = new JButton("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
-        dirtCoverButton.addActionListener(e -> {
-            String ans = (String) JOptionPane.showInputDialog(this, "Please enter the minimum percentage for removing dirt covers.", "Julti: Set Dirt Cover Release Percentage", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().dirtReleasePercent);
-            if (ans == null || ans.equals("")) return;
-            JultiOptions.getInstance().dirtReleasePercent = Integer.parseInt(ans);
-            dirtCoverButton.setText("Release Dirt Cover at " + JultiOptions.getInstance().dirtReleasePercent + "% Loaded");
-        });
-        panel.add(GUIUtil.leftJustify(dirtCoverButton));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("dirtReleasePercent", "Dirt Cover Release Percent", this, "%")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("Projector Name Format:")));
-        JTextField ownfField = new JTextField(JultiOptions.getInstance().obsWindowNameFormat);
-        ownfField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                update();
-            }
-
-            private void update() {
-                JultiOptions.getInstance().obsWindowNameFormat = ownfField.getText();
-            }
-        });
-        GUIUtil.setActualSize(ownfField, 200, 23);
-        panel.add(GUIUtil.leftJustify(ownfField));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("obsWindowNameFormat", "Projector Name Format", this)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -355,7 +292,10 @@ public class OptionsGUI extends JFrame {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        tabbedPane.add(name, new JScrollPane(panel));
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
+        tabbedPane.add(name, scrollPane);
         return panel;
     }
 
@@ -437,8 +377,7 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("Reset Cooldown:")));
-        panel.add(GUIUtil.leftJustify(getWRCDField()));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -489,31 +428,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("Clipboard on Reset:")));
-
-        JTextField corField = new JTextField(JultiOptions.getInstance().clipboardOnReset);
-        corField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                update();
-            }
-
-            private void update() {
-                JultiOptions.getInstance().clipboardOnReset = corField.getText();
-            }
-        });
-        GUIUtil.setActualSize(corField, 200, 23);
-        panel.add(GUIUtil.leftJustify(corField));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("clipboardOnReset", "Clipboard On Reset", this)));
     }
 
     private void reload() {

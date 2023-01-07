@@ -55,7 +55,7 @@ public final class AffinityManager {
                 setAffinity(instance, options.threadsLocked);
             } else if (!(instance.isWorldLoaded() || instance.isPreviewLoaded())) {
                 setAffinity(instance, options.threadsPrePreview);
-            } else if (instance.wasPreviewInLastMillis(300)) {
+            } else if (instance.wasPreviewInLastMillis(options.affinityBurst)) {
                 setAffinity(instance, options.threadsStartPreview);
             } else if (instance.isPreviewLoaded()) {
                 setAffinity(instance, options.threadsPreview);

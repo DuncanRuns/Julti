@@ -83,11 +83,11 @@ public final class JultiOptions {
     public String multiMCPath = "";
     public boolean launchOffline = false;
     public String launchOfflinePrefix = "Instance";
-    public boolean useAffinity = true;
     public int resetCounter = 0;
 
 
     // Affinity
+    public boolean useAffinity = true;
     public int threadsPlaying = AffinityManager.AVAILABLE_THREADS;
     public int threadsPrePreview = AffinityManager.AVAILABLE_THREADS * 31 / 32;
     public int threadsStartPreview = AffinityManager.AVAILABLE_THREADS * 28 / 32;
@@ -95,6 +95,7 @@ public final class JultiOptions {
     public int threadsWorldLoaded = Math.max(1, AffinityManager.AVAILABLE_THREADS / 32);
     public int threadsLocked = AffinityManager.AVAILABLE_THREADS * 31 / 32;
     public int threadsBackground = AffinityManager.AVAILABLE_THREADS * 8 / 32;
+    public int affinityBurst = 300;
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();

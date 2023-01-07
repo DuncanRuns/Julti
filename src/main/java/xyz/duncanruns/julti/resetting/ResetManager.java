@@ -55,9 +55,10 @@ public abstract class ResetManager {
     }
 
     public void notifyPreviewLoaded(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().useAffinity) {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.useAffinity) {
             AffinityManager.ping(julti);
-            AffinityManager.ping(julti, 301);
+            AffinityManager.ping(julti, options.affinityBurst + 1);
         }
     }
 

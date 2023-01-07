@@ -12,17 +12,10 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class GUIUtil {
     private GUIUtil() {
-    }
-
-    public static <T extends JButton> T getButtonWithMethod(T t, Consumer<ActionEvent> actionEventConsumer) {
-        t.addActionListener(e -> {
-            Thread.currentThread().setName("julti-gui");
-            actionEventConsumer.accept(e);
-        });
-        return t;
     }
 
     public static Component leftJustify(Component component) {
@@ -45,6 +38,34 @@ public final class GUIUtil {
         JSeparator jSeparator = new JSeparator();
         jSeparator.setMaximumSize(new Dimension(10000, 2));
         return jSeparator;
+    }
+
+    public static JButton createValueChangerButton(final String optionName, String displayName, Component parent) {
+        return createValueChangerButton(optionName, displayName, parent, "");
+    }
+
+    public static JButton createValueChangerButton(final String optionName, final String displayName, final Component parent, final String valueSuffix) {
+        final Supplier<String> buttonTextGetter = () -> {
+            Object val = JultiOptions.getInstance().getValue(optionName);
+            return displayName + ": " + val + valueSuffix;
+        };
+
+        JButton button = new JButton(buttonTextGetter.get());
+        return getButtonWithMethod(button, actionEvent -> {
+            String ans = (String) JOptionPane.showInputDialog(parent, "Input a new value for " + displayName + ":", "Julti: Set Option", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().getValue(optionName).toString());
+            if (ans == null) return;
+            if (!JultiOptions.getInstance().trySetValue(optionName, ans))
+                JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
+            button.setText(buttonTextGetter.get());
+        });
+    }
+
+    public static <T extends JButton> T getButtonWithMethod(T t, Consumer<ActionEvent> actionEventConsumer) {
+        t.addActionListener(e -> {
+            Thread.currentThread().setName("julti-gui");
+            actionEventConsumer.accept(e);
+        });
+        return t;
     }
 
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
