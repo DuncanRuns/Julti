@@ -221,6 +221,36 @@ end
 
 -- Scene Generator --
 
+function generate_stream_scenes()
+    local julti_source = get_source("Julti")
+
+    if julti_source == nil then
+        obs.script_log(200, "You must press the regular \"Generate Scenes\" button first!")
+    end
+
+    if not scene_exists("Playing") then
+        create_scene("Playing")
+        obs.obs_scene_add(get_scene("Playing"), julti_source)
+    end
+    if not scene_exists("Walling") then
+        create_scene("Walling")
+        local scene = get_scene("Walling")
+
+        obs.obs_scene_add(scene, julti_source)
+
+        local settings = obs.obs_data_create_from_json('{"file":"' ..
+            julti_dir ..
+            'resets.txt","font":{"face":"Arial","flags":0,"size":48,"style":"Regular"},"opacity":50,"read_from_file":true}')
+        local counter_source = obs.obs_source_create("text_gdiplus", "Reset Counter", settings, nil)
+        obs.obs_scene_add(scene, counter_source)
+        release_source(counter_source)
+        obs.obs_data_release(settings)
+    end
+
+    release_source(julti_source)
+
+end
+
 function generate_scenes()
 
     if not scene_exists("Lock Display") then
@@ -411,6 +441,7 @@ function _setup_julti_scene()
     local sound_scene_source = get_source("Sound")
     obs.obs_scene_add(get_scene("Julti"), sound_scene_source)
     release_source(sound_scene_source)
+    bring_to_bottom(obs.obs_scene_find_source(get_scene("Julti"), "Sound"))
 
     _setup_minecraft_sounds(instance_count)
 
@@ -473,8 +504,8 @@ function script_properties()
     local properties = obs.obs_properties_create()
     local generate_scenes_button = obs.obs_properties_add_button(
         properties, "generate_scenes_button", "Generate Scenes", generate_scenes)
-    local testb = obs.obs_properties_add_button(
-        properties, "test", "test", test)
+        local generate_stream_scenes_button = obs.obs_properties_add_button(
+            properties, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
     return properties
 end
 
