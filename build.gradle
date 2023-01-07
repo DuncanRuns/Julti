@@ -34,7 +34,7 @@ dependencies {
 
     implementation 'com.github.tuupertunut:powershell-lib-java:2.0.0'
 
-    implementation 'com.formdev:flatlaf:2.6'
+    implementation 'com.formdev:flatlaf:3.0'
 
     implementation 'org.kohsuke:github-api:1.313'
 }
