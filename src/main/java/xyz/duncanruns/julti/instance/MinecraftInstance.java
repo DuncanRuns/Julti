@@ -55,6 +55,7 @@ public class MinecraftInstance {
     private Integer leavePreviewKey = null;
     private Boolean usingWorldPreview = null;
     private Boolean usingStandardSettings = null;
+    private byte f1SS = -2; // -2 = undetermined, -1 = not present in SS, 0 = false in SS, 1 = true in SS
 
     // State tracking
     private boolean inPreview = false;
@@ -77,16 +78,25 @@ public class MinecraftInstance {
         this.titleInfo = new WindowTitleInfo();
         this.instancePath = instancePath;
         this.notMC = false;
-
-        ensureGoodStandardSettings();
     }
 
     public MinecraftInstance(Pointer hwnd) {
         this.hwnd = hwnd;
         this.titleInfo = new WindowTitleInfo(getCurrentWindowTitle());
+    }
 
-        getInstancePath();
-        ensureGoodStandardSettings();
+    private String getCurrentWindowTitle() {
+        if (!hasWindow()) return "Missing Window";
+        return HwndUtil.getHwndTitle(hwnd);
+    }
+
+    public boolean hasWindow() {
+        if (hwnd != null && HwndUtil.hwndExists(hwnd)) {
+            return true;
+        } else {
+            hwnd = null;
+            return false;
+        }
     }
 
     private static String getOptionFromString(String optionName, String optionsString) {
@@ -98,11 +108,30 @@ public class MinecraftInstance {
         return null;
     }
 
-    private void ensureGoodStandardSettings() {
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    public boolean isUsingF1() {
+        if (JultiOptions.getInstance().pieChartOnLoad) return false;
+
+        // Stupid compact logic, probably don't touch
+        if (f1SS != -2) return f1SS != -1;
+        String out = getStandardOption("f1");
+        if (out == null) f1SS = -1;
+        else if (out.equals("true")) f1SS = 1;
+        else f1SS = 0;
+        return f1SS != -1;
+    }
+
+    public void ensureGoodStandardSettings() {
+        getInstancePath();
         if (!isUsingStandardSettings()) return;
 
         String[] goodSettings = new String[]{
-                "f1:true",
                 "changeOnResize:true",
                 "fullscreen:false",
                 "pauseOnLostFocus:false",
@@ -159,11 +188,6 @@ public class MinecraftInstance {
         } catch (IOException ignored) {
         }
 
-    }
-
-    private String getCurrentWindowTitle() {
-        if (!hasWindow()) return "Missing Window";
-        return HwndUtil.getHwndTitle(hwnd);
     }
 
     public boolean isFullscreen() {
@@ -252,15 +276,6 @@ public class MinecraftInstance {
         }
 
         return instancePath;
-    }
-
-    public boolean hasWindow() {
-        if (hwnd != null && HwndUtil.hwndExists(hwnd)) {
-            return true;
-        } else {
-            hwnd = null;
-            return false;
-        }
     }
 
     public int getPid() {
@@ -401,7 +416,7 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan(!options.unpauseOnSwitch);
                     }
-                    if (isUsingStandardSettings()) {
+                    if (isUsingF1()) {
                         pressF1();
                     }
                 }).start();
@@ -443,13 +458,6 @@ public class MinecraftInstance {
         return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
     }
 
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
     private void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
     }
@@ -467,27 +475,10 @@ public class MinecraftInstance {
 
     }
 
-    public boolean isUsingStandardSettings() {
-        if (usingStandardSettings != null) return usingStandardSettings;
-
-        boolean exists = doesModExist("standardsettings");
-        usingStandardSettings = exists;
-        return exists;
-    }
-
-    private void pressF1() {
-        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_F1);
-    }
-
     public void setWindowTitle(String title) {
         if (hasWindow()) {
             HwndUtil.setHwndTitle(hwnd, title);
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     public Rectangle getWindowRectangle() {
@@ -537,6 +528,18 @@ public class MinecraftInstance {
         KeyboardUtil.sendKeyUpToHwnd(hwnd, Win32Con.VK_LSHIFT, true);
     }
 
+    public boolean isUsingStandardSettings() {
+        if (usingStandardSettings != null) return usingStandardSettings;
+
+        boolean exists = doesModExist("standardsettings");
+        usingStandardSettings = exists;
+        return exists;
+    }
+
+    private void pressF1() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_F1);
+    }
+
     private boolean doesModExist(String modName) {
         Path modsPath = instancePath.resolve("mods");
         try (Stream<Path> list = Files.list(modsPath)) {
@@ -571,6 +574,11 @@ public class MinecraftInstance {
         } else {
             log(Level.WARN, "Could not close " + getName() + " because it is not open.");
         }
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     public void launch(String offlineName) {
@@ -616,14 +624,32 @@ public class MinecraftInstance {
             ogRect = getWindowRectangle();
         }
 
+        boolean shouldDelay = false;
         if (isWorldLoaded()) {
-            if (isFullscreen()) pressFullscreenKey();
-            if (isUsingStandardSettings()) {
+            if (isFullscreen()) {
+                pressFullscreenKey();
+                shouldDelay = true;
+            }
+            if (isUsingF1()) {
                 pressF1();
-                // Delay is needed for f1/f3 to actually do something
-                sleep(50);
+                shouldDelay = true;
             }
         }
+
+        if(shouldDelay){
+            Rectangle finalOgRect = ogRect;
+            new Timer("reset-finisher").schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    finishReset(singleInstance, options, wasFullscreen, finalOgRect);;
+                }
+            },50);
+        }else {
+            finishReset(singleInstance, options, wasFullscreen, ogRect);
+        }
+    }
+
+    private void finishReset(boolean singleInstance, JultiOptions options, boolean wasFullscreen, Rectangle ogRect) {
         pressResetKey();
 
         //Update states
@@ -838,8 +864,12 @@ public class MinecraftInstance {
 
     private void worldLoadKeyPresses(JultiOptions options, Julti julti) {
         boolean active = isActive();
-        if (active && isUsingStandardSettings())
-            pressF1();
+        if (isUsingF1()) {
+            // Simple xor considers all 4 cases of f1:true vs f1:false combined with instance currently active
+            if (active ^ f1SS == 0) {
+                pressF1();
+            }
+        }
         if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
             if (options.useF3) {
                 pressF3Esc();

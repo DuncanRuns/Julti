@@ -118,7 +118,6 @@ public class InstanceManager {
             List<MinecraftInstance> newFoundInstances = findMissingWindows();
             if (!newFoundInstances.isEmpty()) {
                 for (MinecraftInstance instance : newFoundInstances) {
-                    log(Level.INFO, "Found instance: " + instance);
                     onInstanceLoad.accept(instance);
                 }
             }
@@ -148,28 +147,32 @@ public class InstanceManager {
 
         List<MinecraftInstance> replacementInstances = new ArrayList<>();
         try {
-            if (hasMissingWindows()) {
-                List<MinecraftInstance> newInstances = getAllOpenInstances();
-                newInstances.removeIf(minecraftInstance -> instances.contains(minecraftInstance));
-                // Remove any non-minecrafts; this will also get the instance paths
-                newInstances.removeIf(minecraftInstance -> !minecraftInstance.isActuallyMC());
+            if (!hasMissingWindows()) return replacementInstances;
 
-                // Only synchronize after all powershell calls (getting instance paths)
-                synchronized (this) {
-                    for (MinecraftInstance instanceToReplace : new ArrayList<>(instances)) { // Copy list since instances field is changed inside of loop
-                        if (!instanceToReplace.hasWindow() && instanceToReplace.isActuallyMC()) {
-                            // instanceToReplace variable name is only accurate inside this if statement.
-                            for (MinecraftInstance instanceToUse : newInstances) {
-                                if (instanceToUse.getInstancePath().equals(instanceToReplace.getInstancePath())) {
-                                    replacementInstances.add(instanceToUse);
-                                    instances.set(instances.indexOf(instanceToReplace), instanceToUse);
-                                    renameWindows();
-                                }
-                            }
-                        }
+            List<MinecraftInstance> newInstances = getAllOpenInstances();
+            newInstances.removeIf(minecraftInstance -> instances.contains(minecraftInstance));
+            // Remove any non-minecrafts; this will also get the instance paths
+            newInstances.removeIf(minecraftInstance -> !minecraftInstance.isActuallyMC());
+
+            // Only synchronize after all powershell calls (getting instance paths)
+            synchronized (this) {
+                boolean willRenameWindows = false;
+                for (MinecraftInstance instanceToReplace : new ArrayList<>(instances)) { // Copy list since instances field is changed inside of loop
+                    if (instanceToReplace.hasWindow() || !instanceToReplace.isActuallyMC()) continue;
+
+                    // instanceToReplace variable name is only accurate at this stage of execution
+                    for (MinecraftInstance instanceToUse : newInstances) {
+                        if (!instanceToUse.getInstancePath().equals(instanceToReplace.getInstancePath())) continue;
+                        replacementInstances.add(instanceToUse);
+                        instances.set(instances.indexOf(instanceToReplace), instanceToUse);
+                        log(Level.INFO, "Found instance: " + instanceToUse.getName());
+                        willRenameWindows = true;
                     }
+
                 }
+                if (willRenameWindows) renameWindows();
             }
+
         } catch (Exception ignored) {
             // Evil try-catch because windows may get closed in the miliseconds needed to check instance path
         }

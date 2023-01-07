@@ -444,7 +444,7 @@ public class Julti {
             try {
                 String name = "julti-obs-link.lua";
                 ResourceUtil.copyResourceToFile("/" + name, dest);
-                log(Level.INFO, "Generated .Julti file " + name);
+                log(Level.INFO, "Generated " + name + " file in " + dest.getName(dest.getNameCount() - 2));
             } catch (Exception e) {
                 log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
             }
@@ -588,6 +588,7 @@ public class Julti {
 
     private void onInstanceLoad(MinecraftInstance minecraftInstance) {
         minecraftInstance.ensureWindowState();
+        minecraftInstance.ensureGoodStandardSettings();
     }
 
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
