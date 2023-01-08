@@ -106,12 +106,20 @@ public class InstanceManager {
         });
     }
 
-    public void manageMissingInstances(Consumer<MinecraftInstance> onInstanceLoad) {
+    /**
+     * Manages missing instances
+     *
+     * @param onInstanceLoad a method to be called and given an instance upon its initial loading
+     * @return true if any instances go missing or get found, otherwise false
+     */
+    public boolean manageMissingInstances(Consumer<MinecraftInstance> onInstanceLoad) {
         // Be careful not to call this too often, as it is slow (10's or 100's of milliseconds)
         List<MinecraftInstance> newMissingInstances = getNewMissingInstances();
+        boolean out = false;
         if (!newMissingInstances.isEmpty()) {
             for (MinecraftInstance instance : newMissingInstances) {
                 log(Level.WARN, "Instance is missing: " + instance);
+                out = true;
             }
         }
         if (hasMissingWindows()) {
@@ -119,9 +127,11 @@ public class InstanceManager {
             if (!newFoundInstances.isEmpty()) {
                 for (MinecraftInstance instance : newFoundInstances) {
                     onInstanceLoad.accept(instance);
+                    out = true;
                 }
             }
         }
+        return out;
     }
 
     synchronized private List<MinecraftInstance> getNewMissingInstances() {

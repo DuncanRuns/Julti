@@ -149,4 +149,7 @@ public abstract class ResetManager {
 
     public void tick() {
     }
+
+    public void onMissingInstancesUpdate() {
+    }
 }

@@ -94,6 +94,11 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
+    public void onMissingInstancesUpdate() {
+        refreshDisplayInstances();
+    }
+
+    @Override
     protected void lockInstance(MinecraftInstance instance) {
         super.lockInstance(instance);
         refreshDisplayInstances();

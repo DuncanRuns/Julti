@@ -550,7 +550,9 @@ public class Julti {
         if (current - last2SecCycle > 2000) {
             last2SecCycle = current;
 
-            instanceManager.manageMissingInstances(this::onInstanceLoad);
+            if (instanceManager.manageMissingInstances(this::onInstanceLoad)) {
+                resetManager.onMissingInstancesUpdate();
+            }
 
             MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
             ensureCorrectSceneState(selectedInstance);
