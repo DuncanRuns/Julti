@@ -119,7 +119,7 @@ public class WallResetManager extends ResetManager {
         return true;
     }
 
-    private void playInstanceFromWall(MinecraftInstance instance) {
+    protected void playInstanceFromWall(MinecraftInstance instance) {
         if (JultiOptions.getInstance().wallLockInsteadOfPlay && !instance.isWorldLoaded()) {
             lockInstance(instance);
             return;
@@ -166,7 +166,7 @@ public class WallResetManager extends ResetManager {
         return Collections.unmodifiableList(lockedInstances);
     }
 
-    private void resetNonLockedExcept(MinecraftInstance clickedInstance) {
+    protected void resetNonLockedExcept(MinecraftInstance clickedInstance) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
             resetInstance(instance);

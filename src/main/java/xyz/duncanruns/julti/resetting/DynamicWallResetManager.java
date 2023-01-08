@@ -82,6 +82,29 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
+    public boolean doWallFocusReset() {
+        if (!julti.isWallActive()) {
+            return false;
+        }
+        // Regular play instance method
+        MinecraftInstance clickedInstance = getHoveredWallInstance();
+        if (clickedInstance == null) return false;
+        playInstanceFromWall(clickedInstance);
+
+        // Reset all others
+        for (MinecraftInstance instance : instanceManager.getInstances()) {
+            if (getLockedInstances().contains(instance) || (!displayInstances.contains(instance))) continue;
+            if (!instance.equals(clickedInstance)) {
+                resetInstance(instance);
+            }
+        }
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
+        return true;
+    }
+
+    @Override
     protected boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
         if (super.resetInstance(instance, bypassConditions)) {
             if (displayInstances.contains(instance)) {
