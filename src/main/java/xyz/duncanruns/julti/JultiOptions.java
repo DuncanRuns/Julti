@@ -46,7 +46,7 @@ public final class JultiOptions {
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
-    public float lockedInstanceSpace = 1f / 6f;
+    public float lockedInstanceSpace = 100f / 6f;
 
     // Window
     public boolean letJultiMoveWindows = true;
@@ -74,6 +74,7 @@ public final class JultiOptions {
 
     // OBS
     public int dirtReleasePercent = 1;
+    public int instanceSpacing = 0;
     public String obsWindowNameFormat = "* projector (scene) - *";
     public boolean obsPressHotkeys = false;
     public boolean obsUseNumpad = true;

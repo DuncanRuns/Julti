@@ -122,7 +122,7 @@ public class DynamicWallResetManager extends WallResetManager {
         int instanceInd = displayInstances.indexOf(instance);
 
         Dimension dwInnerSize = sceneSize == null ? julti.getOBSSceneSize() : sceneSize;
-        dwInnerSize.height = dwInnerSize.height - (int) (options.lockedInstanceSpace * dwInnerSize.height);
+        dwInnerSize.height = dwInnerSize.height - (int) ((options.lockedInstanceSpace / 100) * dwInnerSize.height);
 
         // Using floats here so there won't be any gaps in the wall after converting back to int
         float iWidth = dwInnerSize.width / (float) totalColumns;
@@ -147,10 +147,10 @@ public class DynamicWallResetManager extends WallResetManager {
         int instanceIndex = getLockedInstances().indexOf(instance);
 
         Dimension dwInnerSize = sceneSize == null ? julti.getOBSSceneSize() : sceneSize;
-        int lockedInstanceHeight = (int) (options.lockedInstanceSpace * dwInnerSize.height);
+        int lockedInstanceHeight = (int) ((options.lockedInstanceSpace / 100) * dwInnerSize.height);
         dwInnerSize.height = dwInnerSize.height - lockedInstanceHeight;
 
-        Dimension lockedInstanceSize = new Dimension((int) (dwInnerSize.width * options.lockedInstanceSpace), lockedInstanceHeight);
+        Dimension lockedInstanceSize = new Dimension((int) (dwInnerSize.width * (options.lockedInstanceSpace / 100)), lockedInstanceHeight);
 
         return new Rectangle(lockedInstanceSize.width * instanceIndex, dwInnerSize.height, lockedInstanceSize.width, lockedInstanceSize.height);
     }

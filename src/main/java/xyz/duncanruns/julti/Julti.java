@@ -576,6 +576,7 @@ public class Julti {
             List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
                 Rectangle instancePos = resetManager.getInstancePosition(instance, size);
+                instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
                         .append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0))
                         .append(",")
