@@ -54,6 +54,11 @@ public final class GUIUtil {
         return getButtonWithMethod(button, actionEvent -> {
             String ans = (String) JOptionPane.showInputDialog(parent, "Input a new value for " + displayName + ":", "Julti: Set Option", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().getValue(optionName).toString());
             if (ans == null) return;
+            // If there is a suffix, the answer ends in the suffix, and the answer isn't just equal to the suffix
+            if ((!valueSuffix.isEmpty()) && ans.endsWith(valueSuffix) && (!ans.equals(valueSuffix))) {
+                // Shorten the answer by the length of the answer
+                ans = ans.substring(0, ans.length() - valueSuffix.length());
+            }
             if (!JultiOptions.getInstance().trySetValue(optionName, ans))
                 JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
             button.setText(buttonTextGetter.get());
