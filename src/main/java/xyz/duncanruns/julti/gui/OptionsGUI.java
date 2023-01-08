@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
-    private static final String[] RESET_MODES = new String[]{"Multi", "Wall"};
+    private static final String[] RESET_MODES = new String[]{"Multi", "Wall", "Dynamic Wall"};
 
     private boolean closed = false;
     private final Julti julti;
@@ -352,7 +352,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         panel.add(GUIUtil.createSpacer());
-        if (JultiOptions.getInstance().resetMode != 1) {
+        if (JultiOptions.getInstance().resetMode == 0) {
             panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
             panel.add(GUIUtil.createSpacer());
         }

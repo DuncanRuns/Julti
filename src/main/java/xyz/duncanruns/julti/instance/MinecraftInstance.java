@@ -321,7 +321,7 @@ public class MinecraftInstance {
      *
      * @return a sorting number to correctly sort instances.
      */
-    public int getSortingNum() {
+    public int getNameSortingNum() {
         AtomicInteger i = new AtomicInteger(0);
         String name = getName();
         Pattern.compile("\\d+").matcher(name).results().forEach(matchResult -> {
@@ -373,6 +373,26 @@ public class MinecraftInstance {
             return "Default Launcher";
         }
         return name;
+    }
+
+    public int getWallSortingNum() {
+        int i = 0;
+        if (isPreviewLoaded()) i += 200;
+        if (isWorldLoaded()) i += 200;
+        i += Math.max(1, getLoadingPercent());
+        return i;
+    }
+
+    synchronized public boolean isPreviewLoaded() {
+        return inPreview;
+    }
+
+    synchronized public boolean isWorldLoaded() {
+        return worldLoaded;
+    }
+
+    public int getLoadingPercent() {
+        return loadingPercent;
     }
 
     public boolean justWentMissing() {
@@ -816,18 +836,6 @@ public class MinecraftInstance {
 
     public boolean hasWorldEverLoaded() {
         return worldEverLoaded;
-    }
-
-    synchronized public boolean isWorldLoaded() {
-        return worldLoaded;
-    }
-
-    public int getLoadingPercent() {
-        return loadingPercent;
-    }
-
-    synchronized public boolean isPreviewLoaded() {
-        return inPreview;
     }
 
     public String getBiome() {

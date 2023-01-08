@@ -34,7 +34,7 @@ public final class JultiOptions {
     public boolean useF3 = true;
     public boolean unpauseOnSwitch = true;
     public String clipboardOnReset = "";
-    public int resetMode = 0; // 0 = Multi, 1 = Wall
+    public int resetMode = 0; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
     public boolean coopMode = false;
 
     // Wall
@@ -46,6 +46,7 @@ public final class JultiOptions {
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
+    public float lockedInstanceSpace = 0.15f;
 
     // Window
     public boolean letJultiMoveWindows = true;

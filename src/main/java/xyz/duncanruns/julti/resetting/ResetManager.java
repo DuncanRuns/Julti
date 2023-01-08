@@ -81,12 +81,20 @@ public abstract class ResetManager {
 
     @Nullable
     protected MinecraftInstance getHoveredWallInstance() {
+        JultiOptions options = JultiOptions.getInstance();
         Point point = MouseUtil.getMousePos();
         Rectangle bounds = julti.getWallBounds();
+        Dimension sceneSize = julti.getOBSSceneSize();
+        if (sceneSize == null) sceneSize = new Dimension(options.windowSize[0], options.windowSize[1]);
         point.translate(-bounds.x, -bounds.y);
+        Point posOnScene = new Point(point);
+        if (!sceneSize.equals(bounds.getSize())) {
+            posOnScene.x = posOnScene.x * sceneSize.width / bounds.width;
+            posOnScene.y = posOnScene.y * sceneSize.height / bounds.height;
+        }
 
         for (MinecraftInstance instance : instanceManager.getInstances()) {
-            if (getInstancePosition(instance, bounds).contains(point)) return instance;
+            if (getInstancePosition(instance, sceneSize).contains(point)) return instance;
         }
         return null;
     }
@@ -99,10 +107,10 @@ public abstract class ResetManager {
      * @param instance the instance to get the position of
      * @return the position of the instance
      */
-    public Rectangle getInstancePosition(MinecraftInstance instance, Rectangle wallBounds) {
-        JultiOptions options = JultiOptions.getInstance();
+    public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
         List<MinecraftInstance> instances = instanceManager.getInstances();
 
+        JultiOptions options = JultiOptions.getInstance();
         int totalRows;
         int totalColumns;
 
@@ -116,11 +124,11 @@ public abstract class ResetManager {
 
         int instanceInd = instances.indexOf(instance);
 
-        Rectangle bounds = wallBounds == null ? julti.getWallBounds() : wallBounds;
+        Dimension size = sceneSize == null ? julti.getOBSSceneSize() : sceneSize;
 
         // Using floats here so there won't be any gaps in the wall after converting back to int
-        float iWidth = bounds.width / (float) totalColumns;
-        float iHeight = bounds.height / (float) totalRows;
+        float iWidth = size.width / (float) totalColumns;
+        float iHeight = size.height / (float) totalRows;
 
         int row = instanceInd / totalColumns;
         int col = instanceInd % totalColumns;
@@ -137,5 +145,8 @@ public abstract class ResetManager {
 
     public Rectangle getInstancePosition(MinecraftInstance instance) {
         return getInstancePosition(instance, null);
+    }
+
+    public void tick() {
     }
 }

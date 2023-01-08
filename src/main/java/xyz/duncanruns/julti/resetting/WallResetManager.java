@@ -173,7 +173,7 @@ public class WallResetManager extends ResetManager {
         }
     }
 
-    private boolean resetInstance(MinecraftInstance instance) {
+    protected boolean resetInstance(MinecraftInstance instance) {
         return resetInstance(instance, false);
     }
 
@@ -238,7 +238,7 @@ public class WallResetManager extends ResetManager {
         lockedInstances.remove(nextInstance);
     }
 
-    private boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
+    protected boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
         unlockInstance(instance);
         if (bypassConditions || shouldResetInstance(instance)) {
             instance.reset(instanceManager.getInstances().size() == 1);
@@ -298,7 +298,7 @@ public class WallResetManager extends ResetManager {
         return System.currentTimeMillis() - instance.getLastResetPress() > (instance.isUsingWorldPreview() ? 5_000 : 20_000);
     }
 
-    private void lockInstance(MinecraftInstance instance) {
+    protected void lockInstance(MinecraftInstance instance) {
         if (!lockedInstances.contains(instance))
             lockedInstances.add(instance);
     }

@@ -59,7 +59,7 @@ public class InstanceManager {
         newInstances.removeIf(minecraftInstance -> (!minecraftInstance.isActuallyMC()));
 
         // Sort instances
-        newInstances.sort(Comparator.comparingInt(MinecraftInstance::getSortingNum));
+        newInstances.sort(Comparator.comparingInt(MinecraftInstance::getNameSortingNum));
 
         // Swich found instances into list
         instances.clear();

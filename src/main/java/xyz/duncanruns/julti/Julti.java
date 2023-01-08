@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetManager;
 import xyz.duncanruns.julti.resetting.WallResetManager;
@@ -41,6 +42,7 @@ public class Julti {
     private boolean foundOBS = false;
     private String currentLocation = "W";
     private final HashMap<String, Consumer<String[]>> commandMap = getCommandMap();
+    private Dimension obsSceneSize = null;
 
     private static String getVersion() {
         // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
@@ -113,7 +115,7 @@ public class Julti {
 
     private void runCommandSorting(String[] args) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
-            log(Level.INFO, instance.getName() + " -> " + instance.getSortingNum());
+            log(Level.INFO, instance.getName() + " -> " + instance.getNameSortingNum());
         }
     }
 
@@ -536,6 +538,9 @@ public class Julti {
             case 1:
                 resetManager = new WallResetManager(this);
                 break;
+            case 2:
+                resetManager = new DynamicWallResetManager(this);
+                break;
         }
     }
 
@@ -553,6 +558,8 @@ public class Julti {
 
             // We don't have permission to write to the obs scripts folder unfortunately, so I'll leave this commented out
             // ensureScriptPlaced();
+
+            resetManager.tick();
         }
     }
 
@@ -562,13 +569,13 @@ public class Julti {
         try {
             StringBuilder out = new StringBuilder(currentLocation);
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
-            Rectangle bounds = getWallBounds();
-            if (bounds == null) {
-                bounds = new Rectangle(0, 0, options.windowSize[0], options.windowSize[1]);
+            Dimension size = getOBSSceneSize();
+            if (size == null) {
+                size = new Dimension(options.windowSize[0], options.windowSize[1]);
             }
             List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
             for (MinecraftInstance instance : instanceManager.getInstances()) {
-                Rectangle instancePos = resetManager.getInstancePosition(instance, bounds);
+                Rectangle instancePos = resetManager.getInstancePosition(instance, size);
                 out.append(";")
                         .append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0))
                         .append(",")
@@ -609,16 +616,31 @@ public class Julti {
         }
     }
 
-    public Rectangle getWallBounds() {
-        JultiOptions options = JultiOptions.getInstance();
-        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
-        if (obsWallHwnd == null) return null;
-        return HwndUtil.getHwndRectangle(obsWallHwnd);
+    public Dimension getOBSSceneSize() {
+        if (obsSceneSize != null) return new Dimension(obsSceneSize);
+
+        Path scriptSizeOutPath = JultiOptions.getJultiDir().resolve("obsscenesize");
+        if (Files.exists(scriptSizeOutPath)) {
+            try {
+                String[] args = Files.readString(scriptSizeOutPath).trim().split(",");
+                obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+            } catch (Exception ignored) {
+            }
+        }
+        if (obsSceneSize != null) return new Dimension(obsSceneSize);
+        return null;
     }
 
     public boolean isWallActive() {
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
         return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
+    }
+
+    public Rectangle getWallBounds() {
+        JultiOptions options = JultiOptions.getInstance();
+        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        if (obsWallHwnd == null) return null;
+        return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
     private void ensureScriptPlaced() {
