@@ -45,6 +45,8 @@ public class DynamicWallResetManager extends WallResetManager {
             }
         }
 
+        if (!displayInstances.contains(null)) return;
+
         List<MinecraftInstance> instancePool = new ArrayList<>(instanceManager.getInstances());
         instancePool.removeIf(instance -> getLockedInstances().contains(instance));
         instancePool.removeIf(instance -> displayInstances.contains(instance));

@@ -377,9 +377,9 @@ public class MinecraftInstance {
 
     public int getWallSortingNum() {
         int i = 0;
-        if (isPreviewLoaded()) i += 200;
-        if (isWorldLoaded()) i += 200;
-        i += Math.max(1, getLoadingPercent());
+        if (isPreviewLoaded()) i += 128;
+        if (isWorldLoaded()) i += 256;
+        i += Math.max(0, getLoadingPercent());
         return i;
     }
 
@@ -660,8 +660,6 @@ public class MinecraftInstance {
             return;
         }
 
-        JultiOptions options = JultiOptions.getInstance();
-
         // Before taking any action, store some info useful for fullscreen management
         boolean wasFullscreen = false;
         if (activeSinceLastReset) {
@@ -674,7 +672,7 @@ public class MinecraftInstance {
 
         // This delay is only used for pressing keys before the reset key
         boolean shouldDelay = false;
-        if (isWorldLoaded()) {
+        if (isWorldLoaded() && activeSinceLastReset) {
             if (wasFullscreen) {
                 pressFullscreenKey();
                 shouldDelay = true;
@@ -691,15 +689,17 @@ public class MinecraftInstance {
             new Timer("reset-finisher").schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    finishReset(singleInstance, options, finalWasFullscreen, finalOgRect);
+                    finishReset(singleInstance, finalWasFullscreen, finalOgRect);
                 }
             }, 50);
         } else {
-            finishReset(singleInstance, options, wasFullscreen, ogRect);
+            finishReset(singleInstance, wasFullscreen, ogRect);
         }
     }
 
-    private void finishReset(boolean singleInstance, JultiOptions options, boolean wasFullscreen, Rectangle ogRect) {
+    private void finishReset(boolean singleInstance, boolean wasFullscreen, Rectangle ogRect) {
+        JultiOptions options = JultiOptions.getInstance();
+
         pressResetKey();
 
         //Update states
