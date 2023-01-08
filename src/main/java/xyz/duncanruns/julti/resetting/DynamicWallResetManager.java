@@ -7,6 +7,7 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,6 +77,7 @@ public class DynamicWallResetManager extends WallResetManager {
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
+        Collections.fill(displayInstances, null);
         refreshDisplayInstances();
         return true;
     }
