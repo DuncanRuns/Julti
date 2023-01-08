@@ -94,11 +94,6 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    public void onMissingInstancesUpdate() {
-        refreshDisplayInstances();
-    }
-
-    @Override
     protected void lockInstance(MinecraftInstance instance) {
         super.lockInstance(instance);
         refreshDisplayInstances();
@@ -143,6 +138,11 @@ public class DynamicWallResetManager extends WallResetManager {
                 (int) ((col + 1) * iWidth) - x,
                 (int) ((row + 1) * iHeight) - y
         );
+    }
+
+    @Override
+    public void onMissingInstancesUpdate() {
+        refreshDisplayInstances();
     }
 
     private Rectangle getLockedInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
