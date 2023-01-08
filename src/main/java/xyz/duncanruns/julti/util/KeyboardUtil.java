@@ -142,7 +142,17 @@ public final class KeyboardUtil {
      * @return A list of integers representing virtual keys.
      */
     public static List<Integer> getPressedKeyWithMods() {
+        return getPressedKeyWithMods(Collections.emptyList());
+    }
+
+    /**
+     * Returns only a single non-modifier key along with any single modifiers pressed at the time.
+     *
+     * @return A list of integers representing virtual keys.
+     */
+    public static List<Integer> getPressedKeyWithMods(List<Integer> excludeKeys) {
         List<Integer> initPressedKeys = getPressedKeys();
+        initPressedKeys.removeAll(excludeKeys);
 
         List<Integer> pressedKeys = new ArrayList<>();
 

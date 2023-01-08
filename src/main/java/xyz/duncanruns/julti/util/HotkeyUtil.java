@@ -28,6 +28,7 @@ public final class HotkeyUtil {
      * @param hotkeyConsumer         a method which should accept a hotkey once found
      */
     public static void onNextHotkey(BooleanSupplier shouldContinueFunction, Consumer<Hotkey> hotkeyConsumer) {
+        List<Integer> preHeldKeys = KeyboardUtil.getPressedKeys();
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         AtomicBoolean done = new AtomicBoolean(false);
         executor.scheduleWithFixedDelay(() -> {
@@ -39,7 +40,8 @@ public final class HotkeyUtil {
                 done.set(true);
                 return;
             }
-            List<Integer> keyList = KeyboardUtil.getPressedKeyWithMods();
+            preHeldKeys.removeIf(key -> !KeyboardUtil.getPressedKeys().contains(key));
+            List<Integer> keyList = KeyboardUtil.getPressedKeyWithMods(preHeldKeys);
             if (!keyList.isEmpty()) {
                 Hotkey hotkey = new Hotkey(keyList);
                 hotkeyConsumer.accept(hotkey);
