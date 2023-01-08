@@ -504,8 +504,8 @@ function script_properties()
     local properties = obs.obs_properties_create()
     local generate_scenes_button = obs.obs_properties_add_button(
         properties, "generate_scenes_button", "Generate Scenes", generate_scenes)
-        local generate_stream_scenes_button = obs.obs_properties_add_button(
-            properties, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
+    local generate_stream_scenes_button = obs.obs_properties_add_button(
+        properties, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
     return properties
 end
 
@@ -513,6 +513,8 @@ function script_load(settings)
     local video_info = get_video_info()
     total_width = video_info.base_width
     total_height = video_info.base_height
+
+    pcall(write_file, julti_dir .. "obsscenesize", total_width .. "," .. total_height)
 
     switch_to_scene("Julti")
 end
