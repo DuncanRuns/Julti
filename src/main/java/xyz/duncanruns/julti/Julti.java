@@ -589,7 +589,6 @@ public class Julti {
             }
             Files.writeString(stateOutputPath, out.toString());
         } catch (Exception ignored) {
-            ignored.printStackTrace();
         }
     }
 

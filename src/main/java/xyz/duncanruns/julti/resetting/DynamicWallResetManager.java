@@ -61,15 +61,15 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public boolean doWallFullReset() {
+        if (isFirstReset && super.doWallFullReset()) {
+            isFirstReset = false;
+            return true;
+        }
         if (!julti.isWallActive()) {
             return false;
         }
         List<MinecraftInstance> lockedInstances = new ArrayList<>(getLockedInstances());
         List<MinecraftInstance> resettable = instanceManager.getInstances().stream().filter(instance -> displayInstances.contains(instance)).collect(Collectors.toList());
-        if (isFirstReset) {
-            resettable = instanceManager.getInstances();
-            isFirstReset = false;
-        }
         for (MinecraftInstance instance : resettable) {
             if (lockedInstances.contains(instance)) continue;
             resetInstance(instance);
