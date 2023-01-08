@@ -420,7 +420,7 @@ public class OptionsGUI extends JFrame {
             reload();
             julti.reloadManagers();
         });
-        GUIUtil.setActualSize(resetStyleBox, 100, 23);
+        GUIUtil.setActualSize(resetStyleBox, 120, 23);
 
         panel.add(GUIUtil.leftJustify(resetStyleBox));
         panel.add(GUIUtil.createSpacer());
