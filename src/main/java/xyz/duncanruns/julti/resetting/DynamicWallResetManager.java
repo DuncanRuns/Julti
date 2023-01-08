@@ -36,7 +36,6 @@ public class DynamicWallResetManager extends WallResetManager {
         if (displayInstances.size() != numToDisplay) {
             displayInstances = new ArrayList<>();
             for (int i = 0; i < numToDisplay; i++) displayInstances.add(null);
-            System.out.println("yeah " + numToDisplay);
         }
 
         for (int i = 0; i < numToDisplay; i++) {
