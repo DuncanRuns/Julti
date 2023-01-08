@@ -234,6 +234,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("obsWindowNameFormat", "Projector Name Format", this)));
         panel.add(GUIUtil.createSpacer());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("instanceSpacing", "Instance Spacing (Border)", this)));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
@@ -350,9 +353,11 @@ public class OptionsGUI extends JFrame {
     private void addComponentsWall() {
         JPanel panel = createNewOptionsPanel("Wall");
 
+        JultiOptions options = JultiOptions.getInstance();
+
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         panel.add(GUIUtil.createSpacer());
-        if (JultiOptions.getInstance().resetMode == 0) {
+        if (options.resetMode == 0) {
             panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
             panel.add(GUIUtil.createSpacer());
         }
@@ -367,10 +372,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay")));
 
 
-        if (!JultiOptions.getInstance().wallResetAllAfterPlaying) {
+        if (!options.wallResetAllAfterPlaying) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reload())));
-            if (JultiOptions.getInstance().wallBypass) {
+            if (options.wallBypass) {
                 panel.add(GUIUtil.createSpacer());
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
             }
@@ -385,10 +390,17 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reload())));
         panel.add(GUIUtil.createSpacer());
-        if (!JultiOptions.getInstance().autoCalcWallSize) {
+        if (!options.autoCalcWallSize) {
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
             panel.add(GUIUtil.createSpacer());
         }
+
+        if (!(options.resetMode == 2)) return;
+        // Dynamic wall settings below
+
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("lockedInstanceSpace", "Locked Instance Space", this, "%")));
+        panel.add(GUIUtil.createSpacer());
     }
 
     private void addComponentsReset() {
