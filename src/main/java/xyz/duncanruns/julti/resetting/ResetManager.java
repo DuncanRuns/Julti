@@ -94,7 +94,7 @@ public abstract class ResetManager {
         }
 
         for (MinecraftInstance instance : instanceManager.getInstances()) {
-            if (getInstancePosition(instance, sceneSize).contains(point)) return instance;
+            if (getInstancePosition(instance, sceneSize).contains(posOnScene)) return instance;
         }
         return null;
     }
