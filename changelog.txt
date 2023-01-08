@@ -1,6 +1,18 @@
 v0.16.0:
 - Completely rewrote script system and OBS systems (#45), please watch tutorial video
-- Added "Reset Instance Data" button to clear any data stored about the instances such as detected standard options or mods.
+    - The script is now saved by Julti to your Documents folder and the .Julti folder
+    - Only set names can be used, however everything can be set up with "Generate Scenes"
+    - Everything is centered around the "Julti" scene
+    - Sounds are automatically setup in the "Sounds" scene, and can be customized there
+    - Locks are customized through changing the "Lock Display" scene
+    - Dirt covers are customized through changing the "Dirt Cover Display" scene
+    - Further "stream scenes" can be generated, and allow you to add some elements that you only want to appear while on the wall or only want to appear while playing an instance.
+    - You can add borders to instances inside the OBS settings in the Julti App
+    - The OBS setup for both regular wall and instance moving is the same
+- Added Dynamic Wall (Instance Moving)
+    - Features a smaller wall (default 2x2 or set to custom wall size in wall settings)
+    - Locked instance go to the "lock bar" at the bottom of the screen, height of the lock bar can be customized in wall settings
+- Added "Reset Instance Data" button to clear any data stored about the instances such as detected standard options or mods
 - Added customizable affinity "burst" (#54)
 - Added offline instance launching (#53)
 - Added World Loaded Affinity
