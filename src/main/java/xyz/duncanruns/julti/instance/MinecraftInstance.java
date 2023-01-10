@@ -464,6 +464,9 @@ public class MinecraftInstance {
                     if (isUsingF1()) {
                         pressF1();
                     }
+                    if (options.autoFullscreen) {
+                        pressFullscreenKey();
+                    }
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
@@ -918,6 +921,9 @@ public class MinecraftInstance {
         } else if (active) {
             if (options.coopMode)
                 openToLan(!options.unpauseOnSwitch);
+            if (options.autoFullscreen) {
+                pressFullscreenKey();
+            }
         }
         julti.getResetManager().notifyWorldLoaded(this);
     }

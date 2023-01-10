@@ -105,6 +105,7 @@ public final class JultiOptions {
     public String lastCheckedVersion = "v0.0.0";
     public boolean noCopeMode = false;
     public boolean pieChartOnLoad = false;
+    public boolean autoFullscreen = false;
 
     // Auto Reset
     public boolean autoResetForBeach = false;
