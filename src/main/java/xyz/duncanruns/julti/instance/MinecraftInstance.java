@@ -155,6 +155,10 @@ public class MinecraftInstance {
             forceStandardSetting(optionName, desiredValue);
             log(Level.INFO, "Set \"" + optionName + "\" to \"" + desiredValue + "\" in standard settings for " + getName());
         }
+
+        if (Objects.equals(getStandardOption("f1"), null)) {
+            forceStandardSetting("f1", "false");
+        }
     }
 
     private void forceStandardSetting(String optionName, String optionValue) {
