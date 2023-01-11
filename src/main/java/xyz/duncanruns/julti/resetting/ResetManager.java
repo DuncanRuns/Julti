@@ -1,11 +1,15 @@
 package xyz.duncanruns.julti.resetting;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.KeyboardUtil;
+import xyz.duncanruns.julti.util.LogReceiver;
 import xyz.duncanruns.julti.util.MouseUtil;
 
 import javax.annotation.Nullable;
@@ -14,12 +18,19 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class ResetManager {
+    private static final Logger LOGGER = LogManager.getLogger("ResetManager");
+
     protected final InstanceManager instanceManager;
     protected final Julti julti;
 
     public ResetManager(Julti julti) {
         this.julti = julti;
         this.instanceManager = julti.getInstanceManager();
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
     }
 
     public boolean doReset() {

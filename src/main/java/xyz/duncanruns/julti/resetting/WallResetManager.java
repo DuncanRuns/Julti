@@ -1,9 +1,13 @@
 package xyz.duncanruns.julti.resetting;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.LogReceiver;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
@@ -12,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class WallResetManager extends ResetManager {
+
     private final List<MinecraftInstance> lockedInstances = new ArrayList<>();
 
     public WallResetManager(Julti julti) {
@@ -59,7 +64,9 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public boolean doWallFullReset() {
+        log(Level.DEBUG, "Full reset key was received");
         if (!julti.isWallActive()) {
+            log(Level.DEBUG, "Wall was not active, cancelling full reset");
             return false;
         }
         List<MinecraftInstance> lockedInstances = new ArrayList<>(getLockedInstances());

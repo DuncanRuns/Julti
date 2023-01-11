@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.util;
 
 import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.JultiOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,6 +18,7 @@ public final class LogReceiver {
     }
 
     public static void receive(Level level, String message) {
+        if (level.equals(Level.DEBUG) && !JultiOptions.getInstance().showDebug) return;
         if (logConsumer != null)
             logConsumer.accept("[" + getTimeString() + "/" + level.name() + "] " + message);
     }

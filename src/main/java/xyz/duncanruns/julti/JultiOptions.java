@@ -106,6 +106,7 @@ public final class JultiOptions {
     public boolean noCopeMode = false;
     public boolean pieChartOnLoad = false;
     public boolean autoFullscreen = false;
+    public boolean showDebug = false;
 
     // Auto Reset
     public boolean autoResetForBeach = false;

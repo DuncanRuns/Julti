@@ -635,6 +635,7 @@ public class Julti {
 
     public boolean isWallActive() {
         Pointer currentHwnd = HwndUtil.getCurrentHwnd();
+        log(Level.DEBUG, "Running isWallActive(): currentHwnd=" + currentHwnd);
         return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
 

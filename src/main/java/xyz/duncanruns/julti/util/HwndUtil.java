@@ -8,7 +8,10 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.LONG;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.win32.User32;
 import xyz.duncanruns.julti.win32.Win32Con;
 
@@ -74,8 +77,13 @@ public final class HwndUtil {
 
     public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
         if (hwnd == null) return false;
-        final Pattern pattern = Pattern.compile('^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$');
-        return pattern.matcher(getHwndTitle(hwnd).toLowerCase()).matches();
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> hwnd is not null");
+        String regex = '^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> regex pattern is " + regex);
+        final Pattern pattern = Pattern.compile(regex);
+        String title = getHwndTitle(hwnd).toLowerCase();
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> title to match is " + title);
+        return pattern.matcher(title).matches();
     }
 
     public static String getHwndTitle(Pointer hwnd) {
