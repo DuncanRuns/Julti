@@ -158,6 +158,7 @@ public class MinecraftInstance {
 
         if (Objects.equals(getStandardOption("f1"), null)) {
             forceStandardSetting("f1", "false");
+            log(Level.INFO, "Set \"f1\" to \"false\" in standard settings for " + getName());
         }
     }
 
