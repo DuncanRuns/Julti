@@ -389,18 +389,24 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reload())));
-        panel.add(GUIUtil.createSpacer());
         if (!options.autoCalcWallSize) {
-            panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
             panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
         }
 
         if (!(options.resetMode == 2)) return;
         // Dynamic wall settings below
 
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("lockedInstanceSpace", "Locked Instance Space", this, "%")));
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Dynamic Wall Settings")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Replace Locked Instances", "dwReplaceLocked")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("lockedInstanceSpace", "Locked Instance Space", this, "%")));
     }
 
     private void addComponentsReset() {

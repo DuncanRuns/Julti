@@ -46,7 +46,8 @@ public final class JultiOptions {
     public int overrideRowsAmount = 3;
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
-    public float lockedInstanceSpace = 100f / 6f;
+    public float lockedInstanceSpace = 16.666668f;
+    public boolean dwReplaceLocked = true;
 
     // Window
     public boolean letJultiMoveWindows = true;

@@ -880,6 +880,8 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(JultiOptions options, Julti julti) {
+        log(Level.DEBUG, getName() + ": World loaded");
+
         // Return if reset is supposed to happen
         if (loadingPercent == -1) {
             reset(false);
@@ -934,6 +936,8 @@ public class MinecraftInstance {
     }
 
     private void onPreviewLoad(JultiOptions options, Julti julti) {
+        log(Level.DEBUG, getName() + ": Preview loaded");
+
         setInPreview(true);
         dirtCover = true;
         loadingPercent = -1;

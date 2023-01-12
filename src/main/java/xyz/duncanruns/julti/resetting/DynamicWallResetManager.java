@@ -119,7 +119,10 @@ public class DynamicWallResetManager extends WallResetManager {
     @Override
     protected void lockInstance(MinecraftInstance instance) {
         super.lockInstance(instance);
-        refreshDisplayInstances();
+        displayInstances.remove(instance);
+        if (JultiOptions.getInstance().dwReplaceLocked) {
+            refreshDisplayInstances();
+        }
     }
 
     @Override
