@@ -38,6 +38,7 @@ public final class JultiOptions {
     public boolean coopMode = false;
 
     // Wall
+    public boolean cleanWall = true;
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallLockInsteadOfPlay = true;
     public boolean wallBypass = true;

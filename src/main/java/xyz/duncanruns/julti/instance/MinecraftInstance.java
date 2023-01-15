@@ -466,7 +466,7 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan(!options.unpauseOnSwitch);
                     }
-                    if (isUsingF1() && options.unpauseOnSwitch) {
+                    if (isUsingF1() && options.unpauseOnSwitch && options.cleanWall) {
                         pressF1();
                     }
                     if (options.autoFullscreen) {
@@ -917,7 +917,7 @@ public class MinecraftInstance {
     private void finishWorldLoad(Julti julti) {
         JultiOptions options = JultiOptions.getInstance();
         boolean active = isActive();
-        if (isUsingF1() && options.unpauseOnSwitch) {
+        if (isUsingF1() && options.unpauseOnSwitch && options.cleanWall) {
             // Simple xor considers all 4 cases of f1:true vs f1:false combined with instance currently active
             if (active ^ f1SS == 0) {
                 pressF1();
