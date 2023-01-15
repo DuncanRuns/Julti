@@ -1,5 +1,5 @@
 v0.16.0:
-- Completely rewrote script system and OBS systems (#45), please watch tutorial video
+- Completely rewrote script system and OBS systems (#45)
     - The script is now saved by Julti to your Documents folder and the .Julti folder
     - Only set names can be used, however everything can be set up with "Generate Scenes"
     - Everything is centered around the "Julti" scene
@@ -21,7 +21,8 @@ v0.16.0:
 - Script is now automatically placed in .Julti and Documents folders
 - Support for standard options, some values will automatically be set for the user to be compatible with Julti (#50, #51)
 - Now can use F1 to make the wall cleaner (#9)
-- Over a thousand lines of code changes sheeeeesh
+- Fixed world load issues (#57)
+- Fixed unpause on switch issues
 
 v0.15.2:
 - Various code refactors and optimizations
