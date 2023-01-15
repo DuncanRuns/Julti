@@ -18,6 +18,8 @@ public interface User32 extends StdCallLibrary {
 
     Pointer GetForegroundWindow();
 
+    boolean SetWindowPos(Pointer hwnd, Pointer hwndInsertAfter, int x, int y, int cx, int cy, UINT flags);
+
     int GetWindowTextA(Pointer hWnd, byte[] lpString, int nMaxCount);
 
     boolean EnumWindows(WNDENUMPROC lpEnumFunc, Pointer userData);

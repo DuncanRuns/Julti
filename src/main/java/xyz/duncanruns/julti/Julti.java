@@ -13,6 +13,7 @@ import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetManager;
 import xyz.duncanruns.julti.resetting.WallResetManager;
 import xyz.duncanruns.julti.util.*;
+import xyz.duncanruns.julti.win32.User32;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.awt.*;
@@ -84,7 +85,12 @@ public class Julti {
         map.put("titles", this::runCommandTitles);
         map.put("profile", this::runCommandProfile);
         map.put("sorting", this::runCommandSorting);
+        map.put("topmost", this::runCommandTopmost);
         return map;
+    }
+
+    private void runCommandTopmost(String[] strings) {
+        User32.INSTANCE.SetWindowPos(HwndUtil.getCurrentHwnd(), new Pointer(-1), 0, 0, 800, 420, null);
     }
 
     private String combineArgs(String[] args) {
@@ -602,7 +608,7 @@ public class Julti {
 
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
         if (selectedInstance == null) {
-            if (isWallActive()) {
+            if (isWallActiveQuick()) {
                 currentLocation = "W";
             }
         } else {
@@ -631,6 +637,10 @@ public class Julti {
         }
         if (obsSceneSize != null) return new Dimension(obsSceneSize);
         return null;
+    }
+
+    public boolean isWallActiveQuick() {
+        return HwndUtil.isSavedObsActive();
     }
 
     public boolean isWallActive() {
@@ -726,6 +736,7 @@ public class Julti {
     }
 
     public void focusWall() {
+        log(Level.DEBUG, "Attempting to focus wall...");
         JultiOptions options = JultiOptions.getInstance();
         SleepBGUtil.disableLock();
         Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
@@ -734,6 +745,7 @@ public class Julti {
             return;
         }
         HwndUtil.activateHwnd(hwnd);
+        HwndUtil.maximizeHwnd(hwnd);
     }
 
     /**

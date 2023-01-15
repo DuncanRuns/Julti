@@ -1,13 +1,10 @@
 package xyz.duncanruns.julti.resetting;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.LogReceiver;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
@@ -25,6 +22,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public boolean doReset() {
+        log(Level.DEBUG, "Reset key received");
 
         List<MinecraftInstance> instances = instanceManager.getInstances();
         // Return if no instances
@@ -32,19 +30,27 @@ public class WallResetManager extends ResetManager {
             return false;
         }
 
+        log(Level.DEBUG, "There are is at least 1 instance");
+
         // Get selected instance, return if no selected instance
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
             return false;
         }
+        log(Level.DEBUG, "There is an instance selected");
+
         // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
             selectedInstance.reset(true);
             return true;
         }
 
+        log(Level.DEBUG, "There is more than 1 instance");
+
         // Only place leaveInstance is used, but it is a big method
         leaveInstance(selectedInstance, instances);
+
+        log(Level.DEBUG, "leaveInstance() ran");
 
         super.doReset();
 

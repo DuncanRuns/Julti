@@ -8,7 +8,6 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.LONG;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
@@ -22,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -46,10 +46,6 @@ public final class HwndUtil {
     }
 
     private HwndUtil() {
-    }
-
-    public static Pointer getCurrentHwnd() {
-        return User32.INSTANCE.GetForegroundWindow();
     }
 
     public static Pointer getOBSWallHwnd(String projectorFormat) {
@@ -322,5 +318,13 @@ public final class HwndUtil {
             }, null);
         }
         return out.get();
+    }
+
+    public static boolean isSavedObsActive() {
+        return Objects.equals(getCurrentHwnd(), obsHwnd);
+    }
+
+    public static Pointer getCurrentHwnd() {
+        return User32.INSTANCE.GetForegroundWindow();
     }
 }
