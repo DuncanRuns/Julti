@@ -466,7 +466,7 @@ public class MinecraftInstance {
                     if (options.coopMode) {
                         openToLan(!options.unpauseOnSwitch);
                     }
-                    if (isUsingF1()) {
+                    if (isUsingF1() && options.unpauseOnSwitch) {
                         pressF1();
                     }
                     if (options.autoFullscreen) {
@@ -882,6 +882,9 @@ public class MinecraftInstance {
     private void onWorldLoad(JultiOptions options, Julti julti) {
         log(Level.DEBUG, getName() + ": World loaded");
 
+        // Return if world already loaded
+        if (isWorldLoaded()) return;
+
         // Return if reset is supposed to happen
         if (loadingPercent == -1) {
             reset(false);
@@ -903,17 +906,18 @@ public class MinecraftInstance {
                 @Override
                 public void run() {
                     if (shouldPressDelayedWLKeys)
-                        worldLoadKeyPresses(options, julti);
+                        finishWorldLoad(julti);
                 }
             }, 150);
         } else {
-            worldLoadKeyPresses(options, julti);
+            finishWorldLoad(julti);
         }
     }
 
-    private void worldLoadKeyPresses(JultiOptions options, Julti julti) {
+    private void finishWorldLoad(Julti julti) {
+        JultiOptions options = JultiOptions.getInstance();
         boolean active = isActive();
-        if (isUsingF1()) {
+        if (isUsingF1() && options.unpauseOnSwitch) {
             // Simple xor considers all 4 cases of f1:true vs f1:false combined with instance currently active
             if (active ^ f1SS == 0) {
                 pressF1();
