@@ -54,13 +54,6 @@ public class Julti {
         return ver;
     }
 
-    private static void sleep(final long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
     public void changeProfile(String newName) {
         storeLastInstances();
         JultiOptions.getInstance().trySave();
@@ -117,7 +110,6 @@ public class Julti {
             log(Level.ERROR, "No args given to profile command!");
         }
     }
-
 
     private void runCommandSorting(String[] args) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
@@ -604,6 +596,7 @@ public class Julti {
     private void manageMissingInstances() {
         if (instanceManager.manageMissingInstances(this::onInstanceLoad)) {
             resetManager.onMissingInstancesUpdate();
+            tryOutputLSInfo();
         }
     }
 
@@ -645,8 +638,52 @@ public class Julti {
         minecraftInstance.ensureGoodStandardSettings();
     }
 
+    public void tryOutputLSInfo() {
+        JultiOptions options = JultiOptions.getInstance();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        if (instances.size() == 0) return;
+        MinecraftInstance firstInstance = instances.get(0);
+        if (!firstInstance.hasWindow()) return;
+
+        int width = options.windowSize[0];
+        int height = options.windowSize[1];
+        if (options.wideResetSquish != 1f) {
+            height = (int) (height / options.wideResetSquish);
+        }
+
+        if (!options.useBorderless) {
+            if (options.wideResetSquish == 1f) {
+                firstInstance.ensureWindowState();
+                sleep(50);
+                Rectangle rect = firstInstance.getWindowRectangle();
+                width = rect.width;
+                height = rect.height;
+            }
+            // These are Windows 10 border sizes
+            // They may be inaccurate depending on the system (?)
+            width -= 16;
+            height -= 39;
+        }
+
+        int loadingSquareSize = firstInstance.getResettingGuiScale() * 90;
+
+        String out = (width - loadingSquareSize) + "," + (height - loadingSquareSize);
+
+        try {
+            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out);
+        } catch (Exception ignored) {
+        }
+    }
+
     public boolean isWallActiveQuick() {
         return HwndUtil.isSavedObsActive();
+    }
+
+    private static void sleep(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     public boolean isWallActive() {

@@ -533,5 +533,6 @@ public class OptionsGUI extends JFrame {
     private void onClose() {
         closed = true;
         julti.reloadInstancePositions();
+        julti.tryOutputLSInfo();
     }
 }

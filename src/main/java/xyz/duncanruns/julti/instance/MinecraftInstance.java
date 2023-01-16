@@ -250,6 +250,41 @@ public class MinecraftInstance {
         return null;
     }
 
+    /**
+     * Determines the gui scale that actually gets used during resets on this instance.
+     */
+    public int getResettingGuiScale() {
+        JultiOptions options = JultiOptions.getInstance();
+
+        // Get values
+        int guiScale = 0;
+        try {
+            guiScale = Integer.parseInt(tryGetOption("guiScale", true));
+        } catch (NumberFormatException ignored) {
+        }
+        boolean forceUnicodeFont = Objects.equals(tryGetOption("forceUnicodeFont", true), "true");
+        int width = options.windowSize[0];
+        int height = options.windowSize[1];
+        if (options.wideResetSquish != 1f) {
+            height = (int) (height / options.wideResetSquish);
+        }
+
+        // Minecraft code magic
+        int i = 1;
+        while ((i != guiScale)
+                && (i < width)
+                && (i < height)
+                && (width / (i + 1) >= 320)
+                && (height / (i + 1) >= 240)) {
+            ++i;
+        }
+        if (forceUnicodeFont && i % 2 != 0) {
+            ++i;
+        }
+
+        return i;
+    }
+
     private String getStandardOption(String optionName, Path path) {
         if (!Files.exists(path)) return null;
 
