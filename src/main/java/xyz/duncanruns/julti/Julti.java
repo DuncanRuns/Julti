@@ -558,9 +558,7 @@ public class Julti {
         if (current - last2SecCycle > 2000) {
             last2SecCycle = current;
 
-            if (instanceManager.manageMissingInstances(this::onInstanceLoad)) {
-                resetManager.onMissingInstancesUpdate();
-            }
+            manageMissingInstances();
 
             MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
             ensureCorrectSceneState(selectedInstance);
@@ -603,9 +601,10 @@ public class Julti {
         }
     }
 
-    private void onInstanceLoad(MinecraftInstance minecraftInstance) {
-        minecraftInstance.ensureWindowState();
-        minecraftInstance.ensureGoodStandardSettings();
+    private void manageMissingInstances() {
+        if (instanceManager.manageMissingInstances(this::onInstanceLoad)) {
+            resetManager.onMissingInstancesUpdate();
+        }
     }
 
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
@@ -639,6 +638,11 @@ public class Julti {
         }
         if (obsSceneSize != null) return new Dimension(obsSceneSize);
         return null;
+    }
+
+    private void onInstanceLoad(MinecraftInstance minecraftInstance) {
+        minecraftInstance.ensureWindowState();
+        minecraftInstance.ensureGoodStandardSettings();
     }
 
     public boolean isWallActiveQuick() {
@@ -755,6 +759,6 @@ public class Julti {
      */
     public void resetInstanceData() {
         instanceManager.resetInstanceData();
-        instanceManager.manageMissingInstances(this::onInstanceLoad);
+        manageMissingInstances();
     }
 }
