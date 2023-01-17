@@ -492,6 +492,57 @@ public class Julti {
         HotkeyUtil.startGlobalHotkeyChecker();
     }
 
+    public void tryOutputLSInfo() {
+        JultiOptions options = JultiOptions.getInstance();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+
+        if (instances.size() == 0) return;
+
+        MinecraftInstance instance = null;
+        if (options.wideResetSquish > 1 || options.useBorderless) {
+            instance = instances.get(0);
+        } else {
+            for (MinecraftInstance instanceCandidate : instances) {
+                if (!instanceCandidate.hasWindow()) continue;
+                instance = instanceCandidate;
+                break;
+            }
+        }
+        if (instance == null) return;
+
+        int width = options.windowSize[0];
+        int height = options.windowSize[1];
+        if (options.wideResetSquish != 1f) {
+            height = (int) (height / options.wideResetSquish);
+        }
+
+        if (!options.useBorderless) {
+            if (options.wideResetSquish == 1f) {
+                instance.ensureWindowState();
+                sleep(50);
+                Rectangle rect = instance.getWindowRectangle();
+                width = rect.width;
+                height = rect.height;
+            }
+            // These are Windows 10 border sizes
+            // They may be inaccurate depending on the system (?)
+            width -= 16;
+            height -= 39;
+        }
+
+        int resettingGuiScale = instance.getResettingGuiScale(width, height);
+        int loadingSquareSize = resettingGuiScale * 90;
+        // extraHeight is for including the % loaded text above the loading square
+        int extraHeight = resettingGuiScale * 19;
+
+        String out = (width - loadingSquareSize) + "," + (height - (loadingSquareSize + extraHeight));
+
+        try {
+            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out);
+        } catch (Exception ignored) {
+        }
+    }
+
     private void tryTick() {
         try {
             tick();
@@ -542,6 +593,13 @@ public class Julti {
             case 2:
                 resetManager = new DynamicWallResetManager(this);
                 break;
+        }
+    }
+
+    private static void sleep(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
         }
     }
 
@@ -639,66 +697,8 @@ public class Julti {
         minecraftInstance.ensureGoodStandardSettings();
     }
 
-    public void tryOutputLSInfo() {
-        JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
-
-        if (instances.size() == 0) return;
-
-        MinecraftInstance instance = null;
-        if (options.wideResetSquish > 1 || options.useBorderless) {
-            instance = instances.get(0);
-        } else {
-            for (MinecraftInstance instanceCandidate : instances) {
-                if (!instanceCandidate.hasWindow()) continue;
-                instance = instanceCandidate;
-                break;
-            }
-        }
-        if (instance == null) return;
-
-        int width = options.windowSize[0];
-        int height = options.windowSize[1];
-        if (options.wideResetSquish != 1f) {
-            height = (int) (height / options.wideResetSquish);
-        }
-
-        if (!options.useBorderless) {
-            if (options.wideResetSquish == 1f) {
-                instance.ensureWindowState();
-                sleep(50);
-                Rectangle rect = instance.getWindowRectangle();
-                width = rect.width;
-                height = rect.height;
-            }
-            // These are Windows 10 border sizes
-            // They may be inaccurate depending on the system (?)
-            width -= 16;
-            height -= 39;
-        }
-
-        int resettingGuiScale = instance.getResettingGuiScale(width, height);
-        int loadingSquareSize = resettingGuiScale * 90;
-        // extraHeight is for including the % loaded text above the loading square
-        int extraHeight = resettingGuiScale * 19;
-
-        String out = (width - loadingSquareSize) + "," + (height - (loadingSquareSize + extraHeight));
-
-        try {
-            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out);
-        } catch (Exception ignored) {
-        }
-    }
-
     public boolean isWallActiveQuick() {
-        return HwndUtil.isSavedObsActive();
-    }
-
-    private static void sleep(final long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
+        return HwndUtil.obsWallCheckActiveQuick(JultiOptions.getInstance().obsWindowNameFormat);
     }
 
     public boolean isWallActive() {

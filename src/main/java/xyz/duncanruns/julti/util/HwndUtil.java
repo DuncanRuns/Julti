@@ -11,6 +11,7 @@ import com.sun.jna.ptr.IntByReference;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.win32.User32;
 import xyz.duncanruns.julti.win32.Win32Con;
 
@@ -48,52 +49,6 @@ public final class HwndUtil {
     private HwndUtil() {
     }
 
-    public static Pointer getOBSWallHwnd(String projectorFormat) {
-
-        if (obsHwnd != null) {
-            if (hwndExists(obsHwnd) && isOBSWallHwnd(projectorFormat, obsHwnd)) {
-                return obsHwnd;
-            }
-        }
-
-        obsHwnd = null;
-        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
-            if (isOBSWallHwnd(projectorFormat, hWnd)) {
-                obsHwnd = hWnd;
-                return false;
-            }
-            return true;
-        }, null);
-        return obsHwnd;
-    }
-
-    public static boolean hwndExists(Pointer hwnd) {
-        return User32.INSTANCE.IsWindow(hwnd);
-    }
-
-    public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
-        if (hwnd == null) return false;
-        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> hwnd is not null");
-        String regex = '^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
-        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> regex pattern is " + regex);
-        final Pattern pattern = Pattern.compile(regex);
-        String title = getHwndTitle(hwnd).toLowerCase();
-        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> title to match is " + title);
-        return pattern.matcher(title).matches();
-    }
-
-    public static String getHwndTitle(Pointer hwnd) {
-        byte[] x = new byte[128];
-        User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
-        StringBuilder out = new StringBuilder();
-        for (byte a : x) {
-            if (a == 0)
-                break;
-            out.append((char) a);
-        }
-        return out.toString();
-    }
-
     public static List<Pointer> getAllMinecraftHwnds() {
         return getAllHwnds(MC_PATTERN);
     }
@@ -108,6 +63,18 @@ public final class HwndUtil {
             return true;
         }, null);
         return list;
+    }
+
+    public static String getHwndTitle(Pointer hwnd) {
+        byte[] x = new byte[128];
+        User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
+        StringBuilder out = new StringBuilder();
+        for (byte a : x) {
+            if (a == 0)
+                break;
+            out.append((char) a);
+        }
+        return out.toString();
     }
 
     // Sets a window to be borderless but does not move it.
@@ -320,11 +287,48 @@ public final class HwndUtil {
         return out.get();
     }
 
-    public static boolean isSavedObsActive() {
+    public static boolean obsWallCheckActiveQuick(String projectorFormat) {
+        if (obsHwnd == null) {
+            obsHwnd = HwndUtil.getOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat);
+        }
         return Objects.equals(getCurrentHwnd(), obsHwnd);
+    }
+
+    public static Pointer getOBSWallHwnd(String projectorFormat) {
+
+        if (obsHwnd != null) {
+            if (hwndExists(obsHwnd) && isOBSWallHwnd(projectorFormat, obsHwnd)) {
+                return obsHwnd;
+            }
+        }
+
+        obsHwnd = null;
+        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
+            if (isOBSWallHwnd(projectorFormat, hWnd)) {
+                obsHwnd = hWnd;
+                return false;
+            }
+            return true;
+        }, null);
+        return obsHwnd;
     }
 
     public static Pointer getCurrentHwnd() {
         return User32.INSTANCE.GetForegroundWindow();
+    }
+
+    public static boolean hwndExists(Pointer hwnd) {
+        return User32.INSTANCE.IsWindow(hwnd);
+    }
+
+    public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
+        if (hwnd == null) return false;
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> hwnd is not null");
+        String regex = '^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> regex pattern is " + regex);
+        final Pattern pattern = Pattern.compile(regex);
+        String title = getHwndTitle(hwnd).toLowerCase();
+        Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> title to match is " + title);
+        return pattern.matcher(title).matches();
     }
 }
