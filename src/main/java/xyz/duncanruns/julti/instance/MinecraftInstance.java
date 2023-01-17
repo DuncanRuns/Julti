@@ -253,9 +253,7 @@ public class MinecraftInstance {
     /**
      * Determines the gui scale that actually gets used during resets on this instance.
      */
-    public int getResettingGuiScale() {
-        JultiOptions options = JultiOptions.getInstance();
-
+    public int getResettingGuiScale(int resettingWidth, int resettingHeight) {
         // Get values
         int guiScale = 0;
         try {
@@ -263,19 +261,14 @@ public class MinecraftInstance {
         } catch (NumberFormatException ignored) {
         }
         boolean forceUnicodeFont = Objects.equals(tryGetOption("forceUnicodeFont", true), "true");
-        int width = options.windowSize[0];
-        int height = options.windowSize[1];
-        if (options.wideResetSquish != 1f) {
-            height = (int) (height / options.wideResetSquish);
-        }
 
         // Minecraft code magic
         int i = 1;
         while ((i != guiScale)
-                && (i < width)
-                && (i < height)
-                && (width / (i + 1) >= 320)
-                && (height / (i + 1) >= 240)) {
+                && (i < resettingWidth)
+                && (i < resettingHeight)
+                && (resettingWidth / (i + 1) >= 320)
+                && (resettingHeight / (i + 1) >= 240)) {
             ++i;
         }
         if (forceUnicodeFont && i % 2 != 0) {

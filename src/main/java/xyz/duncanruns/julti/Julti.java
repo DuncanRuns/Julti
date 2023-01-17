@@ -641,9 +641,20 @@ public class Julti {
     public void tryOutputLSInfo() {
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
+
         if (instances.size() == 0) return;
-        MinecraftInstance firstInstance = instances.get(0);
-        if (!firstInstance.hasWindow()) return;
+
+        MinecraftInstance instance = null;
+        if (options.wideResetSquish > 1 || options.useBorderless) {
+            instance = instances.get(0);
+        } else {
+            for (MinecraftInstance instanceCandidate : instances) {
+                if (!instanceCandidate.hasWindow()) continue;
+                instance = instanceCandidate;
+                break;
+            }
+        }
+        if (instance == null) return;
 
         int width = options.windowSize[0];
         int height = options.windowSize[1];
@@ -653,9 +664,9 @@ public class Julti {
 
         if (!options.useBorderless) {
             if (options.wideResetSquish == 1f) {
-                firstInstance.ensureWindowState();
+                instance.ensureWindowState();
                 sleep(50);
-                Rectangle rect = firstInstance.getWindowRectangle();
+                Rectangle rect = instance.getWindowRectangle();
                 width = rect.width;
                 height = rect.height;
             }
@@ -665,7 +676,7 @@ public class Julti {
             height -= 39;
         }
 
-        int loadingSquareSize = firstInstance.getResettingGuiScale() * 90;
+        int loadingSquareSize = instance.getResettingGuiScale(width, height) * 90;
 
         String out = (width - loadingSquareSize) + "," + (height - loadingSquareSize);
 
