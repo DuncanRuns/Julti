@@ -70,6 +70,14 @@ function get_state_file_string()
     return nil
 end
 
+function get_square_crop_string()
+    local success, result = pcall(read_first_line, julti_dir .. "loadingsquarecrop")
+    if success then
+        return result
+    end
+    return nil
+end
+
 -- Instance --
 
 function set_instance_data(num, lock_visible, cover_visible, x, y, width, height)
@@ -309,32 +317,63 @@ function _setup_verification_scene()
         return
     end
 
+    local square_crop_string = get_square_crop_string()
+    if square_crop_string == nil then
+        square_crop_string = "1830,270"
+        obs.script_log(200, "Warning: Could not a loading square crop, defaulting to 1920x1080 squish level 3 crop.")
+    end
+    local square_crop = split_string(square_crop_string, ",")
+
     local instance_count = (#(split_string(out, ";"))) - 1
 
     if instance_count == 0 then
         return
     end
 
-    if instance_count > 6 then
-        obs.script_log(200, "Warning: You have a lot of instances, your verification scene may require further setup!")
+    local total_rows = math.floor(math.sqrt(instance_count)) - 1
+    local total_columns = 0
+
+    ::increase_again::
+    total_rows = total_rows + 1
+    total_columns = math.ceil(instance_count / total_rows)
+
+    size_ratio = math.floor(total_width / total_columns) / math.floor(total_height / total_rows)
+
+    -- No need to make more rows if it's already just a single column
+    if total_columns == 1 then
+        goto done
     end
 
-    local totalRows = math.ceil(math.sqrt(instance_count))
-    local totalColumns = math.ceil(instance_count / totalRows)
+    -- Size ratio is the ratio between width and height
+    -- If there is not enough width relative to the height, the loading square would take too much space
+    if size_ratio < 2.5 then
+        goto increase_again
+    end
 
-    local i_width = math.floor(total_width / totalColumns)
-    local i_height = math.floor(total_height / totalRows)
+    -- If there is 17.5% or more empty space from unfilled grid spaces, add another row
+    missing = (total_rows * total_columns - instance_count) / (total_rows * total_columns)
+    if missing > 0.175 then
+        goto increase_again
+    end
+
+    ::done::
+    local i_width = math.floor(total_width / total_columns)
+    local i_height = math.floor(total_height / total_rows)
 
     for instance_num = 1, instance_count, 1 do
         local instance_index = instance_num - 1
-        local row = math.floor(instance_index / totalColumns)
-        local col = math.floor(instance_index % totalColumns)
+        local row = math.floor(instance_index / total_columns)
+        local col = math.floor(instance_index % total_columns)
 
         local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
             instance_num .. ':GLFW30:javaw.exe"}')
         local source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num, settings, nil)
         local item = obs.obs_scene_add(scene, source)
-        set_position_with_bounds(item, col * i_width, row * i_height, i_width, i_height)
+        local item2 = obs.obs_scene_add(scene, source)
+        set_position_with_bounds(item, col * i_width, row * i_height, i_width - i_height, i_height)
+        set_position_with_bounds(item2, col * i_width + (i_width - i_height), row * i_height, i_height, i_height)
+        set_crop(item2, 0, square_crop[2], square_crop[1], 0)
+        obs.obs_sceneitem_set_scale_filter(item2, obs.OBS_SCALE_POINT)
         obs.obs_data_release(settings)
     end
 
