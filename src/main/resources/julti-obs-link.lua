@@ -290,6 +290,10 @@ function generate_scenes()
     end
 
     _setup_julti_scene()
+
+    -- Reset variables to have loop update stuff automatically
+    last_state_text = ""
+    last_scene_name = ""
 end
 
 function _setup_cover_scene()
@@ -473,8 +477,11 @@ function _setup_julti_scene()
         create_scene("Julti")
     end
 
+    local y = 0
+    local i_height = math.floor(total_height / instance_count)
     for i = 1, instance_count, 1 do
-        make_minecraft_group(i, total_width, total_height)
+        make_minecraft_group(i, total_width, total_height, y, i_height)
+        y = y + i_height
     end
 
     local sound_scene_source = get_source("Sound")
@@ -507,7 +514,7 @@ function _setup_minecraft_sounds(instance_count)
     end
 end
 
-function make_minecraft_group(num, width, height)
+function make_minecraft_group(num, total_width, total_height, y, i_height)
     local scene = get_scene("Julti")
 
     -- intuitively the scene item returned from add group would need to be released, but it does not
@@ -528,8 +535,8 @@ function make_minecraft_group(num, width, height)
     obs.obs_data_release(settings)
     local mcsi = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, mcsi)
-    set_position_with_bounds(mcsi, 0, 0, width, height)
-    set_instance_data(num, false, false, 0, 0, width, height)
+    set_position_with_bounds(mcsi, 0, 0, total_width, total_height)
+    set_instance_data(num, false, false, 0, y, total_width, i_height)
     release_source(source)
 end
 
