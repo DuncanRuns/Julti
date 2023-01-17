@@ -408,6 +408,7 @@ public class Julti {
         if (JultiOptions.getInstance().useAffinity)
             AffinityManager.start(this);
         setupHotkeys();
+        tryOutputLSInfo();
         tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         tryTick();
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
@@ -676,9 +677,12 @@ public class Julti {
             height -= 39;
         }
 
-        int loadingSquareSize = instance.getResettingGuiScale(width, height) * 90;
+        int resettingGuiScale = instance.getResettingGuiScale(width, height);
+        int loadingSquareSize = resettingGuiScale * 90;
+        // extraHeight is for including the % loaded text above the loading square
+        int extraHeight = resettingGuiScale * 19;
 
-        String out = (width - loadingSquareSize) + "," + (height - loadingSquareSize);
+        String out = (width - loadingSquareSize) + "," + (height - (loadingSquareSize + extraHeight));
 
         try {
             Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out);
