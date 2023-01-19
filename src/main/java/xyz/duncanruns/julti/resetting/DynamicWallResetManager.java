@@ -126,6 +126,17 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
+    public void notifyDirtUncover(MinecraftInstance instance) {
+        if (displayInstances.contains(instance)) return;
+        for (MinecraftInstance replaceCandidateInstance : displayInstances) {
+            if (replaceCandidateInstance.shouldDirtCover()) {
+                Collections.replaceAll(displayInstances, replaceCandidateInstance, instance);
+                return;
+            }
+        }
+    }
+
+    @Override
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
         JultiOptions options = JultiOptions.getInstance();
 

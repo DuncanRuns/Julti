@@ -60,6 +60,7 @@ public class MinecraftInstance {
     // State tracking
     private boolean inPreview = false;
     private boolean worldLoaded = false;
+    private long timeLastAppeared = -1L;
     private long lastPreviewStart = -1L;
     private long lastResetPress = -1L;
     private String biome = "";
@@ -306,8 +307,15 @@ public class MinecraftInstance {
         return lastPreviewStart;
     }
 
-    public long getLastResetPress() {
-        return lastResetPress;
+    public long getTimeLastAppeared() {
+        return timeLastAppeared;
+    }
+
+    /**
+     * Updates the timeLastAppeared field to the current time. Normally would be based on dirt covers, but can be set by a third party such as dynamic wall.
+     */
+    public void updateTimeLastAppeared() {
+        timeLastAppeared = System.currentTimeMillis();
     }
 
     public String getOriginalTitle() {
@@ -410,9 +418,10 @@ public class MinecraftInstance {
 
     public int getWallSortingNum() {
         int i = 0;
-        if (isPreviewLoaded()) i += 128;
-        if (isWorldLoaded()) i += 256;
-        i += Math.max(0, getLoadingPercent());
+        if (isPreviewLoaded()) i += 1280000;
+        if (isWorldLoaded()) i += 2560000;
+        i += 10000 * Math.max(0, getLoadingPercent());
+        i += (System.currentTimeMillis() - getLastResetPress());
         return i;
     }
 
@@ -426,6 +435,10 @@ public class MinecraftInstance {
 
     public int getLoadingPercent() {
         return loadingPercent;
+    }
+
+    public long getLastResetPress() {
+        return lastResetPress;
     }
 
     public boolean justWentMissing() {
@@ -895,7 +908,7 @@ public class MinecraftInstance {
                 } else if (advancementsLoadedPattern.matcher(line).matches()) {
                     onWorldLoad(options, julti);
                 } else if ((isPreviewLoaded() || !isUsingWorldPreview()) && spawnAreaPattern.matcher(line).matches()) {
-                    onPercentLoadingLog(line);
+                    onPercentLoadingLog(julti, line);
                 } else if ((!options.coopMode) && options.noCopeMode && openToLanPattern.matcher(line).matches()) {
                     julti.getResetManager().doReset();
                 }
@@ -903,11 +916,16 @@ public class MinecraftInstance {
         }
     }
 
-    private void onPercentLoadingLog(String line) {
+    private void onPercentLoadingLog(Julti julti, String line) {
         String[] args = line.replace(" %", "%").split(" ");
         try {
             loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
-            dirtCover = loadingPercent < JultiOptions.getInstance().dirtReleasePercent;
+            JultiOptions options = JultiOptions.getInstance();
+            if (dirtCover && loadingPercent >= options.dirtReleasePercent) {
+                updateTimeLastAppeared();
+                julti.getResetManager().notifyDirtUncover(this);
+            }
+            dirtCover = loadingPercent < options.dirtReleasePercent;
         } catch (Exception ignored) {
         }
     }

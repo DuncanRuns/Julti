@@ -305,7 +305,7 @@ public class WallResetManager extends ResetManager {
         // Preview is loaded
         if (instance.isPreviewLoaded()) {
             // Return true if cooldown has passed, otherwise return false
-            return System.currentTimeMillis() - instance.getLastPreviewStart() > JultiOptions.getInstance().wallResetCooldown;
+            return System.currentTimeMillis() - instance.getTimeLastAppeared() > JultiOptions.getInstance().wallResetCooldown;
         }
         // At this point, neither the preview nor world is loaded, which is a small space of time, if the time this is happening exceeds 5 seconds (or 20 seconds for non-wp), allow resetting in case the instance is stuck
         return System.currentTimeMillis() - instance.getLastResetPress() > (instance.isUsingWorldPreview() ? 5_000 : 20_000);
