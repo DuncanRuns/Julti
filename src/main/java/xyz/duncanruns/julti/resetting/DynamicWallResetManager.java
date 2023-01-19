@@ -54,7 +54,9 @@ public class DynamicWallResetManager extends WallResetManager {
 
         while (displayInstances.contains(null)) {
             if (instancePool.isEmpty()) break;
-            displayInstances.set(displayInstances.indexOf(null), instancePool.remove(0));
+            MinecraftInstance removed = instancePool.remove(0);
+            removed.updateTimeLastAppeared();
+            displayInstances.set(displayInstances.indexOf(null), removed);
         }
     }
 
@@ -67,12 +69,11 @@ public class DynamicWallResetManager extends WallResetManager {
         if (!julti.isWallActive()) {
             return false;
         }
-        List<MinecraftInstance> lockedInstances = new ArrayList<>(getLockedInstances());
+        // instead of using the displayInstances, we use "all instances that are also found in displayInstances", which
+        // uses an instance's equals() method to match instance paths so that if displayInstances has an abandoned
+        // instance object, it can still be used.
         List<MinecraftInstance> resettable = instanceManager.getInstances().stream().filter(instance -> displayInstances.contains(instance)).collect(Collectors.toList());
-        for (MinecraftInstance instance : resettable) {
-            if (lockedInstances.contains(instance)) continue;
-            resetInstance(instance);
-        }
+        resettable.forEach(this::resetNoWallUpdate);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
@@ -119,10 +120,14 @@ public class DynamicWallResetManager extends WallResetManager {
     @Override
     protected void lockInstance(MinecraftInstance instance) {
         super.lockInstance(instance);
-        displayInstances.set(displayInstances.indexOf(instance), null);
+        Collections.replaceAll(displayInstances, instance, null);
         if (JultiOptions.getInstance().dwReplaceLocked) {
             refreshDisplayInstances();
         }
+    }
+
+    protected boolean resetNoWallUpdate(MinecraftInstance instance) {
+        return super.resetInstance(instance, false);
     }
 
     @Override
@@ -131,6 +136,7 @@ public class DynamicWallResetManager extends WallResetManager {
         for (MinecraftInstance replaceCandidateInstance : displayInstances) {
             if (replaceCandidateInstance.shouldDirtCover()) {
                 Collections.replaceAll(displayInstances, replaceCandidateInstance, instance);
+                instance.updateTimeLastAppeared();
                 return;
             }
         }
