@@ -141,6 +141,7 @@ public class DynamicWallResetManager extends WallResetManager {
         JultiOptions options = JultiOptions.getInstance();
 
         if (sceneSize != null) sceneSize = new Dimension(sceneSize);
+        else sceneSize = new Dimension(1920, 1080);
 
         if (getLockedInstances().contains(instance)) {
             return getLockedInstancePosition(instance, sceneSize);
