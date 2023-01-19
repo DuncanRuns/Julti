@@ -358,6 +358,7 @@ public class Julti {
         instanceManager.redetectInstances();
         reloadInstancePositions();
         log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
+        storeLastInstances();
     }
 
     public void switchScene(MinecraftInstance instance) {
@@ -765,7 +766,7 @@ public class Julti {
     }
 
     public void reloadInstancePositions() {
-        instanceManager.getInstances().forEach(MinecraftInstance::ensureWindowState);
+        instanceManager.getInstances().forEach(instance -> new Thread(instance::ensureWindowState).start());
     }
 
     public void stop() {
