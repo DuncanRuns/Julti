@@ -179,6 +179,12 @@ public class WallResetManager extends ResetManager {
         return Collections.unmodifiableList(lockedInstances);
     }
 
+    @Override
+    public void onMissingInstancesUpdate() {
+        super.onMissingInstancesUpdate();
+        lockedInstances.clear();
+    }
+
     protected void resetNonLockedExcept(MinecraftInstance clickedInstance) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
