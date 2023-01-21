@@ -166,4 +166,25 @@ public abstract class ResetManager {
 
     public void onMissingInstancesUpdate() {
     }
+
+    public boolean resetInstance(MinecraftInstance instance) {
+        instance.reset(instanceManager.getInstances().size() == 1);
+        return true;
+    }
+
+    public boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
+        instance.reset(instanceManager.getInstances().size() == 1);
+        return true;
+    }
+
+    public boolean lockInstance(MinecraftInstance instance) {
+        return false;
+    }
+
+    public MinecraftInstance getRelativeInstance(int offset) {
+        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
+        List<MinecraftInstance> instances = instanceManager.getInstances();
+        int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
+        return instances.get((startIndex + offset) % instances.size());
+    }
 }

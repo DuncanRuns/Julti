@@ -185,15 +185,33 @@ public class WallResetManager extends ResetManager {
         lockedInstances.clear();
     }
 
+    public boolean resetInstance(MinecraftInstance instance) {
+        return resetInstance(instance, false);
+    }
+
+    public boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
+        unlockInstance(instance);
+        if (bypassConditions || shouldResetInstance(instance)) {
+            instance.reset(instanceManager.getInstances().size() == 1);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean lockInstance(MinecraftInstance instance) {
+        if (!lockedInstances.contains(instance)) {
+            lockedInstances.add(instance);
+            return true;
+        }
+        return false;
+    }
+
     protected void resetNonLockedExcept(MinecraftInstance clickedInstance) {
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
             resetInstance(instance);
         }
-    }
-
-    protected boolean resetInstance(MinecraftInstance instance) {
-        return resetInstance(instance, false);
     }
 
     public void leaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
@@ -257,15 +275,6 @@ public class WallResetManager extends ResetManager {
         lockedInstances.remove(nextInstance);
     }
 
-    protected boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
-        unlockInstance(instance);
-        if (bypassConditions || shouldResetInstance(instance)) {
-            instance.reset(instanceManager.getInstances().size() == 1);
-            return true;
-        }
-        return false;
-    }
-
     private static void sleep(long sleepTime) {
         try {
             Thread.sleep(sleepTime);
@@ -315,10 +324,5 @@ public class WallResetManager extends ResetManager {
         }
         // At this point, neither the preview nor world is loaded, which is a small space of time, if the time this is happening exceeds 5 seconds (or 20 seconds for non-wp), allow resetting in case the instance is stuck
         return System.currentTimeMillis() - instance.getLastResetPress() > (instance.isUsingWorldPreview() ? 5_000 : 20_000);
-    }
-
-    protected void lockInstance(MinecraftInstance instance) {
-        if (!lockedInstances.contains(instance))
-            lockedInstances.add(instance);
     }
 }

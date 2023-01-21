@@ -106,7 +106,14 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    protected boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
+    public void onMissingInstancesUpdate() {
+        super.onMissingInstancesUpdate();
+        displayInstances.clear();
+        refreshDisplayInstances();
+    }
+
+    @Override
+    public boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
         if (super.resetInstance(instance, bypassConditions)) {
             if (displayInstances.contains(instance)) {
                 displayInstances.set(displayInstances.indexOf(instance), null);
@@ -118,19 +125,13 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    protected void lockInstance(MinecraftInstance instance) {
-        super.lockInstance(instance);
+    public boolean lockInstance(MinecraftInstance instance) {
+        boolean out = super.lockInstance(instance);
         Collections.replaceAll(displayInstances, instance, null);
         if (JultiOptions.getInstance().dwReplaceLocked) {
             refreshDisplayInstances();
         }
-    }
-
-    @Override
-    public void onMissingInstancesUpdate() {
-        super.onMissingInstancesUpdate();
-        displayInstances.clear();
-        refreshDisplayInstances();
+        return false;
     }
 
     protected boolean resetNoWallUpdate(MinecraftInstance instance) {
@@ -203,5 +204,13 @@ public class DynamicWallResetManager extends WallResetManager {
         Dimension lockedInstanceSize = new Dimension((int) (dwInnerSize.width * (options.lockedInstanceSpace / 100)), lockedInstanceHeight);
 
         return new Rectangle(lockedInstanceSize.width * instanceIndex, dwInnerSize.height, lockedInstanceSize.width, lockedInstanceSize.height);
+    }
+
+    @Override
+    public MinecraftInstance getRelativeInstance(int offset) {
+        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
+        List<MinecraftInstance> instances = new ArrayList<>(displayInstances);
+        int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
+        return instances.get((startIndex + offset) % instances.size());
     }
 }
