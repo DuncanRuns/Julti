@@ -513,6 +513,7 @@ public class MinecraftInstance {
                     if (options.autoFullscreen) {
                         pressFullscreenKey();
                     }
+                    if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
                 }).start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
