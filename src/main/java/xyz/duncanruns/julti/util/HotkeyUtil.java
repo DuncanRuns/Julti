@@ -106,6 +106,7 @@ public final class HotkeyUtil {
     private static class SingleHotkeyChecker {
         private final Hotkey hotkey;
         private final Runnable runnable;
+        private Thread thread = null;
 
         private SingleHotkeyChecker(Hotkey hotkey, Runnable runnable) {
             this.hotkey = hotkey;
@@ -113,9 +114,11 @@ public final class HotkeyUtil {
         }
 
         public void check() {
-            if (hotkey.wasPressed()) {
-                Thread thread = new Thread(runnable);
-                thread.setName("hotkeys");
+            if (hotkey.wasPressed() && thread == null) {
+                thread = new Thread(() -> {
+                    runnable.run();
+                    thread = null;
+                }, "hotkeys");
                 thread.start();
             }
         }

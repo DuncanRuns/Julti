@@ -114,13 +114,6 @@ public class MinecraftInstance {
         return null;
     }
 
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
-
     public boolean isUsingF1() {
         if (JultiOptions.getInstance().pieChartOnLoad) return false;
 
@@ -235,7 +228,6 @@ public class MinecraftInstance {
 
         return getOptionFromString(optionName, out).trim();
     }
-
 
     private String tryGetStandardOption(String optionName) {
         try {
@@ -616,10 +608,6 @@ public class MinecraftInstance {
     private void pressTab(int tabTimes) {
         for (int i = 0; i < tabTimes; i++)
             KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_TAB);
-    }
-
-    private void pressEnter() {
-        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_RETURN);
     }
 
     private void pressShiftTab(int tabTimes) {
@@ -1146,6 +1134,26 @@ public class MinecraftInstance {
         } catch (IOException ignored) {
 
         }
+    }
+
+    public void sendChatMessage(String chatMessage) {
+        KeyboardUtil.sendKeyToHwnd(hwnd, 0x54);
+        sleep(100); // magic number
+        for (char c : chatMessage.toCharArray()) {
+            KeyboardUtil.sendCharToHwnd(hwnd, c);
+        }
+        pressEnter();
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    private void pressEnter() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_RETURN);
     }
 
     private enum ResetType {

@@ -51,7 +51,8 @@ public class LogPanel extends JPanel {
             Thread.currentThread().setName("julti-gui");
             String command = e.getActionCommand();
             if (command.startsWith("/")) command = command.substring(1);
-            julti.runCommand(command);
+            String finalCommand = command;
+            new Thread(() -> julti.runCommand(finalCommand),"julti-gui").start();
             commandLine.setText("");
         });
         commandLine.addFocusListener(new FocusListener() {

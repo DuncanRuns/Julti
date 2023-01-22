@@ -237,10 +237,26 @@ public final class KeyboardUtil {
         sendKeyUpToHwnd(hwnd, virtualKey, true);
     }
 
-    public static void sendKeyToHwnd(Pointer hwnd, int virtualKey, long pressTime, boolean usePost) throws InterruptedException {
+    public static void sendCharToHwnd(Pointer hwnd, int character) {
+        sendCharToHwnd(hwnd, character, true);
+    }
+
+    public static void sendCharToHwnd(Pointer hwnd, int character, boolean usePost) {
+        if (usePost) {
+            User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(WinUser.WM_CHAR), new WinDef.WPARAM(character), new WinDef.LPARAM(0));
+        } else {
+            User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(WinUser.WM_CHAR), new WinDef.WPARAM(character), new WinDef.LPARAM(0));
+        }
+    }
+
+    public static void sendKeyToHwnd(Pointer hwnd, int virtualKey, long pressTime, boolean usePost) {
         sendKeyDownToHwnd(hwnd, virtualKey, usePost);
         if (pressTime > 0) {
-            Thread.sleep(pressTime);
+            try {
+                Thread.sleep(pressTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         sendKeyUpToHwnd(hwnd, virtualKey, usePost);
     }

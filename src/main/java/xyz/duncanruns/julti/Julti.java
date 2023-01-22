@@ -52,6 +52,8 @@ public class Julti {
             new ActivateCommand(),
             new OptionCommand(),
             new SleepCommand(),
+            new ChatMessageCommand(),
+            new OpenToLanCommand(),
     });
 
     private static String getVersion() {
