@@ -30,16 +30,15 @@ public class LaunchCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti) {
         List<MinecraftInstance> toLaunch;
         if (args[0].equals("all")) toLaunch = julti.getInstanceManager().getInstances();
         else toLaunch = CommandManager.getInstances(args[0], julti);
 
         if (toLaunch.isEmpty()) {
             log(Level.ERROR, "No instances found");
-            return false;
+            return;
         }
         SafeInstanceLauncher.launchInstances(toLaunch);
-        return true;
     }
 }

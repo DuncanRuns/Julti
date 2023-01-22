@@ -29,14 +29,13 @@ public class ActivateCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti) {
         List<MinecraftInstance> instances = CommandManager.getInstances(args[0], julti);
         if (instances.size() != 1) {
             log(Level.ERROR, "No instance found");
-            return false;
+            return;
         }
         MinecraftInstance i = instances.get(0);
         i.activate(1 + julti.getInstanceManager().getInstances().indexOf(i));
-        return true;
     }
 }

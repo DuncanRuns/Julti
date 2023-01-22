@@ -22,5 +22,5 @@ public abstract class Command {
 
     public abstract String getName();
 
-    public abstract boolean run(String[] args, Julti julti);
+    public abstract void run(String[] args, Julti julti);
 }

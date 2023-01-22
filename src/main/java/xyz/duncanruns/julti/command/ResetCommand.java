@@ -29,16 +29,15 @@ public class ResetCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti) {
         List<MinecraftInstance> toReset;
         if (args[0].equals("all")) toReset = julti.getInstanceManager().getInstances();
         else toReset = CommandManager.getInstances(args[0], julti);
 
         if (toReset.isEmpty()) {
             log(Level.ERROR, "No instances found");
-            return false;
+            return;
         }
         toReset.forEach(i -> julti.getResetManager().resetInstance(i));
-        return true;
     }
 }

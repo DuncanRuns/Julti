@@ -41,25 +41,29 @@ public class CommandManager {
     }
 
     public static String combineArgs(String[] args) {
+        return combineArgs(args, " ");
+    }
+
+    public static String combineArgs(String[] args, String separator) {
         StringBuilder out = new StringBuilder();
         for (String arg : args) {
             if (!out.toString().isEmpty()) {
-                out.append(" ");
+                out.append(separator);
             }
             out.append(arg);
         }
         return out.toString();
     }
 
-    public boolean runCommand(String command, Julti julti) {
-        if (command.isEmpty()) return false;
-        return runCommand(command.trim().split(" "), julti);
+    public void runCommand(String command, Julti julti) {
+        if (command.isEmpty()) return;
+        runCommand(command.trim().split(" "), julti);
     }
 
-    public boolean runCommand(String[] commandWords, Julti julti) {
+    public void runCommand(String[] commandWords, Julti julti) {
         if (commandWords[0].equals("help") || commandWords[0].equals("?")) {
             log(Level.INFO, "Commands:\n\n" + getDescriptions(true));
-            return true;
+            return;
         }
         boolean foundCommand = false;
         for (Command command : commands) {
@@ -68,17 +72,17 @@ public class CommandManager {
             String[] args = withoutFirst(commandWords);
             if (args.length < command.getMinArgs() || args.length > command.getMaxArgs()) {
                 log(Level.WARN, "Command failed: Incorrect amount of arguments!");
-                return false;
+                return;
             }
             try {
-                return command.run(args, julti);
+                command.run(args, julti);
+                return;
             } catch (Exception e) {
                 if (e.getClass() == RuntimeException.class) log(Level.ERROR, "Command failed: " + e.getMessage());
                 else log(Level.ERROR, "Command failed:\n" + e);
             }
         }
         if (!foundCommand) log(Level.WARN, "Command does not exists.");
-        return false;
     }
 
     public static void log(Level level, String message) {

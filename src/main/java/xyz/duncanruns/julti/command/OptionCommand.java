@@ -32,8 +32,8 @@ public class OptionCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
-        return innerManager.runCommand(args, julti);
+    public void run(String[] args, Julti julti) {
+        innerManager.runCommand(args, julti);
     }
 
     private static class OptionListCommand extends Command {
@@ -59,7 +59,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public boolean run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti) {
             JultiOptions options = JultiOptions.getInstance();
             StringBuilder optionNames = new StringBuilder();
             for (String optionName : options.getOptionNamesWithType()) {
@@ -69,7 +69,6 @@ public class OptionCommand extends Command {
                 optionNames.append("- ").append(optionName);
             }
             log(Level.INFO, "All available options:\n" + optionNames);
-            return false;
         }
     }
 
@@ -96,7 +95,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public boolean run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti) {
             JultiOptions options = JultiOptions.getInstance();
             String optionName = args[0];
             String value = options.getValueString(optionName);
@@ -106,7 +105,6 @@ public class OptionCommand extends Command {
             } else {
                 log(Level.INFO, "Option \"" + optionName + "\" has a value of: " + value);
             }
-            return false;
         }
     }
 
@@ -133,7 +131,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public boolean run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti) {
             JultiOptions options = JultiOptions.getInstance();
             String[] valueArgs = CommandManager.withoutFirst(args);
             String all = CommandManager.combineArgs(valueArgs);
@@ -143,7 +141,6 @@ public class OptionCommand extends Command {
             } else {
                 log(Level.ERROR, "Could not set value.");
             }
-            return false;
         }
     }
 

@@ -24,12 +24,11 @@ public class SleepCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti) {
         try {
             Thread.sleep(Long.parseLong(args[0]));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return true;
     }
 }

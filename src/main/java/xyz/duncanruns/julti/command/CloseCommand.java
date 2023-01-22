@@ -29,16 +29,15 @@ public class CloseCommand extends Command {
     }
 
     @Override
-    public boolean run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti) {
         List<MinecraftInstance> toClose;
         if (args[0].equals("all")) toClose = julti.getInstanceManager().getInstances();
         else toClose = CommandManager.getInstances(args[0], julti);
 
         if (toClose.isEmpty()) {
             log(Level.ERROR, "No instances found");
-            return false;
+            return;
         }
         toClose.forEach(MinecraftInstance::closeWindow);
-        return true;
     }
 }
