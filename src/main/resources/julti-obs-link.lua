@@ -261,39 +261,51 @@ end
 
 function generate_scenes()
 
+    local already_existing = {}
+    local found_ae = false
+
     if not scene_exists("Lock Display") then
         _setup_lock_scene()
     else
-        obs.script_log(200,
-            'Warning: The lock display scene already exists, if you want it to be remade, please delete it and press the "Generate Scenes" button again.')
+        table.insert(already_existing, "Lock Display")
+        found_ae = true
     end
 
     if not scene_exists("Dirt Cover Display") then
         _setup_cover_scene()
     else
-        obs.script_log(200,
-            'Warning: The dirt cover display scene already exists, if you want it to be remade, please delete it and press the "Generate Scenes" button again.')
+        table.insert(already_existing, "Dirt Cover Display")
+        found_ae = true
     end
 
     if not scene_exists("Sound") then
         _setup_sound_scene()
     else
-        obs.script_log(200,
-            'Warning: The sound scene already exists, if you want it to be remade, please delete it and press the "Generate Scenes" button again.')
+        table.insert(already_existing, "Sound")
+        found_ae = true
     end
 
-    if not scene_exists("Verification") then
-        _setup_verification_scene()
-    else
-        obs.script_log(200,
-            'Warning: The verification scene already exists, if you want it to be remade, please delete it and press the "Generate Scenes" button again.')
-    end
+    _setup_verification_scene()
 
     _setup_julti_scene()
 
     -- Reset variables to have loop update stuff automatically
     last_state_text = ""
     last_scene_name = ""
+
+    if found_ae then
+        -- Report already existing scenes
+
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "The following scenes already exist:")
+
+        for _, v in pairs(already_existing) do
+            obs.script_log(200, "- " .. v)
+        end
+
+        obs.script_log(200, "If you want to recreate these scenes,")
+        obs.script_log(200, "delete them first before pressing Generate Scenes.")
+    end
 end
 
 function _setup_cover_scene()
@@ -313,7 +325,24 @@ function _setup_cover_scene()
 end
 
 function _setup_verification_scene()
-    create_scene("Verification")
+    if scene_exists("Verification") then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "Verification scene already existed,")
+        obs.script_log(200, "window captures and sound group will be replaced.")
+        local scene = get_scene("Verification")
+        local items = obs.obs_scene_enum_items(scene)
+        for _, item in ipairs(items) do
+            local name = get_sceneitem_name(item)
+            if name == "Minecraft Audio" or
+                (string.find(name, "Verification Capture ") ~= nil) then
+                obs.obs_sceneitem_remove(item)
+            end
+        end
+        obs.sceneitem_list_release(items)
+    else
+        create_scene("Verification")
+    end
+
     local scene = get_scene("Verification")
 
     local out = get_state_file_string()
@@ -465,6 +494,9 @@ function _setup_julti_scene()
     end
 
     if scene_exists("Julti") then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "Julti scene already existed,")
+        obs.script_log(200, "instance groups and sound source will be replaced.")
         local items = obs.obs_scene_enum_items(get_scene("Julti"))
         for _, item in ipairs(items) do
             if (string.find(get_sceneitem_name(item), "Instance ") ~= nil) or
