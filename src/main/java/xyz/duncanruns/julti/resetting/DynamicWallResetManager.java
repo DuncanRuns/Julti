@@ -144,7 +144,7 @@ public class DynamicWallResetManager extends WallResetManager {
     public void notifyInstanceAvailable(MinecraftInstance instance) {
         if (displayInstances.contains(instance)) return;
         for (MinecraftInstance replaceCandidateInstance : displayInstances) {
-            if (replaceCandidateInstance.isAvailable()) {
+            if (!replaceCandidateInstance.isAvailable()) {
                 Collections.replaceAll(displayInstances, replaceCandidateInstance, instance);
                 return;
             }
