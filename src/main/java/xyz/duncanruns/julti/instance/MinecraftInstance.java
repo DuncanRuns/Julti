@@ -923,8 +923,10 @@ public class MinecraftInstance {
         String[] args = line.replace(" %", "%").split(" ");
         try {
             loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
+            // Return if not using world preview as the below functionality would not matter
+            if (!isUsingWorldPreview()) return;
             JultiOptions options = JultiOptions.getInstance();
-            if (dirtCover && loadingPercent >= options.dirtReleasePercent) {
+            if (isPreviewLoaded() && dirtCover && loadingPercent >= options.dirtReleasePercent) {
                 updateTimeLastAppeared();
                 dirtCover = false;
                 setAvailable(julti);
