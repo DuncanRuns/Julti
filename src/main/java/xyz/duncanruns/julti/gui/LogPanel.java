@@ -52,7 +52,7 @@ public class LogPanel extends JPanel {
             String command = e.getActionCommand();
             if (command.startsWith("/")) command = command.substring(1);
             String finalCommand = command;
-            new Thread(() -> julti.runCommand(finalCommand),"julti-gui").start();
+            new Thread(() -> julti.runCommand(finalCommand), "julti-gui").start();
             commandLine.setText("");
         });
         commandLine.addFocusListener(new FocusListener() {

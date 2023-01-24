@@ -66,6 +66,7 @@ public class MinecraftInstance {
     private String biome = "";
     private int loadingPercent = 0;
     private boolean dirtCover = false;
+    private boolean available = false;
     boolean worldEverLoaded = false;
     boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
     boolean activeSinceLastReset = false;
@@ -749,7 +750,8 @@ public class MinecraftInstance {
         worldLoaded = false;
         loadingPercent = -1;
         setInPreview(false);
-        dirtCover = true;
+        dirtCover = options.dirtReleasePercent >= 0;
+        available = false;
         shouldPressDelayedWLKeys = false;
         activeSinceLastReset = false;
 
@@ -873,6 +875,18 @@ public class MinecraftInstance {
         return dirtCover;
     }
 
+    public boolean isAvailable() {
+        return available;
+    }
+
+    private void setAvailable(Julti julti) {
+        if (!available) {
+            available = true;
+            julti.getResetManager().notifyInstanceAvailable(this);
+            updateTimeLastAppeared();
+        }
+    }
+
     public boolean hasPreviewEverStarted() {
         return lastPreviewStart != -1L;
     }
@@ -912,9 +926,11 @@ public class MinecraftInstance {
             JultiOptions options = JultiOptions.getInstance();
             if (dirtCover && loadingPercent >= options.dirtReleasePercent) {
                 updateTimeLastAppeared();
-                julti.getResetManager().notifyDirtUncover(this);
+                dirtCover = false;
+                setAvailable(julti);
+            } else {
+                dirtCover = loadingPercent < options.dirtReleasePercent;
             }
-            dirtCover = loadingPercent < options.dirtReleasePercent;
         } catch (Exception ignored) {
         }
     }
@@ -936,6 +952,7 @@ public class MinecraftInstance {
         worldLoaded = true;
         worldEverLoaded = true;
         dirtCover = false;
+        setAvailable(julti);
         loadingPercent = 100;
 
         // Key press shenanigans
@@ -983,18 +1000,21 @@ public class MinecraftInstance {
         log(Level.DEBUG, getName() + ": Preview loaded");
 
         setInPreview(true);
-        dirtCover = true;
+        dirtCover = options.dirtReleasePercent >= 0;
         loadingPercent = -1;
         worldLoaded = false;
         if (options.useF3) {
             pressF3Esc();
         }
         julti.getResetManager().notifyPreviewLoaded(this);
+        if (options.dirtReleasePercent < 0) {
+            setAvailable(julti);
+        }
     }
 
     private void onPreviewLoadWithBiome(JultiOptions options, Julti julti, String line) {
         setInPreview(true);
-        dirtCover = true;
+        dirtCover = options.dirtReleasePercent >= 0;
         loadingPercent = -1;
         worldLoaded = false;
         if (options.useF3) {
@@ -1003,6 +1023,9 @@ public class MinecraftInstance {
         String[] args = line.split(" ");
         biome = args[args.length - 1];
         julti.getResetManager().notifyPreviewLoaded(this);
+        if (options.dirtReleasePercent < 0) {
+            setAvailable(julti);
+        }
     }
 
     private void pressShiftF3() {

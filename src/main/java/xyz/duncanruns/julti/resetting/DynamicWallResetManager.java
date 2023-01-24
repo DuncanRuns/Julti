@@ -73,10 +73,12 @@ public class DynamicWallResetManager extends WallResetManager {
         // uses an instance's equals() method to match instance paths so that if displayInstances has an abandoned
         // instance object, it can still be used.
         List<MinecraftInstance> resettable = instanceManager.getInstances().stream().filter(instance -> displayInstances.contains(instance)).collect(Collectors.toList());
+        // Do special reset so that display instances don't get replaced because it will be filled with null anyway
         resettable.forEach(this::resetNoWallUpdate);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
+        // Fill display with null then refresh to ensure good order
         Collections.fill(displayInstances, null);
         refreshDisplayInstances();
         return true;
@@ -139,12 +141,11 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    public void notifyDirtUncover(MinecraftInstance instance) {
+    public void notifyInstanceAvailable(MinecraftInstance instance) {
         if (displayInstances.contains(instance)) return;
         for (MinecraftInstance replaceCandidateInstance : displayInstances) {
-            if (replaceCandidateInstance.shouldDirtCover()) {
+            if (replaceCandidateInstance.isAvailable()) {
                 Collections.replaceAll(displayInstances, replaceCandidateInstance, instance);
-                instance.updateTimeLastAppeared();
                 return;
             }
         }

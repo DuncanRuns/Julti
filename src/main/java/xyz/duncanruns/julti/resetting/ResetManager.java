@@ -79,7 +79,7 @@ public abstract class ResetManager {
         }
     }
 
-    public void notifyDirtUncover(MinecraftInstance instance) {
+    public void notifyInstanceAvailable(MinecraftInstance instance) {
     }
 
     public boolean shouldDirtCover(MinecraftInstance instance) {

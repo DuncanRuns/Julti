@@ -68,6 +68,8 @@ public class OptionsGUI extends JFrame {
     private void addComponentsOther() {
         JPanel panel = createNewOptionsPanel("Other");
 
+        JultiOptions options = JultiOptions.getInstance();
+
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -83,7 +85,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path (.exe):")));
         panel.add(GUIUtil.createSpacer());
 
-        JTextField mmcField = new JTextField(JultiOptions.getInstance().multiMCPath);
+        JTextField mmcField = new JTextField(options.multiMCPath);
         GUIUtil.setActualSize(mmcField, 300, 23);
         mmcField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -102,7 +104,7 @@ public class OptionsGUI extends JFrame {
             }
 
             private void update() {
-                JultiOptions.getInstance().multiMCPath = mmcField.getText();
+                options.multiMCPath = mmcField.getText();
             }
         });
         panel.add((GUIUtil.leftJustify(mmcField)));
@@ -114,7 +116,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Launch Instances Offline", "launchOffline", b -> reload())));
         panel.add(GUIUtil.createSpacer());
 
-        if (JultiOptions.getInstance().launchOffline) {
+        if (options.launchOffline) {
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflinePrefix", "Offline Name Prefix", this)));
             panel.add(GUIUtil.createSpacer());
         }
@@ -132,7 +134,7 @@ public class OptionsGUI extends JFrame {
             }
         })));
 
-        if (!JultiOptions.getInstance().useAffinity) return;
+        if (!options.useAffinity) return;
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
@@ -229,9 +231,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("obsWindowNameFormat", "Projector Name Format", this)));
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("dirtReleasePercent", "Dirt Cover Release Percent", this, "%")));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("instanceSpacing", "Instance Spacing (Border)", this)));
@@ -386,9 +385,6 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
-        panel.add(GUIUtil.createSpacer());
-
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
@@ -397,6 +393,25 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
         }
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBox("Use Dirt Covers", options.dirtReleasePercent >= 0, b -> {
+            options.dirtReleasePercent = b ? 0 : -1;
+            reload();
+        })));
+        if (options.dirtReleasePercent >= 0) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("dirtReleasePercent", "Dirt Cover Release Percent", this, "%")));
+        }
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("The reset cooldown starts as soon as you can see the instance,")));
+        panel.add(GUIUtil.leftJustify(new JLabel("this also accounts for appearance based on dirt covers and dynamic wall.")));
+
 
         if (!(options.resetMode == 2)) return;
         // Dynamic wall settings below
@@ -416,6 +431,8 @@ public class OptionsGUI extends JFrame {
     private void addComponentsReset() {
         JPanel panel = createNewOptionsPanel("Resetting");
 
+        JultiOptions options = JultiOptions.getInstance();
+
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -424,9 +441,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Style:")));
 
         JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
-        resetStyleBox.setSelectedItem(RESET_MODES[JultiOptions.getInstance().resetMode]);
+        resetStyleBox.setSelectedItem(RESET_MODES[options.resetMode]);
         resetStyleBox.addActionListener(e -> {
-            JultiOptions.getInstance().resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+            options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
             reload();
             julti.reloadManagers();
         });
@@ -447,9 +464,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("clipboardOnReset", "Clipboard On Reset", this)));
     }
 
@@ -470,6 +484,8 @@ public class OptionsGUI extends JFrame {
     private void addComponentsWindow() {
         JPanel panel = createNewOptionsPanel("Window");
 
+        JultiOptions options = JultiOptions.getInstance();
+
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -477,7 +493,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reload())));
 
-        if (!JultiOptions.getInstance().letJultiMoveWindows) return;
+        if (!options.letJultiMoveWindows) return;
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
@@ -503,7 +519,6 @@ public class OptionsGUI extends JFrame {
 
             int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
             if (ans == -1) return;
-            JultiOptions options = JultiOptions.getInstance();
             MonitorUtil.Monitor monitor = monitors[ans];
             options.windowPos = monitor.position;
             options.windowSize = monitor.size;
@@ -515,12 +530,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
 
-        final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
+        final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + options.wideResetSquish + ")");
         panel.add(GUIUtil.leftJustify(squishLabel));
-        JSlider squishSlider = new JSlider(0, 10, 80, (int) (JultiOptions.getInstance().wideResetSquish * 10));
+        JSlider squishSlider = new JSlider(0, 10, 80, (int) (options.wideResetSquish * 10));
         squishSlider.addChangeListener(e -> {
-            JultiOptions.getInstance().wideResetSquish = squishSlider.getValue() / 10f;
-            squishLabel.setText("Wide Reset Squish Level: (" + JultiOptions.getInstance().wideResetSquish + ")");
+            options.wideResetSquish = squishSlider.getValue() / 10f;
+            squishLabel.setText("Wide Reset Squish Level: (" + options.wideResetSquish + ")");
         });
         GUIUtil.setActualSize(squishSlider, 200, 23);
         panel.add(GUIUtil.leftJustify(squishSlider));

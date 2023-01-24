@@ -317,8 +317,8 @@ public class WallResetManager extends ResetManager {
         // World is loaded
         if (instance.isWorldLoaded()) return true;
 
-        // Preview is loaded
-        if (instance.isPreviewLoaded()) {
+        // Preview is "available" (dirt uncovered or preview loaded depending on user setting)
+        if (instance.isAvailable()) {
             // Return true if cooldown has passed, otherwise return false
             return System.currentTimeMillis() - instance.getTimeLastAppeared() > JultiOptions.getInstance().wallResetCooldown;
         }

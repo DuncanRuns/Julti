@@ -36,6 +36,7 @@ public final class JultiOptions {
     public String clipboardOnReset = "";
     public int resetMode = 0; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
     public boolean coopMode = false;
+    public int dirtReleasePercent = 0;
 
     // Wall
     public boolean cleanWall = true;
@@ -75,7 +76,6 @@ public final class JultiOptions {
     public boolean wallFocusResetHotkeyIM = true;
 
     // OBS
-    public int dirtReleasePercent = 1;
     public int instanceSpacing = 0;
     public String obsWindowNameFormat = "* projector (scene) - *";
     public boolean obsPressHotkeys = false;
