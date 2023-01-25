@@ -379,13 +379,13 @@ function _setup_verification_scene()
 
     -- Size ratio is the ratio between width and height
     -- If there is not enough width relative to the height, the loading square would take too much space
-    if size_ratio < 2.5 then
+    if size_ratio < 3.5 then
         goto increase_again
     end
 
     -- If there is 17.5% or more empty space from unfilled grid spaces, add another row
     missing = (total_rows * total_columns - instance_count) / (total_rows * total_columns)
-    if missing > 0.175 then
+    if missing > 0.2 then
         goto increase_again
     end
 
@@ -403,10 +403,14 @@ function _setup_verification_scene()
         local source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num, settings, nil)
         local item = obs.obs_scene_add(scene, source)
         local item2 = obs.obs_scene_add(scene, source)
-        set_position_with_bounds(item, col * i_width, row * i_height, i_width - i_height, i_height)
+        local item3 = obs.obs_scene_add(scene, source)
+        set_position_with_bounds(item, col * i_width, row * i_height, i_width - (2*i_height), i_height)
         set_position_with_bounds(item2, col * i_width + (i_width - i_height), row * i_height, i_height, i_height)
+        set_position_with_bounds(item3, col * i_width + (i_width - (2*i_height)), row * i_height, i_height, i_height)
         set_crop(item2, 0, square_crop[2], square_crop[1], 0)
+        set_crop(item3, square_crop[3], square_crop[4], square_crop[3], square_crop[5])
         obs.obs_sceneitem_set_scale_filter(item2, obs.OBS_SCALE_POINT)
+        obs.obs_sceneitem_set_scale_filter(item3, obs.OBS_SCALE_POINT)
         obs.obs_data_release(settings)
     end
 
