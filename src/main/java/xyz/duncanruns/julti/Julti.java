@@ -291,10 +291,13 @@ public class Julti {
         // extraHeight is for including the % loaded text above the loading square
         int extraHeight = resettingGuiScale * 19;
 
+        // bottom left loading square: right crop, top crop
         String out = (width - loadingSquareSize) + "," + (height - (loadingSquareSize + extraHeight));
+        // middle loading square: left/right crop, top crop, bottom crop
+        String out2 = ((width - loadingSquareSize) / 2) + "," + (((height - loadingSquareSize) / 2 + (resettingGuiScale * 30)) - extraHeight) + "," + ((height - loadingSquareSize) / 2 - (resettingGuiScale * 30));
 
         try {
-            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out);
+            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out + "," + out2);
         } catch (Exception ignored) {
         }
     }
