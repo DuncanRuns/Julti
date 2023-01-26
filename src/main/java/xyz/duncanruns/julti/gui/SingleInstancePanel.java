@@ -94,6 +94,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             public void actionPerformed(ActionEvent e) {
                 Thread.currentThread().setName("julti-gui");
                 julti.getInstanceManager().removeInstance(instance);
+                julti.storeLastInstances();
             }
         });
         remove.setText("Remove");
