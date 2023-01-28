@@ -131,6 +131,7 @@ public class InstanceManager {
                 holdersWithMissing.stream().filter(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath())).forEach(instanceHolder -> instanceHolder.instance = instance);
                 log(Level.INFO, "Found instance: " + instance.getName());
                 onInstanceLoad.accept(instance);
+                out.set(true);
             });
         }
         return out.get();
