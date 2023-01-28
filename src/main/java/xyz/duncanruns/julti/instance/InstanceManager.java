@@ -181,6 +181,7 @@ public class InstanceManager {
 
         public void resetInstanceData() {
             this.instance = new MinecraftInstance(path);
+            instance.justWentMissing();
         }
     }
 }
