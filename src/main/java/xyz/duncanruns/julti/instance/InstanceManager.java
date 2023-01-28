@@ -148,7 +148,7 @@ public class InstanceManager {
     }
 
     public void removeInstance(MinecraftInstance instance) {
-        instanceHolders.removeIf(instanceHolder -> instanceHolder.instance.equals(instance.getInstancePath()));
+        instanceHolders.removeIf(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath()));
     }
 
     public void resetInstanceData() {
