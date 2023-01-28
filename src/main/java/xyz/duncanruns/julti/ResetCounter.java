@@ -24,7 +24,7 @@ public final class ResetCounter {
                 }
             } catch (IOException ignored) {
             }
-        }).start();
+        }, "reset-file-updater").start();
     }
 
     public static void set(int amount) {

@@ -139,13 +139,12 @@ public class InstanceManager {
 
     public void clearAllWorlds() {
         new Thread(() -> {
-            Thread.currentThread().setName("world-clearing");
             for (MinecraftInstance instance : getInstances()) {
                 log(Level.INFO, "Clearing worlds for " + instance + "...");
                 instance.tryClearWorlds();
             }
             log(Level.INFO, "Done clearing worlds!");
-        }).start();
+        }, "world-clearing").start();
     }
 
     public void removeInstance(MinecraftInstance instance) {

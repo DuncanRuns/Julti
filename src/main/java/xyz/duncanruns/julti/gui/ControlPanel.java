@@ -68,7 +68,7 @@ public class ControlPanel extends JPanel {
         add(GUIUtil.getButtonWithMethod(new JButton("Reset Instance Positions"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");
             for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
-                new Thread(instance::ensureWindowState,"julti-gui").start();
+                new Thread(instance::ensureWindowState, "julti-gui").start();
             }
         }), gbc);
 
@@ -82,13 +82,12 @@ public class ControlPanel extends JPanel {
             int ans = JOptionPane.showConfirmDialog(this, "Copy mods and config from " + instances.get(0) + " to all other instances?", "Julti: Sync Instances", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (ans == 0) {
                 new Thread(() -> {
-                    Thread.currentThread().setName("instance-sync");
                     try {
                         SyncUtil.sync(instances, instances.get(0), true, true);
                     } catch (IOException e) {
                         JultiGUI.log(Level.ERROR, "Failed to copy files:\n" + e.getMessage());
                     }
-                }).start();
+                }, "instance-sync").start();
             }
         }), gbc);
 

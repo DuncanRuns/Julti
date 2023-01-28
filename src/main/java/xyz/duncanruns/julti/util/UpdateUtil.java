@@ -26,7 +26,6 @@ public final class UpdateUtil {
     }
 
     public static void checkForUpdates(JultiGUI gui) {
-        Thread.currentThread().setName("update-checker");
         try {
             if (Julti.VERSION.equals("DEV")) {
                 log(Level.INFO, "No updates because Julti is in DEV version.");

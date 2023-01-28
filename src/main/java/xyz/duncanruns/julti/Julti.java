@@ -141,7 +141,7 @@ public class Julti {
     }
 
     public void reloadInstancePositions() {
-        instanceManager.getInstances().forEach(instance -> new Thread(instance::ensureWindowState).start());
+        instanceManager.getInstances().forEach(instance -> new Thread(instance::ensureWindowState, "position-reloader").start());
     }
 
     public void switchScene(MinecraftInstance instance) {
@@ -321,7 +321,7 @@ public class Julti {
                 } catch (Exception e) {
                     log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e.getMessage() + " | " + Arrays.toString(e.getStackTrace()));
                 }
-            });
+            }, "state-checker");
             threads[i++] = thread;
             thread.start();
         }

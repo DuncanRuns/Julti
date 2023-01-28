@@ -479,7 +479,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         activeSinceLastReset = true;
         if (hasWindow()) {
-            new Thread(this::ensureWindowState).start();
+            new Thread(this::ensureWindowState, "window-resizer").start();
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
@@ -507,7 +507,7 @@ public class MinecraftInstance {
                         pressFullscreenKey();
                     }
                     if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
-                }).start();
+                }, "instance-activate-finisher").start();
             }
             if (instanceNum != -1) setWindowTitle("Minecraft* - Instance " + instanceNum);
             log(Level.INFO, "Activated instance " + getName());
