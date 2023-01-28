@@ -7,35 +7,33 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.util.HwndUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class InstanceManager {
 
     private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
 
-    private final List<MinecraftInstance> instances;
+    private final CopyOnWriteArrayList<InstanceHolder> instanceHolders;
 
     public InstanceManager(List<Path> instancePaths) {
         this();
         for (Path path : instancePaths) {
-            MinecraftInstance instance = new MinecraftInstance(path);
-            // Eat the missing reports because
-            instance.justWentMissing();
-            instances.add(instance);
+            instanceHolders.add(new InstanceHolder(path));
         }
     }
 
     public InstanceManager() {
-        instances = new ArrayList<>();
+        instanceHolders = new CopyOnWriteArrayList<>();
     }
 
-
-    @Nullable
     public MinecraftInstance getSelectedInstance() {
         Pointer hwnd = HwndUtil.getCurrentHwnd();
         List<MinecraftInstance> instances = getInstances();
@@ -48,28 +46,49 @@ public class InstanceManager {
     }
 
     public List<MinecraftInstance> getInstances() {
-        return List.copyOf(instances);
+        List<MinecraftInstance> instances = new ArrayList<>();
+        instanceHolders.forEach(instanceHolder -> instances.add(instanceHolder.instance));
+        return Collections.unmodifiableList(instances);
     }
 
-    synchronized public void redetectInstances() {
-        // Get all windows that claim to be a minecraft instance wrapped in the MinecraftInstance class
-        List<MinecraftInstance> newInstances = getAllOpenInstances();
-
-        // Remove anything that doesn't have a game directory in its command line (remove sus imposters)
-        newInstances.removeIf(minecraftInstance -> (!minecraftInstance.isActuallyMC()));
+    public void redetectInstances() {
+        List<MinecraftInstance> newInstances = getAllConfirmedOpenedInstances();
 
         // Sort instances
         newInstances.sort(Comparator.comparingInt(MinecraftInstance::getNameSortingNum));
 
         // Swich found instances into list
-        instances.clear();
-        instances.addAll(newInstances);
+        List<InstanceHolder> newHolders = new ArrayList<>();
+        newInstances.forEach(instance -> newHolders.add(new InstanceHolder(instance)));
+        instanceHolders.clear();
+        instanceHolders.addAll(newHolders);
 
         // Rename windows to instance numbers
         renameWindows();
 
         // Output instances to log
         logInstances();
+    }
+
+    private static List<MinecraftInstance> getAllConfirmedOpenedInstances() {
+        // Get all instances that actually are mc
+        return getAllOpenInstances().stream().filter(MinecraftInstance::isActuallyMC).collect(Collectors.toList());
+    }
+
+    public void renameWindows() {
+        int i = 0;
+        log(Level.INFO, "Renaming windows...");
+        for (MinecraftInstance instance : getInstances()) {
+            instance.setWindowTitle("Minecraft* - Instance " + (++i));
+        }
+
+    }
+
+    private void logInstances() {
+        int i = 0;
+        for (MinecraftInstance instance : getInstances()) {
+            log(Level.INFO, "Instance " + (++i) + ": " + instance.getName());
+        }
     }
 
     private static List<MinecraftInstance> getAllOpenInstances() {
@@ -81,28 +100,13 @@ public class InstanceManager {
         return instanceList;
     }
 
-    synchronized public void renameWindows() {
-        int i = 0;
-        log(Level.INFO, "Renaming windows...");
-        for (MinecraftInstance instance : instances) {
-            instance.setWindowTitle("Minecraft* - Instance " + (++i));
-        }
-    }
-
-    private void logInstances() {
-        int i = 0;
-        for (MinecraftInstance instance : instances) {
-            log(Level.INFO, "Instance " + (++i) + ": " + instance.getName());
-        }
-    }
-
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
     }
 
     public void manageMissingInstances() {
-        manageMissingInstances(minecraftInstance -> {
+        manageMissingInstances(instance -> {
         });
     }
 
@@ -113,95 +117,29 @@ public class InstanceManager {
      * @return true if any instances go missing or get found, otherwise false
      */
     public boolean manageMissingInstances(Consumer<MinecraftInstance> onInstanceLoad) {
-        // Be careful not to call this too often, as it is slow (10's or 100's of milliseconds)
-        List<MinecraftInstance> newMissingInstances = getNewMissingInstances();
-        boolean out = false;
-        if (!newMissingInstances.isEmpty()) {
-            for (MinecraftInstance instance : newMissingInstances) {
-                log(Level.WARN, "Instance is missing: " + instance);
-                out = true;
-            }
+        AtomicBoolean out = new AtomicBoolean(false);
+        instanceHolders.stream().filter(InstanceHolder::justWentMissing).map(instanceHolder -> instanceHolder.instance).forEach(instance -> {
+            log(Level.WARN, "Instance is missing: " + instance);
+            out.set(true);
+        });
+        List<InstanceHolder> holdersWithMissing = instanceHolders.stream().filter(InstanceHolder::isMissing).collect(Collectors.toList());
+        if (out.get() || !holdersWithMissing.isEmpty()) {
+            // relevantPaths contains paths of instances that are missing
+            List<Path> relevantPaths = holdersWithMissing.stream().map(instanceHolder -> instanceHolder.path).collect(Collectors.toList());
+            // Get all opened instances, and if their path is in the relevantPaths list, insert itself into any instance holders with a matching path.
+            getAllConfirmedOpenedInstances().stream().filter(instance -> relevantPaths.contains(instance.getInstancePath())).forEach(instance -> {
+                holdersWithMissing.stream().filter(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath())).forEach(instanceHolder -> instanceHolder.instance = instance);
+                log(Level.INFO, "Found instance: " + instance.getName());
+                onInstanceLoad.accept(instance);
+            });
         }
-        if (hasMissingWindows()) {
-            List<MinecraftInstance> newFoundInstances = findMissingWindows();
-            if (!newFoundInstances.isEmpty()) {
-                for (MinecraftInstance instance : newFoundInstances) {
-                    onInstanceLoad.accept(instance);
-                    out = true;
-                }
-            }
-        }
-        return out;
+        return out.get();
     }
 
-    synchronized private List<MinecraftInstance> getNewMissingInstances() {
-        // Returns instances that have gone missing.
-        List<MinecraftInstance> newMissingInstances = new ArrayList<>();
-        for (MinecraftInstance instance : instances) {
-            if (instance.justWentMissing()) newMissingInstances.add(instance);
-        }
-        return newMissingInstances;
-    }
-
-    synchronized public boolean hasMissingWindows() {
-        for (MinecraftInstance instance : instances) {
-            if (!instance.hasWindow()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public List<MinecraftInstance> findMissingWindows() {
-        // Be careful not to call this too often, as it is slow (10's or 100's of milliseconds)
-
-        List<MinecraftInstance> replacementInstances = new ArrayList<>();
-        try {
-            if (!hasMissingWindows()) return replacementInstances;
-
-            List<MinecraftInstance> newInstances = getAllOpenInstances();
-            newInstances.removeIf(minecraftInstance -> instances.contains(minecraftInstance));
-            // Remove any non-minecrafts; this will also get the instance paths
-            newInstances.removeIf(minecraftInstance -> !minecraftInstance.isActuallyMC());
-
-            // Only synchronize after all powershell calls (getting instance paths)
-            synchronized (this) {
-                boolean willRenameWindows = false;
-                for (MinecraftInstance instanceToReplace : new ArrayList<>(instances)) { // Copy list since instances field is changed inside of loop
-                    if (instanceToReplace.hasWindow() || !instanceToReplace.isActuallyMC()) continue;
-
-                    // instanceToReplace variable name is only accurate at this stage of execution
-                    for (MinecraftInstance instanceToUse : newInstances) {
-                        if (!instanceToUse.getInstancePath().equals(instanceToReplace.getInstancePath())) continue;
-                        replacementInstances.add(instanceToUse);
-                        instances.set(instances.indexOf(instanceToReplace), instanceToUse);
-                        log(Level.INFO, "Found instance: " + instanceToUse.getName());
-                        willRenameWindows = true;
-                    }
-
-                }
-                if (willRenameWindows) renameWindows();
-            }
-
-        } catch (Exception ignored) {
-            // Evil try-catch because windows may get closed in the miliseconds needed to check instance path
-        }
-        return replacementInstances;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder out = new StringBuilder("InstanceManager with " + instances.size() + " instances:");
-        for (MinecraftInstance instance : instances) {
-            out.append("\n\t").append(instance).append(instance.hasWindow() ? " (opened)" : "(closed)");
-        }
-        return out.toString();
-    }
-
-    synchronized public void clearAllWorlds() {
+    public void clearAllWorlds() {
         new Thread(() -> {
             Thread.currentThread().setName("world-clearing");
-            for (MinecraftInstance instance : new ArrayList<>(instances)) {
+            for (MinecraftInstance instance : getInstances()) {
                 log(Level.INFO, "Clearing worlds for " + instance + "...");
                 instance.tryClearWorlds();
             }
@@ -209,28 +147,40 @@ public class InstanceManager {
         }).start();
     }
 
-    synchronized public void removeInstance(MinecraftInstance instance) {
-        removeInstanceByIndex(instances.indexOf(instance));
+    public void removeInstance(MinecraftInstance instance) {
+        instanceHolders.removeIf(instanceHolder -> instanceHolder.instance.equals(instance.getInstancePath()));
     }
 
-    /**
-     * Removes an instance by its index, not its actual number (Instance #1 has index 0).
-     *
-     * @param ind the instance index
-     */
-    synchronized public void removeInstanceByIndex(int ind) {
-        MinecraftInstance removed = instances.remove(ind);
-        log(Level.INFO, "Removed Instance #" + (ind + 1) + ": " + removed.getName());
+    public void resetInstanceData() {
+        instanceHolders.forEach(InstanceHolder::resetInstanceData);
     }
 
-    /**
-     * Replaces each MinecraftInstance object currently loaded with a new one only containing the instance path.
-     */
-    synchronized public void resetInstanceData() {
-        instances.replaceAll(instance -> {
-            MinecraftInstance newInstance = new MinecraftInstance(instance.getInstancePath());
-            newInstance.justWentMissing();
-            return newInstance;
-        });
+    private static class InstanceHolder {
+
+        private final Path path;
+        private MinecraftInstance instance;
+
+        public InstanceHolder(MinecraftInstance instance) {
+            this.path = instance.getInstancePath();
+            this.instance = instance;
+        }
+
+        public InstanceHolder(Path path) {
+            this.path = path;
+            this.instance = new MinecraftInstance(path);
+            instance.justWentMissing();
+        }
+
+        public boolean isMissing() {
+            return !instance.hasWindow();
+        }
+
+        public boolean justWentMissing() {
+            return instance.justWentMissing();
+        }
+
+        public void resetInstanceData() {
+            this.instance = new MinecraftInstance(path);
+        }
     }
 }
