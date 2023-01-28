@@ -68,7 +68,7 @@ public class ControlPanel extends JPanel {
         add(GUIUtil.getButtonWithMethod(new JButton("Reset Instance Positions"), actionEvent -> {
             Thread.currentThread().setName("julti-gui");
             for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
-                instance.ensureWindowState();
+                new Thread(instance::ensureWindowState,"julti-gui").start();
             }
         }), gbc);
 
