@@ -14,10 +14,8 @@ import java.io.PrintStream;
 
 public class LogPanel extends JPanel {
     private final Julti julti;
-    private final PrintStream stdout;
 
     public LogPanel(Julti julti) {
-        stdout = System.out;
         this.julti = julti;
         setupWindow();
     }

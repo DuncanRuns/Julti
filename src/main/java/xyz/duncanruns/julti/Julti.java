@@ -213,7 +213,7 @@ public class Julti {
                 ResourceUtil.copyResourceToFile("/" + name, dest);
                 log(Level.INFO, "Generated .Julti file " + name);
             } catch (Exception e) {
-                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e);
             }
         }
 
@@ -228,7 +228,7 @@ public class Julti {
                 ResourceUtil.copyResourceToFile("/" + name, dest);
                 log(Level.INFO, "Generated " + name + " file in " + dest.getName(dest.getNameCount() - 2));
             } catch (Exception e) {
-                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e);
             }
         }
     }
@@ -306,7 +306,7 @@ public class Julti {
         try {
             tick();
         } catch (Exception e) {
-            log(Level.ERROR, "Error during tick:" + e.getMessage());
+            log(Level.ERROR, "Error during tick:\n" + e);
         }
     }
 
@@ -319,7 +319,7 @@ public class Julti {
                 try {
                     instance.checkLog(this);
                 } catch (Exception e) {
-                    log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e.getMessage() + " | " + Arrays.toString(e.getStackTrace()));
+                    log(Level.ERROR, "Error while checking log for " + instance.getName() + ":\n" + e);
                 }
             }, "state-checker");
             threads[i++] = thread;

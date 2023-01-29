@@ -85,7 +85,7 @@ public class ControlPanel extends JPanel {
                     try {
                         SyncUtil.sync(instances, instances.get(0), true, true);
                     } catch (IOException e) {
-                        JultiGUI.log(Level.ERROR, "Failed to copy files:\n" + e.getMessage());
+                        JultiGUI.log(Level.ERROR, "Failed to copy files:\n" + e);
                     }
                 }, "instance-sync").start();
             }

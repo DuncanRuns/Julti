@@ -78,7 +78,7 @@ public class CommandManager {
                 command.run(args, julti);
                 return;
             } catch (Exception e) {
-                if (e.getClass() == RuntimeException.class) log(Level.ERROR, "Command failed: " + e.getMessage());
+                if (e.getClass() == RuntimeException.class) log(Level.ERROR, "Command failed:\n" + e);
                 else log(Level.ERROR, "Command failed:\n" + e);
             }
         }
