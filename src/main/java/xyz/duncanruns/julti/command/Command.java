@@ -14,6 +14,14 @@ public abstract class Command {
         LogReceiver.receive(level, message);
     }
 
+    protected static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public abstract String helpDescription();
 
     public abstract int getMinArgs();

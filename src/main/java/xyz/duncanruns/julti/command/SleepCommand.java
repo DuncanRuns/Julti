@@ -25,10 +25,6 @@ public class SleepCommand extends Command {
 
     @Override
     public void run(String[] args, Julti julti) {
-        try {
-            Thread.sleep(Long.parseLong(args[0]));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        sleep(Long.parseLong(args[0]));
     }
 }

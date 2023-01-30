@@ -47,6 +47,7 @@ public class MinecraftInstance {
     // Missing Window Stuff
     private boolean notMC = false; // true when a MinecraftInstance is constructed with a window handle which points to a non-mc window
     private boolean missingReported = false;
+    private boolean replaced = false;
 
     // Information to be discovered
     private ResetType resetType = null;
@@ -113,6 +114,18 @@ public class MinecraftInstance {
             }
         }
         return null;
+    }
+
+    public boolean hasWindowOrBeenReplaced() {
+        return hasWindow() || hasBeenReplaced();
+    }
+
+    public boolean hasBeenReplaced() {
+        return replaced;
+    }
+
+    public void markReplaced() {
+        replaced = true;
     }
 
     public boolean isUsingF1() {

@@ -128,7 +128,7 @@ public class InstanceManager {
             List<Path> relevantPaths = holdersWithMissing.stream().map(instanceHolder -> instanceHolder.path).collect(Collectors.toList());
             // Get all opened instances, and if their path is in the relevantPaths list, insert itself into any instance holders with a matching path.
             getAllConfirmedOpenedInstances().stream().filter(instance -> relevantPaths.contains(instance.getInstancePath())).forEach(instance -> {
-                holdersWithMissing.stream().filter(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath())).forEach(instanceHolder -> instanceHolder.instance = instance);
+                holdersWithMissing.stream().filter(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath())).forEach(instanceHolder -> instanceHolder.setInstance(instance));
                 log(Level.INFO, "Found instance: " + instance.getName());
                 onInstanceLoad.accept(instance);
                 out.set(true);
@@ -180,8 +180,13 @@ public class InstanceManager {
         }
 
         public void resetInstanceData() {
-            this.instance = new MinecraftInstance(path);
+            setInstance(new MinecraftInstance(path));
             instance.justWentMissing();
+        }
+
+        public void setInstance(MinecraftInstance instance) {
+            this.instance.markReplaced();
+            this.instance = instance;
         }
     }
 }

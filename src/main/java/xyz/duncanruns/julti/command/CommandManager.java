@@ -36,7 +36,6 @@ public class CommandManager {
                 out.add(allInstances.get((Integer.parseInt(instanceArg) - 1) % allInstances.size()));
             }
         }
-
         return out;
     }
 
