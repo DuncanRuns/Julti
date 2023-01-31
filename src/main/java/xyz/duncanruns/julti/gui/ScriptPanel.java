@@ -45,6 +45,8 @@ public class ScriptPanel extends JPanel {
 
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> ScriptManager.runScript(julti, name)));
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Delete"), a -> {
+            if (JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the script \"" + name + "\"?", "Julti: Delete Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0)
+                return;
             ScriptManager.removeScript(name);
             onDelete.run();
         }));
