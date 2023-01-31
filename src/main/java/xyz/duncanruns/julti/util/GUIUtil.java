@@ -149,7 +149,7 @@ public final class GUIUtil {
     }
 
     public static Component createSpacer(int height) {
-        return Box.createRigidArea(new Dimension(0, height));
+        return Box.createRigidArea(new Dimension(10, height));
     }
 
     public static Component createThreadsSlider(String displayName, String optionName) {
