@@ -73,6 +73,13 @@ public final class GUIUtil {
         return t;
     }
 
+    public static void addMenuItem(JPopupMenu menu, String name, Action action) {
+        JMenuItem item = new JMenuItem();
+        item.setAction(action);
+        item.setText(name);
+        menu.add(item);
+    }
+
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");

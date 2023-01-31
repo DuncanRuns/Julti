@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
 import javax.swing.*;
@@ -58,38 +59,29 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     private void doPop(MouseEvent e) {
         JPopupMenu popupMenu = new JPopupMenu();
         if (instance.hasWindow()) {
-            JMenuItem close = new JMenuItem();
-            close.setAction(new AbstractAction() {
+            GUIUtil.addMenuItem(popupMenu, "Close", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     instance.closeWindow();
                 }
             });
-            close.setText("Close");
-            popupMenu.add(close);
         } else {
-            JMenuItem open = new JMenuItem();
-            open.setAction(new AbstractAction() {
+            GUIUtil.addMenuItem(popupMenu, "Launch", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     SafeInstanceLauncher.launchInstance(instance, julti);
                 }
             });
-            open.setText("Launch");
-            popupMenu.add(open);
         }
-        JMenuItem openFolder = new JMenuItem();
-        openFolder.setAction(new AbstractAction() {
+        GUIUtil.addMenuItem(popupMenu, "Open Folder", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 instance.openFolder();
             }
         });
-        openFolder.setText("Open Folder");
-        JMenuItem remove = new JMenuItem();
-        remove.setAction(new AbstractAction() {
+        GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Thread.currentThread().setName("julti-gui");
@@ -97,9 +89,6 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 julti.storeLastInstances();
             }
         });
-        remove.setText("Remove");
-        popupMenu.add(openFolder);
-        popupMenu.add(remove);
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 
