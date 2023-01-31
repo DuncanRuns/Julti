@@ -10,7 +10,6 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.io.PrintStream;
 
 public class LogPanel extends JPanel {
     private final Julti julti;
