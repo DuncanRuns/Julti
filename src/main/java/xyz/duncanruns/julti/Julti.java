@@ -185,6 +185,7 @@ public class Julti {
     public void start() {
         generateResources();
         stopExecutors();
+        ScriptManager.reload();
         reloadManagers();
         if (JultiOptions.getInstance().useAffinity)
             AffinityManager.start(this);
@@ -195,7 +196,6 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
-        ScriptManager.reload();
         log(Level.INFO, "Welcome to Julti!");
         String libraryPathThing = System.getProperty("java.library.path");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + libraryPathThing.substring(0, libraryPathThing.indexOf(";")));

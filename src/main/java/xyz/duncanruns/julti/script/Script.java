@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.script;
 import java.util.regex.Pattern;
 
 public class Script {
-    private static final Pattern SAVABLE_STRING_PATTERN = Pattern.compile("^[^;]+;\\d;.+$");
+    private static final Pattern SAVABLE_STRING_PATTERN = Pattern.compile("^[^;]+;[0-4];.+$");
     private String name;
     private byte hotkeyContext;
     private String commands; // ; separated commands

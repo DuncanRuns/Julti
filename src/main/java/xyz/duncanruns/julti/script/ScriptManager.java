@@ -1,7 +1,11 @@
 package xyz.duncanruns.julti.script;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,8 +13,10 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class ScriptManager {
+    private static final Logger LOGGER = LogManager.getLogger("Script Manager");
     private static final Path SCRIPTS_PATH = JultiOptions.getJultiDir().resolve("scripts.txt");
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
     private static boolean alreadyRunning = false;
@@ -67,8 +73,40 @@ public class ScriptManager {
         return null;
     }
 
+    public static boolean isDuplicateImport(String scriptString) {
+        if (!Script.isSavableString(scriptString)) return false;
+        Script script = Script.fromSavableString(scriptString);
+        return getScript(script.getName()) != null;
+    }
+
     public static void requestCancel() {
-        if (alreadyRunning) cancel = true;
+        if (alreadyRunning) {
+            cancel = true;
+            log(Level.INFO, "Script canceled");
+        }
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
+    }
+
+    public static boolean forceAddScript(String savableString) {
+        if (!Script.isSavableString(savableString)) {
+            return false;
+        }
+        Script newScript = Script.fromSavableString(savableString);
+        removeScript(newScript.getName());
+        addScript(savableString);
+        return true;
+    }
+
+    public static boolean removeScript(String name) {
+        if (SCRIPTS.removeIf(script -> script.getName().equalsIgnoreCase(name.strip()))) {
+            save();
+            return true;
+        }
+        return false;
     }
 
     public static boolean addScript(String savableString) {
@@ -95,11 +133,12 @@ public class ScriptManager {
         }
     }
 
-    public static boolean removeScript(String name) {
-        if (SCRIPTS.removeIf(script -> script.getName().equalsIgnoreCase(name.strip()))) {
-            save();
-            return true;
-        }
-        return false;
+    public static List<String> getScriptNames() {
+        return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
+    }
+
+    public static byte getHotkeyContext(String name) {
+        Script script = getScript(name);
+        return script == null ? -1 : script.getHotkeyContext();
     }
 }
