@@ -13,6 +13,7 @@ import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetManager;
 import xyz.duncanruns.julti.resetting.WallResetManager;
+import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
 
@@ -23,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -194,6 +194,7 @@ public class Julti {
         tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
         stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
         stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
+        ScriptManager.initialize();
         log(Level.INFO, "Welcome to Julti!");
         String libraryPathThing = System.getProperty("java.library.path");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + libraryPathThing.substring(0, libraryPathThing.indexOf(";")));

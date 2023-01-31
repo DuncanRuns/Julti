@@ -185,7 +185,7 @@ public final class JultiOptions {
         }
     }
 
-    private static void ensureJultiDir() {
+    public static void ensureJultiDir() {
         // Special care is needed to make a .Julti folder for some reason...
         // Using Files.createDirectories on a path.getParent() would create .Julti as a file for some reason.
         new File((System.getProperty("user.home") + "/.Julti/").replace("\\", "/").replace("//", "/")).mkdirs();
