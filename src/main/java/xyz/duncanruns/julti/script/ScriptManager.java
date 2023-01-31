@@ -16,7 +16,7 @@ public class ScriptManager {
     private static boolean alreadyRunning = false;
     private static boolean cancel = false;
 
-    public static void initialize() {
+    public static void reload() {
         String scriptsFileContents = "";
         if (Files.exists(SCRIPTS_PATH)) {
             try {
@@ -25,6 +25,7 @@ public class ScriptManager {
             }
         }
 
+        SCRIPTS.clear();
         // For every whitespace stripped line in the file, if it is a savable string, add it as a script
         Arrays.stream(scriptsFileContents.split("\n")).map(String::strip).filter(s -> !s.isEmpty()).forEach(s -> {
             if (Script.isSavableString(s)) {
