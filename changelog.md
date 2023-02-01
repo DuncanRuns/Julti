@@ -1,6 +1,6 @@
 v0.16.0:
-- Completely rewrote script system and OBS systems (#45)
-    - The script is now saved by Julti to your Documents folder and the .Julti folder
+- Completely rewritten OBS script and functionality (#45)
+    - The lua script is now saved by Julti to your Documents folder and the .Julti folder
     - Only set names can be used, however everything can be set up with "Generate Scenes"
     - Everything is centered around the "Julti" scene
     - Sounds are automatically setup in the "Sounds" scene, and can be customized there
@@ -9,6 +9,11 @@ v0.16.0:
     - Further "stream scenes" can be generated, and allow you to add some elements that you only want to appear while on the wall or only want to appear while playing an instance.
     - You can add borders to instances inside the OBS settings in the Julti App
     - The OBS setup for both regular wall and instance moving is the same
+    - OBS Script is now automatically placed in .Julti and Documents folders
+- Added Julti Scripts
+    - Can be used to open to lan and go into spectator, start a dragon fight with items, etc.
+    - New scripts can be made and imported using the scripts menu accessed from the main GUI
+    - Hotkeys can be bound to scripts in the hotkey settings (hotkey bindings are per profile, but the scripts themselves are global)
 - Added Dynamic Wall (Instance Moving)
     - Features a smaller wall (default 2x2 or set to custom wall size in wall settings)
     - Locked instance go to the "lock bar" at the bottom of the screen, height of the lock bar can be customized in wall settings
@@ -18,7 +23,6 @@ v0.16.0:
 - Added World Loaded Affinity
 - Removed Built-in Wall
 - Removed fullscreen key, you can now just use the in-game key, and Julti will know (#49)
-- Script is now automatically placed in .Julti and Documents folders
 - Support for standard options, some values will automatically be set for the user to be compatible with Julti (#50, #51)
 - Now can use F1 to make the wall cleaner (#9)
 - Fixed world load issues (#57)
