@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 public class ScriptManager {
     private static final Logger LOGGER = LogManager.getLogger("Script Manager");
     private static final Path SCRIPTS_PATH = JultiOptions.getJultiDir().resolve("scripts.txt");
+    private static final String DEFAULT_SCRIPTS = "Warmup + Launch;0;log Launching all instances...; launch all; wait launch all; log Waiting 5 seconds for title screen...; sleep 5000; log Activating all instances to remove mouse jank...; activate all; activate wall; log Waiting 8 seconds for obs pickup...; sleep 8000; log Resetting all and waiting for world load...; reset all; wait load all; log Unpausing all instances...; activate all; activate wall; log Waiting 20 seconds for warmup...; sleep 20000; log Resetting all and returning to wall...; reset all; activate wall; log Warmup done;\n" +
+            "Start Coping;1;opentolan; chatmessage /gamemode spectator;\n" +
+            "Fight Dragon;1;opentolan; chatmessage /gamemode creative; chatmessage /clear; chatmessage /effect give @s minecraft:saturation 10 100; chatmessage /replaceitem entity @s weapon.offhand bread 3; chatmessage /replaceitem entity @s hotbar.8 cobblestone 23; chatmessage /replaceitem entity @s hotbar.7 ender_pearl 5; chatmessage /give @s iron_axe; chatmessage /give @s iron_pickaxe; chatmessage /give @s iron_shovel; chatmessage /give @s water_bucket; chatmessage /give @s flint_and_steel; chatmessage /give @s bread 3; chatmessage /give @s string 60; chatmessage /give @s oak_planks 17; chatmessage /give @s obsidian 4; chatmessage /give @s crafting_table; chatmessage /gamemode survival; chatmessage /give @s oak_boat; chatmessage /setblock ~ ~ ~ end_portal;";
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
     private static AtomicBoolean scriptRunning = new AtomicBoolean(false);
 
@@ -29,6 +32,8 @@ public class ScriptManager {
                 scriptsFileContents = Files.readString(SCRIPTS_PATH);
             } catch (IOException ignored) {
             }
+        } else {
+            scriptsFileContents = DEFAULT_SCRIPTS;
         }
 
         SCRIPTS.clear();
@@ -38,6 +43,7 @@ public class ScriptManager {
                 SCRIPTS.add(Script.fromSavableString(s));
             }
         });
+        save();
     }
 
     public static boolean runScript(Julti julti, String scriptName) {
