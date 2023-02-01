@@ -112,6 +112,8 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
 
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("cancelScriptHotkey"), ScriptManager::requestCancel);
+
         setupScriptHotkeys();
 
         HotkeyUtil.startGlobalHotkeyChecker();

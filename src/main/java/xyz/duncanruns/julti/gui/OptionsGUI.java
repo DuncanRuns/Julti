@@ -296,6 +296,8 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Script Hotkeys")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("cancelScriptHotkey", "Cancel Running Script", julti, true)));
 
         for (String scriptName : ScriptManager.getHotkeyableScriptNames()) {
             panel.add(GUIUtil.createSpacer());
