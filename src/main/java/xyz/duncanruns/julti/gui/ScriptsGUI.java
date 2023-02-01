@@ -60,7 +60,7 @@ public class ScriptsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer(15));
 
         for (String name : ScriptManager.getScriptNames()) {
-            panel.add(GUIUtil.leftJustify(new ScriptPanel(julti, name, ScriptManager.getHotkeyContext(name),this::reload)));
+            panel.add(GUIUtil.leftJustify(new ScriptPanel(julti, name, ScriptManager.getHotkeyContext(name), this::reload)));
         }
 
         verticalScrollBar.setValue(i);
