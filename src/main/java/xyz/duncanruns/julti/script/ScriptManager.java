@@ -13,14 +13,14 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class ScriptManager {
     private static final Logger LOGGER = LogManager.getLogger("Script Manager");
     private static final Path SCRIPTS_PATH = JultiOptions.getJultiDir().resolve("scripts.txt");
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
-    private static boolean alreadyRunning = false;
-    private static boolean cancel = false;
+    private static AtomicBoolean scriptRunning = new AtomicBoolean(false);
 
     public static void reload() {
         String scriptsFileContents = "";
@@ -45,21 +45,24 @@ public class ScriptManager {
     }
 
     public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
-        if (alreadyRunning) return false;
-        Script script = getScript(scriptName);
-        if (script == null || (fromHotkey && script.getHotkeyContext() != hotkeyContext)) return false;
+        final AtomicBoolean running = scriptRunning;
 
-        alreadyRunning = true;
+        if (running.get()) return false;
+
+        Script script = getScript(scriptName);
+        if (!(
+                script != null && (!fromHotkey || (script.getHotkeyContext() & hotkeyContext) > 0)
+        )) return false;
 
         new Thread(() -> {
+            running.set(true);
             String[] commands = script.getCommands().split(";");
 
-            for (int i = 0; i < commands.length && !cancel; i++) {
+            for (int i = 0; i < commands.length && running.get(); i++) {
                 julti.runCommand(commands[i]);
             }
 
-            alreadyRunning = false;
-            cancel = false;
+            running.set(false);
         }, "script-runner").start();
         return true;
     }
@@ -80,10 +83,10 @@ public class ScriptManager {
     }
 
     public static void requestCancel() {
-        if (alreadyRunning) {
-            cancel = true;
-            log(Level.INFO, "Script canceled");
-        }
+        if (!scriptRunning.get()) return;
+        scriptRunning.set(false);
+        scriptRunning = new AtomicBoolean(false);
+        log(Level.INFO, "Script canceled");
     }
 
     public static void log(Level level, String message) {
@@ -135,6 +138,10 @@ public class ScriptManager {
 
     public static List<String> getScriptNames() {
         return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
+    }
+
+    public static List<String> getHotkeyableScriptNames() {
+        return SCRIPTS.stream().filter(s -> s.getHotkeyContext() > 0).map(Script::getName).collect(Collectors.toList());
     }
 
     public static byte getHotkeyContext(String name) {

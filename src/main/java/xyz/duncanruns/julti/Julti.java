@@ -13,6 +13,7 @@ import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetManager;
 import xyz.duncanruns.julti.resetting.WallResetManager;
+import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
@@ -26,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -110,6 +112,8 @@ public class Julti {
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
 
+        setupScriptHotkeys();
+
         HotkeyUtil.startGlobalHotkeyChecker();
     }
 
@@ -132,6 +136,26 @@ public class Julti {
                 resetManager = new DynamicWallResetManager(this);
                 break;
         }
+    }
+
+    private void setupScriptHotkeys() {
+        JultiOptions options = JultiOptions.getInstance();
+
+        // All script hotkeys that have keys bound
+        options.scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).filter(data -> data.keys.size() > 0).forEach(data -> {
+            HotkeyUtil.addGlobalHotkey(data.ignoreModifiers ? new HotkeyUtil.HotkeyIM(data.keys) : new HotkeyUtil.Hotkey(data.keys), () -> {
+                boolean instanceActive = instanceManager.getSelectedInstance() != null;
+                boolean wallActive = !instanceActive && isWallActive();
+                if ((!instanceActive) && (!wallActive)) return;
+                ScriptManager.runScript(this, data.scriptName, true, (byte) (instanceActive ? 1 : 2));
+            });
+        });
+    }
+
+    public boolean isWallActive() {
+        Pointer currentHwnd = HwndUtil.getCurrentHwnd();
+        log(Level.DEBUG, "Running isWallActive(): currentHwnd=" + currentHwnd);
+        return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
 
     public void redetectInstances() {
@@ -439,12 +463,6 @@ public class Julti {
 
     public boolean isWallActiveQuick() {
         return HwndUtil.obsWallCheckActiveQuick(JultiOptions.getInstance().obsWindowNameFormat);
-    }
-
-    public boolean isWallActive() {
-        Pointer currentHwnd = HwndUtil.getCurrentHwnd();
-        log(Level.DEBUG, "Running isWallActive(): currentHwnd=" + currentHwnd);
-        return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
 
     public Rectangle getWallBounds() {

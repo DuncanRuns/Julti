@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
+import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
@@ -17,10 +18,8 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
@@ -39,7 +38,7 @@ public final class JultiOptions {
     public int dirtReleasePercent = 0;
 
     // Wall
-    public boolean cleanWall = true;
+    public boolean cleanWall = false;
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallLockInsteadOfPlay = true;
     public boolean wallBypass = true;
@@ -74,6 +73,8 @@ public final class JultiOptions {
     public boolean wallLockHotkeyIM = true;
     public boolean wallPlayHotkeyIM = true;
     public boolean wallFocusResetHotkeyIM = true;
+
+    public List<String> scriptHotkeys = new ArrayList<>();
 
     // OBS
     public int instanceSpacing = 0;
@@ -245,11 +246,7 @@ public final class JultiOptions {
     }
 
     public List<Path> getLastInstancePaths() {
-        List<Path> instancePaths = new ArrayList<>(lastInstances.size());
-        for (String instanceStr : lastInstances) {
-            instancePaths.add(Paths.get(instanceStr));
-        }
-        return Collections.unmodifiableList(instancePaths);
+        return lastInstances.stream().map(Path::of).collect(Collectors.toUnmodifiableList());
     }
 
     public String getValueString(String optionName) {
@@ -303,6 +300,31 @@ public final class JultiOptions {
         List<Integer> keys = (List<Integer>) getValue(name);
         boolean ignoreModifiers = (Boolean) getValue(name + "IM");
         return ignoreModifiers ? new HotkeyUtil.HotkeyIM(keys) : new HotkeyUtil.Hotkey(keys);
+    }
+
+    public ScriptHotkeyData getScriptHotkeyData(String scriptName) {
+        ScriptHotkeyData out = null;
+
+        for (ScriptHotkeyData replaceData : scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).collect(Collectors.toList())) {
+            if (replaceData.scriptName.equals(scriptName)) {
+                out = replaceData;
+                break;
+            }
+        }
+
+        if (out == null) {
+            return new ScriptHotkeyData(scriptName, false, Collections.emptyList());
+        }
+        return out;
+    }
+
+    public void setScriptHotkey(ScriptHotkeyData data) {
+        scriptHotkeys.removeIf(s -> {
+            ScriptHotkeyData scriptHotkeyData = ScriptHotkeyData.parseString(s);
+            if (scriptHotkeyData == null) return true;
+            return scriptHotkeyData.scriptName.equals(data.scriptName);
+        });
+        scriptHotkeys.add(data.toString());
     }
 
     @Override

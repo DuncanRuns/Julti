@@ -71,6 +71,7 @@ public class MinecraftInstance {
     boolean worldEverLoaded = false;
     boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
     boolean activeSinceLastReset = false;
+    boolean openedToLan = false;
 
     // Log tracking
     private long logProgress = -1;
@@ -569,6 +570,7 @@ public class MinecraftInstance {
     }
 
     public void openToLan(boolean alreadyInMenu) {
+        if (openedToLan) return;
         KeyboardUtil.releaseAllModifiers();
         if (!alreadyInMenu)
             pressEsc();
@@ -925,8 +927,11 @@ public class MinecraftInstance {
                     onWorldLoad(options, julti);
                 } else if ((isPreviewLoaded() || !isUsingWorldPreview()) && spawnAreaPattern.matcher(line).matches()) {
                     onPercentLoadingLog(julti, line);
-                } else if ((!options.coopMode) && options.noCopeMode && openToLanPattern.matcher(line).matches()) {
-                    julti.getResetManager().doReset();
+                } else if (openToLanPattern.matcher(line).matches()) {
+                    openedToLan = true;
+                    if ((!options.coopMode) && options.noCopeMode) {
+                        julti.getResetManager().doReset();
+                    }
                 }
             }
         }
@@ -969,6 +974,7 @@ public class MinecraftInstance {
         dirtCover = false;
         setAvailable(julti);
         loadingPercent = 100;
+        openedToLan = false;
 
         // Key press shenanigans
         if (options.pieChartOnLoad) {

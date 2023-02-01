@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.util;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.script.ScriptHotkeyData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,6 +81,61 @@ public final class GUIUtil {
         menu.add(item);
     }
 
+    public static JComponent createScriptHotkeyChangeButton(final String scriptName, Julti julti, Runnable reloadFunction) {
+
+        ScriptHotkeyData data = JultiOptions.getInstance().getScriptHotkeyData(scriptName);
+
+        JButton button = new JButton(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    data.keys = Collections.emptyList();
+                    JultiOptions.getInstance().setScriptHotkey(data);
+                    button.setText(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
+                    julti.setupHotkeys();
+                }
+            }
+        });
+        button.addActionListener(e -> {
+            HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
+                data.keys = hotkey.getKeys();
+                JultiOptions.getInstance().setScriptHotkey(data);
+                button.setText(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
+                julti.setupHotkeys();
+            });
+            button.setText(scriptName + ": ...");
+        });
+
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JCheckBox checkBox = createCheckBox("", data.ignoreModifiers, aBoolean -> {
+            data.ignoreModifiers = !data.ignoreModifiers;
+            JultiOptions.getInstance().setScriptHotkey(data);
+            reloadFunction.run();
+            julti.setupHotkeys();
+        });
+        checkBox.setToolTipText("Ignore Extra Keys");
+        panel.add(checkBox);
+        panel.add(button);
+
+        return panel;
+    }
+
+    public static JCheckBox createCheckBox(String label, boolean defaultValue, Consumer<Boolean> onValueChange) {
+        JCheckBox jCheckBox = new JCheckBox();
+        jCheckBox.setSelected(defaultValue);
+        jCheckBox.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                onValueChange.accept(jCheckBox.isSelected());
+            }
+        });
+        jCheckBox.setText(label);
+        return jCheckBox;
+    }
+
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
@@ -125,19 +181,6 @@ public final class GUIUtil {
             if (afterSet != null)
                 afterSet.accept(val);
         });
-    }
-
-    public static JCheckBox createCheckBox(String label, boolean defaultValue, Consumer<Boolean> onValueChange) {
-        JCheckBox jCheckBox = new JCheckBox();
-        jCheckBox.setSelected(defaultValue);
-        jCheckBox.setAction(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onValueChange.accept(jCheckBox.isSelected());
-            }
-        });
-        jCheckBox.setText(label);
-        return jCheckBox;
     }
 
     public static JCheckBox createCheckBoxFromOption(String label, String optionName) {

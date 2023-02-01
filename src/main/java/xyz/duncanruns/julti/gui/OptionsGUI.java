@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 
@@ -255,6 +256,8 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsHotkey() {
+        JultiOptions options = JultiOptions.getInstance();
+
         JPanel panel = createNewOptionsPanel("Hotkeys");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Hotkeys")));
@@ -288,6 +291,16 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", julti, true)));
 
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Script Hotkeys")));
+
+        for (String scriptName : ScriptManager.getHotkeyableScriptNames()) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createScriptHotkeyChangeButton(scriptName, julti, this::reload)));
+        }
     }
 
     private JPanel createNewOptionsPanel(String name) {
