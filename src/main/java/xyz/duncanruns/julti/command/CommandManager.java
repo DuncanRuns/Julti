@@ -7,10 +7,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.LogReceiver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class CommandManager {
@@ -36,6 +33,7 @@ public class CommandManager {
                 out.add(allInstances.get((Integer.parseInt(instanceArg) - 1) % allInstances.size()));
             }
         }
+        out.removeIf(Objects::isNull);
         return out;
     }
 
