@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -284,6 +285,18 @@ public final class HwndUtil {
                 return true;
             }, null);
         }
+        return out.get();
+    }
+
+    public static boolean multiMCExists() {
+        AtomicBoolean out = new AtomicBoolean(false);
+        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
+            if (HwndUtil.getHwndTitle(hWnd).startsWith("MultiMC 5 ")) {
+                out.set(true);
+                return false;
+            }
+            return true;
+        }, null);
         return out.get();
     }
 

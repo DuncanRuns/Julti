@@ -7,6 +7,7 @@ import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Timer;
@@ -25,9 +26,9 @@ public final class SafeInstanceLauncher {
             return false;
         }
         try {
-            Runtime.getRuntime().exec(multiMCPath);
+            startMultiMC(multiMCPath);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return false;
         }
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Path.of(multiMCPath);
@@ -47,17 +48,34 @@ public final class SafeInstanceLauncher {
         return true;
     }
 
-    public static boolean launchInstances(List<MinecraftInstance> instances) {
+    private static void startMultiMC(String multiMCLocation) throws IOException {
+        if (HwndUtil.multiMCExists()) {
+            return;
+        }
+        Runtime.getRuntime().exec(multiMCLocation);
+        while (!HwndUtil.multiMCExists()) {
+            sleep(200);
+        }
+    }
 
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean launchInstances(List<MinecraftInstance> instances) {
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
-        if (multiMCPath.isEmpty()) {
+        if (multiMCPath.isEmpty() || !Files.exists(Path.of(multiMCPath))) {
             return false;
         }
         try {
-            Runtime.getRuntime().exec(multiMCPath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            startMultiMC(multiMCPath);
+        } catch (Exception e) {
+            return false;
         }
         new Timer("delayed-launcher").schedule(new TimerTask() {
             @Override
@@ -71,13 +89,5 @@ public final class SafeInstanceLauncher {
             }
         }, 1000);
         return true;
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
