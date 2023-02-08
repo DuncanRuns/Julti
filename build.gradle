@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-
+    id 'maven-publish'
 }
 
 group 'xyz.duncanruns.julti'
@@ -11,6 +11,7 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
