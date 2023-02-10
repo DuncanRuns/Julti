@@ -801,8 +801,8 @@ public class MinecraftInstance {
         lastResetPress = System.currentTimeMillis();
         switch (getResetType()) {
             case NEW_ATUM:
-                if (getLeavePreviewKey() != null)
-                    KeyboardUtil.sendKeyToHwnd(hwnd, getLeavePreviewKey());
+                if (leavePreviewKey != null)
+                    KeyboardUtil.sendKeyToHwnd(hwnd, leavePreviewKey);
                 KeyboardUtil.sendKeyToHwnd(hwnd, getCreateWorldKey());
             case HAS_PREVIEW:
                 if (inPreview) {
@@ -865,6 +865,7 @@ public class MinecraftInstance {
     private ResetType getResetType() {
         if (resetType != null) return resetType;
         if (getCreateWorldKey() != null) {
+            getLeavePreviewKey();
             resetType = ResetType.NEW_ATUM;
         } else if (getLeavePreviewKey() != null) {
             resetType = ResetType.HAS_PREVIEW;
