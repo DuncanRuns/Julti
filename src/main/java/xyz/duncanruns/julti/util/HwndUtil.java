@@ -119,7 +119,10 @@ public final class HwndUtil {
     }
 
     public static void maximizeHwnd(Pointer hwnd) {
-        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
+        //User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
+
+        // Fast maximize yoinked from ahk macros
+        User32.INSTANCE.SendMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(0x0112), new WinDef.WPARAM(0xF030), new WinDef.LPARAM(0));
     }
 
     public static void showHwnd(Pointer hwnd) {
@@ -127,7 +130,7 @@ public final class HwndUtil {
     }
 
     public static void restoreHwnd(Pointer hwnd) {
-        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_NORMAL);
+        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWNOACTIVATE);
     }
 
     public static void setHwndTitle(Pointer hwnd, String title) {

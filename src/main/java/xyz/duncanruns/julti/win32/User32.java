@@ -34,6 +34,8 @@ public interface User32 extends StdCallLibrary {
 
     BOOL SendNotifyMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+    BOOL SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
     boolean ShowWindow(Pointer hWnd, int nCmdShow);
 
     boolean SetWindowTextA(Pointer hWnd, String lpString);
