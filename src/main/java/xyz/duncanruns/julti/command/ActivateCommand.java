@@ -42,6 +42,7 @@ public class ActivateCommand extends Command {
         List<MinecraftInstance> allInstances = julti.getInstanceManager().getInstances();
         for (MinecraftInstance i : instances) {
             i.activate(1 + allInstances.indexOf(i));
+            julti.switchScene(i);
             sleep(500);
         }
     }

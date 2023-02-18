@@ -250,7 +250,6 @@ public class WallResetManager extends ResetManager {
             instances.forEach(instance -> instance.reset(instances.size() == 1));
         // Clear out locked instances since all instances reset.
         lockedInstances.clear();
-        julti.switchToWallScene();
     }
 
     @Nullable
@@ -292,7 +291,6 @@ public class WallResetManager extends ResetManager {
         if (!options.wallBypass || nextInstance == null) {
             // No more instances to play
             julti.focusWall();
-            julti.switchToWallScene();
             if (options.autoResetForBeach) {
                 if (options.autoCheckAllOnWall)
                     instances.stream().filter(instance -> instance.getBiome().equals("beach")).forEach(this::lockInstance);

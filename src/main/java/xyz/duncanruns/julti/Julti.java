@@ -534,6 +534,7 @@ public class Julti {
         }
         HwndUtil.activateHwnd(hwnd);
         HwndUtil.maximizeHwnd(hwnd);
+        switchToWallScene();
     }
 
     /**
