@@ -21,6 +21,7 @@ v0.16.0:
 - Added customizable affinity "burst" (#54)
 - Added offline instance launching (#53)
 - Added World Loaded Affinity
+- Added option to unsquish (unwiden) instances when locking to make switching smoother
 - Removed Built-in Wall
 - Removed fullscreen key, you can now just use the in-game key, and Julti will know (#49)
 - Support for standard options, some values will automatically be set for the user to be compatible with Julti (#50, #51)
