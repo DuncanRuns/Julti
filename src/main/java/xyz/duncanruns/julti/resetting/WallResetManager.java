@@ -202,6 +202,8 @@ public class WallResetManager extends ResetManager {
     public boolean lockInstance(MinecraftInstance instance) {
         if (!lockedInstances.contains(instance)) {
             lockedInstances.add(instance);
+            // Calling super.lockInstance to do unsquish check
+            super.lockInstance(instance);
             return true;
         }
         return false;

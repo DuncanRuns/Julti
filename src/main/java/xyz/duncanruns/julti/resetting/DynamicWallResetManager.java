@@ -128,10 +128,13 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public boolean lockInstance(MinecraftInstance instance) {
-        boolean out = super.lockInstance(instance);
-        Collections.replaceAll(displayInstances, instance, null);
-        if (JultiOptions.getInstance().dwReplaceLocked) {
-            refreshDisplayInstances();
+        // If super.lockInstance is true then it actually got locked and checked to unsquish
+        if (super.lockInstance(instance)) {
+            Collections.replaceAll(displayInstances, instance, null);
+            if (JultiOptions.getInstance().dwReplaceLocked) {
+                refreshDisplayInstances();
+            }
+            return true;
         }
         return false;
     }

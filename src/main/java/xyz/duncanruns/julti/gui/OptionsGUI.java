@@ -554,6 +554,9 @@ public class OptionsGUI extends JFrame {
         });
         GUIUtil.setActualSize(squishSlider, 200, 23);
         panel.add(GUIUtil.leftJustify(squishSlider));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unsquish When Locking", "unsquishOnLock")));
     }
 
     public boolean isClosed() {

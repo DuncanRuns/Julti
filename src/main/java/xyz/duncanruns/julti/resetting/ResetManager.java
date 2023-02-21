@@ -178,6 +178,9 @@ public abstract class ResetManager {
     }
 
     public boolean lockInstance(MinecraftInstance instance) {
+        if (JultiOptions.getInstance().unsquishOnLock) {
+            new Thread(() -> instance.ensureWindowState(true),"unsquisher").start();
+        }
         return false;
     }
 

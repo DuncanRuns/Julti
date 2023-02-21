@@ -536,12 +536,17 @@ public class MinecraftInstance {
     }
 
     public void ensureWindowState() {
+        ensureWindowState(false);
+    }
+
+    public void ensureWindowState(boolean force) {
         JultiOptions options = JultiOptions.getInstance();
 
         // "Do nothing" conditions
         if (!options.letJultiMoveWindows) return;
         Rectangle rectangle = getWindowRectangle();
-        if (options.windowPos[0] == rectangle.x &&
+
+        if (!force && options.windowPos[0] == rectangle.x &&
                 options.windowPos[1] == rectangle.y &&
                 options.windowSize[0] == rectangle.width &&
                 options.windowSize[1] == rectangle.height &&
