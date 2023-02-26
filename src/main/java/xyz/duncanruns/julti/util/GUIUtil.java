@@ -162,6 +162,7 @@ public final class GUIUtil {
             }
         });
         button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
+        button.setFocusable(false);
 
         if (!includeIMOption) return button;
 
