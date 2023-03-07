@@ -234,6 +234,7 @@ function generate_stream_scenes()
 
     if julti_source == nil then
         obs.script_log(200, "You must press the regular \"Generate Scenes\" button first!")
+        return
     end
 
     if not scene_exists("Playing") then
@@ -246,9 +247,10 @@ function generate_stream_scenes()
 
         obs.obs_scene_add(scene, julti_source)
 
-        local settings = obs.obs_data_create_from_json('{"file":"' ..
-            julti_dir ..
-            'resets.txt","font":{"face":"Arial","flags":0,"size":48,"style":"Regular"},"opacity":50,"read_from_file":true}')
+        local settings = obs.obs_data_create_from_json(
+            '{"file":"' .. julti_dir ..
+            'resets.txt","font":{"face":"Arial","flags":0,"size":48,"style":"Regular"},"opacity":50,"read_from_file":true}'
+        )
         local counter_source = obs.obs_source_create("text_gdiplus", "Reset Counter", settings, nil)
         obs.obs_scene_add(scene, counter_source)
         release_source(counter_source)
@@ -256,11 +258,9 @@ function generate_stream_scenes()
     end
 
     release_source(julti_source)
-
 end
 
 function generate_scenes()
-
     local already_existing = {}
     local found_ae = false
 
@@ -321,7 +321,6 @@ function _setup_cover_scene()
     local item = obs.obs_scene_find_source(scene, "Dirt Cover Image")
     set_position_with_bounds(item, 0, 0, total_width, total_height)
     obs.obs_sceneitem_set_scale_filter(item, obs.OBS_SCALE_POINT)
-
 end
 
 function _setup_verification_scene()
@@ -399,14 +398,14 @@ function _setup_verification_scene()
         local col = math.floor(instance_index % total_columns)
 
         local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
-            instance_num .. ':GLFW30:javaw.exe"}')
+        instance_num .. ':GLFW30:javaw.exe"}')
         local source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num, settings, nil)
         local item = obs.obs_scene_add(scene, source)
         local item2 = obs.obs_scene_add(scene, source)
         local item3 = obs.obs_scene_add(scene, source)
-        set_position_with_bounds(item, col * i_width, row * i_height, i_width - (2*i_height), i_height)
+        set_position_with_bounds(item, col * i_width, row * i_height, i_width - (2 * i_height), i_height)
         set_position_with_bounds(item2, col * i_width + (i_width - i_height), row * i_height, i_height, i_height)
-        set_position_with_bounds(item3, col * i_width + (i_width - (2*i_height)), row * i_height, i_height, i_height)
+        set_position_with_bounds(item3, col * i_width + (i_width - (2 * i_height)), row * i_height, i_height, i_height)
         set_crop(item2, 0, square_crop[2], square_crop[1], 0)
         set_crop(item3, square_crop[3], square_crop[4], square_crop[3], square_crop[5])
         obs.obs_sceneitem_set_scale_filter(item2, obs.OBS_SCALE_POINT)
@@ -450,7 +449,7 @@ function _setup_lock_scene()
 
     -- Blacksmith Example
     local blacksmith_data = obs.obs_data_create_from_json('{"file":"' ..
-        julti_dir .. 'blacksmith_example.png' .. '"}')
+    julti_dir .. 'blacksmith_example.png' .. '"}')
     local blacksmith_source = obs.obs_source_create("image_source", "Blacksmith Example", blacksmith_data, nil)
     obs.obs_scene_add(group, blacksmith_source)
     release_source(blacksmith_source)
@@ -475,7 +474,7 @@ function _setup_lock_scene()
 
     -- Lock image
     local lock_data = obs.obs_data_create_from_json('{"file":"' ..
-        julti_dir .. 'lock.png' .. '"}')
+    julti_dir .. 'lock.png' .. '"}')
     local lock_source = obs.obs_source_create("image_source", "Lock Image", lock_data, nil)
     obs.obs_scene_add(scene, lock_source)
     release_source(lock_source)
@@ -542,7 +541,7 @@ function _setup_minecraft_sounds(instance_count)
     for num = 1, instance_count, 1 do
         -- '{"priority": 1, "window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}'
         local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
-            num .. ':GLFW30:javaw.exe"}')
+        num .. ':GLFW30:javaw.exe"}')
         local source = obs.obs_source_create("wasapi_process_output_capture", "Minecraft Audio " .. num, settings, nil)
         obs.obs_scene_add(group, source)
         release_source(source)
@@ -565,7 +564,8 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
     release_source(source)
 
-    local settings = obs.obs_data_create_from_json('{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
+    local settings = obs.obs_data_create_from_json(
+        '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
         .. num .. ':GLFW30:javaw.exe"}')
     local source = obs.obs_source_create("game_capture", "Minecraft Capture " .. num, settings, nil)
     obs.obs_data_release(settings)
