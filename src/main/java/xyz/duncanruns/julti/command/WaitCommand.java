@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.CancelRequester;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -29,7 +30,7 @@ public class WaitCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         List<MinecraftInstance> instances = args[1].equals("all") ? julti.getInstanceManager().getInstances() : CommandManager.getInstances(args[1], julti);
         if (instances.size() == 0) {
             log(Level.ERROR, "No instance found");
@@ -51,10 +52,12 @@ public class WaitCommand extends Command {
                     log(Level.ERROR, "Invalid wait argument! Please use launch, previewload, or load.");
                     return;
             }
-            while (!supplier.getAsBoolean()) {
+            while ((!cancelRequester.isCancelRequested()) && (!supplier.getAsBoolean())) {
                 sleep(50);
             }
         }
-        log(Level.INFO, "Finished waiting for " + instances.size() + " instances.");
+        if (!cancelRequester.isCancelRequested()) {
+            log(Level.INFO, "Finished waiting for " + instances.size() + " instances.");
+        }
     }
 }

@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.util.CancelRequester;
 
 public class OptionCommand extends Command {
     private final CommandManager innerManager = new CommandManager(new Command[]{
@@ -32,8 +33,8 @@ public class OptionCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti) {
-        innerManager.runCommand(args, julti);
+    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+        innerManager.runCommand(args, julti, cancelRequester);
     }
 
     private static class OptionListCommand extends Command {
@@ -59,7 +60,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             StringBuilder optionNames = new StringBuilder();
             for (String optionName : options.getOptionNamesWithType()) {
@@ -95,7 +96,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             String optionName = args[0];
             String value = options.getValueString(optionName);
@@ -131,7 +132,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti) {
+        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             String[] valueArgs = CommandManager.withoutFirst(args);
             String all = CommandManager.combineArgs(valueArgs);

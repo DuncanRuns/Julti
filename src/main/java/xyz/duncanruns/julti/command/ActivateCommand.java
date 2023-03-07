@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.CancelRequester;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class ActivateCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         if (args[0].equals("wall")) {
             julti.focusWall();
             return;
@@ -41,6 +42,7 @@ public class ActivateCommand extends Command {
         }
         List<MinecraftInstance> allInstances = julti.getInstanceManager().getInstances();
         for (MinecraftInstance i : instances) {
+            if (cancelRequester.isCancelRequested()) return;
             i.activate(1 + allInstances.indexOf(i));
             julti.switchScene(i);
             sleep(500);

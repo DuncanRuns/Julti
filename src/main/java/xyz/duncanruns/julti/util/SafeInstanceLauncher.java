@@ -22,6 +22,10 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstance(MinecraftInstance instance, Julti julti) {
+        launchInstance(instance, julti, CancelRequester.NEVER_CANCEL_REQUESTER);
+    }
+
+    public static void launchInstance(MinecraftInstance instance, Julti julti, CancelRequester cancelRequester) {
         String multiMCPath = JultiOptions.getInstance().multiMCPath;
         if (instance.hasWindow()) {
             log(Level.ERROR, "Could not launch " + instance + " (already open).");
@@ -31,7 +35,8 @@ public final class SafeInstanceLauncher {
             log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
             return;
         }
-        new Thread(() -> launchInstanceInternal(instance, julti), "instance-launcher").start();
+        if (cancelRequester.isCancelRequested()) return;
+        new Thread(() -> launchInstanceInternal(instance, julti, cancelRequester), "instance-launcher").start();
     }
 
     public static void log(Level level, String message) {
@@ -39,18 +44,20 @@ public final class SafeInstanceLauncher {
         LogReceiver.receive(level, message);
     }
 
-    private static void launchInstanceInternal(MinecraftInstance instance, Julti julti) {
+    private static void launchInstanceInternal(MinecraftInstance instance, Julti julti, CancelRequester cancelRequester) {
+        if (cancelRequester.isCancelRequested()) return;
         log(Level.INFO, "Launching instance...");
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
         try {
-            if (!startMultiMC(multiMCPath)) {
+            if (!startMultiMC(multiMCPath, cancelRequester)) {
                 log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
                 return;
             }
         } catch (IOException e) {
             return;
         }
+        if (cancelRequester.isCancelRequested()) return;
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
@@ -58,11 +65,12 @@ public final class SafeInstanceLauncher {
             JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline launching!");
         }
         sleep(200);
+        if (cancelRequester.isCancelRequested()) return;
         int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
         instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
     }
 
-    private static boolean startMultiMC(String multiMCLocation) throws IOException {
+    private static boolean startMultiMC(String multiMCLocation, CancelRequester cancelRequester) throws IOException {
         String[] multiMCPathArgs = multiMCLocation.replace('\\', '/').split("/");
         String exeName = multiMCPathArgs[multiMCPathArgs.length - 1];
         if (HwndUtil.multiMCExists(exeName)) {
@@ -70,7 +78,7 @@ public final class SafeInstanceLauncher {
         }
         Runtime.getRuntime().exec(multiMCLocation);
         int tries = 0;
-        while (!HwndUtil.multiMCExists(exeName)) {
+        while ((!HwndUtil.multiMCExists(exeName)) && (!cancelRequester.isCancelRequested())) {
             if (++tries > 50) {
                 return false;
             }
@@ -88,28 +96,33 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstances(List<MinecraftInstance> instances) {
+        launchInstances(instances, CancelRequester.NEVER_CANCEL_REQUESTER);
+    }
+
+    public static void launchInstances(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
         String multiMCPath = JultiOptions.getInstance().multiMCPath;
         if (multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath))) {
             log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
             return;
         }
-        new Thread(() -> launchInstancesInternal(instances), "instance-launcher").start();
+        if (cancelRequester.isCancelRequested()) return;
+        new Thread(() -> launchInstancesInternal(instances, cancelRequester), "instance-launcher").start();
     }
 
-    private static void launchInstancesInternal(List<MinecraftInstance> instances) {
+    private static void launchInstancesInternal(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
+        if (cancelRequester.isCancelRequested()) return;
         log(Level.INFO, "Launching instances...");
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
         try {
-            if (!startMultiMC(multiMCPath)) {
+            if (!startMultiMC(multiMCPath, cancelRequester)) {
                 log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
                 return;
             }
         } catch (Exception e) {
             return;
         }
-        sleep(200);
-
+        if (cancelRequester.isCancelRequested()) return;
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
@@ -117,10 +130,13 @@ public final class SafeInstanceLauncher {
             JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline launching!");
         }
 
+        sleep(200);
+        if (cancelRequester.isCancelRequested()) return;
         for (MinecraftInstance instance : instances) {
             int instanceNum = instances.indexOf(instance) + 1;
             if (instance.hasWindow()) continue;
             sleep(500);
+            if (cancelRequester.isCancelRequested()) return;
             instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
         }
     }

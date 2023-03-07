@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.util.CancelRequester;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
 
@@ -14,7 +15,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class ScriptManager {
@@ -24,7 +24,7 @@ public class ScriptManager {
             "Start Coping;1;opentolan; chatmessage /gamemode spectator;\n" +
             "Fight Dragon;1;opentolan; chatmessage /gamemode creative; chatmessage /clear; chatmessage /effect give @s minecraft:saturation 10 100; chatmessage /replaceitem entity @s weapon.offhand bread 3; chatmessage /replaceitem entity @s hotbar.8 cobblestone 23; chatmessage /replaceitem entity @s hotbar.7 ender_pearl 5; chatmessage /give @s iron_axe; chatmessage /give @s iron_pickaxe; chatmessage /give @s iron_shovel; chatmessage /give @s water_bucket; chatmessage /give @s flint_and_steel; chatmessage /give @s bread 3; chatmessage /give @s string 60; chatmessage /give @s oak_planks 17; chatmessage /give @s obsidian 4; chatmessage /give @s crafting_table; chatmessage /gamemode survival; chatmessage /give @s oak_boat; chatmessage /setblock ~ ~ ~ end_portal;";
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
-    private static AtomicBoolean scriptRunning = new AtomicBoolean(false);
+    private static CancelRequester cancelRequester = CancelRequester.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
 
     public static void reload() {
         String scriptsFileContents = "";
@@ -62,9 +62,8 @@ public class ScriptManager {
     }
 
     public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
-        final AtomicBoolean running = scriptRunning;
-
-        if (running.get()) return false;
+        if (!cancelRequester.isCancelRequested()) return false;
+        cancelRequester = new CancelRequester();
 
         Script script = getScript(scriptName);
         if (!(
@@ -72,14 +71,13 @@ public class ScriptManager {
         )) return false;
 
         new Thread(() -> {
-            running.set(true);
             String[] commands = script.getCommands().split(";");
 
-            for (int i = 0; i < commands.length && running.get(); i++) {
-                julti.runCommand(commands[i]);
+            for (int i = 0; i < commands.length && !cancelRequester.isCancelRequested(); i++) {
+                julti.runCommand(commands[i], cancelRequester);
             }
 
-            running.set(false);
+            cancelRequester.cancel();
         }, "script-runner").start();
         return true;
     }
@@ -100,10 +98,9 @@ public class ScriptManager {
     }
 
     public static void requestCancel() {
-        if (!scriptRunning.get()) return;
-        scriptRunning.set(false);
-        scriptRunning = new AtomicBoolean(false);
-        log(Level.INFO, "Script canceled");
+        if (cancelRequester.cancel()) {
+            log(Level.INFO, "Script canceled");
+        }
     }
 
     public static void log(Level level, String message) {

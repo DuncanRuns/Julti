@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.CancelRequester;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class ResetCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti) {
+    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         List<MinecraftInstance> toReset;
         if (args[0].equals("all")) toReset = julti.getInstanceManager().getInstances();
         else toReset = CommandManager.getInstances(args[0], julti);

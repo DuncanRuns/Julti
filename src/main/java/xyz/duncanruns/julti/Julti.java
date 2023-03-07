@@ -488,8 +488,12 @@ public class Julti {
     }
 
     public void runCommand(final String commands) {
+        runCommand(commands, CancelRequester.NEVER_CANCEL_REQUESTER);
+    }
+
+    public void runCommand(final String commands, CancelRequester cancelRequester) {
         for (String command : commands.split(";")) {
-            commandManager.runCommand(command, this);
+            commandManager.runCommand(command, this, cancelRequester);
         }
     }
 

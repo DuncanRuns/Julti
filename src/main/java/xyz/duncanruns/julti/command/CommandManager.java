@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.util.CancelRequester;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.util.*;
@@ -52,12 +53,12 @@ public class CommandManager {
         return out.toString();
     }
 
-    public void runCommand(String command, Julti julti) {
+    public void runCommand(String command, Julti julti, CancelRequester cancelRequester) {
         if (command.isEmpty()) return;
-        runCommand(command.trim().split(" "), julti);
+        runCommand(command.trim().split(" "), julti, cancelRequester);
     }
 
-    public void runCommand(String[] commandWords, Julti julti) {
+    public void runCommand(String[] commandWords, Julti julti, CancelRequester cancelRequester) {
         if (commandWords[0].equals("help") || commandWords[0].equals("?")) {
             log(Level.INFO, "Commands:\n\n" + getDescriptions(true));
             return;
@@ -72,7 +73,7 @@ public class CommandManager {
                 return;
             }
             try {
-                command.run(args, julti);
+                command.run(args, julti, cancelRequester);
                 return;
             } catch (Exception e) {
                 if (e.getClass() == RuntimeException.class) log(Level.ERROR, "Command failed:\n" + e);
