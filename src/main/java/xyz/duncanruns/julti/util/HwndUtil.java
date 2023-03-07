@@ -274,7 +274,6 @@ public final class HwndUtil {
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
             if (getProcessExecutable(getPidFromHwnd(hWnd)).endsWith(exeName)) {
                 out.set(true);
-                System.out.println(getHwndTitle(hWnd));
                 return false;
             }
             return true;

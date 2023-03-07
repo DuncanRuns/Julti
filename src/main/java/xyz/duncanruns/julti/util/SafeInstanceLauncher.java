@@ -66,19 +66,16 @@ public final class SafeInstanceLauncher {
         String[] multiMCPathArgs = multiMCLocation.replace('\\', '/').split("/");
         String exeName = multiMCPathArgs[multiMCPathArgs.length - 1];
         if (HwndUtil.multiMCExists(exeName)) {
-            System.out.println("true");
             return true;
         }
         Runtime.getRuntime().exec(multiMCLocation);
         int tries = 0;
         while (!HwndUtil.multiMCExists(exeName)) {
             if (++tries > 50) {
-                System.out.println("false");
                 return false;
             }
             sleep(200);
         }
-        System.out.println("true");
         return true;
     }
 
