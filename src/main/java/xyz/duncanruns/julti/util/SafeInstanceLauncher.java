@@ -13,8 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public final class SafeInstanceLauncher {
     // Safely launches instance(s) so that MultiMC does not crash.
@@ -59,14 +57,9 @@ public final class SafeInstanceLauncher {
             launchOffline = false;
             JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline names!");
         }
-        boolean finalLaunchOffline = launchOffline;
-        new Timer("delayed-launcher").schedule(new TimerTask() {
-            @Override
-            public void run() {
-                int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
-                instance.launch(finalLaunchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
-            }
-        }, 1000);
+        sleep(200);
+        int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
+        instance.launch(launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
     }
 
     private static boolean startMultiMC(String multiMCLocation) throws IOException {
@@ -118,16 +111,12 @@ public final class SafeInstanceLauncher {
         } catch (Exception e) {
             return;
         }
-        new Timer("delayed-launcher").schedule(new TimerTask() {
-            @Override
-            public void run() {
-                for (MinecraftInstance instance : instances) {
-                    int instanceNum = instances.indexOf(instance) + 1;
-                    if (instance.hasWindow()) continue;
-                    sleep(500);
-                    instance.launch(options.launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
-                }
-            }
-        }, 1000);
+        sleep(200);
+        for (MinecraftInstance instance : instances) {
+            int instanceNum = instances.indexOf(instance) + 1;
+            if (instance.hasWindow()) continue;
+            sleep(500);
+            instance.launch(options.launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
+        }
     }
 }
