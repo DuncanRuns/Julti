@@ -114,6 +114,7 @@ public final class JultiOptions {
     public boolean pieChartOnLoad = false;
     public boolean autoFullscreen = false;
     public boolean showDebug = false;
+    public boolean preventWindowNaming = false;
 
     // Auto Reset
     public boolean autoResetForBeach = false;

@@ -597,7 +597,7 @@ public class MinecraftInstance {
     }
 
     public void setWindowTitle(String title) {
-        if (hasWindow()) {
+        if (hasWindow() && !JultiOptions.getInstance().preventWindowNaming) {
             HwndUtil.setHwndTitle(hwnd, title);
         }
     }
