@@ -228,34 +228,12 @@ public final class HwndUtil {
         }
     }
 
-    public static int getPidFromHwnd(Pointer hwnd) {
-        final IntByReference pidPointer = new IntByReference();
-        User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
-        return pidPointer.getValue();
-    }
-
     public static boolean isHwndMinimized(Pointer hwnd) {
         return User32.INSTANCE.IsIconic(hwnd);
     }
 
     public static boolean isHwndMaximized(Pointer hwnd) {
         return User32.INSTANCE.IsZoomed(hwnd);
-    }
-
-    public static String getProcessExecutable(int processId) {
-        //Help from https://stackoverflow.com/questions/15693210/getmodulefilename-for-window-in-focus-jna-windows-os
-        WinNT.HANDLE process = Kernel32.INSTANCE.OpenProcess(0x0400 | 0x0010, false, processId);
-
-        StringBuilder out = new StringBuilder();
-        synchronized (executablePathBuffer) {
-            Psapi.INSTANCE.GetModuleFileNameExA(process, null, executablePathBuffer, 1024);
-            for (byte a : executablePathBuffer) {
-                if (a == 0)
-                    break;
-                out.append((char) a);
-            }
-        }
-        return out.toString();
     }
 
     public static Rectangle getHwndRectangle(Pointer hwnd) {
@@ -291,16 +269,39 @@ public final class HwndUtil {
         return out.get();
     }
 
-    public static boolean multiMCExists() {
+    public static boolean multiMCExists(String exeName) {
         AtomicBoolean out = new AtomicBoolean(false);
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
-            if (HwndUtil.getHwndTitle(hWnd).startsWith("MultiMC 5 ")) {
+            if (getProcessExecutable(getPidFromHwnd(hWnd)).endsWith(exeName)) {
                 out.set(true);
+                System.out.println(getHwndTitle(hWnd));
                 return false;
             }
             return true;
         }, null);
         return out.get();
+    }
+
+    public static String getProcessExecutable(int processId) {
+        //Help from https://stackoverflow.com/questions/15693210/getmodulefilename-for-window-in-focus-jna-windows-os
+        WinNT.HANDLE process = Kernel32.INSTANCE.OpenProcess(0x0400 | 0x0010, false, processId);
+
+        StringBuilder out = new StringBuilder();
+        synchronized (executablePathBuffer) {
+            Psapi.INSTANCE.GetModuleFileNameExA(process, null, executablePathBuffer, 1024);
+            for (byte a : executablePathBuffer) {
+                if (a == 0)
+                    break;
+                out.append((char) a);
+            }
+        }
+        return out.toString();
+    }
+
+    public static int getPidFromHwnd(Pointer hwnd) {
+        final IntByReference pidPointer = new IntByReference();
+        User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
+        return pidPointer.getValue();
     }
 
     public static boolean obsWallCheckActiveQuick(String projectorFormat) {

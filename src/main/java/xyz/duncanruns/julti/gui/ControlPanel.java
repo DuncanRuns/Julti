@@ -57,11 +57,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    if (SafeInstanceLauncher.launchInstances(julti.getInstanceManager().getInstances())) {
-                        JultiGUI.log(Level.INFO, "Instances launched");
-                    } else {
-                        JultiGUI.log(Level.WARN, "Cannot launch instances! Is your MultiMC.exe path set?");
-                    }
+                    SafeInstanceLauncher.launchInstances(julti.getInstanceManager().getInstances());
                 }
             });
 
