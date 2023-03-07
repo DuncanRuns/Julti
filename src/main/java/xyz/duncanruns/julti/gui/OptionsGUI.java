@@ -118,7 +118,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         if (options.launchOffline) {
-            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflinePrefix", "Offline Name Prefix", this)));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflineName", "Offline Name", this)));
             panel.add(GUIUtil.createSpacer());
         }
 

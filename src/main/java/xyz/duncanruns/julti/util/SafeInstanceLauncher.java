@@ -55,11 +55,11 @@ public final class SafeInstanceLauncher {
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
             launchOffline = false;
-            JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline names!");
+            JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline launching!");
         }
         sleep(200);
         int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
-        instance.launch(launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
+        instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
     }
 
     private static boolean startMultiMC(String multiMCLocation) throws IOException {
@@ -109,11 +109,19 @@ public final class SafeInstanceLauncher {
             return;
         }
         sleep(200);
+
+        boolean launchOffline = options.launchOffline;
+        Path multiMCActualPath = Paths.get(multiMCPath);
+        if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
+            launchOffline = false;
+            JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline launching!");
+        }
+
         for (MinecraftInstance instance : instances) {
             int instanceNum = instances.indexOf(instance) + 1;
             if (instance.hasWindow()) continue;
             sleep(500);
-            instance.launch(options.launchOffline ? (options.launchOfflinePrefix + "_" + instanceNum) : null);
+            instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
         }
     }
 }

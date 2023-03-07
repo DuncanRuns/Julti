@@ -91,7 +91,7 @@ public final class JultiOptions {
     // Other
     public String multiMCPath = "";
     public boolean launchOffline = false;
-    public String launchOfflinePrefix = "Instance";
+    public String launchOfflineName = "Instance*";
     public int resetCounter = 0;
 
 
