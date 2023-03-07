@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
+import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.win32.Win32Con;
@@ -144,7 +145,7 @@ public final class JultiOptions {
         Path selectedFilePath = jultiDir.resolve("selectedprofile.txt");
         if (Files.isRegularFile(selectedFilePath)) {
             try {
-                String name = Files.readString(selectedFilePath);
+                String name = FileUtil.readString(selectedFilePath);
                 if (name.isEmpty()) {
                     name = "default";
                 }
@@ -153,7 +154,7 @@ public final class JultiOptions {
             }
         } else {
             try {
-                Files.writeString(selectedFilePath, "default");
+                FileUtil.writeString(selectedFilePath, "default");
             } catch (IOException ignored) {
             }
         }
@@ -165,7 +166,7 @@ public final class JultiOptions {
             try {
                 // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(Files.readString(location), JultiOptions.class);
+                gson.fromJson(FileUtil.readString(location), JultiOptions.class);
                 return true;
             } catch (Exception ignored) {
             }
@@ -181,7 +182,7 @@ public final class JultiOptions {
         Path selectedFilePath = getJultiDir().resolve("selectedprofile.txt");
         try {
             ensureJultiDir();
-            Files.writeString(selectedFilePath, profileName);
+            FileUtil.writeString(selectedFilePath, profileName);
             INSTANCE = null;
             return true;
         } catch (Exception ignored) {
@@ -237,7 +238,7 @@ public final class JultiOptions {
         try {
             ensureJultiDir();
             Files.createDirectories(location.getParent());
-            Files.writeString(location, GSON_WRITER.toJson(this));
+            FileUtil.writeString(location, GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;
@@ -249,7 +250,7 @@ public final class JultiOptions {
     }
 
     public List<Path> getLastInstancePaths() {
-        return lastInstances.stream().map(Path::of).collect(Collectors.toUnmodifiableList());
+        return lastInstances.stream().map(Paths::get).collect(Collectors.toList());
     }
 
     public String getValueString(String optionName) {
@@ -394,7 +395,7 @@ public final class JultiOptions {
         try {
             ensureJultiDir();
             Files.createDirectories(location.getParent());
-            Files.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
+            FileUtil.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;

@@ -9,6 +9,7 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,7 +32,7 @@ public final class SafeInstanceLauncher {
             return false;
         }
         boolean launchOffline = options.launchOffline;
-        Path multiMCActualPath = Path.of(multiMCPath);
+        Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
             launchOffline = false;
             JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline names!");
@@ -69,7 +70,7 @@ public final class SafeInstanceLauncher {
     public static boolean launchInstances(List<MinecraftInstance> instances) {
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
-        if (multiMCPath.isEmpty() || !Files.exists(Path.of(multiMCPath))) {
+        if (multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath))) {
             return false;
         }
         try {

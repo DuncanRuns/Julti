@@ -1,7 +1,8 @@
 package xyz.duncanruns.julti;
 
+import xyz.duncanruns.julti.util.FileUtil;
+
 import java.io.IOException;
-import java.nio.file.Files;
 
 public final class ResetCounter {
     private static final Object LOCK = new Object();
@@ -20,7 +21,7 @@ public final class ResetCounter {
         new Thread(() -> {
             try {
                 synchronized (LOCK) {
-                    Files.writeString(JultiOptions.getJultiDir().resolve("resets.txt"), String.valueOf(JultiOptions.getInstance().resetCounter));
+                    FileUtil.writeString(JultiOptions.getJultiDir().resolve("resets.txt"), String.valueOf(JultiOptions.getInstance().resetCounter));
                 }
             } catch (IOException ignored) {
             }

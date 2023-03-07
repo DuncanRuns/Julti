@@ -8,10 +8,7 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.ResetCounter;
-import xyz.duncanruns.julti.util.HwndUtil;
-import xyz.duncanruns.julti.util.KeyboardUtil;
-import xyz.duncanruns.julti.util.LogReceiver;
-import xyz.duncanruns.julti.util.McKeyUtil;
+import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.awt.*;
@@ -21,10 +18,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,10 +175,10 @@ public class MinecraftInstance {
         Path path = instancePath.resolve("config").resolve("standardoptions.txt");
         while (true) {
             try {
-                String contents = Files.readString(path).trim();
+                String contents = FileUtil.readString(path).trim();
                 if (!contents.endsWith(".txt"))
                     break;
-                Path deeperPath = Path.of(contents);
+                Path deeperPath = Paths.get(contents);
                 if (!Files.exists(deeperPath)) {
                     break;
                 }
@@ -203,7 +203,7 @@ public class MinecraftInstance {
         out.append("\n").append(optionName).append(":").append(optionValue);
 
         try {
-            Files.writeString(path, out.toString().trim());
+            FileUtil.writeString(path, out.toString().trim());
         } catch (IOException ignored) {
         }
 
@@ -235,7 +235,7 @@ public class MinecraftInstance {
 
         String out;
         try {
-            out = Files.readString(path);
+            out = FileUtil.readString(path);
         } catch (IOException e) {
             // This should never be reached
             return null;
@@ -291,7 +291,7 @@ public class MinecraftInstance {
 
         String out;
         try {
-            out = Files.readString(path).trim();
+            out = FileUtil.readString(path).trim();
         } catch (IOException e) {
             // This should never be reached
             return null;
@@ -299,7 +299,7 @@ public class MinecraftInstance {
 
         if (!out.contains("\n")) {
             if (out.endsWith(".txt")) {
-                return getStandardOption(optionName, Path.of(out));
+                return getStandardOption(optionName, Paths.get(out));
             }
         }
 
@@ -372,7 +372,15 @@ public class MinecraftInstance {
     public int getNameSortingNum() {
         AtomicInteger i = new AtomicInteger(0);
         String name = getName();
-        Pattern.compile("\\d+").matcher(name).results().forEach(matchResult -> {
+
+        List<MatchResult> results = new ArrayList<>();
+        Matcher matcher = Pattern.compile("\\d+").matcher(name);
+        while (matcher.find()) {
+            results.add(matcher.toMatchResult());
+        }
+
+
+        results.forEach(matchResult -> {
             String section = name.substring(matchResult.start(), matchResult.end());
             if (section.length() == 0) return;
             while (section.length() > 1 && section.startsWith("0")) {

@@ -3,8 +3,6 @@ package xyz.duncanruns.julti.script;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ScriptHotkeyData {
@@ -20,15 +18,20 @@ public class ScriptHotkeyData {
 
     public static ScriptHotkeyData parseString(String string) {
         try {
-            AtomicInteger lastColonLocation = new AtomicInteger(-1);
-            Pattern.compile(":").matcher(string).results().forEach(matchResult -> lastColonLocation.set(matchResult.start()));
-            if (lastColonLocation.get() == -1) return null;
+            int lastColonLocation = -1;
+            for (int i = 0; i < string.length(); i++) {
+                if (string.charAt(i) == ':') {
+                    lastColonLocation = i;
+                }
+            }
 
-            final String[] imAndKeys = string.substring(lastColonLocation.get() + 1).split(";");
+            if (lastColonLocation == -1) return null;
+
+            final String[] imAndKeys = string.substring(lastColonLocation + 1).split(";");
 
             final List<Integer> keys = imAndKeys.length == 1 ? Collections.emptyList() : Arrays.stream(imAndKeys[1].split(",")).map(Integer::parseInt).collect(Collectors.toList());
             final boolean ignoreModifiers = Boolean.parseBoolean(imAndKeys[0]);
-            final String scriptName = string.substring(0, lastColonLocation.get());
+            final String scriptName = string.substring(0, lastColonLocation);
 
             return new ScriptHotkeyData(scriptName, ignoreModifiers, keys);
         } catch (Exception e) {

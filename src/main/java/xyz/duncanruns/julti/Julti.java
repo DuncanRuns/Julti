@@ -199,15 +199,6 @@ public class Julti {
         return instanceManager;
     }
 
-    public void switchToWallScene() {
-        JultiOptions options = JultiOptions.getInstance();
-        if (options.obsPressHotkeys) {
-            KeyboardUtil.releaseAllModifiers();
-            KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
-        }
-        currentLocation = "W";
-    }
-
     public void start() {
         generateResources();
         stopExecutors();
@@ -326,7 +317,7 @@ public class Julti {
         String out2 = ((width - loadingSquareSize) / 2) + "," + (((height - loadingSquareSize) / 2 + (resettingGuiScale * 30)) - extraHeight) + "," + ((height - loadingSquareSize) / 2 - (resettingGuiScale * 30));
 
         try {
-            Files.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out + "," + out2);
+            FileUtil.writeString(JultiOptions.getJultiDir().resolve("loadingsquarecrop"), out + "," + out2);
         } catch (Exception ignored) {
         }
     }
@@ -413,7 +404,7 @@ public class Julti {
                         .append(",")
                         .append(instancePos.height);
             }
-            Files.writeString(stateOutputPath, out.toString());
+            FileUtil.writeString(stateOutputPath, out.toString());
         } catch (Exception ignored) {
         }
     }
@@ -449,7 +440,7 @@ public class Julti {
         Path scriptSizeOutPath = JultiOptions.getJultiDir().resolve("obsscenesize");
         if (Files.exists(scriptSizeOutPath)) {
             try {
-                String[] args = Files.readString(scriptSizeOutPath).trim().split(",");
+                String[] args = FileUtil.readString(scriptSizeOutPath).trim().split(",");
                 obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
             } catch (Exception ignored) {
             }
@@ -479,7 +470,7 @@ public class Julti {
         int[] processes = PsapiUtil.enumProcesses();
         Path executablePath = null;
         for (int process : processes) {
-            executablePath = Path.of(HwndUtil.getProcessExecutable(process));
+            executablePath = Paths.get(HwndUtil.getProcessExecutable(process));
             String executablePathName = executablePath.getName(executablePath.getNameCount() - 1).toString();
             if (executablePathName.equals("obs64.exe") || executablePathName.equals("obs32.exe")) {
                 foundOBS = true;
@@ -535,6 +526,15 @@ public class Julti {
         HwndUtil.activateHwnd(hwnd);
         HwndUtil.maximizeHwnd(hwnd);
         switchToWallScene();
+    }
+
+    public void switchToWallScene() {
+        JultiOptions options = JultiOptions.getInstance();
+        if (options.obsPressHotkeys) {
+            KeyboardUtil.releaseAllModifiers();
+            KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
+        }
+        currentLocation = "W";
     }
 
     /**

@@ -9,9 +9,9 @@ public class Script {
     private String commands; // ; separated commands
 
     public Script(String name, byte hotkeyContext, String commands) {
-        this.name = name.strip();
+        this.name = name.trim();
         this.hotkeyContext = hotkeyContext;
-        this.commands = commands.strip();
+        this.commands = commands.trim();
     }
 
     public static boolean isSavableString(String string) {
@@ -39,7 +39,7 @@ public class Script {
     }
 
     public void setCommands(String commands) {
-        this.commands = commands.strip();
+        this.commands = commands.trim();
     }
 
     public String toSavableString() {
@@ -58,6 +58,6 @@ public class Script {
     }
 
     public void setName(String name) {
-        this.name = name.strip();
+        this.name = name.trim();
     }
 }

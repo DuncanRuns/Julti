@@ -133,7 +133,7 @@ public final class HotkeyUtil {
         public Hotkey(List<Integer> keys) {
             // Copy the list by wrapping in the ArrayList constructor, and use unmodifiableList to give an unmodifiable view of it.
             // This is the best way to prevent the hotkey from being tampered with, which also keeps it thread-safe.
-            this.keys = List.copyOf(keys);
+            this.keys = new ArrayList<>(keys);
             hasBeenPressed = false;
         }
 

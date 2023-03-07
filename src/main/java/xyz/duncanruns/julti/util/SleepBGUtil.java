@@ -14,7 +14,7 @@ public final class SleepBGUtil {
     public static void enableLock() {
         try {
             if (!Files.exists(SLEEP_LOCK_PATH))
-                Files.writeString(SLEEP_LOCK_PATH, "");
+                FileUtil.writeString(SLEEP_LOCK_PATH, "");
         } catch (IOException ignored) {
         }
     }

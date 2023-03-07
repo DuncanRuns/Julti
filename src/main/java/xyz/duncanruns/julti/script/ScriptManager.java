@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class ScriptManager {
         String scriptsFileContents = "";
         if (Files.exists(SCRIPTS_PATH)) {
             try {
-                scriptsFileContents = Files.readString(SCRIPTS_PATH);
+                scriptsFileContents = FileUtil.readString(SCRIPTS_PATH);
             } catch (IOException ignored) {
             }
         } else {
@@ -38,12 +39,22 @@ public class ScriptManager {
 
         SCRIPTS.clear();
         // For every whitespace stripped line in the file, if it is a savable string, add it as a script
-        Arrays.stream(scriptsFileContents.split("\n")).map(String::strip).filter(s -> !s.isEmpty()).forEach(s -> {
+        Arrays.stream(scriptsFileContents.split("\n")).map(String::trim).filter(s -> !s.isEmpty()).forEach(s -> {
             if (Script.isSavableString(s)) {
                 SCRIPTS.add(Script.fromSavableString(s));
             }
         });
         save();
+    }
+
+    private static void save() {
+        JultiOptions.ensureJultiDir();
+        StringBuilder out = new StringBuilder(500);
+        SCRIPTS.forEach(script -> out.append(script.toSavableString()).append("\n"));
+        try {
+            FileUtil.writeString(SCRIPTS_PATH, out.toString().trim());
+        } catch (IOException ignored) {
+        }
     }
 
     public static boolean runScript(Julti julti, String scriptName) {
@@ -75,7 +86,7 @@ public class ScriptManager {
 
     private static Script getScript(String scriptName) {
         for (Script script : SCRIPTS) {
-            if (script.getName().equalsIgnoreCase(scriptName.strip())) {
+            if (script.getName().equalsIgnoreCase(scriptName.trim())) {
                 return script;
             }
         }
@@ -111,7 +122,7 @@ public class ScriptManager {
     }
 
     public static boolean removeScript(String name) {
-        if (SCRIPTS.removeIf(script -> script.getName().equalsIgnoreCase(name.strip()))) {
+        if (SCRIPTS.removeIf(script -> script.getName().equalsIgnoreCase(name.trim()))) {
             save();
             return true;
         }
@@ -130,16 +141,6 @@ public class ScriptManager {
         SCRIPTS.add(newScript);
         save();
         return true;
-    }
-
-    private static void save() {
-        JultiOptions.ensureJultiDir();
-        StringBuilder out = new StringBuilder(500);
-        SCRIPTS.forEach(script -> out.append(script.toSavableString()).append("\n"));
-        try {
-            Files.writeString(SCRIPTS_PATH, out.toString().strip());
-        } catch (IOException ignored) {
-        }
     }
 
     public static List<String> getScriptNames() {

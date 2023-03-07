@@ -7,7 +7,7 @@ group 'xyz.duncanruns.julti'
 version '0.16.0'
 
 tasks.withType(JavaCompile) {
-    options.release = 11
+    options.release = 8
 }
 
 repositories {
