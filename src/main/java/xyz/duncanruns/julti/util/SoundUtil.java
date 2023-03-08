@@ -23,6 +23,7 @@ public class SoundUtil {
      * @author DuncanRuns
      */
     public static void playSound(File soundFile, float volume) {
+        if (volume <= 0.0f) return;
         try {
             volume = Math.min(1.0f, Math.max(0.0f, volume));
             final AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);
