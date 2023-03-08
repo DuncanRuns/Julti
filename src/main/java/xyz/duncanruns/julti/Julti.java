@@ -219,11 +219,16 @@ public class Julti {
     }
 
     private static void generateResources() {
+        JultiOptions.ensureJultiDir();
+        JultiOptions.getJultiDir().resolve("sounds").toFile().mkdirs();
+
         String[] filesToCopy = {
                 "dirtcover.png",
                 "lock.png",
                 "blacksmith_example.png",
-                "beach_example.png"
+                "beach_example.png",
+                "sounds/click.wav",
+                "sounds/plop.wav"
         };
 
         for (String name : filesToCopy) {
