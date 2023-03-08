@@ -74,14 +74,19 @@ public class DynamicWallResetManager extends WallResetManager {
         // instance object, it can still be used.
         List<MinecraftInstance> resettable = instanceManager.getInstances().stream().filter(instance -> displayInstances.contains(instance)).collect(Collectors.toList());
         // Do special reset so that display instances don't get replaced because it will be filled with null anyway
-        resettable.forEach(this::resetNoWallUpdate);
+        boolean hasResetInstances = false;
+        for (MinecraftInstance instance : resettable) {
+            if (resetNoWallUpdate(instance)) hasResetInstances = true;
+        }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
+        List<MinecraftInstance> oldDisplayInstances = new ArrayList<>(displayInstances);
         // Fill display with null then refresh to ensure good order
         Collections.fill(displayInstances, null);
         refreshDisplayInstances();
-        return true;
+        // Return true if something has happened: instances were reset OR the display was updated
+        return hasResetInstances || !oldDisplayInstances.equals(displayInstances);
     }
 
     @Override
@@ -95,16 +100,17 @@ public class DynamicWallResetManager extends WallResetManager {
         playInstanceFromWall(clickedInstance);
 
         // Reset all others
+        boolean out = false;
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (getLockedInstances().contains(instance) || (!displayInstances.contains(instance))) continue;
             if (!instance.equals(clickedInstance)) {
-                resetInstance(instance);
+                if (resetInstance(instance)) out = true;
             }
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 
     @Override

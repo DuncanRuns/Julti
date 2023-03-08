@@ -61,11 +61,11 @@ public class WallResetManager extends ResetManager {
     public boolean doBGReset() {
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) return false;
-        resetNonLockedExcept(selectedInstance);
+        boolean out = resetNonLockedExcept(selectedInstance);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 
     @Override
@@ -76,14 +76,15 @@ public class WallResetManager extends ResetManager {
             return false;
         }
         List<MinecraftInstance> lockedInstances = new ArrayList<>(getLockedInstances());
+        boolean out = false;
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (lockedInstances.contains(instance)) continue;
-            resetInstance(instance);
+            if (resetInstance(instance)) out = true;
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 
     @Override
@@ -125,11 +126,11 @@ public class WallResetManager extends ResetManager {
         playInstanceFromWall(clickedInstance);
 
         // Reset all others
-        resetNonLockedExcept(clickedInstance);
+        boolean out = resetNonLockedExcept(clickedInstance);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 
     protected void playInstanceFromWall(MinecraftInstance instance) {
@@ -209,11 +210,13 @@ public class WallResetManager extends ResetManager {
         return false;
     }
 
-    protected void resetNonLockedExcept(MinecraftInstance clickedInstance) {
+    private boolean resetNonLockedExcept(MinecraftInstance clickedInstance) {
+        boolean out = false;
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (instance.equals(clickedInstance) || lockedInstances.contains(instance)) continue;
-            resetInstance(instance);
+            if (resetInstance(instance)) out = true;
         }
+        return out;
     }
 
     public void leaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
