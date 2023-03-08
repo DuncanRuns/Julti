@@ -75,14 +75,15 @@ public class MultiResetManager extends ResetManager {
             return false;
         }
         List<MinecraftInstance> instances = instanceManager.getInstances();
+        boolean out = false;
         for (MinecraftInstance instance : instances) {
-            if (!instance.equals(selectedInstance)) {
-                instance.reset(false);
-            }
+            if (instance.equals(selectedInstance)) continue;
+            if (resetInstance(instance)) out = true;
+
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 }
