@@ -103,14 +103,32 @@ public class Julti {
 
         JultiOptions options = JultiOptions.getInstance();
 
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallResetHotkey"), () -> resetManager.doWallFullReset());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallSingleResetHotkey"), () -> resetManager.doWallSingleReset());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallLockHotkey"), () -> resetManager.doWallLock());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallResetHotkey"), () -> {
+            if (resetManager.doWallFullReset())
+                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+        });
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallSingleResetHotkey"), () -> {
+            if (resetManager.doWallSingleReset())
+                SoundUtil.playSound(options.singleResetSound, options.singleResetVolume);
+        });
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallLockHotkey"), () -> {
+            if (resetManager.doWallLock())
+                SoundUtil.playSound(options.lockSound, options.lockVolume);
+        });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> resetManager.doWallPlay());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> resetManager.doWallFocusReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> {
+            if (resetManager.doWallFocusReset())
+                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+        });
 
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> resetManager.doReset());
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> resetManager.doBGReset());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> {
+            if (resetManager.doReset())
+                SoundUtil.playSound(options.singleResetSound, options.singleResetVolume);
+        });
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> {
+            if (resetManager.doBGReset())
+                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+        });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("cancelScriptHotkey"), ScriptManager::requestCancel);
 

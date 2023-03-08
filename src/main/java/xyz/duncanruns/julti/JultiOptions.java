@@ -106,6 +106,14 @@ public final class JultiOptions {
     public int threadsBackground = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
     public int affinityBurst = 300;
 
+    // Sounds
+    public String singleResetSound = JultiOptions.getJultiDir().resolve("sounds").resolve("click.wav").toAbsolutePath().toString();
+    public float singleResetVolume = 0.7f;
+    public String multiResetSound = JultiOptions.getJultiDir().resolve("sounds").resolve("click.wav").toAbsolutePath().toString();
+    public float multiResetVolume = 0.7f;
+    public String lockSound = JultiOptions.getJultiDir().resolve("sounds").resolve("plop.wav").toAbsolutePath().toString();
+    public float lockVolume = 0.7f;
+
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
     public int[] lastGUIPos = new int[]{0, 0};
