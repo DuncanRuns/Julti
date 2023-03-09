@@ -1,3 +1,11 @@
+v0.17.0:
+- Added Sounds (#5)
+    - Settings are in the new Sound tab
+    - Also added a playsound command
+- Added the "Play Next Lock" hotkey, which will play the most loaded locked instance
+- A fix for blazes and caves fix
+- Several refactors and nerd stuff
+
 v0.16.0:
 - Completely rewritten OBS script and functionality (#45)
     - The lua script is now saved by Julti to your Documents folder and the .Julti folder
