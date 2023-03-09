@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public class PlaysoundCommand extends Command {
     @Override
     public String helpDescription() {
-        return "playsound [volume] [sound] - Plays a sound in the .Julti/sounds folder at the specified volume. A file path may also be specified.";
+        return "playsound [volume] [sound] - Plays a sound in the .Julti/sounds folder at the specified volume (A file path may also be specified)";
     }
 
     @Override

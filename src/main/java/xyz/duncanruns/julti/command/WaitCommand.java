@@ -11,7 +11,7 @@ import java.util.function.BooleanSupplier;
 public class WaitCommand extends Command {
     @Override
     public String helpDescription() {
-        return "wait <launch/previewload/load> [instances/all] - Wait until the specified instances have reached a certain state.";
+        return "wait <launch/previewload/load> [instances/all] - Wait until the specified instances have reached a certain state";
     }
 
     @Override
