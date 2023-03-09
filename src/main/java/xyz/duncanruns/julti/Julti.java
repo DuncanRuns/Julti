@@ -58,6 +58,7 @@ public class Julti {
             new OpenToLanCommand(),
             new WaitCommand(),
             new LogCommand(),
+            new PlaysoundCommand(),
     });
 
     private static String getVersion() {
