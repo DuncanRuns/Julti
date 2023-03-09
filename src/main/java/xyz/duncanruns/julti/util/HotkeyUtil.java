@@ -78,7 +78,7 @@ public final class HotkeyUtil {
         GLOBAL_HOTKEY_EXECUTOR.scheduleWithFixedDelay(() -> {
             // Make a copy of checker list with ArrayList constructor and run check() on each of them.
             ((List<SingleHotkeyChecker>) new ArrayList<>(GLOBAL_HOTKEYS)).forEach(SingleHotkeyChecker::check);
-        }, 25, 25, TimeUnit.MILLISECONDS);
+        }, 10, 10, TimeUnit.MILLISECONDS);
     }
 
     /**
