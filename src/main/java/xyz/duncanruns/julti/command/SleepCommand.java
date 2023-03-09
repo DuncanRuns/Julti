@@ -27,9 +27,10 @@ public class SleepCommand extends Command {
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         long millis = Long.parseLong(args[0]);
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < millis && !cancelRequester.isCancelRequested()) {
-            sleep(200);
+        long endTime = System.currentTimeMillis() + millis;
+        long currentTime;
+        while ((currentTime = System.currentTimeMillis()) < endTime && !cancelRequester.isCancelRequested()) {
+            sleep(Math.min(100, endTime - currentTime));
         }
     }
 }
