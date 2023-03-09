@@ -108,11 +108,11 @@ public class WallResetManager extends ResetManager {
         }
         MinecraftInstance clickedInstance = getHoveredWallInstance();
         if (clickedInstance == null) return false;
-        lockInstance(clickedInstance);
+        boolean out = lockInstance(clickedInstance);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return out;
     }
 
     @Override
