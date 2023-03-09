@@ -115,7 +115,11 @@ public class Julti {
             if (resetManager.doWallLock())
                 SoundUtil.playSound(options.lockSound, options.lockVolume);
         });
-        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> resetManager.doWallPlay());
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> {
+            if (resetManager.doWallPlay()) {
+                SoundUtil.playSound(options.playSound, options.playVolume);
+            }
+        });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> {
             if (resetManager.doWallFocusReset())
                 SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);

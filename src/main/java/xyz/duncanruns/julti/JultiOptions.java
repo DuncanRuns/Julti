@@ -113,6 +113,8 @@ public final class JultiOptions {
     public float multiResetVolume = 0.7f;
     public String lockSound = JultiOptions.getJultiDir().resolve("sounds").resolve("plop.wav").toAbsolutePath().toString();
     public float lockVolume = 0.7f;
+    public String playSound = "";
+    public float playVolume = 0.0f;
 
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
