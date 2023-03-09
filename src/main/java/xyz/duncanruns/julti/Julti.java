@@ -125,6 +125,11 @@ public class Julti {
             if (resetManager.doWallFocusReset())
                 SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
         });
+        HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayLockHotkey"), () -> {
+            if (resetManager.doWallPlayLock()) {
+                SoundUtil.playSound(options.playSound, options.playVolume);
+            }
+        });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> {
             if (resetManager.doReset())

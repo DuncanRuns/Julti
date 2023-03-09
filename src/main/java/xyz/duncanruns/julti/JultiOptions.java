@@ -68,6 +68,7 @@ public final class JultiOptions {
     public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
     public List<Integer> wallFocusResetHotkey = Collections.singletonList((int) 'F');
     public List<Integer> cancelScriptHotkey = Arrays.asList(164, 46);
+    public List<Integer> wallPlayLockHotkey = Collections.emptyList();
 
     public boolean resetHotkeyIM = true;
     public boolean bgResetHotkeyIM = true;
@@ -76,6 +77,7 @@ public final class JultiOptions {
     public boolean wallLockHotkeyIM = true;
     public boolean wallPlayHotkeyIM = true;
     public boolean wallFocusResetHotkeyIM = true;
+    public boolean wallPlayLockHotkeyIM = true;
     public boolean cancelScriptHotkeyIM = true;
 
     public List<String> scriptHotkeys = new ArrayList<>();

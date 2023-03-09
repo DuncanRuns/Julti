@@ -340,6 +340,8 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", julti, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", julti, true)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayLockHotkey", "Play Next Lock", julti, true)));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());

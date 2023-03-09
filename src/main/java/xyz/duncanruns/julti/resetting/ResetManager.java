@@ -65,6 +65,10 @@ public abstract class ResetManager {
         return false;
     }
 
+    public boolean doWallPlayLock() {
+        return false;
+    }
+
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         JultiOptions options = JultiOptions.getInstance();
         if (options.useAffinity) {

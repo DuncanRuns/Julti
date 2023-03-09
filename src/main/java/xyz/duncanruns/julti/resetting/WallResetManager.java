@@ -160,6 +160,18 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
+    public boolean doWallPlayLock() {
+        if (!julti.isWallActive()) return false;
+        if (lockedInstances.isEmpty()) return false;
+        MinecraftInstance firstLockedInstance = lockedInstances.get(0);
+        playInstanceFromWall(firstLockedInstance);
+        if (JultiOptions.getInstance().useAffinity) {
+            AffinityManager.ping(julti);
+        }
+        return true;
+    }
+
+    @Override
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
         JultiOptions options = JultiOptions.getInstance();
