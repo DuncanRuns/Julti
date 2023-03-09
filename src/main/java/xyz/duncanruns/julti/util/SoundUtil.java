@@ -11,6 +11,8 @@ public class SoundUtil {
      * @param volume    the volume of the played sound (between 0.0 and 1.0)
      */
     public static void playSound(String soundPath, float volume) {
+        soundPath = soundPath.trim();
+        if (soundPath.isEmpty()) return;
         playSound(new File(soundPath), volume);
     }
 
