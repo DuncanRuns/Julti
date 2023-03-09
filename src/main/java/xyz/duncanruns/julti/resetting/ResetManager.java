@@ -33,40 +33,40 @@ public abstract class ResetManager {
         LogReceiver.receive(level, message);
     }
 
-    public boolean doReset() {
+    public List<ActionResult> doReset() {
         String toCopy = JultiOptions.getInstance().clipboardOnReset;
         if (!toCopy.isEmpty()) {
             KeyboardUtil.copyToClipboard(toCopy);
         }
-        return true;
+        return Collections.emptyList();
     }
 
-    public boolean doBGReset() {
-        return false;
+    public List<ActionResult> doBGReset() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallFullReset() {
-        return false;
+    public List<ActionResult> doWallFullReset() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallSingleReset() {
-        return false;
+    public List<ActionResult> doWallSingleReset() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallLock() {
-        return false;
+    public List<ActionResult> doWallLock() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallFocusReset() {
-        return false;
+    public List<ActionResult> doWallFocusReset() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallPlay() {
-        return false;
+    public List<ActionResult> doWallPlay() {
+        return Collections.emptyList();
     }
 
-    public boolean doWallPlayLock() {
-        return false;
+    public List<ActionResult> doWallPlayLock() {
+        return Collections.emptyList();
     }
 
     public void notifyPreviewLoaded(MinecraftInstance instance) {

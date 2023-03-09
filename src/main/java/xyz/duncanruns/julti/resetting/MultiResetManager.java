@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MultiResetManager extends ResetManager {
@@ -13,20 +14,20 @@ public class MultiResetManager extends ResetManager {
     }
 
     @Override
-    public boolean doReset() {
+    public List<ActionResult> doReset() {
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
-
+        List<ActionResult> actionResults = new ArrayList<>();
 
         // Return if no instances
         if (instances.size() == 0) {
-            return false;
+            return actionResults;
         }
 
         // Get selected instance, return if no selected instance,
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
-            return false;
+            return actionResults;
         }
 
         boolean resetFirst = options.coopMode || selectedInstance.isFullscreen();
@@ -34,7 +35,8 @@ public class MultiResetManager extends ResetManager {
         // if there is only a single instance, reset it and return.
         if (instances.size() == 1) {
             selectedInstance.reset(true);
-            return true;
+            actionResults.add(ActionResult.INSTANCE_RESET);
+            return actionResults;
         }
 
         int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
@@ -43,11 +45,14 @@ public class MultiResetManager extends ResetManager {
 
         if (resetFirst) {
             selectedInstance.reset(false);
+            actionResults.add(ActionResult.INSTANCE_RESET);
             sleep(100);
         }
         nextInstance.activate(nextInsNum);
+        actionResults.add(ActionResult.INSTANCE_ACTIVATED);
         if (!resetFirst) {
             selectedInstance.reset(false);
+            actionResults.add(ActionResult.INSTANCE_RESET);
         }
         julti.switchScene(nextInstInd + 1);
 
@@ -56,7 +61,7 @@ public class MultiResetManager extends ResetManager {
         if (options.useAffinity) {
             AffinityManager.ping(julti);
         }
-        return true;
+        return actionResults;
     }
 
     private static void sleep(long sleepTime) {
@@ -68,22 +73,23 @@ public class MultiResetManager extends ResetManager {
     }
 
     @Override
-    public boolean doBGReset() {
-        super.doBGReset();
+    public List<ActionResult> doBGReset() {
+        List<ActionResult> actionResults = new ArrayList<>();
+
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         if (selectedInstance == null) {
-            return false;
+            return actionResults;
         }
         List<MinecraftInstance> instances = instanceManager.getInstances();
-        boolean out = false;
+
         for (MinecraftInstance instance : instances) {
             if (instance.equals(selectedInstance)) continue;
-            if (resetInstance(instance)) out = true;
+            if (resetInstance(instance)) actionResults.add(ActionResult.INSTANCE_RESET);
 
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return out;
+        return actionResults;
     }
 }

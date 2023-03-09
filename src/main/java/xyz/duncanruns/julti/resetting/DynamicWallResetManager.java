@@ -61,56 +61,54 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    public boolean doWallFullReset() {
-        if (isFirstReset && super.doWallFullReset()) {
+    public List<ActionResult> doWallFullReset() {
+        List<ActionResult> actionResults = new ArrayList<>();
+        if (isFirstReset && !(actionResults = super.doWallFullReset()).isEmpty()) {
             isFirstReset = false;
-            return true;
+            return actionResults;
         }
         if (!julti.isWallActive()) {
-            return false;
+            return actionResults;
         }
         // instead of using the displayInstances, we use "all instances that are also found in displayInstances", which
         // uses an instance's equals() method to match instance paths so that if displayInstances has an abandoned
         // instance object, it can still be used.
         List<MinecraftInstance> resettable = instanceManager.getInstances().stream().filter(instance -> displayInstances.contains(instance)).collect(Collectors.toList());
         // Do special reset so that display instances don't get replaced because it will be filled with null anyway
-        boolean hasResetInstances = false;
         for (MinecraftInstance instance : resettable) {
-            if (resetNoWallUpdate(instance)) hasResetInstances = true;
+            if (resetNoWallUpdate(instance)) actionResults.add(ActionResult.INSTANCE_RESET);
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        List<MinecraftInstance> oldDisplayInstances = new ArrayList<>(displayInstances);
         // Fill display with null then refresh to ensure good order
         Collections.fill(displayInstances, null);
         refreshDisplayInstances();
         // Return true if something has happened: instances were reset OR the display was updated
-        return hasResetInstances || !oldDisplayInstances.equals(displayInstances);
+        return actionResults;
     }
 
     @Override
-    public boolean doWallFocusReset() {
+    public List<ActionResult> doWallFocusReset() {
         if (!julti.isWallActive()) {
-            return false;
+            return Collections.emptyList();
         }
         // Regular play instance method
         MinecraftInstance clickedInstance = getHoveredWallInstance();
-        if (clickedInstance == null) return false;
-        playInstanceFromWall(clickedInstance);
+        if (clickedInstance == null) return Collections.emptyList();
+        List<ActionResult> actionResults = new ArrayList<>(playInstanceFromWall(clickedInstance));
 
         // Reset all others
-        boolean out = false;
         for (MinecraftInstance instance : instanceManager.getInstances()) {
             if (getLockedInstances().contains(instance) || (!displayInstances.contains(instance))) continue;
             if (!instance.equals(clickedInstance)) {
-                if (resetInstance(instance)) out = true;
+                if (resetInstance(instance)) actionResults.add(ActionResult.INSTANCE_RESET);
             }
         }
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
-        return out;
+        return actionResults;
     }
 
     @Override

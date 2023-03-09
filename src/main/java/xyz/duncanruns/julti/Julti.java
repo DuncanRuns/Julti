@@ -9,10 +9,7 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.command.*;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
-import xyz.duncanruns.julti.resetting.MultiResetManager;
-import xyz.duncanruns.julti.resetting.ResetManager;
-import xyz.duncanruns.julti.resetting.WallResetManager;
+import xyz.duncanruns.julti.resetting.*;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
@@ -105,39 +102,29 @@ public class Julti {
         JultiOptions options = JultiOptions.getInstance();
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallResetHotkey"), () -> {
-            if (resetManager.doWallFullReset())
-                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+            playActionSounds(resetManager.doWallFullReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallSingleResetHotkey"), () -> {
-            if (resetManager.doWallSingleReset())
-                SoundUtil.playSound(options.singleResetSound, options.singleResetVolume);
+            playActionSounds(resetManager.doWallSingleReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallLockHotkey"), () -> {
-            if (resetManager.doWallLock())
-                SoundUtil.playSound(options.lockSound, options.lockVolume);
+            playActionSounds(resetManager.doWallLock());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> {
-            if (resetManager.doWallPlay()) {
-                SoundUtil.playSound(options.playSound, options.playVolume);
-            }
+            playActionSounds(resetManager.doWallPlay());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> {
-            if (resetManager.doWallFocusReset())
-                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+            playActionSounds(resetManager.doWallFocusReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayLockHotkey"), () -> {
-            if (resetManager.doWallPlayLock()) {
-                SoundUtil.playSound(options.playSound, options.playVolume);
-            }
+            playActionSounds(resetManager.doWallPlayLock());
         });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> {
-            if (resetManager.doReset())
-                SoundUtil.playSound(options.singleResetSound, options.singleResetVolume);
+            playActionSounds(resetManager.doReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> {
-            if (resetManager.doBGReset())
-                SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+            playActionSounds(resetManager.doBGReset());
         });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("cancelScriptHotkey"), ScriptManager::requestCancel);
@@ -165,6 +152,28 @@ public class Julti {
             case 2:
                 resetManager = new DynamicWallResetManager(this);
                 break;
+        }
+    }
+
+    private void playActionSounds(List<ActionResult> actionResults) {
+        JultiOptions options = JultiOptions.getInstance();
+
+        // Reset Sounds
+        int instancesReset = (int) actionResults.stream().filter(actionResult -> actionResult.equals(ActionResult.INSTANCE_RESET)).count();
+        if (instancesReset > 1) {
+            SoundUtil.playSound(options.multiResetSound, options.multiResetVolume);
+        } else if (instancesReset == 1) {
+            SoundUtil.playSound(options.singleResetSound, options.singleResetVolume);
+        }
+
+        // Lock Sound
+        if (actionResults.contains(ActionResult.INSTANCE_LOCKED)) {
+            SoundUtil.playSound(options.lockSound, options.lockVolume);
+        }
+
+        // Play Sound
+        if (actionResults.contains(ActionResult.INSTANCE_ACTIVATED)) {
+            SoundUtil.playSound(options.playSound, options.playVolume);
         }
     }
 
