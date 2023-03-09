@@ -6,10 +6,13 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -81,6 +84,44 @@ public final class GUIUtil {
         menu.add(item);
     }
 
+    public static JComponent createFileSelectButton(final Component parent, final String optionName, final String fileType, Path startingLocation) {
+        final JultiOptions options = JultiOptions.getInstance();
+
+        String currentValue = options.getValueString(optionName);
+        JButton button = new JButton(currentValue.isEmpty() ? "No File Selected" : currentValue);
+
+        Path fStartingLocation = startingLocation == null ? Paths.get(currentValue) : startingLocation;
+
+        button.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if ((!options.getValueString(optionName).isEmpty()) && e.getButton() == 3) {
+                    int ans = JOptionPane.showConfirmDialog(parent, "Clear file selection?", "Julti: Clear file selection", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    if (ans == 0) {
+                        options.trySetValue(optionName, "");
+                        button.setText("No File Selected");
+                    }
+                }
+            }
+        });
+        return getButtonWithMethod(button, actionEvent -> {
+            JFileChooser jfc = new JFileChooser();
+            jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            jfc.setDialogTitle("Julti: Choose Files");
+            jfc.setAcceptAllFileFilterUsed(false);
+            jfc.addChoosableFileFilter(new FileNameExtensionFilter(fileType, fileType));
+            jfc.setCurrentDirectory(fStartingLocation.toFile());
+
+            int val = jfc.showOpenDialog(parent);
+            if (val == JFileChooser.APPROVE_OPTION) {
+                String chosen = jfc.getSelectedFile().toPath().toString();
+                options.trySetValue(optionName, chosen);
+                button.setText(chosen);
+            }
+        });
+    }
+
     public static JComponent createScriptHotkeyChangeButton(final String scriptName, Julti julti, Runnable reloadFunction) {
 
         ScriptHotkeyData data = JultiOptions.getInstance().getScriptHotkeyData(scriptName);
@@ -88,7 +129,7 @@ public final class GUIUtil {
         JButton button = new JButton(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
         button.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == 3) {
                     data.keys = Collections.emptyList();
                     JultiOptions.getInstance().setScriptHotkey(data);
@@ -141,7 +182,7 @@ public final class GUIUtil {
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
         button.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == 3) {
                     HotkeyUtil.Hotkey hotkey = new HotkeyUtil.Hotkey(Collections.emptyList());
                     JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
