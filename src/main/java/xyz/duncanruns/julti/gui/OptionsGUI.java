@@ -46,7 +46,7 @@ public class OptionsGUI extends JFrame {
                 onClose();
             }
         });
-        setSize(500, 350);
+        setSize(600, 400);
         setVisible(true);
     }
 
@@ -61,9 +61,85 @@ public class OptionsGUI extends JFrame {
         addComponentsWindow();
         addComponentsHotkey();
         addComponentsOBS();
+        addComponentsSound();
+        addComponentsAffinity();
         addComponentsOther();
         revalidate();
         repaint();
+    }
+
+    private void addComponentsSound() {
+        JPanel panel = createNewOptionsPanel("Sound");
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Sound Settings")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Right click selected sounds to clear")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        Path jultiDir = JultiOptions.getJultiDir().resolve("sounds");
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Single Reset Sound:")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "singleResetSound", "wav", jultiDir)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("singleResetVolume")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Multi Reset Sound:")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "multiResetSound", "wav", jultiDir)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("multiResetVolume")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Lock Sound:")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "lockSound", "wav", jultiDir)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("lockVolume")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Play Sound:")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "playSound", "wav", jultiDir)));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("playVolume")));
+    }
+
+    private void addComponentsAffinity() {
+        JPanel panel = createNewOptionsPanel("Affinity");
+
+        JultiOptions options = JultiOptions.getInstance();
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Affinity Settings")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
+            reload();
+            if (b) {
+                AffinityManager.start(julti);
+            } else {
+                AffinityManager.stop();
+                AffinityManager.release(julti);
+            }
+        })));
+
+        if (!options.useAffinity) return;
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Currently Playing", "threadsPlaying")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Before Preview", "threadsPrePreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Start of Preview", "threadsStartPreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Rest of Preview", "threadsPreview")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("World Loaded", "threadsWorldLoaded")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Locked", "threadsLocked")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Background", "threadsBackground")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("affinityBurst", "Affinity Burst", this, "ms")));
     }
 
     private void addComponentsOther() {
@@ -121,32 +197,6 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflineName", "Offline Name", this)));
             panel.add(GUIUtil.createSpacer());
         }
-
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
-            reload();
-            if (b) {
-                AffinityManager.start(julti);
-            } else {
-                AffinityManager.stop();
-                AffinityManager.release(julti);
-            }
-        })));
-
-        if (!options.useAffinity) return;
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Currently Playing", "threadsPlaying")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Before Preview", "threadsPrePreview")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Start of Preview", "threadsStartPreview")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Rest of Preview", "threadsPreview")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("World Loaded", "threadsWorldLoaded")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Locked", "threadsLocked")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Background", "threadsBackground")));
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("affinityBurst", "Affinity Burst", this, "ms")));
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {

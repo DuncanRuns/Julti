@@ -93,7 +93,6 @@ public final class GUIUtil {
         Path fStartingLocation = startingLocation == null ? Paths.get(currentValue) : startingLocation;
 
         button.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseReleased(MouseEvent e) {
                 if ((!options.getValueString(optionName).isEmpty()) && e.getButton() == 3) {
@@ -105,7 +104,7 @@ public final class GUIUtil {
                 }
             }
         });
-        return getButtonWithMethod(button, actionEvent -> {
+        button.addActionListener(e -> {
             JFileChooser jfc = new JFileChooser();
             jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             jfc.setDialogTitle("Julti: Choose Files");
@@ -120,6 +119,7 @@ public final class GUIUtil {
                 button.setText(chosen);
             }
         });
+        return button;
     }
 
     public static JComponent createScriptHotkeyChangeButton(final String scriptName, Julti julti, Runnable reloadFunction) {
@@ -269,5 +269,32 @@ public final class GUIUtil {
         component.setSize(d);
         component.setMaximumSize(d);
         component.setPreferredSize(d);
+    }
+
+    public static JComponent createVolumeSlider(String optionName) {
+        JultiOptions options = JultiOptions.getInstance();
+        int current = (int) (((Float) options.getValue(optionName)) * 100);
+        current = Math.max(0, Math.min(100, current));
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        JLabel label = new JLabel();
+        label.setText("Volume (" + current + "%)");
+
+        JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 100, current);
+        slider.setPaintLabels(true);
+        slider.setPaintTicks(true);
+        slider.setSnapToTicks(true);
+        slider.addChangeListener(e -> {
+            int newCurrent = slider.getValue();
+            JultiOptions.getInstance().trySetValue(optionName, String.valueOf(newCurrent / 100f));
+            label.setText("Volume (" + newCurrent + "%)");
+        });
+
+        GUIUtil.setActualSize(slider, 200, 23);
+        panel.add(slider);
+        panel.add(label);
+
+        return panel;
     }
 }
