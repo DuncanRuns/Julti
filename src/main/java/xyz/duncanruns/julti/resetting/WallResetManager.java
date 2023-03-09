@@ -8,7 +8,10 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class WallResetManager extends ResetManager {
 
@@ -164,10 +167,9 @@ public class WallResetManager extends ResetManager {
     public List<ActionResult> doWallPlayLock() {
         if (!julti.isWallActive()) return Collections.emptyList();
         if (lockedInstances.isEmpty()) return Collections.emptyList();
-        Optional<MinecraftInstance> firstLockedInstanceO = lockedInstances.stream().filter(MinecraftInstance::isWorldLoaded).findAny();
-        if (!firstLockedInstanceO.isPresent()) return Collections.emptyList();
-        MinecraftInstance firstLockedInstance = firstLockedInstanceO.get();
-        List<ActionResult> out = playInstanceFromWall(firstLockedInstance);
+        List<MinecraftInstance> instancePool = new ArrayList<>(lockedInstances);
+        instancePool.sort((o1, o2) -> o2.getWallSortingNum() - o1.getWallSortingNum());
+        List<ActionResult> out = playInstanceFromWall(instancePool.get(0));
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping(julti);
         }
