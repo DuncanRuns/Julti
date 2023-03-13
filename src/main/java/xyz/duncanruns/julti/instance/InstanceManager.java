@@ -45,13 +45,13 @@ public class InstanceManager {
         return null;
     }
 
-    public List<MinecraftInstance> getInstances() {
+    public synchronized List<MinecraftInstance> getInstances() {
         List<MinecraftInstance> instances = new ArrayList<>();
         instanceHolders.forEach(instanceHolder -> instances.add(instanceHolder.instance));
         return Collections.unmodifiableList(instances);
     }
 
-    public void redetectInstances() {
+    public synchronized void redetectInstances() {
         List<MinecraftInstance> newInstances = getAllConfirmedOpenedInstances();
 
         // Sort instances
@@ -147,11 +147,11 @@ public class InstanceManager {
         }, "world-clearing").start();
     }
 
-    public void removeInstance(MinecraftInstance instance) {
+    public synchronized void removeInstance(MinecraftInstance instance) {
         instanceHolders.removeIf(instanceHolder -> instanceHolder.path.equals(instance.getInstancePath()));
     }
 
-    public void resetInstanceData() {
+    public synchronized void resetInstanceData() {
         instanceHolders.forEach(InstanceHolder::resetInstanceData);
     }
 
