@@ -80,11 +80,17 @@ public final class UpdateUtil {
         boolean isGreater = false;
         for (int i = 2; i >= 0; i--) {
             if (i == 2 && canBeEqual) {
-                if (latestVersionNums[i] >= currentVersionNums[i]) isGreater = true;
+                if (latestVersionNums[i] >= currentVersionNums[i]) {
+                    isGreater = true;
+                }
             } else {
-                if (latestVersionNums[i] > currentVersionNums[i]) isGreater = true;
+                if (latestVersionNums[i] > currentVersionNums[i]) {
+                    isGreater = true;
+                }
             }
-            if (latestVersionNums[i] < currentVersionNums[i]) isGreater = false;
+            if (latestVersionNums[i] < currentVersionNums[i]) {
+                isGreater = false;
+            }
         }
         return isGreater;
     }

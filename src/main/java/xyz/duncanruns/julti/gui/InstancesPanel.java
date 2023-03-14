@@ -26,45 +26,45 @@ public class InstancesPanel extends JPanel {
         this.shouldUpdateSupplier = shouldUpdateSupplier;
         this.shouldShutdownSupplier = shouldShutdownSupplier;
 
-        setLayout(new GridBagLayout());
-        setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
+        this.setLayout(new GridBagLayout());
+        this.setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
 
         JLabel instancesLabel = new JLabel("Instances");
         instancesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(instancesLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
+        this.add(instancesLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
 
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(0, 5));
-        add(mainPanel, new GridBagConstraints(0, 1, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
+        this.mainPanel = new JPanel();
+        this.mainPanel.setLayout(new GridLayout(0, 5));
+        this.add(this.mainPanel, new GridBagConstraints(0, 1, 1, 1, 0, 0, 10, 0, new Insets(0, 0, 5, 0), 0, 0));
 
-        tick();
-        executor.scheduleWithFixedDelay(this::tick, 250, 250, TimeUnit.MILLISECONDS);
+        this.tick();
+        this.executor.scheduleWithFixedDelay(this::tick, 250, 250, TimeUnit.MILLISECONDS);
     }
 
     private void tick() {
-        if (shouldShutdownSupplier.get()) {
-            executor.shutdownNow();
+        if (this.shouldShutdownSupplier.get()) {
+            this.executor.shutdownNow();
             return;
         }
-        if (!shouldUpdateSupplier.get()) {
+        if (!this.shouldUpdateSupplier.get()) {
             return;
         }
 
-        List<MinecraftInstance> instances = julti.getInstanceManager().getInstances();
+        List<MinecraftInstance> instances = this.julti.getInstanceManager().getInstances();
 
-        if (instancePanels.size() != instances.size()) {
-            while (instancePanels.size() < instances.size()) {
-                instancePanels.add((SingleInstancePanel) mainPanel.add(new SingleInstancePanel(julti)));
+        if (this.instancePanels.size() != instances.size()) {
+            while (this.instancePanels.size() < instances.size()) {
+                this.instancePanels.add((SingleInstancePanel) this.mainPanel.add(new SingleInstancePanel(this.julti)));
             }
-            while (instancePanels.size() > instances.size()) {
-                mainPanel.remove(instancePanels.remove(0));
+            while (this.instancePanels.size() > instances.size()) {
+                this.mainPanel.remove(this.instancePanels.remove(0));
             }
-            mainPanel.setLayout(new GridLayout(0, Math.max(1, Math.min(instances.size(), 5))));
-            revalidate();
+            this.mainPanel.setLayout(new GridLayout(0, Math.max(1, Math.min(instances.size(), 5))));
+            this.revalidate();
         }
         int i = 0;
         for (MinecraftInstance instance : instances) {
-            instancePanels.get(i++).setInfo(instance);
+            this.instancePanels.get(i++).setInfo(instance);
         }
     }
 }

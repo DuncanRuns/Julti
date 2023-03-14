@@ -6,6 +6,8 @@ import com.sun.jna.platform.win32.PsapiUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.command.*;
 import xyz.duncanruns.julti.instance.InstanceManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -68,18 +70,18 @@ public class Julti {
     }
 
     public void changeProfile(String newName) {
-        storeLastInstances();
+        this.storeLastInstances();
         JultiOptions.getInstance().trySave();
         JultiOptions.changeProfile(newName);
         log(Level.INFO, "Switched to profile \"" + newName + "\"");
-        reloadManagers();
-        setupHotkeys();
+        this.reloadManagers();
+        this.setupHotkeys();
         ResetCounter.updateFile();
     }
 
     public void storeLastInstances() {
         List<String> instanceStrings = new ArrayList<>();
-        for (MinecraftInstance instance : instanceManager.getInstances()) {
+        for (MinecraftInstance instance : this.instanceManager.getInstances()) {
             instanceStrings.add(instance.getInstancePath().toString());
         }
         JultiOptions.getInstance().lastInstances = Collections.unmodifiableList(instanceStrings);
@@ -91,8 +93,8 @@ public class Julti {
     }
 
     public void reloadManagers() {
-        reloadInstanceManager();
-        reloadResetManager();
+        this.reloadInstanceManager();
+        this.reloadResetManager();
     }
 
     public void setupHotkeys() {
@@ -102,34 +104,34 @@ public class Julti {
         JultiOptions options = JultiOptions.getInstance();
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallResetHotkey"), () -> {
-            playActionSounds(resetManager.doWallFullReset());
+            this.playActionSounds(this.resetManager.doWallFullReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallSingleResetHotkey"), () -> {
-            playActionSounds(resetManager.doWallSingleReset());
+            this.playActionSounds(this.resetManager.doWallSingleReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallLockHotkey"), () -> {
-            playActionSounds(resetManager.doWallLock());
+            this.playActionSounds(this.resetManager.doWallLock());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayHotkey"), () -> {
-            playActionSounds(resetManager.doWallPlay());
+            this.playActionSounds(this.resetManager.doWallPlay());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallFocusResetHotkey"), () -> {
-            playActionSounds(resetManager.doWallFocusReset());
+            this.playActionSounds(this.resetManager.doWallFocusReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("wallPlayLockHotkey"), () -> {
-            playActionSounds(resetManager.doWallPlayLock());
+            this.playActionSounds(this.resetManager.doWallPlayLock());
         });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("resetHotkey"), () -> {
-            playActionSounds(resetManager.doReset());
+            this.playActionSounds(this.resetManager.doReset());
         });
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("bgResetHotkey"), () -> {
-            playActionSounds(resetManager.doBGReset());
+            this.playActionSounds(this.resetManager.doBGReset());
         });
 
         HotkeyUtil.addGlobalHotkey(options.getHotkeyFromSetting("cancelScriptHotkey"), ScriptManager::requestCancel);
 
-        setupScriptHotkeys();
+        this.setupScriptHotkeys();
 
         HotkeyUtil.startGlobalHotkeyChecker();
     }
@@ -138,19 +140,19 @@ public class Julti {
      * Replaces the instanceManager in this Julti object with a new one based on saved instance paths.
      */
     private void reloadInstanceManager() {
-        instanceManager = new InstanceManager(JultiOptions.getInstance().getLastInstancePaths());
+        this.instanceManager = new InstanceManager(JultiOptions.getInstance().getLastInstancePaths());
     }
 
     private void reloadResetManager() {
         switch (JultiOptions.getInstance().resetMode) {
             case 0:
-                resetManager = new MultiResetManager(this);
+                this.resetManager = new MultiResetManager(this);
                 break;
             case 1:
-                resetManager = new WallResetManager(this);
+                this.resetManager = new WallResetManager(this);
                 break;
             case 2:
-                resetManager = new DynamicWallResetManager(this);
+                this.resetManager = new DynamicWallResetManager(this);
                 break;
         }
     }
@@ -183,9 +185,11 @@ public class Julti {
         // All script hotkeys that have keys bound
         options.scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).filter(data -> data.keys.size() > 0).forEach(data -> {
             HotkeyUtil.addGlobalHotkey(data.ignoreModifiers ? new HotkeyUtil.HotkeyIM(data.keys) : new HotkeyUtil.Hotkey(data.keys), () -> {
-                boolean instanceActive = instanceManager.getSelectedInstance() != null;
-                boolean wallActive = !instanceActive && isWallActive();
-                if ((!instanceActive) && (!wallActive)) return;
+                boolean instanceActive = this.instanceManager.getSelectedInstance() != null;
+                boolean wallActive = !instanceActive && this.isWallActive();
+                if ((!instanceActive) && (!wallActive)) {
+                    return;
+                }
                 ScriptManager.runScript(this, data.scriptName, true, (byte) (instanceActive ? 1 : 2));
             });
         });
@@ -199,18 +203,18 @@ public class Julti {
 
     public void redetectInstances() {
         log(Level.INFO, "Redetecting Instances...");
-        instanceManager.redetectInstances();
-        reloadInstancePositions();
-        log(Level.INFO, instanceManager.getInstances().size() + " instances found.");
-        storeLastInstances();
+        this.instanceManager.redetectInstances();
+        this.reloadInstancePositions();
+        log(Level.INFO, this.instanceManager.getInstances().size() + " instances found.");
+        this.storeLastInstances();
     }
 
     public void reloadInstancePositions() {
-        instanceManager.getInstances().forEach(instance -> new Thread(instance::ensureWindowState, "position-reloader").start());
+        this.instanceManager.getInstances().forEach(instance -> new Thread(instance::ensureWindowState, "position-reloader").start());
     }
 
     public void switchScene(MinecraftInstance instance) {
-        switchScene(getInstanceManager().getInstances().indexOf(instance) + 1);
+        this.switchScene(this.getInstanceManager().getInstances().indexOf(instance) + 1);
     }
 
     public void switchScene(final int i) {
@@ -229,27 +233,28 @@ public class Julti {
                 log(Level.ERROR, "Too many instances! Could not switch to a scene past 9.");
             }
         }
-        currentLocation = String.valueOf(i);
+        this.currentLocation = String.valueOf(i);
     }
 
     public InstanceManager getInstanceManager() {
-        return instanceManager;
+        return this.instanceManager;
     }
 
     public void start() {
         generateResources();
-        stopExecutors();
+        this.stopExecutors();
         ScriptManager.reload();
-        reloadManagers();
-        if (JultiOptions.getInstance().useAffinity)
+        this.reloadManagers();
+        if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.start(this);
-        setupHotkeys();
-        tryOutputLSInfo();
-        tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
-        tryTick();
-        tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
-        stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
-        stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
+        }
+        this.setupHotkeys();
+        this.tryOutputLSInfo();
+        this.tickExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
+        this.tryTick();
+        this.tickExecutor.scheduleWithFixedDelay(this::tryTick, 25, 50, TimeUnit.MILLISECONDS);
+        this.stateExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("julti").build());
+        this.stateExecutor.scheduleWithFixedDelay(this::stateTick, 10, 20, TimeUnit.MILLISECONDS);
         log(Level.INFO, "Welcome to Julti!");
         String libraryPathThing = System.getProperty("java.library.path");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + libraryPathThing.substring(0, libraryPathThing.indexOf(";")));
@@ -271,7 +276,9 @@ public class Julti {
         for (String name : filesToCopy) {
             try {
                 Path dest = JultiOptions.getJultiDir().resolve(name);
-                if (dest.toFile().exists()) continue;
+                if (dest.toFile().exists()) {
+                    continue;
+                }
                 ResourceUtil.copyResourceToFile("/" + name, dest);
                 log(Level.INFO, "Generated .Julti file " + name);
             } catch (Exception e) {
@@ -296,15 +303,15 @@ public class Julti {
     }
 
     private void stopExecutors() {
-        if (tickExecutor != null) {
+        if (this.tickExecutor != null) {
             try {
-                tickExecutor.shutdownNow();
+                this.tickExecutor.shutdownNow();
             } catch (Exception ignored) {
             }
         }
-        if (stateExecutor != null) {
+        if (this.stateExecutor != null) {
             try {
-                stateExecutor.shutdownNow();
+                this.stateExecutor.shutdownNow();
             } catch (Exception ignored) {
             }
         }
@@ -312,21 +319,27 @@ public class Julti {
 
     public void tryOutputLSInfo() {
         JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
+        List<MinecraftInstance> instances = this.instanceManager.getInstances();
 
-        if (instances.size() == 0) return;
+        if (instances.size() == 0) {
+            return;
+        }
 
         MinecraftInstance instance = null;
         if (options.wideResetSquish > 1 || options.useBorderless) {
             instance = instances.get(0);
         } else {
             for (MinecraftInstance instanceCandidate : instances) {
-                if (!instanceCandidate.hasWindow()) continue;
+                if (!instanceCandidate.hasWindow()) {
+                    continue;
+                }
                 instance = instanceCandidate;
                 break;
             }
         }
-        if (instance == null) return;
+        if (instance == null) {
+            return;
+        }
 
         int width = options.windowSize[0];
         int height = options.windowSize[1];
@@ -366,7 +379,7 @@ public class Julti {
 
     private void tryTick() {
         try {
-            tick();
+            this.tick();
         } catch (Exception e) {
             log(Level.ERROR, "Error during tick:\n" + e);
         }
@@ -374,7 +387,7 @@ public class Julti {
 
     private void stateTick() {
         int i = 0;
-        List<MinecraftInstance> instances = instanceManager.getInstances();
+        List<MinecraftInstance> instances = this.instanceManager.getInstances();
         Thread[] threads = new Thread[instances.size()];
         for (MinecraftInstance instance : instances) {
             Thread thread = new Thread(() -> {
@@ -393,7 +406,7 @@ public class Julti {
             } catch (InterruptedException ignored) {
             }
         }
-        tryOutputState();
+        this.tryOutputState();
     }
 
     private static void sleep(final long millis) {
@@ -405,19 +418,19 @@ public class Julti {
 
     private void tick() {
         long current = System.currentTimeMillis();
-        if (current - last2SecCycle > 2000) {
-            last2SecCycle = current;
+        if (current - this.last2SecCycle > 2000) {
+            this.last2SecCycle = current;
 
-            manageMissingInstances();
+            this.manageMissingInstances();
 
-            MinecraftInstance selectedInstance = getInstanceManager().getSelectedInstance();
-            ensureCorrectSceneState(selectedInstance);
-            ensureSleepBG(selectedInstance);
+            MinecraftInstance selectedInstance = this.getInstanceManager().getSelectedInstance();
+            this.ensureCorrectSceneState(selectedInstance);
+            this.ensureSleepBG(selectedInstance);
 
             // We don't have permission to write to the obs scripts folder unfortunately, so I'll leave this commented out
             // ensureScriptPlaced();
 
-            resetManager.tick();
+            this.resetManager.tick();
         }
     }
 
@@ -425,18 +438,18 @@ public class Julti {
         JultiOptions options = JultiOptions.getInstance();
         // Lazy try except (I sorry)
         try {
-            StringBuilder out = new StringBuilder(currentLocation);
+            StringBuilder out = new StringBuilder(this.currentLocation);
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
-            Dimension size = getOBSSceneSize();
+            Dimension size = this.getOBSSceneSize();
             if (size == null) {
                 size = new Dimension(options.windowSize[0], options.windowSize[1]);
             }
-            List<MinecraftInstance> lockedInstances = resetManager.getLockedInstances();
-            for (MinecraftInstance instance : instanceManager.getInstances()) {
-                Rectangle instancePos = resetManager.getInstancePosition(instance, size);
+            List<MinecraftInstance> lockedInstances = this.resetManager.getLockedInstances();
+            for (MinecraftInstance instance : this.instanceManager.getInstances()) {
+                Rectangle instancePos = this.resetManager.getInstancePosition(instance, size);
                 instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
-                        .append((lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0))
+                        .append((lockedInstances.contains(instance) ? 1 : 0) + (this.resetManager.shouldDirtCover(instance) ? 2 : 0))
                         .append(",")
                         .append(instancePos.x)
                         .append(",")
@@ -452,19 +465,19 @@ public class Julti {
     }
 
     private void manageMissingInstances() {
-        if (instanceManager.manageMissingInstances(this::onInstanceLoad)) {
-            resetManager.onMissingInstancesUpdate();
-            tryOutputLSInfo();
+        if (this.instanceManager.manageMissingInstances(this::onInstanceLoad)) {
+            this.resetManager.onMissingInstancesUpdate();
+            this.tryOutputLSInfo();
         }
     }
 
     private void ensureCorrectSceneState(MinecraftInstance selectedInstance) {
         if (selectedInstance == null) {
-            if (isWallActiveQuick()) {
-                currentLocation = "W";
+            if (this.isWallActiveQuick()) {
+                this.currentLocation = "W";
             }
         } else {
-            currentLocation = String.valueOf(getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
+            this.currentLocation = String.valueOf(this.getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
         }
     }
 
@@ -477,17 +490,21 @@ public class Julti {
     }
 
     public Dimension getOBSSceneSize() {
-        if (obsSceneSize != null) return new Dimension(obsSceneSize);
+        if (this.obsSceneSize != null) {
+            return new Dimension(this.obsSceneSize);
+        }
 
         Path scriptSizeOutPath = JultiOptions.getJultiDir().resolve("obsscenesize");
         if (Files.exists(scriptSizeOutPath)) {
             try {
                 String[] args = FileUtil.readString(scriptSizeOutPath).trim().split(",");
-                obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+                this.obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
             } catch (Exception ignored) {
             }
         }
-        if (obsSceneSize != null) return new Dimension(obsSceneSize);
+        if (this.obsSceneSize != null) {
+            return new Dimension(this.obsSceneSize);
+        }
         return null;
     }
 
@@ -503,23 +520,29 @@ public class Julti {
     public Rectangle getWallBounds() {
         JultiOptions options = JultiOptions.getInstance();
         Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
-        if (obsWallHwnd == null) return null;
+        if (obsWallHwnd == null) {
+            return null;
+        }
         return HwndUtil.getHwndRectangle(obsWallHwnd);
     }
 
     private void ensureScriptPlaced() {
-        if (foundOBS) return;
+        if (this.foundOBS) {
+            return;
+        }
         int[] processes = PsapiUtil.enumProcesses();
         Path executablePath = null;
         for (int process : processes) {
             executablePath = Paths.get(HwndUtil.getProcessExecutable(process));
             String executablePathName = executablePath.getName(executablePath.getNameCount() - 1).toString();
             if (executablePathName.equals("obs64.exe") || executablePathName.equals("obs32.exe")) {
-                foundOBS = true;
+                this.foundOBS = true;
                 break;
             }
         }
-        if (!foundOBS) return;
+        if (!this.foundOBS) {
+            return;
+        }
         assert executablePath != null;
         Path scriptLocation = executablePath.getParent().getParent().getParent().resolve("data").resolve("obs-plugins").resolve("frontend-tools").resolve("scripts").resolve("julti-obs-link.lua");
         try {
@@ -530,34 +553,34 @@ public class Julti {
     }
 
     public void runCommand(final String commands) {
-        runCommand(commands, CancelRequester.NEVER_CANCEL_REQUESTER);
+        this.runCommand(commands, CancelRequesters.NEVER_CANCEL_REQUESTER);
     }
 
     public void runCommand(final String commands, CancelRequester cancelRequester) {
         for (String command : commands.split(";")) {
-            commandManager.runCommand(command, this, cancelRequester);
+            this.commandManager.runCommand(command, this, cancelRequester);
         }
     }
 
     public ResetManager getResetManager() {
-        return resetManager;
+        return this.resetManager;
     }
 
     public void stop() {
-        stopExecutors();
-        if (instanceManager != null) {
-            storeLastInstances();
+        this.stopExecutors();
+        if (this.instanceManager != null) {
+            this.storeLastInstances();
         }
         HotkeyUtil.stopGlobalHotkeyChecker();
         JultiOptions.getInstance().trySave();
         SleepBGUtil.disableLock();
         AffinityManager.stop();
         AffinityManager.release(this);
-        stopped = true;
+        this.stopped = true;
     }
 
     public boolean isStopped() {
-        return stopped;
+        return this.stopped;
     }
 
     public void focusWall() {
@@ -571,7 +594,7 @@ public class Julti {
         }
         HwndUtil.activateHwnd(hwnd);
         HwndUtil.maximizeHwnd(hwnd);
-        switchToWallScene();
+        this.switchToWallScene();
     }
 
     public void switchToWallScene() {
@@ -580,14 +603,14 @@ public class Julti {
             KeyboardUtil.releaseAllModifiers();
             KeyboardUtil.pressKeysForTime(options.switchToWallHotkey, 100);
         }
-        currentLocation = "W";
+        this.currentLocation = "W";
     }
 
     /**
      * Replaces each MinecraftInstance object currently loaded with a new one only containing the instance path.
      */
     public void resetInstanceData() {
-        instanceManager.resetInstanceData();
-        manageMissingInstances();
+        this.instanceManager.resetInstanceData();
+        this.manageMissingInstances();
     }
 }

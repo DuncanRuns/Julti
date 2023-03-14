@@ -25,7 +25,9 @@ public class ScriptHotkeyData {
                 }
             }
 
-            if (lastColonLocation == -1) return null;
+            if (lastColonLocation == -1) {
+                return null;
+            }
 
             final String[] imAndKeys = string.substring(lastColonLocation + 1).split(";");
 
@@ -42,10 +44,12 @@ public class ScriptHotkeyData {
     @Override
     public String toString() {
         final StringBuilder keysOut = new StringBuilder();
-        keys.forEach(integer -> {
-            if (!keysOut.toString().isEmpty()) keysOut.append(",");
+        this.keys.forEach(integer -> {
+            if (!keysOut.toString().isEmpty()) {
+                keysOut.append(",");
+            }
             keysOut.append(integer);
         });
-        return scriptName + ":" + ignoreModifiers + ";" + keysOut;
+        return this.scriptName + ":" + this.ignoreModifiers + ";" + keysOut;
     }
 }

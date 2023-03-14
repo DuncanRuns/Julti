@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
@@ -22,7 +24,7 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstance(MinecraftInstance instance, Julti julti) {
-        launchInstance(instance, julti, CancelRequester.NEVER_CANCEL_REQUESTER);
+        launchInstance(instance, julti, CancelRequesters.NEVER_CANCEL_REQUESTER);
     }
 
     public static void launchInstance(MinecraftInstance instance, Julti julti, CancelRequester cancelRequester) {
@@ -35,7 +37,9 @@ public final class SafeInstanceLauncher {
             log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
             return;
         }
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         new Thread(() -> launchInstanceInternal(instance, julti, cancelRequester), "instance-launcher").start();
     }
 
@@ -45,7 +49,9 @@ public final class SafeInstanceLauncher {
     }
 
     private static void launchInstanceInternal(MinecraftInstance instance, Julti julti, CancelRequester cancelRequester) {
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         log(Level.INFO, "Launching instance...");
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
@@ -57,7 +63,9 @@ public final class SafeInstanceLauncher {
         } catch (IOException e) {
             return;
         }
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
@@ -65,7 +73,9 @@ public final class SafeInstanceLauncher {
             JultiGUI.log(Level.WARN, "Warning: Prism Launcher cannot use offline launching!");
         }
         sleep(200);
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
         instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
     }
@@ -96,7 +106,7 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstances(List<MinecraftInstance> instances) {
-        launchInstances(instances, CancelRequester.NEVER_CANCEL_REQUESTER);
+        launchInstances(instances, CancelRequesters.NEVER_CANCEL_REQUESTER);
     }
 
     public static void launchInstances(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
@@ -105,12 +115,16 @@ public final class SafeInstanceLauncher {
             log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
             return;
         }
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         new Thread(() -> launchInstancesInternal(instances, cancelRequester), "instance-launcher").start();
     }
 
     private static void launchInstancesInternal(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         log(Level.INFO, "Launching instances...");
         JultiOptions options = JultiOptions.getInstance();
         String multiMCPath = options.multiMCPath;
@@ -122,7 +136,9 @@ public final class SafeInstanceLauncher {
         } catch (Exception e) {
             return;
         }
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
@@ -131,12 +147,18 @@ public final class SafeInstanceLauncher {
         }
 
         sleep(200);
-        if (cancelRequester.isCancelRequested()) return;
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
         for (MinecraftInstance instance : instances) {
             int instanceNum = instances.indexOf(instance) + 1;
-            if (instance.hasWindow()) continue;
+            if (instance.hasWindow()) {
+                continue;
+            }
             sleep(500);
-            if (cancelRequester.isCancelRequested()) return;
+            if (cancelRequester.isCancelRequested()) {
+                return;
+            }
             instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
         }
     }

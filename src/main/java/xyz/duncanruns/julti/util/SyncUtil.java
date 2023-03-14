@@ -21,7 +21,9 @@ public final class SyncUtil {
 
     public static void sync(List<MinecraftInstance> instances, MinecraftInstance sourceInstance, boolean copyMods, boolean copyConfigs) throws IOException {
         synchronized (LOCK) {
-            if (!copyConfigs && !copyMods) return;
+            if (!copyConfigs && !copyMods) {
+                return;
+            }
 
             for (MinecraftInstance instance : instances) {
                 if (instance.hasWindow()) {

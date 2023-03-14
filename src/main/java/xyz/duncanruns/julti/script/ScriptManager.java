@@ -5,7 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
 
@@ -24,7 +25,7 @@ public class ScriptManager {
             "Start Coping;1;opentolan; chatmessage /gamemode spectator;\n" +
             "Fight Dragon;1;opentolan; chatmessage /gamemode creative; chatmessage /clear; chatmessage /effect give @s minecraft:saturation 10 100; chatmessage /replaceitem entity @s weapon.offhand bread 3; chatmessage /replaceitem entity @s hotbar.8 cobblestone 23; chatmessage /replaceitem entity @s hotbar.7 ender_pearl 5; chatmessage /give @s iron_axe; chatmessage /give @s iron_pickaxe; chatmessage /give @s iron_shovel; chatmessage /give @s water_bucket; chatmessage /give @s flint_and_steel; chatmessage /give @s bread 3; chatmessage /give @s string 60; chatmessage /give @s oak_planks 17; chatmessage /give @s obsidian 4; chatmessage /give @s crafting_table; chatmessage /gamemode survival; chatmessage /give @s oak_boat; chatmessage /setblock ~ ~ ~ end_portal;";
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
-    private static CancelRequester cancelRequester = CancelRequester.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
+    private static CancelRequester cancelRequester = CancelRequesters.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
 
     public static void reload() {
         String scriptsFileContents = "";
@@ -62,13 +63,17 @@ public class ScriptManager {
     }
 
     public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
-        if (!cancelRequester.isCancelRequested()) return false;
+        if (!cancelRequester.isCancelRequested()) {
+            return false;
+        }
         cancelRequester = new CancelRequester();
 
         Script script = getScript(scriptName);
         if (!(
                 script != null && (!fromHotkey || (script.getHotkeyContext() & hotkeyContext) > 0)
-        )) return false;
+        )) {
+            return false;
+        }
 
         new Thread(() -> {
             String[] commands = script.getCommands().split(";");
@@ -92,7 +97,9 @@ public class ScriptManager {
     }
 
     public static boolean isDuplicateImport(String scriptString) {
-        if (!Script.isSavableString(scriptString)) return false;
+        if (!Script.isSavableString(scriptString)) {
+            return false;
+        }
         Script script = Script.fromSavableString(scriptString);
         return getScript(script.getName()) != null;
     }

@@ -12,7 +12,9 @@ public class SoundUtil {
      */
     public static void playSound(String soundPath, float volume) {
         soundPath = soundPath.trim();
-        if (soundPath.isEmpty()) return;
+        if (soundPath.isEmpty()) {
+            return;
+        }
         playSound(new File(soundPath), volume);
     }
 
@@ -25,7 +27,9 @@ public class SoundUtil {
      * @author DuncanRuns
      */
     public static void playSound(File soundFile, float volume) {
-        if (volume <= 0.0f) return;
+        if (volume <= 0.0f) {
+            return;
+        }
         try {
             volume = Math.min(1.0f, Math.max(0.0f, volume));
             final AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);

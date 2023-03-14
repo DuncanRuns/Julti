@@ -42,22 +42,36 @@ public final class MonitorUtil {
 
             this.position = new int[]{x, y};
             this.size = new int[]{width, height};
-            bounds = new Rectangle(x, y, width, height);
+            this.bounds = new Rectangle(x, y, width, height);
         }
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
 
             Monitor monitor = (Monitor) o;
 
-            if (x != monitor.x) return false;
-            if (y != monitor.y) return false;
-            if (width != monitor.width) return false;
-            if (height != monitor.height) return false;
-            if (!Arrays.equals(position, monitor.position)) return false;
-            return Arrays.equals(size, monitor.size);
+            if (this.x != monitor.x) {
+                return false;
+            }
+            if (this.y != monitor.y) {
+                return false;
+            }
+            if (this.width != monitor.width) {
+                return false;
+            }
+            if (this.height != monitor.height) {
+                return false;
+            }
+            if (!Arrays.equals(this.position, monitor.position)) {
+                return false;
+            }
+            return Arrays.equals(this.size, monitor.size);
         }
     }
 }

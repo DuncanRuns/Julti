@@ -148,119 +148,228 @@ public final class McKeyUtil {
     public static Integer getVkFromMCTranslation(String translationKey) {
         Integer glfwKey = TRANSLATIONS_TO_GLFW.get(translationKey);
         Integer vkKey = getVkFromGLFW(glfwKey);
-        if (vkKey == null || vkKey <= 0) return null;
+        if (vkKey == null || vkKey <= 0) {
+            return null;
+        }
         return vkKey;
     }
 
     public static Integer getVkFromGLFW(Integer key) {
-        if (key == null)
+        if (key == null) {
             return null;
+        }
         if (key <= 7 && key >= -1)  // Unknown or Mouse
+        {
             return -1;
+        }
         if (key <= 57 && key >= 48)  // Number
+        {
             return key;
+        }
         if (key >= 65 && key <= 90)  // Letter
+        {
             return key;
+        }
         if (key >= 290 && key <= 313)  // Function keys
+        {
             return key - 290 + Win32Con.VK_F1;
+        }
         if (key == 282)  // Num Lock
+        {
             return Win32Con.VK_NUMLOCK;
+        }
         if (key >= 320 && key <= 329)  // Num keys
+        {
             return key - 320 + Win32Con.VK_NUMPAD0;
+        }
         if (key == 334)  // Add key
+        {
             return Win32Con.VK_ADD;
+        }
         if (key == 330)  // Decimal key
+        {
             return Win32Con.VK_DECIMAL;
+        }
         if (key == 335)  // Numpad enter key
+        {
             return Win32Con.VK_RETURN; // definitely wrong lol
+        }
         if (key == 336)  // Equals (on numpad) key
+        {
             return 0xBB;  // definitely wrong lol
+        }
         if (key == 332)  // Multiply key
+        {
             return Win32Con.VK_MULTIPLY;
+        }
         if (key == 331)  // Divide key
+        {
             return Win32Con.VK_DIVIDE;
+        }
         if (key == 333)  // Subtract key
+        {
             return Win32Con.VK_SUBTRACT;
+        }
         if (key == 264)  // Down key
+        {
             return Win32Con.VK_DOWN;
+        }
         if (key == 263)  // Left key
+        {
             return Win32Con.VK_LEFT;
+        }
         if (key == 262)  // Right key
+        {
             return Win32Con.VK_RIGHT;
+        }
         if (key == 265)  // Up key
+        {
             return Win32Con.VK_UP;
+        }
         if (key == 39)  // Apostrophe
+        {
             return 0xDE;  // May be wrong
+        }
         if (key == 92)  // Backslash
+        {
             return 0xDC;  // May be wrong
+        }
         if (key == 44)  // ,< key
+        {
             return 0xBC;  // May be wrong
+        }
         if (key == 61)  // += key
+        {
             return 0xBB;  // May be wrong
+        }
         if (key == 96)  // `~ key
+        {
             return 0xC0;  // May be wrong
+        }
         if (key == 91)  // [{ key
+        {
             return 0xDB;  // May be wrong
+        }
         if (key == 45)  // -_ key
+        {
             return 0xBD;  // May be wrong
+        }
         if (key == 46)  // .> key
+        {
             return 0xBE;  // May be wrong
+        }
         if (key == 93)  // ]} key
+        {
             return 0xDD;  // May be wrong
+        }
         if (key == 59)  // ;) key
+        {
             return 0xBA;  // May be wrong
+        }
         if (key == 47)  // /? key
+        {
             return 0xBF;  // May be wrong
+        }
         if (key == 32)  // Space
+        {
             return Win32Con.VK_SPACE;
+        }
         if (key == 258)  // Tab
+        {
             return Win32Con.VK_TAB;
+        }
         if (key == 342)  // Left alt
+        {
             return Win32Con.VK_LMENU;
+        }
         if (key == 341)  // Left ctrl
+        {
             return Win32Con.VK_LCONTROL;
+        }
         if (key == 340)  // Left shift
+        {
             return Win32Con.VK_LSHIFT;
+        }
         if (key == 343)  // Left win
+        {
             return Win32Con.VK_LWIN;
+        }
         if (key == 346)  // Right alt
+        {
             return Win32Con.VK_RMENU;
+        }
         if (key == 345)  // Right control
+        {
             return Win32Con.VK_RCONTROL;
+        }
         if (key == 344)  // Right shift
+        {
             return Win32Con.VK_RSHIFT;
+        }
         if (key == 347)  // Right win
+        {
             return Win32Con.VK_RWIN;
+        }
         if (key == 257)  // Enter
+        {
             return Win32Con.VK_RETURN;
+        }
         if (key == 256)  // Escape
+        {
             return Win32Con.VK_ESCAPE;
+        }
         if (key == 259)  // Backspace
+        {
             return Win32Con.VK_BACK;
+        }
         if (key == 261)  // Del
+        {
             return Win32Con.VK_DELETE;
+        }
         if (key == 269)  // End
+        {
             return Win32Con.VK_END;
+        }
         if (key == 268)  // Home
+        {
             return Win32Con.VK_HOME;
+        }
         if (key == 260)  // Insert
+        {
             return Win32Con.VK_INSERT;
+        }
         if (key == 267)  // PgDn
+        {
             return Win32Con.VK_NEXT;
+        }
         if (key == 266)  // PgUp
+        {
             return Win32Con.VK_PRIOR;
+        }
         if (key == 280)  // Caps lock
+        {
             return Win32Con.VK_CAPITAL;
+        }
         if (key == 284)  // Pause
+        {
             return Win32Con.VK_PAUSE;
+        }
         if (key == 281)  // Scroll lock
+        {
             return Win32Con.VK_SCROLL;
+        }
         if (key == 348)  // "Menu"
+        {
             return Win32Con.VK_APPS;  // Might be wrong
+        }
         if (key == 283)  // Print screen
+        {
             return Win32Con.VK_SNAPSHOT;
+        }
         if (key == 161 || key == 162)  // what even are these "world" keys
+        {
             return -1; // Definitely wrong
+        }
         return -1;
     }
 }

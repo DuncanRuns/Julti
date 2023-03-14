@@ -72,14 +72,14 @@ public abstract class ResetManager {
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         JultiOptions options = JultiOptions.getInstance();
         if (options.useAffinity) {
-            AffinityManager.ping(julti);
-            AffinityManager.ping(julti, options.affinityBurst + 1);
+            AffinityManager.ping(this.julti);
+            AffinityManager.ping(this.julti, options.affinityBurst + 1);
         }
     }
 
     public void notifyWorldLoaded(MinecraftInstance instance) {
         if (JultiOptions.getInstance().useAffinity) {
-            AffinityManager.ping(julti);
+            AffinityManager.ping(this.julti);
         }
     }
 
@@ -88,7 +88,7 @@ public abstract class ResetManager {
 
     public boolean shouldDirtCover(MinecraftInstance instance) {
         if (JultiOptions.getInstance().autoResetForBeach) {
-            return instance.hasPreviewEverStarted() && (((!getLockedInstances().contains(instance)) && (!instance.isPreviewLoaded()) && (!instance.isWorldLoaded())) || instance.shouldDirtCover());
+            return instance.hasPreviewEverStarted() && (((!this.getLockedInstances().contains(instance)) && (!instance.isPreviewLoaded()) && (!instance.isWorldLoaded())) || instance.shouldDirtCover());
         }
         return instance.shouldDirtCover();
     }
@@ -101,9 +101,11 @@ public abstract class ResetManager {
     protected MinecraftInstance getHoveredWallInstance() {
         JultiOptions options = JultiOptions.getInstance();
         Point point = MouseUtil.getMousePos();
-        Rectangle bounds = julti.getWallBounds();
-        Dimension sceneSize = julti.getOBSSceneSize();
-        if (sceneSize == null) sceneSize = new Dimension(options.windowSize[0], options.windowSize[1]);
+        Rectangle bounds = this.julti.getWallBounds();
+        Dimension sceneSize = this.julti.getOBSSceneSize();
+        if (sceneSize == null) {
+            sceneSize = new Dimension(options.windowSize[0], options.windowSize[1]);
+        }
         point.translate(-bounds.x, -bounds.y);
         Point posOnScene = new Point(point);
         if (!sceneSize.equals(bounds.getSize())) {
@@ -111,8 +113,10 @@ public abstract class ResetManager {
             posOnScene.y = posOnScene.y * sceneSize.height / bounds.height;
         }
 
-        for (MinecraftInstance instance : instanceManager.getInstances()) {
-            if (getInstancePosition(instance, sceneSize).contains(posOnScene)) return instance;
+        for (MinecraftInstance instance : this.instanceManager.getInstances()) {
+            if (this.getInstancePosition(instance, sceneSize).contains(posOnScene)) {
+                return instance;
+            }
         }
         return null;
     }
@@ -126,7 +130,7 @@ public abstract class ResetManager {
      * @return the position of the instance
      */
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
-        List<MinecraftInstance> instances = instanceManager.getInstances();
+        List<MinecraftInstance> instances = this.instanceManager.getInstances();
 
         JultiOptions options = JultiOptions.getInstance();
         int totalRows;
@@ -142,7 +146,7 @@ public abstract class ResetManager {
 
         int instanceInd = instances.indexOf(instance);
 
-        Dimension size = sceneSize == null ? julti.getOBSSceneSize() : sceneSize;
+        Dimension size = sceneSize == null ? this.julti.getOBSSceneSize() : sceneSize;
 
         // Using floats here so there won't be any gaps in the wall after converting back to int
         float iWidth = size.width / (float) totalColumns;
@@ -162,7 +166,7 @@ public abstract class ResetManager {
     }
 
     public Rectangle getInstancePosition(MinecraftInstance instance) {
-        return getInstancePosition(instance, null);
+        return this.getInstancePosition(instance, null);
     }
 
     public void tick() {
@@ -172,12 +176,12 @@ public abstract class ResetManager {
     }
 
     public boolean resetInstance(MinecraftInstance instance) {
-        instance.reset(instanceManager.getInstances().size() == 1);
+        instance.reset(this.instanceManager.getInstances().size() == 1);
         return true;
     }
 
     public boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
-        instance.reset(instanceManager.getInstances().size() == 1);
+        instance.reset(this.instanceManager.getInstances().size() == 1);
         return true;
     }
 
@@ -189,8 +193,8 @@ public abstract class ResetManager {
     }
 
     public MinecraftInstance getRelativeInstance(int offset) {
-        MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
-        List<MinecraftInstance> instances = instanceManager.getInstances();
+        MinecraftInstance selectedInstance = this.instanceManager.getSelectedInstance();
+        List<MinecraftInstance> instances = this.instanceManager.getInstances();
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
     }

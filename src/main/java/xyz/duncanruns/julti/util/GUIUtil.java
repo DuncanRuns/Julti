@@ -57,14 +57,17 @@ public final class GUIUtil {
         JButton button = new JButton(buttonTextGetter.get());
         return getButtonWithMethod(button, actionEvent -> {
             String ans = (String) JOptionPane.showInputDialog(parent, "Input a new value for " + displayName + ":", "Julti: Set Option", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().getValue(optionName).toString());
-            if (ans == null) return;
+            if (ans == null) {
+                return;
+            }
             // If there is a suffix, the answer ends in the suffix, and the answer isn't just equal to the suffix
             if ((!valueSuffix.isEmpty()) && ans.endsWith(valueSuffix) && (!ans.equals(valueSuffix))) {
                 // Shorten the answer by the length of the answer
                 ans = ans.substring(0, ans.length() - valueSuffix.length());
             }
-            if (!JultiOptions.getInstance().trySetValue(optionName, ans))
+            if (!JultiOptions.getInstance().trySetValue(optionName, ans)) {
                 JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
+            }
             button.setText(buttonTextGetter.get());
         });
     }
@@ -205,7 +208,9 @@ public final class GUIUtil {
         button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
         button.setFocusable(false);
 
-        if (!includeIMOption) return button;
+        if (!includeIMOption) {
+            return button;
+        }
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -220,8 +225,9 @@ public final class GUIUtil {
     public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
         return createCheckBox(label, (Boolean) JultiOptions.getInstance().getValue(optionName), val -> {
             JultiOptions.getInstance().trySetValue(optionName, String.valueOf(val));
-            if (afterSet != null)
+            if (afterSet != null) {
                 afterSet.accept(val);
+            }
         });
     }
 

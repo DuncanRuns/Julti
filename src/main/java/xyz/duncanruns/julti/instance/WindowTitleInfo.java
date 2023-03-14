@@ -18,7 +18,7 @@ public class WindowTitleInfo {
     }
 
     public void provide(String title) {
-        if (waiting() && MC_PATTERN.matcher(title).matches()) {
+        if (this.waiting() && MC_PATTERN.matcher(title).matches()) {
             this.title = title;
         }
     }
@@ -28,7 +28,7 @@ public class WindowTitleInfo {
     }
 
     public Version getVersion() {
-        String[] nums = getOriginalTitle().split(" ")[1].split("\\.");
+        String[] nums = this.getOriginalTitle().split(" ")[1].split("\\.");
         if (nums.length > 2) {
             return new Version(Integer.parseInt(nums[1]), Integer.parseInt(nums[2]));
         } else {
@@ -37,7 +37,7 @@ public class WindowTitleInfo {
     }
 
     public String getOriginalTitle() {
-        if (!waiting()) {
+        if (!this.waiting()) {
             return this.title;
         }
         return DEFAULT_TITLE;
@@ -53,11 +53,11 @@ public class WindowTitleInfo {
         }
 
         public int getMajor() {
-            return major;
+            return this.major;
         }
 
         public int getMinor() {
-            return minor;
+            return this.minor;
         }
     }
 }

@@ -4,7 +4,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 public abstract class Command {
@@ -32,7 +33,7 @@ public abstract class Command {
     public abstract String getName();
 
     public final void run(String[] args, Julti julti) {
-        run(args, julti, CancelRequester.NEVER_CANCEL_REQUESTER);
+        this.run(args, julti, CancelRequesters.NEVER_CANCEL_REQUESTER);
     }
 
     public abstract void run(String[] args, Julti julti, CancelRequester cancelRequester);

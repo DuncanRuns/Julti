@@ -21,23 +21,23 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
 
     public SingleInstancePanel(Julti julti) {
         this.julti = julti;
-        setBorder(new FlatBorder());
-        setLayout(new FlowLayout());
+        this.setBorder(new FlatBorder());
+        this.setLayout(new FlowLayout());
         JPanel panel = new JPanel();
 
         panel.setLayout(new GridLayout(2, 1));
 
-        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        panel.add(nameLabel);
-        panel.add(statusLabel);
-        add(panel);
-        addMouseListener(this);
+        this.nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        this.statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(this.nameLabel);
+        panel.add(this.statusLabel);
+        this.add(panel);
+        this.addMouseListener(this);
     }
 
     public void setInfo(MinecraftInstance instance) {
-        nameLabel.setText(instance.getName());
-        statusLabel.setText(instance.hasWindow() ? "Open" : "Closed");
+        this.nameLabel.setText(instance.getName());
+        this.statusLabel.setText(instance.hasWindow() ? "Open" : "Closed");
         this.instance = instance;
     }
 
@@ -45,26 +45,26 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == 1) {
             Thread.currentThread().setName("julti-gui");
-            instance.activate(julti.getInstanceManager().getInstances().indexOf(instance) + 1);
-            julti.switchScene(instance);
+            this.instance.activate(this.julti.getInstanceManager().getInstances().indexOf(this.instance) + 1);
+            this.julti.switchScene(this.instance);
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.isPopupTrigger()) {
-            doPop(e);
+            this.doPop(e);
         }
     }
 
     private void doPop(MouseEvent e) {
         JPopupMenu popupMenu = new JPopupMenu();
-        if (instance.hasWindow()) {
+        if (this.instance.hasWindow()) {
             GUIUtil.addMenuItem(popupMenu, "Close", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    instance.closeWindow();
+                    SingleInstancePanel.this.instance.closeWindow();
                 }
             });
         } else {
@@ -72,22 +72,22 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    SafeInstanceLauncher.launchInstance(instance, julti);
+                    SafeInstanceLauncher.launchInstance(SingleInstancePanel.this.instance, SingleInstancePanel.this.julti);
                 }
             });
         }
         GUIUtil.addMenuItem(popupMenu, "Open Folder", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                instance.openFolder();
+                SingleInstancePanel.this.instance.openFolder();
             }
         });
         GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Thread.currentThread().setName("julti-gui");
-                julti.getInstanceManager().removeInstance(instance);
-                julti.storeLastInstances();
+                SingleInstancePanel.this.julti.getInstanceManager().removeInstance(SingleInstancePanel.this.instance);
+                SingleInstancePanel.this.julti.storeLastInstances();
             }
         });
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -96,7 +96,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.isPopupTrigger()) {
-            doPop(e);
+            this.doPop(e);
         }
     }
 

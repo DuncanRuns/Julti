@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.util.List;
 
@@ -32,8 +32,11 @@ public class LockCommand extends Command {
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         List<MinecraftInstance> toLock;
-        if (args[0].equals("all")) toLock = julti.getInstanceManager().getInstances();
-        else toLock = CommandManager.getInstances(args[0], julti);
+        if (args[0].equals("all")) {
+            toLock = julti.getInstanceManager().getInstances();
+        } else {
+            toLock = CommandManager.getInstances(args[0], julti);
+        }
 
         if (toLock.isEmpty()) {
             log(Level.ERROR, "No instances found");

@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.util.List;
 
@@ -32,15 +32,20 @@ public class CloseCommand extends Command {
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         List<MinecraftInstance> toClose;
-        if (args[0].equals("all")) toClose = julti.getInstanceManager().getInstances();
-        else toClose = CommandManager.getInstances(args[0], julti);
+        if (args[0].equals("all")) {
+            toClose = julti.getInstanceManager().getInstances();
+        } else {
+            toClose = CommandManager.getInstances(args[0], julti);
+        }
 
         if (toClose.isEmpty()) {
             log(Level.ERROR, "No instances found");
             return;
         }
         for (MinecraftInstance instance : toClose) {
-            if (cancelRequester.isCancelRequested()) return;
+            if (cancelRequester.isCancelRequested()) {
+                return;
+            }
             instance.closeWindow();
         }
     }

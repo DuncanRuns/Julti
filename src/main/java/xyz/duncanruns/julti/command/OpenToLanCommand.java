@@ -2,7 +2,7 @@ package xyz.duncanruns.julti.command;
 
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 public class OpenToLanCommand extends Command {
     @Override
@@ -28,6 +28,8 @@ public class OpenToLanCommand extends Command {
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
         MinecraftInstance selectedInstance = julti.getInstanceManager().getSelectedInstance();
-        if (selectedInstance != null) selectedInstance.openToLan(false);
+        if (selectedInstance != null) {
+            selectedInstance.openToLan(false);
+        }
     }
 }

@@ -1,7 +1,7 @@
 package xyz.duncanruns.julti.command;
 
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 public class SleepCommand extends Command {
     @Override

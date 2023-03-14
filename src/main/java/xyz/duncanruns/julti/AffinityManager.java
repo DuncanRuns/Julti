@@ -26,7 +26,9 @@ public final class AffinityManager {
     }
 
     public static void stop() {
-        if (EXECUTOR == null || EXECUTOR.isShutdown() || EXECUTOR.isTerminated()) return;
+        if (EXECUTOR == null || EXECUTOR.isShutdown() || EXECUTOR.isTerminated()) {
+            return;
+        }
         EXECUTOR.shutdown();
         EXECUTOR = null;
     }
@@ -46,7 +48,9 @@ public final class AffinityManager {
         if (selectedInstance != null) {
             setAffinity(selectedInstance, options.threadsPlaying);
             for (MinecraftInstance instance : instances) {
-                if (!instance.equals(selectedInstance)) setAffinity(instance, options.threadsBackground);
+                if (!instance.equals(selectedInstance)) {
+                    setAffinity(instance, options.threadsBackground);
+                }
             }
             return;
         }

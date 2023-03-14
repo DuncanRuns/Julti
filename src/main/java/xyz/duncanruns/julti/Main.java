@@ -35,7 +35,9 @@ public class Main {
             while (running) {
                 String input = scanner.nextLine();
                 // Allow staring with /
-                if (input.startsWith("/")) input = input.substring(1);
+                if (input.startsWith("/")) {
+                    input = input.substring(1);
+                }
                 if (Objects.equals(input, "stop")) {
                     running = false;
                 } else {

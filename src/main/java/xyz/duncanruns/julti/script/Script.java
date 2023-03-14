@@ -27,7 +27,7 @@ public class Script {
     }
 
     public byte getHotkeyContext() {
-        return hotkeyContext;
+        return this.hotkeyContext;
     }
 
     public void setHotkeyContext(byte hotkeyContext) {
@@ -35,7 +35,7 @@ public class Script {
     }
 
     public String getCommands() {
-        return commands;
+        return this.commands;
     }
 
     public void setCommands(String commands) {
@@ -43,18 +43,18 @@ public class Script {
     }
 
     public String toSavableString() {
-        return name + ";" + hotkeyContext + ";" + commands;
+        return this.name + ";" + this.hotkeyContext + ";" + this.commands;
     }
 
     @Override
     public String toString() {
         return "Script{" +
-                "name='" + getName() + '\'' +
+                "name='" + this.getName() + '\'' +
                 '}';
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {

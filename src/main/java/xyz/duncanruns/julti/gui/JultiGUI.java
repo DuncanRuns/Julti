@@ -20,14 +20,14 @@ public class JultiGUI extends JFrame {
 
     public JultiGUI(Julti julti) {
         this.julti = julti;
-        closed = false;
-        setLayout(new GridBagLayout());
-        setupComponents();
-        setupWindow();
+        this.closed = false;
+        this.setLayout(new GridBagLayout());
+        this.setupComponents();
+        this.setupWindow();
     }
 
     private void setupComponents() {
-        add(new LogPanel(julti), new GridBagConstraints(
+        this.add(new LogPanel(this.julti), new GridBagConstraints(
                 0,
                 0,
                 1,
@@ -41,8 +41,8 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        controlPanel = new ControlPanel(julti, this);
-        add(controlPanel, new GridBagConstraints(
+        this.controlPanel = new ControlPanel(this.julti, this);
+        this.add(this.controlPanel, new GridBagConstraints(
                 1,
                 0,
                 1,
@@ -56,7 +56,7 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        add(new InstancesPanel(julti, () -> isActive() || isOptionsActive(), this::isClosed), new GridBagConstraints(
+        this.add(new InstancesPanel(this.julti, () -> this.isActive() || this.isOptionsActive(), this::isClosed), new GridBagConstraints(
                 0,
                 1,
                 1,
@@ -72,32 +72,32 @@ public class JultiGUI extends JFrame {
     }
 
     private void setupWindow() {
-        setSize(800, 420);
+        this.setSize(800, 420);
         int[] lastGUIPos = JultiOptions.getInstance().lastGUIPos;
-        setLocation(lastGUIPos[0], lastGUIPos[1]);
-        setTitle("Julti");
-        setVisible(true);
-        addWindowListener(new WindowAdapter() {
+        this.setLocation(lastGUIPos[0], lastGUIPos[1]);
+        this.setTitle("Julti");
+        this.setVisible(true);
+        this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                onClose();
+                JultiGUI.this.onClose();
             }
         });
     }
 
     private boolean isOptionsActive() {
-        OptionsGUI optionsGUI = controlPanel.getOptionsGUI();
+        OptionsGUI optionsGUI = this.controlPanel.getOptionsGUI();
         return optionsGUI != null && (!optionsGUI.isClosed()) && optionsGUI.isActive();
     }
 
     private boolean isClosed() {
-        return closed;
+        return this.closed;
     }
 
     private void onClose() {
-        closed = true;
-        JultiOptions.getInstance().lastGUIPos = new int[]{getLocation().x, getLocation().y};
-        julti.stop();
+        this.closed = true;
+        JultiOptions.getInstance().lastGUIPos = new int[]{this.getLocation().x, this.getLocation().y};
+        this.julti.stop();
         System.exit(0);
     }
 

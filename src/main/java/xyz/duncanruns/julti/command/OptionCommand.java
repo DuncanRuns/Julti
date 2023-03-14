@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 public class OptionCommand extends Command {
     private final CommandManager innerManager = new CommandManager(new Command[]{
@@ -14,7 +14,7 @@ public class OptionCommand extends Command {
 
     @Override
     public String helpDescription() {
-        return innerManager.getDescriptions(false);
+        return this.innerManager.getDescriptions(false);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class OptionCommand extends Command {
 
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
-        innerManager.runCommand(args, julti, cancelRequester);
+        this.innerManager.runCommand(args, julti, cancelRequester);
     }
 
     private static class OptionListCommand extends Command {

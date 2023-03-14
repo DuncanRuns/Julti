@@ -71,8 +71,9 @@ public final class HwndUtil {
         User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
         StringBuilder out = new StringBuilder();
         for (byte a : x) {
-            if (a == 0)
+            if (a == 0) {
                 break;
+            }
             out.append((char) a);
         }
         return out.toString();
@@ -140,7 +141,9 @@ public final class HwndUtil {
     public static void activateHwnd(Pointer hwnd) {
         // Windows requires alt to be pressed to switch to a window.... maybe?
         // It needed it in the python implementation but apparently not here. Will keep it anyway.
-        if (hwnd == null) return;
+        if (hwnd == null) {
+            return;
+        }
         ROBOT.keyPress(KeyEvent.VK_ALT);
         ROBOT.keyRelease(KeyEvent.VK_ALT);
         User32.INSTANCE.SetForegroundWindow(hwnd);
@@ -289,8 +292,9 @@ public final class HwndUtil {
         synchronized (executablePathBuffer) {
             Psapi.INSTANCE.GetModuleFileNameExA(process, null, executablePathBuffer, 1024);
             for (byte a : executablePathBuffer) {
-                if (a == 0)
+                if (a == 0) {
                     break;
+                }
                 out.append((char) a);
             }
         }
@@ -338,7 +342,9 @@ public final class HwndUtil {
     }
 
     public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
-        if (hwnd == null) return false;
+        if (hwnd == null) {
+            return false;
+        }
         Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> hwnd is not null");
         String regex = '^' + projectorFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
         Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> regex pattern is " + regex);

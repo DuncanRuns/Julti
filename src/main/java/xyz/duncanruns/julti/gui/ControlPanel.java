@@ -21,7 +21,7 @@ public class ControlPanel extends JPanel {
 
     public ControlPanel(Julti julti, JultiGUI gui) {
         this.julti = julti;
-        setLayout(new GridBagLayout());
+        this.setLayout(new GridBagLayout());
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.ipadx = 5;
         gbc2.ipady = 5;
@@ -32,16 +32,17 @@ public class ControlPanel extends JPanel {
 
         Component thisComponent = this;
 
-        setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
-        add(GUIUtil.getButtonWithMethod(new JButton("Instance Utilities..."), a -> {
+        this.setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Instance Utilities..."), a -> {
             JPopupMenu menu = new JPopupMenu("Instance Utilities");
 
             GUIUtil.addMenuItem(menu, "Redetect Instances", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    if (0 == JOptionPane.showConfirmDialog(gui, "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION))
+                    if (0 == JOptionPane.showConfirmDialog(gui, "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
                         julti.redetectInstances();
+                    }
                 }
             });
 
@@ -95,7 +96,7 @@ public class ControlPanel extends JPanel {
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("File Utilities..."), a -> {
+        this.add(GUIUtil.getButtonWithMethod(new JButton("File Utilities..."), a -> {
             JPopupMenu menu = new JPopupMenu("File Utilities");
 
             GUIUtil.addMenuItem(menu, "Clear Worlds", new AbstractAction() {
@@ -129,26 +130,26 @@ public class ControlPanel extends JPanel {
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> {
-            if (scriptsGUI == null || scriptsGUI.isClosed()) {
-                scriptsGUI = new ScriptsGUI(julti, gui);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> {
+            if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
+                this.scriptsGUI = new ScriptsGUI(julti, gui);
             } else {
-                scriptsGUI.requestFocus();
+                this.scriptsGUI.requestFocus();
             }
         }), gbc);
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> {
-            if (optionsGUI == null || optionsGUI.isClosed()) {
-                optionsGUI = new OptionsGUI(julti, gui);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> {
+            if (this.optionsGUI == null || this.optionsGUI.isClosed()) {
+                this.optionsGUI = new OptionsGUI(julti, gui);
             } else {
-                optionsGUI.requestFocus();
+                this.optionsGUI.requestFocus();
             }
         }), gbc);
     }
 
     public OptionsGUI getOptionsGUI() {
-        return optionsGUI;
+        return this.optionsGUI;
     }
 }

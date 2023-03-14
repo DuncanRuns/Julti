@@ -2,7 +2,7 @@ package xyz.duncanruns.julti.command;
 
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 public class LogCommand extends Command {
     @Override

@@ -104,7 +104,9 @@ public final class KeyboardUtil {
     public static List<Integer> getPressedNonModKeys() {
         List<Integer> pressedKeys = getPressedKeys();
 
-        if (!pressedKeys.isEmpty()) pressedKeys.removeAll(ALL_MODIFIERS);
+        if (!pressedKeys.isEmpty()) {
+            pressedKeys.removeAll(ALL_MODIFIERS);
+        }
         return pressedKeys;
     }
 
@@ -115,7 +117,9 @@ public final class KeyboardUtil {
                 initPressedKeys.add(vKey);
             }
         }
-        if (!initPressedKeys.isEmpty()) initPressedKeys.removeAll(BROAD_MODIFIERS);
+        if (!initPressedKeys.isEmpty()) {
+            initPressedKeys.removeAll(BROAD_MODIFIERS);
+        }
 
         List<Integer> pressedKeys = new ArrayList<>();
 

@@ -175,11 +175,11 @@ public final class JultiOptions {
     }
 
     public boolean tryLoad() {
-        if (Files.isRegularFile(location)) {
+        if (Files.isRegularFile(this.location)) {
             try {
                 // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(FileUtil.readString(location), JultiOptions.class);
+                gson.fromJson(FileUtil.readString(this.location), JultiOptions.class);
                 return true;
             } catch (Exception ignored) {
             }
@@ -225,8 +225,9 @@ public final class JultiOptions {
         Arrays.stream(profiles).iterator().forEachRemaining(s -> {
             if (s.endsWith(".json")) {
                 String nextName = s.substring(0, s.length() - 5);
-                if (!nextName.equals(first))
+                if (!nextName.equals(first)) {
                     names.add(nextName);
+                }
             }
         });
         return names.toArray(new String[0]);
@@ -250,8 +251,8 @@ public final class JultiOptions {
     public boolean trySave() {
         try {
             ensureJultiDir();
-            Files.createDirectories(location.getParent());
-            FileUtil.writeString(location, GSON_WRITER.toJson(this));
+            Files.createDirectories(this.location.getParent());
+            FileUtil.writeString(this.location, GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;
@@ -259,16 +260,18 @@ public final class JultiOptions {
     }
 
     public String getProfileName() {
-        return profileName;
+        return this.profileName;
     }
 
     public List<Path> getLastInstancePaths() {
-        return lastInstances.stream().map(Paths::get).collect(Collectors.toList());
+        return this.lastInstances.stream().map(Paths::get).collect(Collectors.toList());
     }
 
     public String getValueString(String optionName) {
-        Object value = getValue(optionName);
-        if (value == null) return null;
+        Object value = this.getValue(optionName);
+        if (value == null) {
+            return null;
+        }
         if (value.getClass().isArray()) {
             List<Object> objectList = new ArrayList<>();
             for (int i = 0; i < Array.getLength(value); i++) {
@@ -283,7 +286,7 @@ public final class JultiOptions {
     public Object getValue(String optionName) {
         Field optionField = null;
         try {
-            optionField = getClass().getField(optionName);
+            optionField = this.getClass().getField(optionName);
         } catch (NoSuchFieldException ignored) {
         }
         if (optionField == null || Modifier.isTransient(optionField.getModifiers())) {
@@ -293,13 +296,27 @@ public final class JultiOptions {
             // Basic value to change
             Class<?> clazz = optionField.getType();
             try {
-                if (boolean.class == clazz) return optionField.getBoolean(this);
-                if (byte.class == clazz) return optionField.getByte(this);
-                if (short.class == clazz) return optionField.getShort(this);
-                if (int.class == clazz) return optionField.getInt(this);
-                if (long.class == clazz) return optionField.getLong(this);
-                if (float.class == clazz) return optionField.getFloat(this);
-                if (double.class == clazz) return optionField.getDouble(this);
+                if (boolean.class == clazz) {
+                    return optionField.getBoolean(this);
+                }
+                if (byte.class == clazz) {
+                    return optionField.getByte(this);
+                }
+                if (short.class == clazz) {
+                    return optionField.getShort(this);
+                }
+                if (int.class == clazz) {
+                    return optionField.getInt(this);
+                }
+                if (long.class == clazz) {
+                    return optionField.getLong(this);
+                }
+                if (float.class == clazz) {
+                    return optionField.getFloat(this);
+                }
+                if (double.class == clazz) {
+                    return optionField.getDouble(this);
+                }
             } catch (Exception e) {
                 // This should theoretically never run
                 return null;
@@ -314,15 +331,15 @@ public final class JultiOptions {
     }
 
     public HotkeyUtil.Hotkey getHotkeyFromSetting(String name) {
-        List<Integer> keys = (List<Integer>) getValue(name);
-        boolean ignoreModifiers = (Boolean) getValue(name + "IM");
+        List<Integer> keys = (List<Integer>) this.getValue(name);
+        boolean ignoreModifiers = (Boolean) this.getValue(name + "IM");
         return ignoreModifiers ? new HotkeyUtil.HotkeyIM(keys) : new HotkeyUtil.Hotkey(keys);
     }
 
     public ScriptHotkeyData getScriptHotkeyData(String scriptName) {
         ScriptHotkeyData out = null;
 
-        for (ScriptHotkeyData replaceData : scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).collect(Collectors.toList())) {
+        for (ScriptHotkeyData replaceData : this.scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).collect(Collectors.toList())) {
             if (replaceData.scriptName.equals(scriptName)) {
                 out = replaceData;
                 break;
@@ -336,22 +353,24 @@ public final class JultiOptions {
     }
 
     public void setScriptHotkey(ScriptHotkeyData data) {
-        scriptHotkeys.removeIf(s -> {
+        this.scriptHotkeys.removeIf(s -> {
             ScriptHotkeyData scriptHotkeyData = ScriptHotkeyData.parseString(s);
-            if (scriptHotkeyData == null) return true;
+            if (scriptHotkeyData == null) {
+                return true;
+            }
             return scriptHotkeyData.scriptName.equals(data.scriptName);
         });
-        scriptHotkeys.add(data.toString());
+        this.scriptHotkeys.add(data.toString());
     }
 
     @Override
     public int hashCode() {
-        return location.hashCode();
+        return this.location.hashCode();
     }
 
     public List<String> getOptionNamesWithType() {
         List<String> names = new ArrayList<>();
-        for (Field field : getClass().getFields()) {
+        for (Field field : this.getClass().getFields()) {
             if (!Modifier.isTransient(field.getModifiers())) {
                 names.add(field.getName() + " (" + field.getType().getSimpleName() + ")");
             }
@@ -361,16 +380,30 @@ public final class JultiOptions {
 
     public boolean trySetValue(String optionName, String valueString) {
         try {
-            Field optionField = getClass().getField(optionName);
+            Field optionField = this.getClass().getField(optionName);
             if (optionField.getType().isPrimitive()) {
                 Class<?> clazz = optionField.getType();
-                if (boolean.class == clazz) optionField.setBoolean(this, Boolean.parseBoolean(valueString));
-                if (byte.class == clazz) optionField.setByte(this, Byte.parseByte(valueString));
-                if (short.class == clazz) optionField.setShort(this, Short.parseShort(valueString));
-                if (int.class == clazz) optionField.setInt(this, Integer.parseInt(valueString));
-                if (long.class == clazz) optionField.setLong(this, Long.parseLong(valueString));
-                if (float.class == clazz) optionField.setFloat(this, Float.parseFloat(valueString));
-                if (double.class == clazz) optionField.setDouble(this, Double.parseDouble(valueString));
+                if (boolean.class == clazz) {
+                    optionField.setBoolean(this, Boolean.parseBoolean(valueString));
+                }
+                if (byte.class == clazz) {
+                    optionField.setByte(this, Byte.parseByte(valueString));
+                }
+                if (short.class == clazz) {
+                    optionField.setShort(this, Short.parseShort(valueString));
+                }
+                if (int.class == clazz) {
+                    optionField.setInt(this, Integer.parseInt(valueString));
+                }
+                if (long.class == clazz) {
+                    optionField.setLong(this, Long.parseLong(valueString));
+                }
+                if (float.class == clazz) {
+                    optionField.setFloat(this, Float.parseFloat(valueString));
+                }
+                if (double.class == clazz) {
+                    optionField.setDouble(this, Double.parseDouble(valueString));
+                }
                 return true;
             } else if (optionField.getType().isArray()) {
                 // Only int arrays exist for now, so assuming int.
@@ -396,7 +429,7 @@ public final class JultiOptions {
 
     public boolean trySetHotkey(String optionName, List<Integer> keys) {
         try {
-            Field optionField = getClass().getField(optionName);
+            Field optionField = this.getClass().getField(optionName);
             optionField.set(this, keys);
             return true;
         } catch (Exception ignored) {
@@ -407,8 +440,8 @@ public final class JultiOptions {
     public boolean copyTo(String profileName) {
         try {
             ensureJultiDir();
-            Files.createDirectories(location.getParent());
-            FileUtil.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
+            Files.createDirectories(this.location.getParent());
+            FileUtil.writeString(this.location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
             return true;
         } catch (Exception ignored) {
             return false;
