@@ -70,10 +70,10 @@ public class MinecraftInstance {
     private int loadingPercent = 0;
     private boolean dirtCover = false;
     private boolean available = false;
-    boolean worldEverLoaded = false;
-    boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
-    boolean activeSinceLastReset = false;
-    boolean openedToLan = false;
+    private boolean worldEverLoaded = false;
+    private boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
+    private boolean activeSinceLastReset = false;
+    private boolean openedToLan = false;
 
     // Log tracking
     private long logProgress = -1;
