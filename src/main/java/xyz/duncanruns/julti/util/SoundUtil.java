@@ -4,6 +4,9 @@ import javax.sound.sampled.*;
 import java.io.File;
 
 public class SoundUtil {
+    private SoundUtil() {
+    }
+
     /**
      * Plays the sound found at soundPath at the specified volume.
      *

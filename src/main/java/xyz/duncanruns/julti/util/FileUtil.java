@@ -6,6 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileUtil {
+    private FileUtil() {
+    }
+
     public static void writeString(Path path, String string) throws IOException {
         FileWriter writer = new FileWriter(path.toFile());
         writer.write(string);
