@@ -14,6 +14,8 @@ public final class AffinityManager {
     public static final int AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors();
     private static ScheduledExecutorService EXECUTOR;
 
+    private AffinityManager() {}
+
     public static void start(Julti julti) {
         stop();
         ScheduledExecutorService executorService = getExecutor();

@@ -15,6 +15,8 @@ public final class HotkeyUtil {
     private static final List<SingleHotkeyChecker> GLOBAL_HOTKEYS = Collections.synchronizedList(new ArrayList<>());
     private static ScheduledExecutorService GLOBAL_HOTKEY_EXECUTOR = null;
 
+    private HotkeyUtil() {}
+
     /**
      * This method is <b>non-blocking</b>.
      * Starts a background task which waits for a hotkey to be pressed. Once a hotkey is pressed, it will be accepted

@@ -17,8 +17,7 @@ import java.util.Arrays;
 public final class UpdateUtil {
     private static final Logger LOGGER = LogManager.getLogger("UpdateChecker");
 
-    private UpdateUtil() {
-    }
+    private UpdateUtil() {}
 
     public static void main(String[] args) {
         FlatDarkLaf.setup();
@@ -45,7 +44,7 @@ public final class UpdateUtil {
             boolean isAlreadyExactlyLatest = latestVersion.endsWith(Julti.VERSION);
             boolean canBeEqual = Julti.VERSION.contains("-") || Julti.VERSION.contains("+");
 
-            if ((!isAlreadyExactlyLatest) && isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual)) {
+            if (!isAlreadyExactlyLatest && isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual)) {
                 options.lastCheckedVersion = latestVersion;
                 if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + Julti.VERSION + ", and the latest version is " + latestVersion + ".\nWould you like to go to the releases page?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
                     Desktop.getDesktop().browse(new URI("https://github.com/DuncanRuns/Julti/releases"));
@@ -53,7 +52,6 @@ public final class UpdateUtil {
                 return;
             }
             log(Level.INFO, "No new updates found!");
-
         } catch (Exception e) {
             log(Level.WARN, "Update check failed! Maybe you are not connected to the internet.");
         }
@@ -68,7 +66,7 @@ public final class UpdateUtil {
         // Remove v prefix
         versionString = versionString.startsWith("v") ? versionString.substring(1) : versionString;
         // Remove suffix
-        for (char c : new char[]{'+', '-'}) {
+        for (char c : new char[] { '+', '-' }) {
             if (versionString.contains("" + c)) {
                 versionString = versionString.substring(0, versionString.indexOf(c));
             }

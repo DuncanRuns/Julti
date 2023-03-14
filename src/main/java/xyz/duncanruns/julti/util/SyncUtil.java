@@ -16,6 +16,8 @@ public final class SyncUtil {
     private static final Logger LOGGER = LogManager.getLogger("SyncUtil");
     private static final Object LOCK = new Object();
 
+    private SyncUtil() {}
+
     public static void sync(List<MinecraftInstance> instances, MinecraftInstance sourceInstance, boolean copyMods, boolean copyConfigs) throws IOException {
         synchronized (LOCK) {
             if (!copyConfigs && !copyMods) return;

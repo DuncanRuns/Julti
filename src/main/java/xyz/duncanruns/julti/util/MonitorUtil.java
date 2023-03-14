@@ -4,6 +4,8 @@ import java.awt.*;
 import java.util.Arrays;
 
 public final class MonitorUtil {
+    private MonitorUtil() {}
+
     public static Monitor getPrimaryMonitor() {
         return new Monitor(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds());
     }

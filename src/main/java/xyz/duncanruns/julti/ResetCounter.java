@@ -7,6 +7,8 @@ import java.io.IOException;
 public final class ResetCounter {
     private static final Object LOCK = new Object();
 
+    private ResetCounter() {}
+
     public static void increment() {
         synchronized (LOCK) {
             JultiOptions.getInstance().resetCounter += 1;

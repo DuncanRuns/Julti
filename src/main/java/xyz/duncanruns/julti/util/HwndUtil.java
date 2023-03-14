@@ -36,6 +36,8 @@ public final class HwndUtil {
     private static final byte[] EXECUTABLE_PATH_BUFFER = new byte[1024];
     private static WinDef.HWND OBS_HWND = null;
 
+    private HwndUtil() {}
+
     static {
         try { POWER_SHELL = PowerShell.open(); }
         catch (IOException e) { throw new RuntimeException(e); }

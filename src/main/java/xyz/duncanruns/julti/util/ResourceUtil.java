@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class ResourceUtil {
+    private ResourceUtil() {}
+
     /**
      * <a href="https://stackoverflow.com/questions/10308221/how-to-copy-file-inside-jar-to-outside-the-jar">Source</a>
      */

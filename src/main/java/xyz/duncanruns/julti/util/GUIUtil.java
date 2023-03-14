@@ -19,6 +19,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class GUIUtil {
+    private GUIUtil() {}
+
     public static Component leftJustify(Component component) {
         Box b = Box.createHorizontalBox();
         b.add(component);

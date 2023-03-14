@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 public final class SleepBGUtil {
     private static final Path SLEEP_LOCK_PATH = Paths.get(System.getProperty("user.home")).resolve("sleepbg.lock");
 
+    private SleepBGUtil() {}
+
     public static void enableLock() {
         try {
             if (!Files.exists(SLEEP_LOCK_PATH)) {

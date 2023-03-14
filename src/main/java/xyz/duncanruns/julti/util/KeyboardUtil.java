@@ -22,6 +22,8 @@ public final class KeyboardUtil {
     public static final List<Integer> SINGLE_MODIFIERS = Arrays.asList(Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
     private static final String[] KEY_NAMES = getKeyNamesArray();
 
+    private KeyboardUtil() {}
+
     public static void pressKeysForTime(List<Integer> keys, long time) {
         for (int vk : keys) {
             keyDown(vk);
