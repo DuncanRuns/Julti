@@ -1,8 +1,8 @@
 package xyz.duncanruns.julti.command;
 
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 public class ChatMessageCommand extends Command {
     @Override

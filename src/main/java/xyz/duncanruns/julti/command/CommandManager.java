@@ -4,8 +4,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.util.*;
