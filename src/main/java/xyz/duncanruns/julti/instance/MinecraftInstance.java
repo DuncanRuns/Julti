@@ -338,7 +338,7 @@ public class MinecraftInstance {
         return this.hwnd != null;
     }
 
-    synchronized public long getLastPreviewStart() {
+    public long getLastPreviewStart() {
         return this.lastPreviewStart;
     }
 
@@ -478,11 +478,11 @@ public class MinecraftInstance {
         return i;
     }
 
-    synchronized public boolean isPreviewLoaded() {
+    public boolean isPreviewLoaded() {
         return this.inPreview;
     }
 
-    synchronized public boolean isWorldLoaded() {
+    public boolean isWorldLoaded() {
         return this.worldLoaded;
     }
 
@@ -592,7 +592,6 @@ public class MinecraftInstance {
     public void ensureWindowState() {
         this.ensureWindowState(false, true);
     }
-
 
     /**
      * Ensure window state resizes the window and sets its maximized/borderless state depending on Julti options and parameters
@@ -977,7 +976,7 @@ public class MinecraftInstance {
         return this.resetType;
     }
 
-    synchronized private void setInPreview(boolean inPreview) {
+    private void setInPreview(boolean inPreview) {
         if (inPreview && !this.inPreview) {
             this.lastPreviewStart = System.currentTimeMillis();
         }
@@ -1019,7 +1018,7 @@ public class MinecraftInstance {
         return this.biome;
     }
 
-    synchronized private void checkLogContents(String newLogContents, final Julti julti) {
+    private void checkLogContents(String newLogContents, final Julti julti) {
         JultiOptions options = JultiOptions.getInstance();
         if (!newLogContents.isEmpty()) {
             for (String line : newLogContents.split("\n")) {
