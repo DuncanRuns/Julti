@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti;
 
-
 import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT;
@@ -13,11 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class AffinityManager {
     public static final int AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors();
-    private static ScheduledExecutorService EXECUTOR = null;
-
-
-    private AffinityManager() {
-    }
+    private static ScheduledExecutorService EXECUTOR;
 
     public static void start(Julti julti) {
         stop();
@@ -81,7 +76,6 @@ public final class AffinityManager {
 
     public static void ping(Julti julti) {
         getExecutor().execute(() -> tick(julti));
-
     }
 
     public static void ping(Julti julti, int delay) {

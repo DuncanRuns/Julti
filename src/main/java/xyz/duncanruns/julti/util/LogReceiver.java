@@ -10,26 +10,23 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public final class LogReceiver {
-    private static final ExecutorService receiverQueue = Executors.newSingleThreadExecutor();
-    private static Consumer<String> logConsumer = null;
-
-    private LogReceiver() {
-    }
+    private static final ExecutorService RECEIVER_QUEUE = Executors.newSingleThreadExecutor();
+    private static Consumer<String> LOG_CONSUMER;
 
     public static void setLogConsumer(Consumer<String> consumer) {
-        logConsumer = consumer;
+        LOG_CONSUMER = consumer;
     }
 
     public static void receive(Level level, String message) {
-        receiverQueue.execute(() -> {
+        RECEIVER_QUEUE.execute(() -> {
             if (level.equals(Level.DEBUG) && !JultiOptions.getInstance().showDebug) return;
-            if (logConsumer != null)
-                logConsumer.accept("[" + getTimeString() + "/" + level.name() + "] " + message);
+            if (LOG_CONSUMER != null) {
+                LOG_CONSUMER.accept("[" + getTimeString() + "/" + level.name() + "] " + message);
+            }
         });
     }
 
     private static String getTimeString() {
         return new SimpleDateFormat("HH:mm:ss").format(new Date());
     }
-
 }

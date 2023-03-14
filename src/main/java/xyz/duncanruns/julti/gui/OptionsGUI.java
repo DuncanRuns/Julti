@@ -20,56 +20,55 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
-    private static final String[] RESET_MODES = new String[]{"Multi", "Wall", "Dynamic Wall"};
-
+    private static final String[] RESET_MODES = new String[] { "Multi", "Wall", "Dynamic Wall" };
     private boolean closed = false;
     private final Julti julti;
     private JTabbedPane tabbedPane;
 
     public OptionsGUI(Julti julti, JultiGUI gui) {
         this.julti = julti;
-        setLocation(gui.getLocation());
-        setupWindow();
-        reloadComponents();
+        this.setLocation(gui.getLocation());
+        this.setupWindow();
+        this.reloadComponents();
     }
 
     private JTabbedPane getTabbedPane() {
-        return tabbedPane;
+        return this.tabbedPane;
     }
 
     private void setupWindow() {
-        setLayout(null);
-        setTitle("Julti Options");
-        addWindowListener(new WindowAdapter() {
+        this.setLayout(null);
+        this.setTitle("Julti Options");
+        this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 onClose();
             }
         });
-        setSize(600, 400);
-        setVisible(true);
+        this.setSize(600, 400);
+        this.setVisible(true);
     }
 
     private void reloadComponents() {
-        getContentPane().removeAll();
-        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        setContentPane(tabbedPane);
-        addComponentsProfile();
-        addComponentsReset();
-        addComponentsWall();
-        addComponentsWindow();
-        addComponentsHotkey();
-        addComponentsOBS();
-        addComponentsSound();
-        addComponentsAffinity();
-        addComponentsOther();
-        revalidate();
-        repaint();
+        this.getContentPane().removeAll();
+        this.tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        this.tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        this.setContentPane(this.tabbedPane);
+        this.addComponentsProfile();
+        this.addComponentsReset();
+        this.addComponentsWall();
+        this.addComponentsWindow();
+        this.addComponentsHotkey();
+        this.addComponentsOBS();
+        this.addComponentsSound();
+        this.addComponentsAffinity();
+        this.addComponentsOther();
+        this.revalidate();
+        this.repaint();
     }
 
     private void addComponentsSound() {
-        JPanel panel = createNewOptionsPanel("Sound");
+        JPanel panel = this.createNewOptionsPanel("Sound");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Sound Settings")));
         panel.add(GUIUtil.createSpacer());
@@ -109,7 +108,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsAffinity() {
-        JPanel panel = createNewOptionsPanel("Affinity");
+        JPanel panel = this.createNewOptionsPanel("Affinity");
 
         JultiOptions options = JultiOptions.getInstance();
 
@@ -119,16 +118,16 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
-            reload();
+            this.reload();
             if (b) {
-                AffinityManager.start(julti);
+                AffinityManager.start(this.julti);
             } else {
                 AffinityManager.stop();
-                AffinityManager.release(julti);
+                AffinityManager.release(this.julti);
             }
         })));
 
-        if (!options.useAffinity) return;
+        if (!options.useAffinity) { return; }
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
@@ -143,7 +142,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsOther() {
-        JPanel panel = createNewOptionsPanel("Other");
+        JPanel panel = this.createNewOptionsPanel("Other");
 
         JultiOptions options = JultiOptions.getInstance();
 
@@ -167,17 +166,17 @@ public class OptionsGUI extends JFrame {
         mmcField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             private void update() {
@@ -190,7 +189,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> runMMCExecutableHelper(mmcField))));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Launch Instances Offline", "launchOffline", b -> reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Launch Instances Offline", "launchOffline", b -> this.reload())));
         panel.add(GUIUtil.createSpacer());
 
         if (options.launchOffline) {
@@ -232,7 +231,7 @@ public class OptionsGUI extends JFrame {
         }
         if (candidates.size() == 0) {
             if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                browseForMMCExecutable(mmcField);
+                this.browseForMMCExecutable(mmcField);
             }
             return;
         }
@@ -246,11 +245,10 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
-        if (ans == -1) return;
-        if (ans == candidates.size()) {
-            browseForMMCExecutable(mmcField);
-        } else {
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        if (ans == -1) { return; }
+        if (ans == candidates.size()) { this.browseForMMCExecutable(mmcField); }
+        else {
             Path chosen = candidates.get(ans);
             JultiOptions.getInstance().multiMCPath = chosen.toString();
             mmcField.setText(chosen.toString());
@@ -266,7 +264,6 @@ public class OptionsGUI extends JFrame {
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
-
             String chosen = jfc.getSelectedFile().toPath().toString();
             JultiOptions.getInstance().multiMCPath = chosen;
             mmcField.setText(chosen);
@@ -290,14 +287,14 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> this.reload())));
         if (JultiOptions.getInstance().obsPressHotkeys) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt", "obsUseAlt")));
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", julti, false)));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", this.julti, false)));
         }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -306,8 +303,6 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsHotkey() {
-        JultiOptions options = JultiOptions.getInstance();
-
         JPanel panel = createNewOptionsPanel("Hotkeys");
 
         panel.add(GUIUtil.leftJustify(new JLabel("Hotkeys")));
@@ -321,9 +316,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("In-Game Hotkeys")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("resetHotkey", "Reset", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("resetHotkey", "Reset", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
@@ -331,17 +326,17 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Hotkeys")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallResetHotkey", "Full Reset", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallResetHotkey", "Full Reset", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallSingleResetHotkey", "Reset Instance", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallSingleResetHotkey", "Reset Instance", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", this.julti, true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayLockHotkey", "Play Next Lock", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayLockHotkey", "Play Next Lock", this.julti, true)));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -349,11 +344,11 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(new JLabel("Script Hotkeys")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("cancelScriptHotkey", "Cancel Running Script", julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("cancelScriptHotkey", "Cancel Running Script", this.julti, true)));
 
         for (String scriptName : ScriptManager.getHotkeyableScriptNames()) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createScriptHotkeyChangeButton(scriptName, julti, this::reload)));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createScriptHotkeyChangeButton(scriptName, this.julti, this::reload)));
         }
     }
 
@@ -364,7 +359,7 @@ public class OptionsGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
-        tabbedPane.add(name, scrollPane);
+        this.tabbedPane.add(name, scrollPane);
         return panel;
     }
 
@@ -377,8 +372,10 @@ public class OptionsGUI extends JFrame {
         JComboBox<String> profileSelectBox = new JComboBox<>(JultiOptions.getProfileNames());
         GUIUtil.setActualSize(profileSelectBox, 200, 22);
         profileSelectBox.addActionListener(e -> {
-            julti.changeProfile(profileSelectBox.getSelectedItem().toString());
-            reloadComponents();
+            if (profileSelectBox.getSelectedItem() != null) {
+                this.julti.changeProfile(profileSelectBox.getSelectedItem().toString());
+                this.reloadComponents();
+            }
         });
 
         panel.add(GUIUtil.leftJustify(profileSelectBox));
@@ -387,8 +384,7 @@ public class OptionsGUI extends JFrame {
         OptionsGUI thisGUI = this;
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), actionEvent -> {
             String toRemove = JultiOptions.getSelectedProfileName();
-            if (0 != JOptionPane.showConfirmDialog(thisGUI, "Are you sure you want to remove the profile \"" + toRemove + "\"?", "Julti: Remove Profile", JOptionPane.WARNING_MESSAGE))
-                return;
+            if (JOptionPane.showConfirmDialog(thisGUI, "Are you sure you want to remove the profile \"" + toRemove + "\"?", "Julti: Remove Profile", JOptionPane.YES_NO_OPTION) != 0) { return; }
             String switchTo = "";
             for (String name : JultiOptions.getProfileNames()) {
                 if (!name.equals(toRemove)) {
@@ -396,9 +392,9 @@ public class OptionsGUI extends JFrame {
                     break;
                 }
             }
-            julti.changeProfile(switchTo);
+            this.julti.changeProfile(switchTo);
             JultiOptions.removeProfile(toRemove);
-            reloadComponents();
+            this.reloadComponents();
         })));
 
         panel.add(GUIUtil.createSpacer());
@@ -410,8 +406,8 @@ public class OptionsGUI extends JFrame {
                     return;
                 }
                 JultiOptions.getInstance().copyTo(newName);
-                julti.changeProfile(newName);
-                reloadComponents();
+                this.julti.changeProfile(newName);
+                this.reloadComponents();
             }
         })));
     }
@@ -434,9 +430,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
-            reload();
-        })));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> this.reload())));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay")));
@@ -444,7 +438,7 @@ public class OptionsGUI extends JFrame {
 
         if (!options.wallResetAllAfterPlaying) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> reload())));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> this.reload())));
             if (options.wallBypass) {
                 panel.add(GUIUtil.createSpacer());
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
@@ -455,7 +449,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> this.reload())));
         if (!options.autoCalcWallSize) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
@@ -467,7 +461,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBox("Use Dirt Covers", options.dirtReleasePercent >= 0, b -> {
             options.dirtReleasePercent = b ? 0 : -1;
-            reload();
+            this.reload();
         })));
         if (options.dirtReleasePercent >= 0) {
             panel.add(GUIUtil.createSpacer());
@@ -480,7 +474,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("this also accounts for appearance based on dirt covers and dynamic wall.")));
 
 
-        if (!(options.resetMode == 2)) return;
+        if (options.resetMode != 2) return;
         // Dynamic wall settings below
 
         panel.add(GUIUtil.createSpacer());
@@ -510,9 +504,11 @@ public class OptionsGUI extends JFrame {
         JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
         resetStyleBox.setSelectedItem(RESET_MODES[options.resetMode]);
         resetStyleBox.addActionListener(e -> {
-            options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
-            reload();
-            julti.reloadManagers();
+            if (resetStyleBox.getSelectedItem() != null) {
+                options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+                this.reload();
+                this.julti.reloadManagers();
+            }
         });
         GUIUtil.setActualSize(resetStyleBox, 120, 23);
 
@@ -535,17 +531,11 @@ public class OptionsGUI extends JFrame {
     }
 
     private void reload() {
-        // Get current index
-        int index = getTabbedPane().getSelectedIndex();
-        // Get current scroll
-        int s = ((JScrollPane) getTabbedPane().getSelectedComponent()).getVerticalScrollBar().getValue();
-        // Reload
-        reloadComponents();
-        // Set index
-        getTabbedPane().setSelectedIndex(index);
-        // Set scroll
-        ((JScrollPane) getTabbedPane().getSelectedComponent()).getVerticalScrollBar().setValue(s);
-
+        int index = this.getTabbedPane().getSelectedIndex();
+        int s = ((JScrollPane) this.getTabbedPane().getSelectedComponent()).getVerticalScrollBar().getValue();
+        this.reloadComponents();
+        this.getTabbedPane().setSelectedIndex(index);
+        ((JScrollPane) this.getTabbedPane().getSelectedComponent()).getVerticalScrollBar().setValue(s);
     }
 
     private void addComponentsWindow() {
@@ -558,7 +548,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Let Julti Manage Windows", "letJultiMoveWindows", b -> this.reload())));
 
         if (!options.letJultiMoveWindows) return;
         panel.add(GUIUtil.createSpacer());
@@ -590,12 +580,11 @@ public class OptionsGUI extends JFrame {
             options.windowPos = monitor.position;
             options.windowSize = monitor.size;
             windowOptions.reload();
-            revalidate();
+            this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
-
 
         final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + options.wideResetSquish + ")");
         panel.add(GUIUtil.leftJustify(squishLabel));
@@ -612,12 +601,12 @@ public class OptionsGUI extends JFrame {
     }
 
     public boolean isClosed() {
-        return closed;
+        return this.closed;
     }
 
     private void onClose() {
-        closed = true;
-        julti.reloadInstancePositions();
-        julti.tryOutputLSInfo();
+        this.closed = true;
+        this.julti.reloadInstancePositions();
+        this.julti.tryOutputLSInfo();
     }
 }

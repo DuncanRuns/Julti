@@ -16,14 +16,14 @@ public class LogPanel extends JPanel {
 
     public LogPanel(Julti julti) {
         this.julti = julti;
-        setupWindow();
+        this.setupWindow();
     }
 
     private void setupWindow() {
-        setLayout(new GridBagLayout());
-        createTextArea();
-        createCommandLine();
-        setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
+        this.setLayout(new GridBagLayout());
+        this.createTextArea();
+        this.createCommandLine();
+        this.setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
     }
 
     private void createTextArea() {
@@ -39,7 +39,7 @@ public class LogPanel extends JPanel {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         ((DefaultCaret) textArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        add(new JScrollPane(textArea), new GridBagConstraints(0, 0, 1, 1, 1, 1, 10, 1, new Insets(0, 0, 0, 0), 0, 0));
+        this.add(new JScrollPane(textArea), new GridBagConstraints(0, 0, 1, 1, 1, 1, 10, 1, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     private void createCommandLine() {
@@ -49,7 +49,7 @@ public class LogPanel extends JPanel {
             String command = e.getActionCommand();
             if (command.startsWith("/")) command = command.substring(1);
             String finalCommand = command;
-            new Thread(() -> julti.runCommand(finalCommand), "julti-gui").start();
+            new Thread(() -> this.julti.runCommand(finalCommand), "julti-gui").start();
             commandLine.setText("");
         });
         commandLine.addFocusListener(new FocusListener() {
@@ -67,6 +67,6 @@ public class LogPanel extends JPanel {
             }
         });
         commandLine.setBorder(new FlatBorder());
-        add(commandLine, new GridBagConstraints(0, 1, 1, 1, 1, 0, 10, 2, new Insets(0, 0, 0, 0), 0, 0));
+        this.add(commandLine, new GridBagConstraints(0, 1, 1, 1, 1, 0, 10, 2, new Insets(0, 0, 0, 0), 0, 0));
     }
 }

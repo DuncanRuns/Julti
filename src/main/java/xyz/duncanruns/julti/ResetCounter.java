@@ -7,9 +7,6 @@ import java.io.IOException;
 public final class ResetCounter {
     private static final Object LOCK = new Object();
 
-    private ResetCounter() {
-    }
-
     public static void increment() {
         synchronized (LOCK) {
             JultiOptions.getInstance().resetCounter += 1;
@@ -23,15 +20,7 @@ public final class ResetCounter {
                 synchronized (LOCK) {
                     FileUtil.writeString(JultiOptions.getJultiDir().resolve("resets.txt"), String.valueOf(JultiOptions.getInstance().resetCounter));
                 }
-            } catch (IOException ignored) {
-            }
+            } catch (IOException ignored) {}
         }, "reset-file-updater").start();
-    }
-
-    public static void set(int amount) {
-        synchronized (LOCK) {
-            JultiOptions.getInstance().resetCounter = amount;
-        }
-        updateFile();
     }
 }

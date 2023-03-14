@@ -5,9 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LogReceiver;
+import xyz.duncanruns.julti.util.requester.CancelRequesters;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,15 +25,13 @@ public class ScriptManager {
             "Start Coping;1;opentolan; chatmessage /gamemode spectator;\n" +
             "Fight Dragon;1;opentolan; chatmessage /gamemode creative; chatmessage /clear; chatmessage /effect give @s minecraft:saturation 10 100; chatmessage /replaceitem entity @s weapon.offhand bread 3; chatmessage /replaceitem entity @s hotbar.8 cobblestone 23; chatmessage /replaceitem entity @s hotbar.7 ender_pearl 5; chatmessage /give @s iron_axe; chatmessage /give @s iron_pickaxe; chatmessage /give @s iron_shovel; chatmessage /give @s water_bucket; chatmessage /give @s flint_and_steel; chatmessage /give @s bread 3; chatmessage /give @s string 60; chatmessage /give @s oak_planks 17; chatmessage /give @s obsidian 4; chatmessage /give @s crafting_table; chatmessage /gamemode survival; chatmessage /give @s oak_boat; chatmessage /setblock ~ ~ ~ end_portal;";
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
-    private static CancelRequester cancelRequester = CancelRequester.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
+    private static CancelRequester CANCEL_REQUESTER = CancelRequesters.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
 
     public static void reload() {
         String scriptsFileContents = "";
         if (Files.exists(SCRIPTS_PATH)) {
-            try {
-                scriptsFileContents = FileUtil.readString(SCRIPTS_PATH);
-            } catch (IOException ignored) {
-            }
+            try { scriptsFileContents = FileUtil.readString(SCRIPTS_PATH); }
+            catch (IOException ignored) {}
         } else {
             scriptsFileContents = DEFAULT_SCRIPTS;
         }
@@ -51,35 +50,30 @@ public class ScriptManager {
         JultiOptions.ensureJultiDir();
         StringBuilder out = new StringBuilder(500);
         SCRIPTS.forEach(script -> out.append(script.toSavableString()).append("\n"));
-        try {
-            FileUtil.writeString(SCRIPTS_PATH, out.toString().trim());
-        } catch (IOException ignored) {
-        }
+        try {FileUtil.writeString(SCRIPTS_PATH, out.toString().trim()); }
+        catch (IOException ignored) {}
     }
 
-    public static boolean runScript(Julti julti, String scriptName) {
-        return runScript(julti, scriptName, false, (byte) 0);
+    public static void runScript(Julti julti, String scriptName) {
+        runScript(julti, scriptName, false, (byte) 0);
     }
 
-    public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
-        if (!cancelRequester.isCancelRequested()) return false;
-        cancelRequester = new CancelRequester();
+    public static void runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
+        if (!CANCEL_REQUESTER.isCancelRequested()) { return; }
+        CANCEL_REQUESTER = new CancelRequester();
 
         Script script = getScript(scriptName);
-        if (!(
-                script != null && (!fromHotkey || (script.getHotkeyContext() & hotkeyContext) > 0)
-        )) return false;
+        if (!(script != null && (!fromHotkey || (script.getHotkeyContext() & hotkeyContext) > 0))) { return; }
 
         new Thread(() -> {
             String[] commands = script.getCommands().split(";");
 
-            for (int i = 0; i < commands.length && !cancelRequester.isCancelRequested(); i++) {
-                julti.runCommand(commands[i], cancelRequester);
+            for (int i = 0; i < commands.length && !CANCEL_REQUESTER.isCancelRequested(); i++) {
+                julti.runCommand(commands[i], CANCEL_REQUESTER);
             }
 
-            cancelRequester.cancel();
+            CANCEL_REQUESTER.cancel();
         }, "script-runner").start();
-        return true;
     }
 
     private static Script getScript(String scriptName) {
@@ -92,13 +86,13 @@ public class ScriptManager {
     }
 
     public static boolean isDuplicateImport(String scriptString) {
-        if (!Script.isSavableString(scriptString)) return false;
+        if (!Script.isSavableString(scriptString)) { return false; }
         Script script = Script.fromSavableString(scriptString);
         return getScript(script.getName()) != null;
     }
 
     public static void requestCancel() {
-        if (cancelRequester.cancel()) {
+        if (CANCEL_REQUESTER.cancel()) {
             log(Level.INFO, "Script canceled");
         }
     }
@@ -108,28 +102,21 @@ public class ScriptManager {
         LogReceiver.receive(level, message);
     }
 
-    public static boolean forceAddScript(String savableString) {
-        if (!Script.isSavableString(savableString)) {
-            return false;
-        }
+    public static void forceAddScript(String savableString) {
+        if (!Script.isSavableString(savableString)) { return; }
         Script newScript = Script.fromSavableString(savableString);
         removeScript(newScript.getName());
         addScript(savableString);
-        return true;
     }
 
-    public static boolean removeScript(String name) {
+    public static void removeScript(String name) {
         if (SCRIPTS.removeIf(script -> script.getName().equalsIgnoreCase(name.trim()))) {
             save();
-            return true;
         }
-        return false;
     }
 
     public static boolean addScript(String savableString) {
-        if (!Script.isSavableString(savableString)) {
-            return false;
-        }
+        if (!Script.isSavableString(savableString)) { return false; }
         Script newScript = Script.fromSavableString(savableString);
         // If any script name matches the new script name
         if (SCRIPTS.stream().anyMatch(script -> script.getName().equalsIgnoreCase(newScript.getName()))) {

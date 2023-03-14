@@ -1,15 +1,13 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
 import java.util.List;
 
 public class LaunchCommand extends Command {
-
     @Override
     public String helpDescription() {
         return "launch [instances] - Launches the specified instances\nlaunch all - Launch all instances";
@@ -32,14 +30,9 @@ public class LaunchCommand extends Command {
 
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
-        List<MinecraftInstance> toLaunch;
-        if (args[0].equals("all")) toLaunch = julti.getInstanceManager().getInstances();
-        else toLaunch = CommandManager.getInstances(args[0], julti);
-
-        if (toLaunch.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
+        List<MinecraftInstance> toLaunch = this.getInstancesFromArg(args[0], julti);
+        if (toLaunch.size() > 0) {
+            SafeInstanceLauncher.launchInstances(toLaunch, cancelRequester);
         }
-        SafeInstanceLauncher.launchInstances(toLaunch, cancelRequester);
     }
 }

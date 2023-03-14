@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 import xyz.duncanruns.julti.util.SoundUtil;
 
 import java.nio.file.Files;
@@ -41,11 +41,13 @@ public class PlaysoundCommand extends Command {
             SoundUtil.playSound(pathFromSoundsFolder.toFile(), volume);
             return;
         }
+
         Path wholePath = Paths.get(soundString);
         if (Files.isRegularFile(wholePath)) {
             SoundUtil.playSound(wholePath.toFile(), volume);
             return;
         }
+
         log(Level.ERROR, "Playsound file location could not be determined!");
     }
 }

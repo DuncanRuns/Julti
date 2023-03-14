@@ -19,23 +19,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class GUIUtil {
-    private GUIUtil() {
-    }
-
     public static Component leftJustify(Component component) {
         Box b = Box.createHorizontalBox();
         b.add(component);
         b.add(Box.createHorizontalGlue());
         return b;
-    }
-
-    public static JPanel withConstantSize(Component component, Dimension dimension) {
-        JPanel panel = new JPanel();
-        panel.getInsets().set(0, 0, 0, 0);
-        panel.setSize(dimension);
-        panel.setPreferredSize(dimension);
-        panel.add(component);
-        return panel;
     }
 
     public static JSeparator createSeparator() {
@@ -56,15 +44,18 @@ public final class GUIUtil {
 
         JButton button = new JButton(buttonTextGetter.get());
         return getButtonWithMethod(button, actionEvent -> {
-            String ans = (String) JOptionPane.showInputDialog(parent, "Input a new value for " + displayName + ":", "Julti: Set Option", JOptionPane.QUESTION_MESSAGE, null, null, JultiOptions.getInstance().getValue(optionName).toString());
-            if (ans == null) return;
+            Object value = JultiOptions.getInstance().getValue(optionName);
+            if (value == null) { return; }
+            String ans = (String) JOptionPane.showInputDialog(parent, "Input a new value for " + displayName + ":", "Julti: Set Option", JOptionPane.QUESTION_MESSAGE, null, null, value.toString());
+            if (ans == null) { return; }
             // If there is a suffix, the answer ends in the suffix, and the answer isn't just equal to the suffix
-            if ((!valueSuffix.isEmpty()) && ans.endsWith(valueSuffix) && (!ans.equals(valueSuffix))) {
+            if (!valueSuffix.isEmpty() && ans.endsWith(valueSuffix) && !ans.equals(valueSuffix)) {
                 // Shorten the answer by the length of the answer
                 ans = ans.substring(0, ans.length() - valueSuffix.length());
             }
-            if (!JultiOptions.getInstance().trySetValue(optionName, ans))
+            if (!JultiOptions.getInstance().trySetValue(optionName, ans)){
                 JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
+            }
             button.setText(buttonTextGetter.get());
         });
     }
@@ -88,6 +79,7 @@ public final class GUIUtil {
         final JultiOptions options = JultiOptions.getInstance();
 
         String currentValue = options.getValueString(optionName);
+        if (currentValue == null) { return null; }
         JButton button = new JButton(currentValue.isEmpty() ? "No File Selected" : currentValue);
 
         Path fStartingLocation = startingLocation == null ? Paths.get(currentValue) : startingLocation;
@@ -95,7 +87,8 @@ public final class GUIUtil {
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((!options.getValueString(optionName).isEmpty()) && e.getButton() == 3) {
+                String value = options.getValueString(optionName);
+                if (value != null && !value.isEmpty() && e.getButton() == 3) {
                     int ans = JOptionPane.showConfirmDialog(parent, "Clear file selection?", "Julti: Clear file selection", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                     if (ans == 0) {
                         options.trySetValue(optionName, "");
@@ -123,7 +116,6 @@ public final class GUIUtil {
     }
 
     public static JComponent createScriptHotkeyChangeButton(final String scriptName, Julti julti, Runnable reloadFunction) {
-
         ScriptHotkeyData data = JultiOptions.getInstance().getScriptHotkeyData(scriptName);
 
         JButton button = new JButton(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
@@ -139,7 +131,7 @@ public final class GUIUtil {
             }
         });
         button.addActionListener(e -> {
-            HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
+            HotkeyUtil.onNextHotkey(julti::isRunning, hotkey -> {
                 data.keys = hotkey.getKeys();
                 JultiOptions.getInstance().setScriptHotkey(data);
                 button.setText(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
@@ -147,7 +139,6 @@ public final class GUIUtil {
             });
             button.setText(scriptName + ": ...");
         });
-
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -177,6 +168,7 @@ public final class GUIUtil {
         return jCheckBox;
     }
 
+    @SuppressWarnings("unchecked")
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
@@ -194,7 +186,7 @@ public final class GUIUtil {
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
+                HotkeyUtil.onNextHotkey(julti::isRunning, hotkey -> {
                     JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
                     button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
                     julti.setupHotkeys();
@@ -210,6 +202,7 @@ public final class GUIUtil {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         JCheckBox checkBox = createCheckBoxFromOption("", optionName + "IM", b -> julti.setupHotkeys());
+        if (checkBox == null) { return null; }
         checkBox.setToolTipText("Ignore Extra Keys");
         panel.add(checkBox);
         panel.add(button);
@@ -218,10 +211,13 @@ public final class GUIUtil {
     }
 
     public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
-        return createCheckBox(label, (Boolean) JultiOptions.getInstance().getValue(optionName), val -> {
+        Object value = JultiOptions.getInstance().getValue(optionName);
+        if (value == null) { return null; }
+        return createCheckBox(label, (Boolean) value, val -> {
             JultiOptions.getInstance().trySetValue(optionName, String.valueOf(val));
-            if (afterSet != null)
+            if (afterSet != null) {
                 afterSet.accept(val);
+            }
         });
     }
 
@@ -239,7 +235,9 @@ public final class GUIUtil {
 
     public static Component createThreadsSlider(String displayName, String optionName) {
         JultiOptions options = JultiOptions.getInstance();
-        int current = (Integer) options.getValue(optionName);
+        Object value = options.getValue(optionName);
+        if (value == null) { return null; }
+        int current = (Integer) value;
         current = Math.max(1, Math.min(AffinityManager.AVAILABLE_THREADS, current));
 
         JPanel panel = new JPanel();
@@ -273,7 +271,9 @@ public final class GUIUtil {
 
     public static JComponent createVolumeSlider(String optionName) {
         JultiOptions options = JultiOptions.getInstance();
-        int current = (int) (((Float) options.getValue(optionName)) * 100);
+        Object value = options.getValue(optionName);
+        if (value == null) { return null; }
+        int current = (int) (((Float) value) * 100);
         current = Math.max(0, Math.min(100, current));
 
         JPanel panel = new JPanel();

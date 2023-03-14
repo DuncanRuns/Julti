@@ -1,14 +1,12 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 
 import java.util.List;
 
 public class ResetCommand extends Command {
-
     @Override
     public String helpDescription() {
         return "reset [instances] - Resets the specified instances\nreset all - Resets all instances";
@@ -31,14 +29,7 @@ public class ResetCommand extends Command {
 
     @Override
     public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
-        List<MinecraftInstance> toReset;
-        if (args[0].equals("all")) toReset = julti.getInstanceManager().getInstances();
-        else toReset = CommandManager.getInstances(args[0], julti);
-
-        if (toReset.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
-        }
+        List<MinecraftInstance> toReset = this.getInstancesFromArg(args[0], julti);
         toReset.forEach(i -> julti.getResetManager().resetInstance(i));
     }
 }

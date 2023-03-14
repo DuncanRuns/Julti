@@ -6,6 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileUtil {
+    public static void createEmptyFile(Path path) throws IOException {
+        writeString(path, "");
+    }
+
     public static void writeString(Path path, String string) throws IOException {
         FileWriter writer = new FileWriter(path.toFile());
         writer.write(string);

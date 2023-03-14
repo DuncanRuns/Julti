@@ -10,25 +10,23 @@ import javax.swing.text.NumberFormatter;
 import java.text.NumberFormat;
 
 public class WindowOptionComponent extends JPanel {
-
     public WindowOptionComponent() {
-        setLayout(new BoxLayout(this, 1));
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        reload();
+        this.reload();
     }
 
     public void reload() {
-        removeAll();
-        add(GUIUtil.leftJustify(new JLabel("Window Position")));
-        add(GUIUtil.leftJustify(getPositionPanel()));
-        add(GUIUtil.leftJustify(new JLabel("Window Size")));
-        add(GUIUtil.leftJustify(getSizePanel()));
-
+        this.removeAll();
+        this.add(GUIUtil.leftJustify(new JLabel("Window Position")));
+        this.add(GUIUtil.leftJustify(getPositionPanel()));
+        this.add(GUIUtil.leftJustify(new JLabel("Window Size")));
+        this.add(GUIUtil.leftJustify(getSizePanel()));
     }
 
     private static JPanel getPositionPanel() {
         JPanel positionPanel = new JPanel();
-        positionPanel.setLayout(new BoxLayout(positionPanel, 0));
+        positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.X_AXIS));
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
         NumberFormatter formatter = new NumberFormatter(format);
@@ -46,17 +44,17 @@ public class WindowOptionComponent extends JPanel {
         DocumentListener documentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             private void update() {
@@ -72,7 +70,7 @@ public class WindowOptionComponent extends JPanel {
 
     private static JPanel getSizePanel() {
         JPanel positionPanel = new JPanel();
-        positionPanel.setLayout(new BoxLayout(positionPanel, 0));
+        positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.X_AXIS));
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
         NumberFormatter formatter = new NumberFormatter(format);
@@ -90,17 +88,17 @@ public class WindowOptionComponent extends JPanel {
         DocumentListener documentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             private void update() {

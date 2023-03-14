@@ -12,7 +12,7 @@ public class SoundUtil {
      */
     public static void playSound(String soundPath, float volume) {
         soundPath = soundPath.trim();
-        if (soundPath.isEmpty()) return;
+        if (soundPath.isEmpty()) { return; }
         playSound(new File(soundPath), volume);
     }
 
@@ -35,7 +35,7 @@ public class SoundUtil {
             // https://stackoverflow.com/questions/40514910/set-volume-of-java-clip
             // Thanks to the anonymous user7106805
             FloatControl gainControl = ((FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN));
-            gainControl.setValue(((gainControl.getMaximum() - gainControl.getMinimum()) * volume) + gainControl.getMinimum());
+            gainControl.setValue((gainControl.getMaximum() - gainControl.getMinimum()) * volume + gainControl.getMinimum());
 
             clip.loop(0);
             clip.addLineListener(e -> {
@@ -44,7 +44,6 @@ public class SoundUtil {
                 }
             });
             clip.start();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 }

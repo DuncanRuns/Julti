@@ -6,8 +6,7 @@ import java.util.regex.Pattern;
 public class WindowTitleInfo {
     private static final Pattern MC_PATTERN = Pattern.compile("^Minecraft\\*? 1\\.[1-9]\\d*(\\.[1-9]\\d*)?( .*)?$");
     private static final String DEFAULT_TITLE = "Minecraft* 1.16.1";
-
-    private String title;
+    private final String title;
 
     public WindowTitleInfo(String title) {
         this.title = title;
@@ -15,12 +14,6 @@ public class WindowTitleInfo {
 
     public WindowTitleInfo() {
         this.title = "None";
-    }
-
-    public void provide(String title) {
-        if (waiting() && MC_PATTERN.matcher(title).matches()) {
-            this.title = title;
-        }
     }
 
     public boolean waiting() {
@@ -37,7 +30,7 @@ public class WindowTitleInfo {
     }
 
     public String getOriginalTitle() {
-        if (!waiting()) {
+        if (!this.waiting()) {
             return this.title;
         }
         return DEFAULT_TITLE;
@@ -53,11 +46,11 @@ public class WindowTitleInfo {
         }
 
         public int getMajor() {
-            return major;
+            return this.major;
         }
 
         public int getMinor() {
-            return minor;
+            return this.minor;
         }
     }
 }

@@ -1,7 +1,7 @@
 package xyz.duncanruns.julti.win32;
 
+@SuppressWarnings("UnusedDeclaration")
 public interface Win32Con {
-
     // Keys
     int VK_LBUTTON = 1;
     int VK_RBUTTON = 2;

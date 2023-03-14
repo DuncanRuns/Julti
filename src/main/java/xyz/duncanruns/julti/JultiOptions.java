@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"UnusedDeclaration", "CanBeFinal"})
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
     private static JultiOptions INSTANCE = null;
@@ -95,7 +96,6 @@ public final class JultiOptions {
     public boolean launchOffline = false;
     public String launchOfflineName = "Instance*";
     public int resetCounter = 0;
-
 
     // Affinity
     public boolean useAffinity = true;
@@ -174,39 +174,33 @@ public final class JultiOptions {
         return jultiDir.resolve("profiles").resolve("default.json");
     }
 
-    public boolean tryLoad() {
-        if (Files.isRegularFile(location)) {
+    public void tryLoad() {
+        if (Files.isRegularFile(this.location)) {
             try {
                 // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(FileUtil.readString(location), JultiOptions.class);
-                return true;
-            } catch (Exception ignored) {
-            }
+                gson.fromJson(FileUtil.readString(this.location), JultiOptions.class);
+            } catch (Exception ignored) {}
         }
-        return false;
     }
 
     public static Path getJultiDir() {
         return Paths.get(System.getProperty("user.home")).resolve(".Julti");
     }
 
-    public static boolean changeProfile(String profileName) {
+    public static void changeProfile(String profileName) {
         Path selectedFilePath = getJultiDir().resolve("selectedprofile.txt");
         try {
             ensureJultiDir();
             FileUtil.writeString(selectedFilePath, profileName);
             INSTANCE = null;
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
+        } catch (Exception ignored) {}
     }
 
     public static void ensureJultiDir() {
         // Special care is needed to make a .Julti folder for some reason...
         // Using Files.createDirectories on a path.getParent() would create .Julti as a file for some reason.
-        new File((System.getProperty("user.home") + "/.Julti/").replace("\\", "/").replace("//", "/")).mkdirs();
+        boolean ignored = new File((System.getProperty("user.home") + "/.Julti/").replace("\\", "/").replace("//", "/")).mkdirs();
     }
 
     /**
@@ -220,13 +214,14 @@ public final class JultiOptions {
         names.add(first);
         String[] profiles = getJultiDir().resolve("profiles").toFile().list();
         if (profiles == null || profiles.length == 0) {
-            profiles = new String[]{"default"};
+            profiles = new String[] { "default" };
         }
         Arrays.stream(profiles).iterator().forEachRemaining(s -> {
             if (s.endsWith(".json")) {
                 String nextName = s.substring(0, s.length() - 5);
-                if (!nextName.equals(first))
+                if (!nextName.equals(first)) {
                     names.add(nextName);
+                }
             }
         });
         return names.toArray(new String[0]);
@@ -238,36 +233,33 @@ public final class JultiOptions {
         return fileName.substring(0, fileName.length() - 5);
     }
 
-    public static boolean removeProfile(String profileName) {
+    public static void removeProfile(String profileName) {
         Path resolve = getSelectedProfilePath().resolveSibling(profileName + ".json");
-        return resolve.toFile().delete();
+        boolean ignored = resolve.toFile().delete();
     }
 
     public String testJson() {
         return GSON_WRITER.toJson(this);
     }
 
-    public boolean trySave() {
+    public void trySave() {
         try {
             ensureJultiDir();
-            Files.createDirectories(location.getParent());
-            FileUtil.writeString(location, GSON_WRITER.toJson(this));
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
+            Files.createDirectories(this.location.getParent());
+            FileUtil.writeString(this.location, GSON_WRITER.toJson(this));
+        } catch (Exception ignored) {}
     }
 
     public String getProfileName() {
-        return profileName;
+        return this.profileName;
     }
 
     public List<Path> getLastInstancePaths() {
-        return lastInstances.stream().map(Paths::get).collect(Collectors.toList());
+        return this.lastInstances.stream().map(Paths::get).collect(Collectors.toList());
     }
 
     public String getValueString(String optionName) {
-        Object value = getValue(optionName);
+        Object value = this.getValue(optionName);
         if (value == null) return null;
         if (value.getClass().isArray()) {
             List<Object> objectList = new ArrayList<>();
@@ -282,10 +274,9 @@ public final class JultiOptions {
     @Nullable
     public Object getValue(String optionName) {
         Field optionField = null;
-        try {
-            optionField = getClass().getField(optionName);
-        } catch (NoSuchFieldException ignored) {
-        }
+        try { optionField = getClass().getField(optionName); }
+        catch (NoSuchFieldException ignored) {}
+
         if (optionField == null || Modifier.isTransient(optionField.getModifiers())) {
             return null;
         }
@@ -305,24 +296,24 @@ public final class JultiOptions {
                 return null;
             }
         } else {
-            try {
-                return optionField.get(this);
-            } catch (IllegalAccessException ignored) {
-            }
+            try { return optionField.get(this); }
+            catch (IllegalAccessException ignored) {}
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public HotkeyUtil.Hotkey getHotkeyFromSetting(String name) {
         List<Integer> keys = (List<Integer>) getValue(name);
-        boolean ignoreModifiers = (Boolean) getValue(name + "IM");
+        Object value = getValue(name + "IM");
+        boolean ignoreModifiers = value != null && (Boolean) value;
         return ignoreModifiers ? new HotkeyUtil.HotkeyIM(keys) : new HotkeyUtil.Hotkey(keys);
     }
 
     public ScriptHotkeyData getScriptHotkeyData(String scriptName) {
         ScriptHotkeyData out = null;
 
-        for (ScriptHotkeyData replaceData : scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).collect(Collectors.toList())) {
+        for (ScriptHotkeyData replaceData : this.scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).collect(Collectors.toList())) {
             if (replaceData.scriptName.equals(scriptName)) {
                 out = replaceData;
                 break;
@@ -336,17 +327,17 @@ public final class JultiOptions {
     }
 
     public void setScriptHotkey(ScriptHotkeyData data) {
-        scriptHotkeys.removeIf(s -> {
+        this.scriptHotkeys.removeIf(s -> {
             ScriptHotkeyData scriptHotkeyData = ScriptHotkeyData.parseString(s);
-            if (scriptHotkeyData == null) return true;
+            if (scriptHotkeyData == null) { return true; }
             return scriptHotkeyData.scriptName.equals(data.scriptName);
         });
-        scriptHotkeys.add(data.toString());
+        this.scriptHotkeys.add(data.toString());
     }
 
     @Override
     public int hashCode() {
-        return location.hashCode();
+        return this.location.hashCode();
     }
 
     public List<String> getOptionNamesWithType() {
@@ -389,29 +380,22 @@ public final class JultiOptions {
                 optionField.set(this, valueString);
                 return true;
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         return false;
     }
 
-    public boolean trySetHotkey(String optionName, List<Integer> keys) {
+    public void trySetHotkey(String optionName, List<Integer> keys) {
         try {
             Field optionField = getClass().getField(optionName);
             optionField.set(this, keys);
-            return true;
-        } catch (Exception ignored) {
-        }
-        return false;
+        } catch (Exception ignored) {}
     }
 
-    public boolean copyTo(String profileName) {
+    public void copyTo(String profileName) {
         try {
             ensureJultiDir();
-            Files.createDirectories(location.getParent());
-            FileUtil.writeString(location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
+            Files.createDirectories(this.location.getParent());
+            FileUtil.writeString(this.location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
+        } catch (Exception ignored) {}
     }
 }

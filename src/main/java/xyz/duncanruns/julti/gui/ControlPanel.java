@@ -15,13 +15,11 @@ import java.io.IOException;
 import java.util.List;
 
 public class ControlPanel extends JPanel {
-    private final Julti julti;
     private OptionsGUI optionsGUI = null;
     private ScriptsGUI scriptsGUI = null;
 
     public ControlPanel(Julti julti, JultiGUI gui) {
-        this.julti = julti;
-        setLayout(new GridBagLayout());
+        this.setLayout(new GridBagLayout());
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.ipadx = 5;
         gbc2.ipady = 5;
@@ -32,8 +30,8 @@ public class ControlPanel extends JPanel {
 
         Component thisComponent = this;
 
-        setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
-        add(GUIUtil.getButtonWithMethod(new JButton("Instance Utilities..."), a -> {
+        this.setBorder(new FlatMarginBorder(new Insets(5, 5, 5, 5)));
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Instance Utilities..."), a -> {
             JPopupMenu menu = new JPopupMenu("Instance Utilities");
 
             GUIUtil.addMenuItem(menu, "Redetect Instances", new AbstractAction() {
@@ -93,9 +91,9 @@ public class ControlPanel extends JPanel {
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
 
-        // add(GUIUtil.createSpacer(2), gbc2);
+        // this.add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("File Utilities..."), a -> {
+        this.add(GUIUtil.getButtonWithMethod(new JButton("File Utilities..."), a -> {
             JPopupMenu menu = new JPopupMenu("File Utilities");
 
             GUIUtil.addMenuItem(menu, "Clear Worlds", new AbstractAction() {
@@ -127,28 +125,28 @@ public class ControlPanel extends JPanel {
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
 
-        // add(GUIUtil.createSpacer(2), gbc2);
+        // this.add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> {
-            if (scriptsGUI == null || scriptsGUI.isClosed()) {
-                scriptsGUI = new ScriptsGUI(julti, gui);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> {
+            if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
+                this.scriptsGUI = new ScriptsGUI(julti, gui);
             } else {
-                scriptsGUI.requestFocus();
+                this.scriptsGUI.requestFocus();
             }
         }), gbc);
 
-        // add(GUIUtil.createSpacer(2), gbc2);
+        // this.add(GUIUtil.createSpacer(2), gbc2);
 
-        add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> {
-            if (optionsGUI == null || optionsGUI.isClosed()) {
-                optionsGUI = new OptionsGUI(julti, gui);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> {
+            if (this.optionsGUI == null || this.optionsGUI.isClosed()) {
+                this.optionsGUI = new OptionsGUI(julti, gui);
             } else {
-                optionsGUI.requestFocus();
+                this.optionsGUI.requestFocus();
             }
         }), gbc);
     }
 
     public OptionsGUI getOptionsGUI() {
-        return optionsGUI;
+        return this.optionsGUI;
     }
 }

@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -52,7 +52,7 @@ public class WaitCommand extends Command {
                     log(Level.ERROR, "Invalid wait argument! Please use launch, previewload, or load.");
                     return;
             }
-            while ((!cancelRequester.isCancelRequested()) && (!supplier.getAsBoolean())) {
+            while (!cancelRequester.isCancelRequested() && !supplier.getAsBoolean()) {
                 sleep(50);
             }
         }

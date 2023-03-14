@@ -16,9 +16,6 @@ public final class SyncUtil {
     private static final Logger LOGGER = LogManager.getLogger("SyncUtil");
     private static final Object LOCK = new Object();
 
-    private SyncUtil() {
-    }
-
     public static void sync(List<MinecraftInstance> instances, MinecraftInstance sourceInstance, boolean copyMods, boolean copyConfigs) throws IOException {
         synchronized (LOCK) {
             if (!copyConfigs && !copyMods) return;
@@ -60,7 +57,7 @@ public final class SyncUtil {
                 if (Files.isRegularFile(sourceOptionsPath)) {
                     for (Path destinationPath : destinationPaths) {
                         Path destinationOptionsPath = destinationPath.resolve("options.txt");
-                        destinationOptionsPath.toFile().delete();
+                        boolean ignored = destinationOptionsPath.toFile().delete();
                         log(Level.INFO, "Syncing options.txt file: " + sourcePath + " -> " + destinationPath);
                         FileUtils.copyFile(sourceOptionsPath.toFile(), destinationOptionsPath.toFile());
                     }
@@ -82,7 +79,6 @@ public final class SyncUtil {
             } else if (copyConfigs) {
                 log(Level.WARN, "Source instance has no config folder!");
             }
-
             log(Level.INFO, "Sync finished!");
         }
     }

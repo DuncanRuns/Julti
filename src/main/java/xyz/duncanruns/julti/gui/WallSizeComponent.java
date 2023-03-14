@@ -10,22 +10,21 @@ import javax.swing.text.NumberFormatter;
 import java.text.NumberFormat;
 
 public class WallSizeComponent extends JPanel {
-
     public WallSizeComponent() {
-        setLayout(new BoxLayout(this, 1));
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        reload();
+        this.reload();
     }
 
     public void reload() {
-        removeAll();
-        add(GUIUtil.leftJustify(new JLabel("Wall Size (rows x columns)")));
-        add(GUIUtil.leftJustify(getSizePanel()));
+        this.removeAll();
+        this.add(GUIUtil.leftJustify(new JLabel("Wall Size (rows x columns)")));
+        this.add(GUIUtil.leftJustify(getSizePanel()));
     }
 
     private static JPanel getSizePanel() {
         JPanel sizePanel = new JPanel();
-        sizePanel.setLayout(new BoxLayout(sizePanel, 0));
+        sizePanel.setLayout(new BoxLayout(sizePanel, BoxLayout.X_AXIS));
         NumberFormat format = NumberFormat.getInstance();
         format.setGroupingUsed(false);
         NumberFormatter formatter = new NumberFormatter(format);
@@ -43,17 +42,17 @@ public class WallSizeComponent extends JPanel {
         DocumentListener documentListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                update();
+                this.update();
             }
 
             private void update() {

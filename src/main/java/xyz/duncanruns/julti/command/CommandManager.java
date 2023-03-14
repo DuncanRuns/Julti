@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.util.*;
@@ -24,6 +24,7 @@ public class CommandManager {
         if (!INSTANCES_ARG_PATTERN.matcher(instancesArg).matches()) {
             return Collections.emptyList();
         }
+
         List<MinecraftInstance> out = new ArrayList<>();
         List<MinecraftInstance> allInstances = julti.getInstanceManager().getInstances();
 
@@ -35,6 +36,7 @@ public class CommandManager {
             }
         }
         out.removeIf(Objects::isNull);
+
         return out;
     }
 
@@ -54,7 +56,7 @@ public class CommandManager {
     }
 
     public void runCommand(String command, Julti julti, CancelRequester cancelRequester) {
-        if (command.isEmpty()) return;
+        if (command.isEmpty()) { return; }
         runCommand(command.trim().split(" "), julti, cancelRequester);
     }
 
@@ -63,9 +65,11 @@ public class CommandManager {
             log(Level.INFO, "Commands:\n\n" + getDescriptions(true));
             return;
         }
+
         boolean foundCommand = false;
+
         for (Command command : commands) {
-            if (!command.getName().equals(commandWords[0])) continue;
+            if (!command.getName().equals(commandWords[0])) { continue; }
             foundCommand = true;
             String[] args = withoutFirst(commandWords);
             if (args.length < command.getMinArgs() || args.length > command.getMaxArgs()) {
@@ -76,11 +80,12 @@ public class CommandManager {
                 command.run(args, julti, cancelRequester);
                 return;
             } catch (Exception e) {
-                if (e.getClass() == RuntimeException.class) log(Level.ERROR, "Command failed:\n" + e);
-                else log(Level.ERROR, "Command failed:\n" + e);
+                if (e.getClass() == RuntimeException.class) { log(Level.ERROR, "Command failed:\n" + e); }
+                else { log(Level.ERROR, "Command failed:\n" + e); }
             }
         }
-        if (!foundCommand) log(Level.WARN, "Command does not exists.");
+
+        if (!foundCommand) { log(Level.WARN, "Command does not exists."); }
     }
 
     public static void log(Level level, String message) {

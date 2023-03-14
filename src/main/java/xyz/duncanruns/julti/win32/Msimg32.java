@@ -4,6 +4,7 @@ import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.win32.StdCallLibrary;
 
+@SuppressWarnings("UnusedDeclaration")
 public interface Msimg32 extends StdCallLibrary {
     Msimg32 INSTANCE = Native.load("msimg32", Msimg32.class);
 

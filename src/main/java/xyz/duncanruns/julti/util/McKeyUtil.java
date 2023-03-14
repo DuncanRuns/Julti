@@ -8,9 +8,6 @@ import java.util.Hashtable;
 public final class McKeyUtil {
     public static final Dictionary<String, Integer> TRANSLATIONS_TO_GLFW = getTranslationsToGLFW();
 
-    private McKeyUtil() {
-    }
-
     private static Dictionary<String, Integer> getTranslationsToGLFW() {
         Hashtable<String, Integer> table = new Hashtable<>();
         table.put("key.keyboard.unknown", -1);
@@ -259,8 +256,7 @@ public final class McKeyUtil {
             return Win32Con.VK_APPS;  // Might be wrong
         if (key == 283)  // Print screen
             return Win32Con.VK_SNAPSHOT;
-        if (key == 161 || key == 162)  // what even are these "world" keys
-            return -1; // Definitely wrong
+        // what even are these "world" keys
         return -1;
     }
 }

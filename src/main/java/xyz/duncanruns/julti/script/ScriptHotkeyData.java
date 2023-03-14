@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ScriptHotkeyData {
-    public String scriptName;
+    public final String scriptName;
     public boolean ignoreModifiers;
     public List<Integer> keys;
 
@@ -42,10 +42,10 @@ public class ScriptHotkeyData {
     @Override
     public String toString() {
         final StringBuilder keysOut = new StringBuilder();
-        keys.forEach(integer -> {
-            if (!keysOut.toString().isEmpty()) keysOut.append(",");
+        this.keys.forEach(integer -> {
+            if (!keysOut.toString().isEmpty()) { keysOut.append(","); }
             keysOut.append(integer);
         });
-        return scriptName + ":" + ignoreModifiers + ";" + keysOut;
+        return this.scriptName + ":" + this.ignoreModifiers + ";" + keysOut;
     }
 }

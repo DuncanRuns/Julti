@@ -15,9 +15,6 @@ public final class HotkeyUtil {
     private static final List<SingleHotkeyChecker> GLOBAL_HOTKEYS = Collections.synchronizedList(new ArrayList<>());
     private static ScheduledExecutorService GLOBAL_HOTKEY_EXECUTOR = null;
 
-    private HotkeyUtil() {
-    }
-
     /**
      * This method is <b>non-blocking</b>.
      * Starts a background task which waits for a hotkey to be pressed. Once a hotkey is pressed, it will be accepted
@@ -58,7 +55,7 @@ public final class HotkeyUtil {
      * @param runnable the method to be run when the hotkey is pressed
      */
     public static void addGlobalHotkey(Hotkey hotkey, Runnable runnable) {
-        if (hotkey.isEmpty()) return;
+        if (hotkey.isEmpty()) { return; }
         GLOBAL_HOTKEYS.add(new SingleHotkeyChecker(hotkey, runnable));
     }
 
@@ -83,20 +80,14 @@ public final class HotkeyUtil {
 
     /**
      * Stops the global hotkey checker if it exists.
-     *
-     * @return true if a global hotkey checker existed and was closed
      */
-    public static boolean stopGlobalHotkeyChecker() {
+    public static void stopGlobalHotkeyChecker() {
         if (GLOBAL_HOTKEY_EXECUTOR != null && !GLOBAL_HOTKEY_EXECUTOR.isShutdown()) {
             GLOBAL_HOTKEY_EXECUTOR.shutdown();
-            try {
-                GLOBAL_HOTKEY_EXECUTOR.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException ignored) {
-            }
+            try { boolean ignored = GLOBAL_HOTKEY_EXECUTOR.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS); }
+            catch (InterruptedException ignored) {}
             GLOBAL_HOTKEY_EXECUTOR = null;
-            return true;
         }
-        return false;
     }
 
     public static String formatKeys(List<Integer> keys) {
@@ -113,28 +104,28 @@ public final class HotkeyUtil {
         }
 
         public void check() {
-            if (hotkey.wasPressed()) {
-                new Thread(runnable, "hotkeys").start();
+            if (this.hotkey.wasPressed()) {
+                new Thread(this.runnable, "hotkeys").start();
             }
         }
     }
 
     public static class Hotkey {
-
         protected final List<Integer> keys;
         private boolean hasBeenPressed;
 
         // Should only be used in extended classes
+        @SuppressWarnings("UnusedDeclaration")
         private Hotkey() {
-            keys = null;
-            hasBeenPressed = true;
+            this.keys = null;
+            this.hasBeenPressed = true;
         }
 
         public Hotkey(List<Integer> keys) {
             // Copy the list by wrapping in the ArrayList constructor, and use unmodifiableList to give an unmodifiable view of it.
             // This is the best way to prevent the hotkey from being tampered with, which also keeps it thread-safe.
             this.keys = new ArrayList<>(keys);
-            hasBeenPressed = false;
+            this.hasBeenPressed = false;
         }
 
         /**
@@ -143,7 +134,7 @@ public final class HotkeyUtil {
          * @return an unmodifiable list of integers representing the windows virtual-key codes for the hotkey
          */
         public List<Integer> getKeys() {
-            return keys;
+            return this.keys;
         }
 
         /**
@@ -152,16 +143,16 @@ public final class HotkeyUtil {
          * Re-pressing modifier keys will not cause the method to return true.
          * The method will need to be called often to ensure intended results.
          *
-         * @return true if called consistenly and follows the descriptions
+         * @return true if called consistently and follows the descriptions
          */
         public boolean wasPressed() {
             if (isPressed()) {
-                if (!hasBeenPressed) {
-                    hasBeenPressed = true;
+                if (!this.hasBeenPressed) {
+                    this.hasBeenPressed = true;
                     return true;
                 }
             } else {
-                hasBeenPressed = isMainKeyPressed();
+                this.hasBeenPressed = this.isMainKeyPressed();
             }
             return false;
         }
@@ -174,13 +165,16 @@ public final class HotkeyUtil {
          */
         public boolean isPressed() {
             // If any keys belonging to the hotkey are not pressed, return false
-            for (int vKey : keys) {
-                if (!KeyboardUtil.isPressed(vKey)) return false;
+            if (this.keys == null) { return false; }
+            for (int vKey : this.keys) {
+                if (!KeyboardUtil.isPressed(vKey)) {
+                    return false;
+                }
             }
 
             // If any modifier keys that do not belong to the hotkey are pressed, return false
             for (int vKey : KeyboardUtil.SINGLE_MODIFIERS) {
-                if (!keys.contains(vKey) && KeyboardUtil.isPressed(vKey)) {
+                if (!this.keys.contains(vKey) && KeyboardUtil.isPressed(vKey)) {
                     return false;
                 }
             }
@@ -194,7 +188,8 @@ public final class HotkeyUtil {
          * @return true if any non-modifier key is pressed
          */
         public boolean isMainKeyPressed() {
-            for (int vKey : keys) {
+            if (this.keys == null) { return false; }
+            for (int vKey : this.keys) {
                 if (!KeyboardUtil.ALL_MODIFIERS.contains(vKey) && KeyboardUtil.isPressed(vKey)) {
                     return true;
                 }
@@ -209,13 +204,14 @@ public final class HotkeyUtil {
 
             Hotkey hotkey = (Hotkey) o;
 
-            return Objects.equals(keys, hotkey.keys);
+            return Objects.equals(this.keys, hotkey.keys);
         }
 
         @Override
         public String toString() {
             StringBuilder out = new StringBuilder();
-            for (int vKey : keys) {
+            if (this.keys == null) { return ""; }
+            for (int vKey : this.keys) {
                 if (!out.toString().isEmpty()) {
                     out.append(" + ");
                 }
@@ -225,7 +221,7 @@ public final class HotkeyUtil {
         }
 
         public boolean isEmpty() {
-            return keys.size() == 0;
+            return this.keys == null || this.keys.size() == 0;
         }
     }
 
@@ -233,7 +229,6 @@ public final class HotkeyUtil {
      * Much like the regular Hotkey class, except ignores extra pressed modifier keys.
      */
     public static class HotkeyIM extends Hotkey {
-
         public HotkeyIM(List<Integer> keys) {
             super(keys);
         }
@@ -241,7 +236,8 @@ public final class HotkeyUtil {
         @Override
         public boolean isPressed() {
             // If any keys belonging to the hotkey are not pressed, return false
-            for (int vKey : keys) {
+            if (this.keys == null) { return false; }
+            for (int vKey : this.keys) {
                 if (!KeyboardUtil.isPressed(vKey)) return false;
             }
             return true;

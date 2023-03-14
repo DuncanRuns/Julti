@@ -4,9 +4,9 @@ import java.util.regex.Pattern;
 
 public class Script {
     private static final Pattern SAVABLE_STRING_PATTERN = Pattern.compile("^[^;]+;[0-4];.+$");
-    private String name;
-    private byte hotkeyContext;
-    private String commands; // ; separated commands
+    private final String name;
+    private final byte hotkeyContext;
+    private final String commands; // ; separated commands
 
     public Script(String name, byte hotkeyContext, String commands) {
         this.name = name.trim();
@@ -27,37 +27,25 @@ public class Script {
     }
 
     public byte getHotkeyContext() {
-        return hotkeyContext;
-    }
-
-    public void setHotkeyContext(byte hotkeyContext) {
-        this.hotkeyContext = hotkeyContext;
+        return this.hotkeyContext;
     }
 
     public String getCommands() {
-        return commands;
-    }
-
-    public void setCommands(String commands) {
-        this.commands = commands.trim();
+        return this.commands;
     }
 
     public String toSavableString() {
-        return name + ";" + hotkeyContext + ";" + commands;
+        return this.name + ";" + this.hotkeyContext + ";" + this.commands;
     }
 
     @Override
     public String toString() {
         return "Script{" +
-                "name='" + getName() + '\'' +
+                "name='" + this.getName() + '\'' +
                 '}';
     }
 
     public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name.trim();
+        return this.name;
     }
 }

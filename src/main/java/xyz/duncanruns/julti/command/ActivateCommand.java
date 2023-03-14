@@ -3,12 +3,11 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 
 import java.util.List;
 
 public class ActivateCommand extends Command {
-
     @Override
     public String helpDescription() {
         return "activate [instances] - Activates the specified instances\nactivate all - Activate all instances\nactivate wall - Activates wall";
@@ -42,7 +41,7 @@ public class ActivateCommand extends Command {
         }
         List<MinecraftInstance> allInstances = julti.getInstanceManager().getInstances();
         for (MinecraftInstance i : instances) {
-            if (cancelRequester.isCancelRequested()) return;
+            if (cancelRequester.isCancelRequested()) { return; }
             i.activate(1 + allInstances.indexOf(i));
             julti.switchScene(i);
             sleep(500);

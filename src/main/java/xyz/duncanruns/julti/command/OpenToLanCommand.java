@@ -2,7 +2,7 @@ package xyz.duncanruns.julti.command;
 
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.util.CancelRequester;
+import xyz.duncanruns.julti.util.requester.CancelRequester;
 
 public class OpenToLanCommand extends Command {
     @Override
