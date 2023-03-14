@@ -845,7 +845,7 @@ public class MinecraftInstance {
     private void finishReset(boolean singleInstance, boolean wasFullscreen, Rectangle ogRect) {
         JultiOptions options = JultiOptions.getInstance();
 
-        this.pressResetKey();
+        this.pressResetKeys();
 
         //Update states
         this.worldLoaded = false;
@@ -888,7 +888,7 @@ public class MinecraftInstance {
         ResetCounter.increment();
     }
 
-    private void pressResetKey() {
+    private void pressResetKeys() {
         this.lastResetPress = System.currentTimeMillis();
         switch (this.getResetType()) {
             case NEW_ATUM:
@@ -896,12 +896,14 @@ public class MinecraftInstance {
                     KeyboardUtil.sendKeyToHwnd(this.hwnd, this.leavePreviewKey);
                 }
                 KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getCreateWorldKey());
+                break;
             case HAS_PREVIEW:
                 if (this.inPreview) {
                     KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getLeavePreviewKey());
                 } else {
                     this.runNoAtumLeave();
                 }
+                break;
             case EXIT_WORLD:
                 this.runNoAtumLeave();
         }
