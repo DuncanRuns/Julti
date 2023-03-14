@@ -74,6 +74,7 @@ public class MinecraftInstance {
     private boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
     private boolean activeSinceLastReset = false;
     private boolean openedToLan = false;
+    private boolean firstActivate = true;
 
     // Log tracking
     private long logProgress = -1;
@@ -546,6 +547,10 @@ public class MinecraftInstance {
             new Thread(() -> this.ensureWindowState(false, false), "window-resizer").start();
             HwndUtil.showHwnd(this.hwnd);
             HwndUtil.activateHwnd(this.hwnd);
+            if (this.firstActivate) {
+                this.firstActivate = false;
+                this.clickTopLeftCorner();
+            }
             if (this.worldLoaded) {
                 new Thread(() -> {
                     int i = 100;
@@ -582,6 +587,10 @@ public class MinecraftInstance {
         } else {
             log(Level.WARN, "Could not activate instance " + this.getName() + " (not opened)");
         }
+    }
+
+    private void clickTopLeftCorner() {
+        MouseUtil.clickTopLeft(this.hwnd);
     }
 
     private boolean shouldDoCleanWall() {

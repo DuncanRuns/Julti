@@ -34,6 +34,20 @@ public class InstanceManager {
         this.instanceHolders = new CopyOnWriteArrayList<>();
     }
 
+    public int getInstanceNum(MinecraftInstance instance) {
+        return this.getInstanceIndex(instance) + 1;
+    }
+
+    public int getInstanceIndex(MinecraftInstance instance) {
+        return this.getInstances().indexOf(instance);
+    }
+
+    public synchronized List<MinecraftInstance> getInstances() {
+        List<MinecraftInstance> instances = new ArrayList<>();
+        this.instanceHolders.forEach(instanceHolder -> instances.add(instanceHolder.instance));
+        return Collections.unmodifiableList(instances);
+    }
+
     public MinecraftInstance getSelectedInstance() {
         Pointer hwnd = HwndUtil.getCurrentHwnd();
         List<MinecraftInstance> instances = this.getInstances();
@@ -43,12 +57,6 @@ public class InstanceManager {
             }
         }
         return null;
-    }
-
-    public synchronized List<MinecraftInstance> getInstances() {
-        List<MinecraftInstance> instances = new ArrayList<>();
-        this.instanceHolders.forEach(instanceHolder -> instances.add(instanceHolder.instance));
-        return Collections.unmodifiableList(instances);
     }
 
     public synchronized void redetectInstances() {

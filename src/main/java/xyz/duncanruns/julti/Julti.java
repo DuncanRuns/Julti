@@ -504,9 +504,11 @@ public class Julti {
         return null;
     }
 
-    private void onInstanceLoad(MinecraftInstance minecraftInstance) {
-        minecraftInstance.ensureWindowState();
-        minecraftInstance.ensureGoodStandardSettings();
+    private void onInstanceLoad(MinecraftInstance instance) {
+        instance.ensureWindowState();
+        instance.ensureGoodStandardSettings();
+        instance.activate(this.instanceManager.getInstanceNum(instance));
+        this.instanceManager.renameWindows();
     }
 
     public boolean isWallActiveQuick() {

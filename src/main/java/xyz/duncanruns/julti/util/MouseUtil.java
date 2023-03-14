@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.util;
 
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
@@ -19,6 +20,12 @@ public final class MouseUtil {
         pci.cbSize = new WinDef.DWORD(Native.getNativeSize(pci.getClass(), pci));
         User32.INSTANCE.GetCursorInfo(pci);
         return (pci.flags.longValue() & 0x1) == 1;
+    }
+
+    public static void clickTopLeft(Pointer hwnd) {
+        WinDef.RECT rect = new WinDef.RECT();
+        User32.INSTANCE.GetClientRect(new WinDef.HWND(hwnd), rect);
+        User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(0x0201), new WinDef.WPARAM(1), new WinDef.LPARAM(0L));
     }
 
     public static void keyDown(int vk) {
