@@ -547,6 +547,13 @@ public class MinecraftInstance {
         ensureWindowState(false, true);
     }
 
+
+    /**
+     * Ensure window state resizes the window and sets its maximized/borderless state depending on Julti options and parameters
+     *
+     * @param force skips any checks to see if the window state is already in an ideal state
+     * @param allowSquished allows squished instances (where height = the set height divided by the squish level) as an ideal state
+     */
     public void ensureWindowState(boolean force, boolean allowSquished) {
         JultiOptions options = JultiOptions.getInstance();
 
