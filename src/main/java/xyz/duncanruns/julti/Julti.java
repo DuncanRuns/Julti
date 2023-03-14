@@ -336,7 +336,7 @@ public class Julti {
 
         if (!options.useBorderless) {
             if (options.wideResetSquish == 1f) {
-                instance.ensureWindowState();
+                instance.ensureWindowState(true, false);
                 sleep(50);
                 Rectangle rect = instance.getWindowRectangle();
                 width = rect.width;

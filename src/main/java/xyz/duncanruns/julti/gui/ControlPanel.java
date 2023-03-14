@@ -84,7 +84,7 @@ public class ControlPanel extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     for (MinecraftInstance instance : julti.getInstanceManager().getInstances()) {
-                        new Thread(instance::ensureWindowState, "julti-gui").start();
+                        new Thread(() -> instance.ensureWindowState(true, false), "julti-gui").start();
                     }
                 }
             });

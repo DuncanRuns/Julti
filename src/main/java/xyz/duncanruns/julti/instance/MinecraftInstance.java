@@ -501,7 +501,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         activeSinceLastReset = true;
         if (hasWindow()) {
-            new Thread(this::ensureWindowState, "window-resizer").start();
+            new Thread(() -> ensureWindowState(false, false), "window-resizer").start();
             HwndUtil.showHwnd(hwnd);
             HwndUtil.activateHwnd(hwnd);
             if (worldLoaded) {
@@ -544,20 +544,24 @@ public class MinecraftInstance {
     }
 
     public void ensureWindowState() {
-        ensureWindowState(false);
+        ensureWindowState(false, true);
     }
 
-    public void ensureWindowState(boolean force) {
+    public void ensureWindowState(boolean force, boolean allowSquished) {
         JultiOptions options = JultiOptions.getInstance();
 
         // "Do nothing" conditions
         if (!options.letJultiMoveWindows) return;
         Rectangle rectangle = getWindowRectangle();
 
+        boolean heightMatches = options.windowSize[1] == rectangle.height;
+        if (!force && !heightMatches && allowSquished) {
+            heightMatches = options.windowSize[1] / options.wideResetSquish == rectangle.height;
+        }
         if (!force && options.windowPos[0] == rectangle.x &&
                 options.windowPos[1] == rectangle.y &&
                 options.windowSize[0] == rectangle.width &&
-                options.windowSize[1] == rectangle.height &&
+                heightMatches &&
                 options.useBorderless == isBorderless() &&
                 (options.useBorderless || isMaximized())
         ) return;
@@ -572,34 +576,6 @@ public class MinecraftInstance {
             move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
         }
 
-    }
-
-    private boolean isActive() {
-        return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
-    }
-
-    private void pressEsc() {
-        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
-    }
-
-    public void openToLan(boolean alreadyInMenu) {
-        if (openedToLan) return;
-        KeyboardUtil.releaseAllModifiers();
-        if (!alreadyInMenu)
-            pressEsc();
-        pressTab(7);
-        pressEnter();
-        pressShiftTab(1);
-        pressEnter();
-        pressTab(1);
-        pressEnter();
-
-    }
-
-    public void setWindowTitle(String title) {
-        if (hasWindow() && !JultiOptions.getInstance().preventWindowNaming) {
-            HwndUtil.setHwndTitle(hwnd, title);
-        }
     }
 
     public Rectangle getWindowRectangle() {
@@ -632,6 +608,34 @@ public class MinecraftInstance {
 
     public void move(int x, int y, int w, int h) {
         HwndUtil.moveHwnd(hwnd, x, y, w, h);
+    }
+
+    private boolean isActive() {
+        return Objects.equals(HwndUtil.getCurrentHwnd(), hwnd);
+    }
+
+    private void pressEsc() {
+        KeyboardUtil.sendKeyToHwnd(hwnd, Win32Con.VK_ESCAPE);
+    }
+
+    public void openToLan(boolean alreadyInMenu) {
+        if (openedToLan) return;
+        KeyboardUtil.releaseAllModifiers();
+        if (!alreadyInMenu)
+            pressEsc();
+        pressTab(7);
+        pressEnter();
+        pressShiftTab(1);
+        pressEnter();
+        pressTab(1);
+        pressEnter();
+
+    }
+
+    public void setWindowTitle(String title) {
+        if (hasWindow() && !JultiOptions.getInstance().preventWindowNaming) {
+            HwndUtil.setHwndTitle(hwnd, title);
+        }
     }
 
     private void pressTab(int tabTimes) {
