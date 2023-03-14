@@ -216,7 +216,7 @@ public class Julti {
     }
 
     public void switchScene(MinecraftInstance instance) {
-        this.switchScene(this.getInstanceManager().getInstances().indexOf(instance) + 1);
+        this.switchScene(this.getInstanceManager().getInstanceNum(instance));
     }
 
     public void switchScene(final int i) {
@@ -473,7 +473,7 @@ public class Julti {
                 this.currentLocation = "W";
             }
         } else {
-            this.currentLocation = String.valueOf(this.getInstanceManager().getInstances().indexOf(selectedInstance) + 1);
+            this.currentLocation = String.valueOf(this.getInstanceManager().getInstanceNum(selectedInstance));
         }
     }
 

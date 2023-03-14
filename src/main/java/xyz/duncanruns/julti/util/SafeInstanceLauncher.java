@@ -78,7 +78,7 @@ public final class SafeInstanceLauncher {
         if (cancelRequester.isCancelRequested()) {
             return;
         }
-        int instanceNum = julti.getInstanceManager().getInstances().indexOf(instance) + 1;
+        int instanceNum = julti.getInstanceManager().getInstanceNum(instance);
         instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
     }
 

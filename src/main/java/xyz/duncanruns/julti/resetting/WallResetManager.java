@@ -155,7 +155,7 @@ public class WallResetManager extends ResetManager {
             return this.lockInstance(instance) ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList();
         }
 
-        instance.activate(this.instanceManager.getInstances().indexOf(instance) + 1);
+        instance.activate(this.instanceManager.getInstanceNum(instance));
         this.julti.switchScene(instance);
         this.unlockInstance(instance);
         SleepBGUtil.enableLock();
