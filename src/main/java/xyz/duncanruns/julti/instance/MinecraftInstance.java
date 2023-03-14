@@ -901,20 +901,20 @@ public class MinecraftInstance {
     private void pressResetKeys() {
         this.lastResetPress = System.currentTimeMillis();
         switch (this.getResetType()) {
-            case NEW_ATUM:
+            case MODERN_ATUM_EXIT:
                 if (this.leavePreviewKey != null) {
                     KeyboardUtil.sendKeyToHwnd(this.hwnd, this.leavePreviewKey);
                 }
                 KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getCreateWorldKey());
                 break;
-            case HAS_PREVIEW:
+            case LEAVE_PREVIEW_EXIT:
                 if (this.inPreview) {
                     KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getLeavePreviewKey());
                 } else {
                     this.runNoAtumLeave();
                 }
                 break;
-            case EXIT_WORLD:
+            case VANILLA_EXIT:
                 this.runNoAtumLeave();
         }
     }
@@ -976,11 +976,11 @@ public class MinecraftInstance {
         }
         if (this.getCreateWorldKey() != null) {
             this.getLeavePreviewKey();
-            this.resetType = ResetType.NEW_ATUM;
+            this.resetType = ResetType.MODERN_ATUM_EXIT;
         } else if (this.getLeavePreviewKey() != null) {
-            this.resetType = ResetType.HAS_PREVIEW;
+            this.resetType = ResetType.LEAVE_PREVIEW_EXIT;
         } else {
-            this.resetType = ResetType.EXIT_WORLD;
+            this.resetType = ResetType.VANILLA_EXIT;
         }
         return this.resetType;
     }
@@ -1313,8 +1313,8 @@ public class MinecraftInstance {
     }
 
     private enum ResetType {
-        EXIT_WORLD, // Esc+Shift+Tab+Enter always
-        HAS_PREVIEW, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
-        NEW_ATUM // Use createWorldKey always
+        VANILLA_EXIT, // Esc+Shift+Tab+Enter always
+        LEAVE_PREVIEW_EXIT, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
+        MODERN_ATUM_EXIT // Use createWorldKey always
     }
 }
