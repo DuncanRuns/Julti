@@ -1,3 +1,8 @@
+Changes in v0.17.1:
+- Massively sweeping code changes and refactors (thanks in part to @QuesiaSR)
+- It turns out that for the past however many versions, julti has been using every reset method, meaning it has pressed the create new world key, leave preview key, and esc-shift-tab-enter to reset every instance every single time, so this has been fixed
+- When instances are detected, they will now quickly activate and receive a click input, which fixes mouse teleports and not being able to reset from title screen
+
 v0.17.0:
 - Added Sounds (#5)
     - Settings are in the new Sound tab
