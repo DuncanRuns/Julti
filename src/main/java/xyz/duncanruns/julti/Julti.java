@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class Julti {
     public static final String VERSION = getVersion();
     private static final Logger LOGGER = LogManager.getLogger("Julti");
@@ -409,12 +411,6 @@ public class Julti {
         this.tryOutputState();
     }
 
-    private static void sleep(final long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
-    }
 
     private void tick() {
         long current = System.currentTimeMillis();

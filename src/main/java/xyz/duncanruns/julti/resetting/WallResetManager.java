@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class WallResetManager extends ResetManager {
 
     private final List<MinecraftInstance> lockedInstances = new ArrayList<>();
@@ -333,14 +335,6 @@ public class WallResetManager extends ResetManager {
 
     private void unlockInstance(MinecraftInstance nextInstance) {
         this.lockedInstances.remove(nextInstance);
-    }
-
-    private static void sleep(long sleepTime) {
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**

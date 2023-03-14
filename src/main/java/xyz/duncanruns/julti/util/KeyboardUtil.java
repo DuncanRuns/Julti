@@ -15,6 +15,8 @@ import java.awt.datatransfer.StringSelection;
 import java.util.List;
 import java.util.*;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public final class KeyboardUtil {
 
     public static final List<Integer> ALL_MODIFIERS = Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_SHIFT, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_MENU, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
@@ -256,11 +258,7 @@ public final class KeyboardUtil {
     public static void sendKeyToHwnd(Pointer hwnd, int virtualKey, long pressTime, boolean usePost) {
         sendKeyDownToHwnd(hwnd, virtualKey, usePost);
         if (pressTime > 0) {
-            try {
-                Thread.sleep(pressTime);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            sleep(pressTime);
         }
         sendKeyUpToHwnd(hwnd, virtualKey, usePost);
     }

@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public final class HwndUtil {
     private static final Pattern MC_PATTERN = Pattern.compile("(^Minecraft\\* - Instance \\d\\d?$)|(^Minecraft\\*? 1\\.[1-9]\\d*(\\.[1-9]\\d*)?( - .+)?$)");
     private static final Robot ROBOT;
@@ -256,11 +258,7 @@ public final class HwndUtil {
     public static Pointer waitForWindow(String exactName) {
         AtomicReference<Pointer> out = new AtomicReference<>(null);
         while (out.get() == null) {
-            try {
-                Thread.sleep(1000 / 20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            sleep(50); // 1/20th of a second
             User32.INSTANCE.EnumWindows((hWnd, arg) -> {
                 if (HwndUtil.getHwndTitle(hWnd).equals(exactName)) {
                     out.set(hWnd);

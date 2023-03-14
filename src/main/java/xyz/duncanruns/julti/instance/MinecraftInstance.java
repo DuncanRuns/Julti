@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class MinecraftInstance {
 
     private static final Logger LOGGER = LogManager.getLogger("MinecraftInstance");
@@ -1296,13 +1298,6 @@ public class MinecraftInstance {
             KeyboardUtil.sendCharToHwnd(this.hwnd, c);
         }
         this.pressEnter();
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ignored) {
-        }
     }
 
     private void pressEnter() {

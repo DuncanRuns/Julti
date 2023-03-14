@@ -3,6 +3,8 @@ package xyz.duncanruns.julti.command;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class SleepCommand extends Command {
     @Override
     public String helpDescription() {

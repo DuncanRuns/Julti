@@ -8,6 +8,8 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class WaitCommand extends Command {
     @Override
     public String helpDescription() {

@@ -8,6 +8,8 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import java.util.ArrayList;
 import java.util.List;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class MultiResetManager extends ResetManager {
     public MultiResetManager(Julti julti) {
         super(julti);
@@ -64,13 +66,6 @@ public class MultiResetManager extends ResetManager {
         return actionResults;
     }
 
-    private static void sleep(long sleepTime) {
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public List<ActionResult> doBGReset() {

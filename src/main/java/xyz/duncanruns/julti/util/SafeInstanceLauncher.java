@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public final class SafeInstanceLauncher {
     // Safely launches instance(s) so that MultiMC does not crash.
     private static final Logger LOGGER = LogManager.getLogger("InstanceLauncher");
@@ -95,14 +97,6 @@ public final class SafeInstanceLauncher {
             sleep(200);
         }
         return true;
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static void launchInstances(List<MinecraftInstance> instances) {

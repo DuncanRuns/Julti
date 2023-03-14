@@ -7,6 +7,8 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.util.List;
 
+import static xyz.duncanruns.julti.util.SleepUtil.sleep;
+
 public class ActivateCommand extends Command {
 
     @Override
