@@ -19,11 +19,11 @@ import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public final class KeyboardUtil {
 
-    public static final List<Integer> ALL_MODIFIERS = Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_SHIFT, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_MENU, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
+    public static final List<Integer> ALL_MODIFIERS = Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_SHIFT, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_MENU, Win32Con.VK_LMENU, Win32Con.VK_RMENU);
     // Modifier keys which capture multiple keys
     public static final List<Integer> BROAD_MODIFIERS = Arrays.asList(Win32Con.VK_CONTROL, Win32Con.VK_SHIFT, Win32Con.VK_MENU);
     // Modifier keys which reference only single keys
-    public static final List<Integer> SINGLE_MODIFIERS = Arrays.asList(Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_LMENU, Win32Con.VK_RMENU, Win32Con.VK_F3);
+    public static final List<Integer> SINGLE_MODIFIERS = Arrays.asList(Win32Con.VK_LCONTROL, Win32Con.VK_RCONTROL, Win32Con.VK_LSHIFT, Win32Con.VK_RSHIFT, Win32Con.VK_LMENU, Win32Con.VK_RMENU);
     private static final String[] KEY_NAMES = getKeyNamesArray();
 
     private KeyboardUtil() {
