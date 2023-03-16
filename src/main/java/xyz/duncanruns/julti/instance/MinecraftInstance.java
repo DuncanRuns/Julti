@@ -191,7 +191,7 @@ public class MinecraftInstance {
     }
 
     private void forceStandardSetting(String optionName, String optionValue) {
-        Path path = this.instancePath.resolve("config").resolve("standardoptions.txt");
+        Path path = this.getInstancePath().resolve("config").resolve("standardoptions.txt");
         while (true) {
             try {
                 String contents = FileUtil.readString(path).trim();
@@ -252,7 +252,7 @@ public class MinecraftInstance {
             }
         }
 
-        Path path = this.instancePath.resolve("options.txt");
+        Path path = this.getInstancePath().resolve("options.txt");
 
         if (!Files.exists(path)) {
             return null;
@@ -278,7 +278,7 @@ public class MinecraftInstance {
     }
 
     private String getStandardOption(String optionName) {
-        String out = this.getStandardOption(optionName, this.instancePath.resolve("config").resolve("standardoptions.txt"));
+        String out = this.getStandardOption(optionName, this.getInstancePath().resolve("config").resolve("standardoptions.txt"));
         if (out != null) {
             return out.trim();
         }
@@ -737,7 +737,7 @@ public class MinecraftInstance {
     }
 
     private boolean doesModExist(String modName) {
-        Path modsPath = this.instancePath.resolve("mods");
+        Path modsPath = this.getInstancePath().resolve("mods");
         try (Stream<Path> list = Files.list(modsPath)) {
             for (Path modPath : list.collect(Collectors.toList())) {
                 String jarName = modPath.getName(modPath.getNameCount() - 1).toString();
@@ -955,7 +955,7 @@ public class MinecraftInstance {
         return this.leavePreviewKey;
     }
 
-    private Integer getCreateWorldKey() {
+    public Integer getCreateWorldKey() {
         if (this.createWorldKey == null) {
             this.createWorldKey = this.getKey("key_Create New World");
         }
@@ -977,10 +977,13 @@ public class MinecraftInstance {
         if (this.getCreateWorldKey() != null) {
             this.getLeavePreviewKey();
             this.resetType = ResetType.MODERN_ATUM_EXIT;
+            log(Level.DEBUG, this.toString() + " using MODERN_ATUM_EXIT");
         } else if (this.getLeavePreviewKey() != null) {
             this.resetType = ResetType.LEAVE_PREVIEW_EXIT;
+            log(Level.DEBUG, this.toString() + " using LEAVE_PREVIEW_EXIT");
         } else {
             this.resetType = ResetType.VANILLA_EXIT;
+            log(Level.DEBUG, this.toString() + " using VANILLA_EXIT");
         }
         return this.resetType;
     }
