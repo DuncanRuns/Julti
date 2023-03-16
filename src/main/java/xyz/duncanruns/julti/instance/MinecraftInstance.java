@@ -967,7 +967,11 @@ public class MinecraftInstance {
         if (out == null) {
             return null;
         }
-        return McKeyUtil.getVkFromMCTranslation(out);
+        Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
+        if (vkFromMCTranslation == null) {
+            log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
+        }
+        return vkFromMCTranslation;
     }
 
     private ResetType getResetType() {
