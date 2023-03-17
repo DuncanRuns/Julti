@@ -981,13 +981,13 @@ public class MinecraftInstance {
         if (this.getCreateWorldKey() != null) {
             this.getLeavePreviewKey();
             this.resetType = ResetType.MODERN_ATUM_EXIT;
-            log(Level.DEBUG, this.toString() + " using MODERN_ATUM_EXIT");
+            log(Level.DEBUG, this + " using MODERN_ATUM_EXIT");
         } else if (this.getLeavePreviewKey() != null) {
             this.resetType = ResetType.LEAVE_PREVIEW_EXIT;
-            log(Level.DEBUG, this.toString() + " using LEAVE_PREVIEW_EXIT");
+            log(Level.DEBUG, this + " using LEAVE_PREVIEW_EXIT");
         } else {
             this.resetType = ResetType.VANILLA_EXIT;
-            log(Level.DEBUG, this.toString() + " using VANILLA_EXIT");
+            log(Level.DEBUG, this + " using VANILLA_EXIT");
         }
         return this.resetType;
     }
