@@ -544,7 +544,9 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.activeSinceLastReset = true;
         if (this.hasWindow()) {
-            new Thread(() -> this.ensureWindowState(false, false), "window-resizer").start();
+            if (!this.firstActivate) {
+                new Thread(() -> this.ensureWindowState(false, false), "window-resizer").start();
+            }
             HwndUtil.showHwnd(this.hwnd);
             HwndUtil.activateHwnd(this.hwnd);
             if (this.firstActivate) {
@@ -618,15 +620,16 @@ public class MinecraftInstance {
         Rectangle rectangle = this.getWindowRectangle();
 
         boolean heightMatches = options.windowSize[1] == rectangle.height;
+        boolean squishMatches = false;
         if (!force && !heightMatches && allowSquished) {
-            heightMatches = options.windowSize[1] / options.wideResetSquish == rectangle.height;
+            squishMatches = options.windowSize[1] / options.wideResetSquish == rectangle.height;
         }
         if (!force && options.windowPos[0] == rectangle.x &&
                 options.windowPos[1] == rectangle.y &&
                 options.windowSize[0] == rectangle.width &&
-                heightMatches &&
+                (heightMatches || squishMatches) &&
                 options.useBorderless == this.isBorderless() &&
-                (options.useBorderless || this.isMaximized())
+                (options.useBorderless || squishMatches || this.isMaximized())
         ) {
             return;
         }
