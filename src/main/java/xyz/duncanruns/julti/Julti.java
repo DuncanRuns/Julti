@@ -184,7 +184,16 @@ public class Julti {
     private void setupScriptHotkeys() {
         JultiOptions options = JultiOptions.getInstance();
 
-        // All script hotkeys that have keys bound
+
+        final List<String> scriptNames = ScriptManager.getScriptNames();
+        // Remove any hotkeys of non-existent scripts
+        options.scriptHotkeys.removeIf(s -> {
+            ScriptHotkeyData scriptHotkeyData = ScriptHotkeyData.parseString(s);
+            if (scriptHotkeyData == null) {
+                return true;
+            }
+            return !scriptNames.contains(scriptHotkeyData.scriptName);
+        });
         options.scriptHotkeys.stream().map(ScriptHotkeyData::parseString).filter(Objects::nonNull).filter(data -> data.keys.size() > 0).forEach(data -> {
             HotkeyUtil.addGlobalHotkey(data.ignoreModifiers ? new HotkeyUtil.HotkeyIM(data.keys) : new HotkeyUtil.Hotkey(data.keys), () -> {
                 boolean instanceActive = this.instanceManager.getSelectedInstance() != null;

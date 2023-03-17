@@ -63,6 +63,11 @@ public class ScriptManager {
     }
 
     public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
+        if (!getScriptNames().contains(scriptName)) {
+            log(Level.ERROR, "Could not run script " + scriptName + " because it does not exists.");
+            return false;
+        }
+
         if (!cancelRequester.isCancelRequested()) {
             return false;
         }
@@ -87,6 +92,15 @@ public class ScriptManager {
         return true;
     }
 
+    public static List<String> getScriptNames() {
+        return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
+    }
+
+    public static void log(Level level, String message) {
+        LOGGER.log(level, message);
+        LogReceiver.receive(level, message);
+    }
+
     private static Script getScript(String scriptName) {
         for (Script script : SCRIPTS) {
             if (script.getName().equalsIgnoreCase(scriptName.trim())) {
@@ -108,11 +122,6 @@ public class ScriptManager {
         if (cancelRequester.cancel()) {
             log(Level.INFO, "Script canceled");
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     public static boolean forceAddScript(String savableString) {
@@ -145,10 +154,6 @@ public class ScriptManager {
         SCRIPTS.add(newScript);
         save();
         return true;
-    }
-
-    public static List<String> getScriptNames() {
-        return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
     }
 
     public static List<String> getHotkeyableScriptNames() {
