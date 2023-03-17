@@ -163,6 +163,10 @@ public class InstanceManager {
         this.instanceHolders.forEach(InstanceHolder::resetInstanceData);
     }
 
+    public int getSize() {
+        return this.instanceHolders.size();
+    }
+
     private static class InstanceHolder {
 
         private final Path path;

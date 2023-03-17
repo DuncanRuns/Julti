@@ -18,11 +18,12 @@ public class MultiResetManager extends ResetManager {
     @Override
     public List<ActionResult> doReset() {
         JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = this.instanceManager.getInstances();
         List<ActionResult> actionResults = new ArrayList<>();
 
+        int instanceCount = this.instanceManager.getSize();
+
         // Return if no instances
-        if (instances.size() == 0) {
+        if (instanceCount == 0) {
             return actionResults;
         }
 
@@ -35,28 +36,30 @@ public class MultiResetManager extends ResetManager {
         boolean resetFirst = options.coopMode || selectedInstance.isFullscreen();
 
         // if there is only a single instance, reset it and return.
-        if (instances.size() == 1) {
+        if (instanceCount == 1) {
             selectedInstance.reset(true);
             actionResults.add(ActionResult.INSTANCE_RESET);
             return actionResults;
         }
 
-        int nextInstInd = (instances.indexOf(selectedInstance) + 1) % instances.size();
-        int nextInsNum = nextInstInd + 1;
-        MinecraftInstance nextInstance = instances.get(nextInstInd);
+        List<MinecraftInstance> instancePool = new ArrayList<>(this.instanceManager.getInstances());
+        instancePool.removeIf(instance -> instance.equals(selectedInstance));
+        instancePool.sort((o1, o2) -> o2.getWallSortingNum() - o1.getWallSortingNum());
+        MinecraftInstance nextInstance = instancePool.get(0);
+        int instanceNum = this.instanceManager.getInstanceNum(nextInstance);
 
         if (resetFirst) {
             selectedInstance.reset(false);
             actionResults.add(ActionResult.INSTANCE_RESET);
             sleep(100);
         }
-        nextInstance.activate(nextInsNum);
+        nextInstance.activate(instanceNum);
         actionResults.add(ActionResult.INSTANCE_ACTIVATED);
         if (!resetFirst) {
             selectedInstance.reset(false);
             actionResults.add(ActionResult.INSTANCE_RESET);
         }
-        this.julti.switchScene(nextInstInd + 1);
+        this.julti.switchScene(instanceNum);
 
         super.doReset();
 
