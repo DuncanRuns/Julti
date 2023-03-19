@@ -790,15 +790,19 @@ public class MinecraftInstance {
             if (!multiMCPath.isEmpty()) {
                 String cmd;
                 if (offlineName == null) {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getName() + "\"";
+                    cmd = multiMCPath.trim() + " --launch \"" + this.getInstanceFolderName() + "\"";
                 } else {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getName() + "\" -o -n " + offlineName;
+                    cmd = multiMCPath.trim() + " --launch \"" + this.getInstanceFolderName() + "\" -o -n " + offlineName;
                 }
                 Runtime.getRuntime().exec(cmd);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getInstanceFolderName() {
+        return this.getInstancePath().getName(this.getInstancePath().getNameCount() - 2).toString();
     }
 
     private void pressF3Esc() {
