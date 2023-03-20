@@ -122,10 +122,10 @@ public final class HwndUtil {
     }
 
     public static void maximizeHwnd(HWND hwnd) {
-        //User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
+        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
 
         // Fast maximize yoinked from ahk macros
-        User32.INSTANCE.SendMessageA(hwnd, new WinDef.UINT(0x0112), new WinDef.WPARAM(0xF030), new WinDef.LPARAM(0));
+        //User32.INSTANCE.SendMessageA(hwnd, new WinDef.UINT(0x0112), new WinDef.WPARAM(0xF030), new WinDef.LPARAM(0));
     }
 
     public static void showHwnd(HWND hwnd) {
