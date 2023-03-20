@@ -624,6 +624,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unsquish When Locking", "unsquishOnLock")));
+        panel.add(GUIUtil.leftJustify(new JLabel("Warning: This option may cause the instance to become unverifiable.")));
     }
 
     public boolean isClosed() {
