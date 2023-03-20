@@ -5,6 +5,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.ResetCounter;
@@ -52,6 +53,7 @@ public class MinecraftInstance {
     private boolean replaced = false;
 
     // Information to be discovered
+    private MCVersion version = null;
     private ResetType resetType = null;
     private Integer createWorldKey = null;
     private Integer fullscreenKey = null;
@@ -439,10 +441,9 @@ public class MinecraftInstance {
         }
 
         // Check MultiMC/Prism name
-
-        Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
-        if (Files.exists(mmcConfigPath)) {
+        if (this.usesMultiMC()) {
             try {
+                Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
                 for (String line : Files.readAllLines(mmcConfigPath)) {
                     line = line.trim();
                     if (line.startsWith("name=")) {
@@ -464,6 +465,10 @@ public class MinecraftInstance {
             return "Default Launcher";
         }
         return this.name;
+    }
+
+    private boolean usesMultiMC() {
+        return Files.exists(this.getInstancePath().getParent().resolve("instance.cfg"));
     }
 
     public int getWallSortingNum() {
@@ -927,7 +932,7 @@ public class MinecraftInstance {
     }
 
     private void runNoAtumLeave() {
-        WindowTitleInfo.Version version = this.titleInfo.getVersion();
+        MCVersion version = this.getVersion();
 
         KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_ESCAPE);
         if (version.getMajor() > 12) {
@@ -943,6 +948,58 @@ public class MinecraftInstance {
             this.pressTab(1);
         }
         this.pressEnter();
+    }
+
+    public MCVersion getVersion() {
+        if (this.version != null) {
+            return this.version;
+        }
+
+        if (!this.usesMultiMC()) {
+            // This sucks.
+            return this.getVersionFromTitle();
+        }
+
+        Path mmcPackPath = this.getInstancePath().getParent().resolve("mmc-pack.json");
+
+        String out;
+        try {
+            out = FileUtil.readString(mmcPackPath);
+        } catch (IOException e) {
+            log(Level.ERROR, "Error reading from MultiMC instance info, using window title instead.");
+            return this.getVersionFromTitle();
+        }
+
+        JSONObject json = new JSONObject(out);
+        String versionString = null;
+
+        for (Object component : json.getJSONArray("components")) {
+            if (component instanceof JSONObject && "net.minecraft".equals(((JSONObject) component).get("uid"))) {
+                versionString = (String) ((JSONObject) component).get("version");
+                break;
+            }
+        }
+
+        if (versionString == null) {
+            log(Level.ERROR, "Could not find MC version from MultiMC instance info, using window title instead.");
+            return this.getVersionFromTitle();
+        }
+
+        String[] versionNums = versionString.split("\\.");
+        this.version = new MCVersion(Integer.parseInt(versionNums[1]), Integer.parseInt(versionNums[2]));
+        return this.version;
+    }
+
+    /**
+     * This method should only be used inside getVersion().
+     */
+    private MCVersion getVersionFromTitle() {
+        if (this.titleInfo.waiting()) {
+            log(Level.WARN, "Warning: Game version is unknown because the window title does not contain the version, defaulting to 1.16.1.");
+            return this.titleInfo.getVersion();
+        }
+        this.version = this.titleInfo.getVersion();
+        return this.version;
     }
 
     public boolean isUsingWorldPreview() {

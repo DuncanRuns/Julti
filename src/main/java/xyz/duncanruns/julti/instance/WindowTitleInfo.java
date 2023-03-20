@@ -27,12 +27,12 @@ public class WindowTitleInfo {
         return !MC_PATTERN.matcher(this.title).matches();
     }
 
-    public Version getVersion() {
+    public MCVersion getVersion() {
         String[] nums = this.getOriginalTitle().split(" ")[1].split("\\.");
         if (nums.length > 2) {
-            return new Version(Integer.parseInt(nums[1]), Integer.parseInt(nums[2]));
+            return new MCVersion(Integer.parseInt(nums[1]), Integer.parseInt(nums[2]));
         } else {
-            return new Version(Integer.parseInt(nums[1]), 0);
+            return new MCVersion(Integer.parseInt(nums[1]), 0);
         }
     }
 
@@ -43,21 +43,4 @@ public class WindowTitleInfo {
         return DEFAULT_TITLE;
     }
 
-    public static class Version {
-        private final int major;
-        private final int minor;
-
-        private Version(int major, int minor) {
-            this.major = major;
-            this.minor = minor;
-        }
-
-        public int getMajor() {
-            return this.major;
-        }
-
-        public int getMinor() {
-            return this.minor;
-        }
-    }
 }
