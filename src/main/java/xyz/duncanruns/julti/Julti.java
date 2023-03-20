@@ -336,19 +336,16 @@ public class Julti {
             return;
         }
 
-        MinecraftInstance instance = null;
-        if (options.wideResetSquish > 1 || options.useBorderless) {
-            instance = instances.get(0);
-        } else {
-            for (MinecraftInstance instanceCandidate : instances) {
-                if (!instanceCandidate.hasWindow()) {
-                    continue;
-                }
+        MinecraftInstance instance = instances.get(0);
+        for (MinecraftInstance instanceCandidate : instances) {
+            if (instanceCandidate.hasWindow()) {
                 instance = instanceCandidate;
                 break;
             }
         }
-        if (instance == null) {
+
+        if (!instance.hasWindowQuick() && !options.useBorderless && options.wideResetSquish == 1f) {
+            log(Level.WARN, "Could not output verification cropping info because maximized windows are being used for resetting. Because the taskbar be different sizes depending on the user, an instance must first be opened in order to determine its window size while resetting.");
             return;
         }
 
