@@ -1,3 +1,13 @@
+Changes in v0.17.2:
+- Lots of bug fixes and changes for non-borderless users
+- Removed F3 as a modifier key, allowing it to be used as a hotkey
+- Add a warning for when a minecraft key in standard settings is badly formatted
+- Fix scripts freezing when using a hotkey for a deleted script
+- Fix launching instances with mismatching folder/name
+- Added a warning to the "unsquish on lock" option since it may mess with verification
+- Added a bunch of other warnings and errors to the log
+- Better game version detection using MultiMC instance data rather than the window title of the game
+
 Changes in v0.17.1:
 - Massively sweeping code changes and refactors (thanks in part to @QuesiaSR)
 - It turns out that for the past however many versions, julti has been using every reset method, meaning it has pressed the create new world key, leave preview key, and esc-shift-tab-enter to reset every instance every single time, so this has been fixed
