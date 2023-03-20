@@ -38,6 +38,8 @@ dependencies {
     implementation 'com.formdev:flatlaf:3.0'
 
     implementation 'org.kohsuke:github-api:1.313'
+
+    implementation 'org.json:json:20230227'
 }
 
 jar {
