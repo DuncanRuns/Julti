@@ -34,7 +34,7 @@ public final class JultiOptions {
     public boolean useF3 = true;
     public boolean unpauseOnSwitch = true;
     public String clipboardOnReset = "";
-    public int resetMode = 0; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
+    public int resetMode = 1; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
     public boolean coopMode = false;
     public int dirtReleasePercent = 0;
 
@@ -53,7 +53,7 @@ public final class JultiOptions {
 
     // Window
     public boolean letJultiMoveWindows = true;
-    public boolean useBorderless = false;
+    public boolean useBorderless = true;
     public boolean unsquishOnLock = false;
     public int[] windowPos = MonitorUtil.getPrimaryMonitor().position;
     public int[] windowSize = MonitorUtil.getPrimaryMonitor().size;
@@ -64,7 +64,7 @@ public final class JultiOptions {
     public List<Integer> bgResetHotkey = Collections.emptyList();
     public List<Integer> wallResetHotkey = Collections.singletonList((int) 'T');
     public List<Integer> wallSingleResetHotkey = Collections.singletonList((int) 'E');
-    public List<Integer> wallLockHotkey = Collections.singletonList(1);
+    public List<Integer> wallLockHotkey = Arrays.asList(160, 1);
     public List<Integer> wallPlayHotkey = Collections.singletonList((int) 'R');
     public List<Integer> wallFocusResetHotkey = Collections.singletonList((int) 'F');
     public List<Integer> cancelScriptHotkey = Arrays.asList(164, 46);
@@ -100,11 +100,11 @@ public final class JultiOptions {
     // Affinity
     public boolean useAffinity = true;
     public int threadsPlaying = Math.max(1, AffinityManager.AVAILABLE_THREADS);
-    public int threadsPrePreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 31 / 32);
+    public int threadsPrePreview = Math.max(1, AffinityManager.AVAILABLE_THREADS);
     public int threadsStartPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 28 / 32);
-    public int threadsPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 10 / 32);
+    public int threadsPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 11 / 32);
     public int threadsWorldLoaded = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
-    public int threadsLocked = Math.max(1, AffinityManager.AVAILABLE_THREADS * 31 / 32);
+    public int threadsLocked = Math.max(1, AffinityManager.AVAILABLE_THREADS);
     public int threadsBackground = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
     public int affinityBurst = 300;
 
