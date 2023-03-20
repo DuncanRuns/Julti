@@ -1,8 +1,8 @@
 package xyz.duncanruns.julti;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.PsapiUtil;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -207,7 +207,7 @@ public class Julti {
     }
 
     public boolean isWallActive() {
-        Pointer currentHwnd = HwndUtil.getCurrentHwnd();
+        HWND currentHwnd = HwndUtil.getCurrentHwnd();
         log(Level.DEBUG, "Running isWallActive(): currentHwnd=" + currentHwnd);
         return HwndUtil.isOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat, currentHwnd);
     }
@@ -526,7 +526,7 @@ public class Julti {
 
     public Rectangle getWallBounds() {
         JultiOptions options = JultiOptions.getInstance();
-        Pointer obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        HWND obsWallHwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
         if (obsWallHwnd == null) {
             return null;
         }
@@ -594,7 +594,7 @@ public class Julti {
         log(Level.DEBUG, "Attempting to focus wall...");
         JultiOptions options = JultiOptions.getInstance();
         SleepBGUtil.disableLock();
-        Pointer hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
+        HWND hwnd = HwndUtil.getOBSWallHwnd(options.obsWindowNameFormat);
         if (hwnd == null) {
             log(Level.WARN, "No OBS Window found!");
             return;

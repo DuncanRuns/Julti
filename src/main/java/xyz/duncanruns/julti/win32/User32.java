@@ -1,7 +1,6 @@
 package xyz.duncanruns.julti.win32;
 
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.*;
 import com.sun.jna.platform.win32.WinUser.INPUT;
@@ -16,41 +15,41 @@ import com.sun.jna.win32.StdCallLibrary;
 public interface User32 extends StdCallLibrary {
     User32 INSTANCE = Native.load("user32", User32.class);
 
-    Pointer GetForegroundWindow();
+    HWND GetForegroundWindow();
 
-    boolean SetWindowPos(Pointer hwnd, Pointer hwndInsertAfter, int x, int y, int cx, int cy, UINT flags);
+    boolean SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT flags);
 
-    int GetWindowTextA(Pointer hWnd, byte[] lpString, int nMaxCount);
+    int GetWindowTextA(HWND hWnd, byte[] lpString, int nMaxCount);
 
-    boolean EnumWindows(WNDENUMPROC lpEnumFunc, Pointer userData);
+    boolean EnumWindows(WNDENUMPROC lpEnumFunc, HWND userData);
 
-    boolean IsWindow(Pointer hWnd);
+    boolean IsWindow(HWND hWnd);
 
-    LONG GetWindowLongA(Pointer hWnd, int nIndex);
+    LONG GetWindowLongA(HWND hWnd, int nIndex);
 
-    LONG SetWindowLongA(Pointer hWnd, int nIndex, LONG dwNewLong);
+    LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong);
 
-    boolean PostMessageA(Pointer hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+    boolean PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     BOOL SendNotifyMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     BOOL SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-    boolean ShowWindow(Pointer hWnd, int nCmdShow);
+    boolean ShowWindow(HWND hWnd, int nCmdShow);
 
-    boolean SetWindowTextA(Pointer hWnd, String lpString);
+    boolean SetWindowTextA(HWND hWnd, String lpString);
 
-    int SetForegroundWindow(Pointer hWnd);
+    int SetForegroundWindow(HWND hWnd);
 
-    boolean BringWindowToTop(Pointer hWnd);
+    boolean BringWindowToTop(HWND hWnd);
 
-    boolean MoveWindow(Pointer hWnd, int x, int y, int nWidth, int nHeight, boolean bRepaint);
+    boolean MoveWindow(HWND hWnd, int x, int y, int nWidth, int nHeight, boolean bRepaint);
 
-    boolean IsIconic(Pointer hWnd);
+    boolean IsIconic(HWND hWnd);
 
     UINT MapVirtualKeyA(UINT uCode, UINT uMapType);
 
-    int GetWindowThreadProcessId(Pointer hwnd, IntByReference lpdwProcessId);
+    int GetWindowThreadProcessId(HWND hwnd, IntByReference lpdwProcessId);
 
     short GetAsyncKeyState(int vKey);
 
@@ -68,14 +67,14 @@ public interface User32 extends StdCallLibrary {
 
     int FillRect(HDC hdc, RECT rect, HBRUSH hbrush);
 
-    boolean IsZoomed(Pointer hWnd);
+    boolean IsZoomed(HWND hWnd);
 
     BOOL GetCursorInfo(CURSORINFO pci);
 
     BOOL GetCursorPos(POINT point);
 
     interface WNDENUMPROC extends StdCallCallback {
-        boolean callback(Pointer hWnd, Pointer arg);
+        boolean callback(HWND hWnd, LPARAM arg);
     }
 
     @Structure.FieldOrder({"cbSize", "flags", "hCursor", "ptScreenPos"})

@@ -1,6 +1,6 @@
 package xyz.duncanruns.julti.instance;
 
-import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +42,7 @@ public class MinecraftInstance {
 
     // Basic instance information
     private final WindowTitleInfo titleInfo;
-    private Pointer hwnd;
+    private HWND hwnd;
     private Path instancePath = null;
     private String name = null;
 
@@ -88,7 +88,7 @@ public class MinecraftInstance {
         this.notMC = false;
     }
 
-    public MinecraftInstance(Pointer hwnd) {
+    public MinecraftInstance(HWND hwnd) {
         this.hwnd = hwnd;
         this.titleInfo = new WindowTitleInfo(this.getCurrentWindowTitle());
     }
@@ -391,7 +391,7 @@ public class MinecraftInstance {
         return this.pid;
     }
 
-    public Pointer getHwnd() {
+    public HWND getHwnd() {
         // Note: if hwnd == null, the instance is unusable. The proper way to manage this is to replace the object with a new one.
         return this.hwnd;
     }

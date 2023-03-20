@@ -1,6 +1,6 @@
 package xyz.duncanruns.julti.instance;
 
-import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +49,7 @@ public class InstanceManager {
     }
 
     public MinecraftInstance getSelectedInstance() {
-        Pointer hwnd = HwndUtil.getCurrentHwnd();
+        HWND hwnd = HwndUtil.getCurrentHwnd();
         List<MinecraftInstance> instances = this.getInstances();
         for (MinecraftInstance instance : instances) {
             if (instance.hasWindow() && instance.getHwnd().equals(hwnd)) {
@@ -101,7 +101,7 @@ public class InstanceManager {
 
     private static List<MinecraftInstance> getAllOpenInstances() {
         List<MinecraftInstance> instanceList = new ArrayList<>();
-        for (Pointer hwnd : HwndUtil.getAllMinecraftHwnds()) {
+        for (HWND hwnd : HwndUtil.getAllMinecraftHwnds()) {
             MinecraftInstance instance = new MinecraftInstance(hwnd);
             instanceList.add(instance);
         }

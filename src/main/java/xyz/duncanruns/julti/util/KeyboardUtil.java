@@ -1,9 +1,9 @@
 package xyz.duncanruns.julti.util;
 
 import com.google.common.collect.Lists;
-import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinUser;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -222,40 +222,40 @@ public final class KeyboardUtil {
         return createLParam(virtualKey, 1, true, true, false);
     }
 
-    public static void sendKeyDownToHwnd(Pointer hwnd, int virtualKey, boolean usePost) {
+    public static void sendKeyDownToHwnd(HWND hwnd, int virtualKey, boolean usePost) {
         if (usePost) {
             User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(256), new WinDef.WPARAM(virtualKey), createLParamKeyDown(virtualKey));
         } else {
-            User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(256), new WinDef.WPARAM(virtualKey), createLParamKeyDown(virtualKey));
+            User32.INSTANCE.SendNotifyMessageA(hwnd, new WinDef.UINT(256), new WinDef.WPARAM(virtualKey), createLParamKeyDown(virtualKey));
         }
     }
 
-    public static void sendKeyUpToHwnd(Pointer hwnd, int virtualKey, boolean usePost) {
+    public static void sendKeyUpToHwnd(HWND hwnd, int virtualKey, boolean usePost) {
         if (usePost) {
             User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(257), new WinDef.WPARAM(virtualKey), createLParamKeyUp(virtualKey));
         } else {
-            User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(257), new WinDef.WPARAM(virtualKey), createLParamKeyUp(virtualKey));
+            User32.INSTANCE.SendNotifyMessageA(hwnd, new WinDef.UINT(257), new WinDef.WPARAM(virtualKey), createLParamKeyUp(virtualKey));
         }
     }
 
-    public static void sendKeyToHwnd(Pointer hwnd, int virtualKey) {
+    public static void sendKeyToHwnd(HWND hwnd, int virtualKey) {
         sendKeyDownToHwnd(hwnd, virtualKey, true);
         sendKeyUpToHwnd(hwnd, virtualKey, true);
     }
 
-    public static void sendCharToHwnd(Pointer hwnd, int character) {
+    public static void sendCharToHwnd(HWND hwnd, int character) {
         sendCharToHwnd(hwnd, character, true);
     }
 
-    public static void sendCharToHwnd(Pointer hwnd, int character, boolean usePost) {
+    public static void sendCharToHwnd(HWND hwnd, int character, boolean usePost) {
         if (usePost) {
             User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(WinUser.WM_CHAR), new WinDef.WPARAM(character), new WinDef.LPARAM(0));
         } else {
-            User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(WinUser.WM_CHAR), new WinDef.WPARAM(character), new WinDef.LPARAM(0));
+            User32.INSTANCE.SendNotifyMessageA(hwnd, new WinDef.UINT(WinUser.WM_CHAR), new WinDef.WPARAM(character), new WinDef.LPARAM(0));
         }
     }
 
-    public static void sendKeyToHwnd(Pointer hwnd, int virtualKey, long pressTime, boolean usePost) {
+    public static void sendKeyToHwnd(HWND hwnd, int virtualKey, long pressTime, boolean usePost) {
         sendKeyDownToHwnd(hwnd, virtualKey, usePost);
         if (pressTime > 0) {
             sleep(pressTime);

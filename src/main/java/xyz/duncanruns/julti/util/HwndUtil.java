@@ -1,10 +1,10 @@
 package xyz.duncanruns.julti.util;
 
 import com.github.tuupertunut.powershelllibjava.PowerShell;
-import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.Psapi;
 import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LONG;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.IntByReference;
@@ -34,7 +34,7 @@ public final class HwndUtil {
     private static final Robot ROBOT;
     private static final PowerShell POWER_SHELL;
     private static final byte[] executablePathBuffer = new byte[1024];
-    private static Pointer obsHwnd = null;
+    private static HWND obsHwnd = null;
 
     static {
         try {
@@ -52,12 +52,12 @@ public final class HwndUtil {
     private HwndUtil() {
     }
 
-    public static List<Pointer> getAllMinecraftHwnds() {
+    public static List<HWND> getAllMinecraftHwnds() {
         return getAllHwnds(MC_PATTERN);
     }
 
-    private static List<Pointer> getAllHwnds(Pattern pattern) {
-        List<Pointer> list = new ArrayList<>();
+    private static List<HWND> getAllHwnds(Pattern pattern) {
+        List<HWND> list = new ArrayList<>();
         User32.INSTANCE.EnumWindows((hwnd, arg) -> {
             String title = getHwndTitle(hwnd);
             if (pattern.matcher(title).matches()) {
@@ -68,7 +68,7 @@ public final class HwndUtil {
         return list;
     }
 
-    public static String getHwndTitle(Pointer hwnd) {
+    public static String getHwndTitle(HWND hwnd) {
         byte[] x = new byte[128];
         User32.INSTANCE.GetWindowTextA(hwnd, x, 128);
         StringBuilder out = new StringBuilder();
@@ -82,7 +82,7 @@ public final class HwndUtil {
     }
 
     // Sets a window to be borderless but does not move it.
-    public static void setHwndBorderless(Pointer hwnd) {
+    public static void setHwndBorderless(HWND hwnd) {
         long style = getHwndStyle(hwnd);
         style &= ~(Win32Con.WS_BORDER
                 | Win32Con.WS_DLGFRAME
@@ -93,19 +93,19 @@ public final class HwndUtil {
         setHwndStyle(hwnd, style);
     }
 
-    public static long getHwndStyle(Pointer hwnd) {
+    public static long getHwndStyle(HWND hwnd) {
         return User32.INSTANCE.GetWindowLongA(hwnd, Win32Con.GWL_STYLE).longValue();
     }
 
-    public static void setHwndStyle(Pointer hwnd, long style) {
+    public static void setHwndStyle(HWND hwnd, long style) {
         User32.INSTANCE.SetWindowLongA(hwnd, Win32Con.GWL_STYLE, new LONG(style));
     }
 
-    public static void sendCloseMessage(Pointer hwnd) {
-        User32.INSTANCE.SendNotifyMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(Win32Con.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
+    public static void sendCloseMessage(HWND hwnd) {
+        User32.INSTANCE.SendNotifyMessageA(hwnd, new WinDef.UINT(Win32Con.WM_SYSCOMMAND), new WinDef.WPARAM(Win32Con.SC_CLOSE), new WinDef.LPARAM(0));
     }
 
-    public static boolean isHwndBorderless(Pointer hwnd) {
+    public static boolean isHwndBorderless(HWND hwnd) {
         long oldStyle = getHwndStyle(hwnd);
         long newStyle = oldStyle;
         newStyle &= ~(Win32Con.WS_BORDER
@@ -117,30 +117,30 @@ public final class HwndUtil {
         return newStyle == oldStyle;
     }
 
-    public static void undoHwndBorderless(Pointer hwnd) {
+    public static void undoHwndBorderless(HWND hwnd) {
         setHwndStyle(hwnd, 382664704);
     }
 
-    public static void maximizeHwnd(Pointer hwnd) {
+    public static void maximizeHwnd(HWND hwnd) {
         //User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWMAXIMIZED);
 
         // Fast maximize yoinked from ahk macros
-        User32.INSTANCE.SendMessageA(new WinDef.HWND(hwnd), new WinDef.UINT(0x0112), new WinDef.WPARAM(0xF030), new WinDef.LPARAM(0));
+        User32.INSTANCE.SendMessageA(hwnd, new WinDef.UINT(0x0112), new WinDef.WPARAM(0xF030), new WinDef.LPARAM(0));
     }
 
-    public static void showHwnd(Pointer hwnd) {
+    public static void showHwnd(HWND hwnd) {
         User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOW);
     }
 
-    public static void restoreHwnd(Pointer hwnd) {
+    public static void restoreHwnd(HWND hwnd) {
         User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_SHOWNOACTIVATE);
     }
 
-    public static void setHwndTitle(Pointer hwnd, String title) {
+    public static void setHwndTitle(HWND hwnd, String title) {
         User32.INSTANCE.SetWindowTextA(hwnd, title);
     }
 
-    public static void activateHwnd(Pointer hwnd) {
+    public static void activateHwnd(HWND hwnd) {
         // Windows requires alt to be pressed to switch to a window.... maybe?
         // It needed it in the python implementation but apparently not here. Will keep it anyway.
         if (hwnd == null) {
@@ -152,7 +152,7 @@ public final class HwndUtil {
         User32.INSTANCE.BringWindowToTop(hwnd);
     }
 
-    public static void moveHwnd(Pointer hwnd, int x, int y, int w, int h) {
+    public static void moveHwnd(HWND hwnd, int x, int y, int w, int h) {
         User32.INSTANCE.MoveWindow(hwnd, x, y, w, h, true);
     }
 
@@ -233,17 +233,17 @@ public final class HwndUtil {
         }
     }
 
-    public static boolean isHwndMinimized(Pointer hwnd) {
+    public static boolean isHwndMinimized(HWND hwnd) {
         return User32.INSTANCE.IsIconic(hwnd);
     }
 
-    public static boolean isHwndMaximized(Pointer hwnd) {
+    public static boolean isHwndMaximized(HWND hwnd) {
         return User32.INSTANCE.IsZoomed(hwnd);
     }
 
-    public static Rectangle getHwndRectangle(Pointer hwnd) {
+    public static Rectangle getHwndRectangle(HWND hwnd) {
         WinDef.RECT rect = new WinDef.RECT();
-        User32.INSTANCE.GetWindowRect(new WinDef.HWND(hwnd), rect);
+        User32.INSTANCE.GetWindowRect(hwnd, rect);
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
     }
 
@@ -255,8 +255,8 @@ public final class HwndUtil {
      * @param exactName the exact name of the window
      * @return the window handle
      */
-    public static Pointer waitForWindow(String exactName) {
-        AtomicReference<Pointer> out = new AtomicReference<>(null);
+    public static HWND waitForWindow(String exactName) {
+        AtomicReference<HWND> out = new AtomicReference<>(null);
         while (out.get() == null) {
             sleep(50); // 1/20th of a second
             User32.INSTANCE.EnumWindows((hWnd, arg) -> {
@@ -299,7 +299,7 @@ public final class HwndUtil {
         return out.toString();
     }
 
-    public static int getPidFromHwnd(Pointer hwnd) {
+    public static int getPidFromHwnd(HWND hwnd) {
         final IntByReference pidPointer = new IntByReference();
         User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
         return pidPointer.getValue();
@@ -312,7 +312,7 @@ public final class HwndUtil {
         return Objects.equals(getCurrentHwnd(), obsHwnd);
     }
 
-    public static Pointer getOBSWallHwnd(String projectorFormat) {
+    public static HWND getOBSWallHwnd(String projectorFormat) {
 
         if (obsHwnd != null) {
             if (hwndExists(obsHwnd) && isOBSWallHwnd(projectorFormat, obsHwnd)) {
@@ -331,15 +331,15 @@ public final class HwndUtil {
         return obsHwnd;
     }
 
-    public static Pointer getCurrentHwnd() {
+    public static HWND getCurrentHwnd() {
         return User32.INSTANCE.GetForegroundWindow();
     }
 
-    public static boolean hwndExists(Pointer hwnd) {
+    public static boolean hwndExists(HWND hwnd) {
         return User32.INSTANCE.IsWindow(hwnd);
     }
 
-    public static boolean isOBSWallHwnd(String projectorFormat, Pointer hwnd) {
+    public static boolean isOBSWallHwnd(String projectorFormat, HWND hwnd) {
         if (hwnd == null) {
             return false;
         }
