@@ -605,11 +605,11 @@ function script_update(settings)
     if timers_activated then
         return
     end
+    timers_activated = true
     obs.timer_add(loop, 20)
 end
 
 function loop()
-
     -- Scene Change Check
 
     local current_scene_source = obs.obs_frontend_get_current_scene()
@@ -672,13 +672,10 @@ function loop()
         bring_to_top(obs.obs_scene_find_source(scene, "Instance " .. user_location))
         set_instance_data(tonumber(user_location), false, false, 0, 0, total_width, total_height)
     end
-
 end
 
 function on_scene_change(last_scene_name, new_scene_name)
-
     if new_scene_name == "Lock Display" then
-
         local state = get_state_file_string()
         if state == nil then
             return
@@ -693,14 +690,10 @@ function on_scene_change(last_scene_name, new_scene_name)
         local item = obs.obs_scene_find_source(scene, "Example Instances")
         obs.obs_sceneitem_set_visible(item, true)
         set_position_with_bounds(item, 0, 0, tonumber(nums[4]), tonumber(nums[5]))
-
     elseif last_scene_name == "Lock Display" then
-
         local scene = get_scene("Lock Display")
         local item = obs.obs_scene_find_source(scene, "Example Instances")
         obs.obs_sceneitem_set_visible(item, false)
-
     end
-
 end
 
