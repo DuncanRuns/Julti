@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.util;
 
 import com.github.tuupertunut.powershelllibjava.PowerShell;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.Psapi;
 import com.sun.jna.platform.win32.WinDef;
@@ -237,6 +238,10 @@ public final class HwndUtil {
         return User32.INSTANCE.IsIconic(hwnd);
     }
 
+    public static void minimizeHwnd(HWND hwnd) {
+        User32.INSTANCE.ShowWindow(hwnd,Win32Con.SW_MINIMIZE);
+    }
+
     public static boolean isHwndMaximized(HWND hwnd) {
         return User32.INSTANCE.IsZoomed(hwnd);
     }
@@ -350,5 +355,11 @@ public final class HwndUtil {
         String title = getHwndTitle(hwnd).toLowerCase();
         Julti.log(Level.DEBUG, "HwndUtil.isOBSWallHwnd -> title to match is " + title);
         return pattern.matcher(title).matches();
+    }
+
+    public static void setOnTop(HWND hwnd, boolean topmost) {
+        HWND HWND_TOPMOST = new HWND(new Pointer(-1));
+        HWND HWND_NOTOPMOST = new HWND(new Pointer(-2));
+        User32.INSTANCE.SetWindowPos(hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, new WinDef.UINT(0x0002 | 0x0001));
     }
 }
