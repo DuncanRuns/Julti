@@ -345,7 +345,7 @@ public class Julti {
         }
 
         if (!instance.hasWindowQuick() && !options.useBorderless && options.wideResetSquish == 1f) {
-            log(Level.WARN, "Could not output verification cropping info because maximized windows are being used for resetting. Because the taskbar be different sizes depending on the user, an instance must first be opened in order to determine its window size while resetting.");
+            log(Level.WARN, "Could not output verification cropping info because maximized windows are being used for resetting. Because the taskbar can be different sizes depending on the user, an instance must first be opened in order to determine its window size while resetting.");
             return;
         }
 
