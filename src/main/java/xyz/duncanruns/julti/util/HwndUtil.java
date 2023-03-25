@@ -239,7 +239,7 @@ public final class HwndUtil {
     }
 
     public static void minimizeHwnd(HWND hwnd) {
-        User32.INSTANCE.ShowWindow(hwnd,Win32Con.SW_MINIMIZE);
+        User32.INSTANCE.ShowWindow(hwnd, Win32Con.SW_MINIMIZE);
     }
 
     public static boolean isHwndMaximized(HWND hwnd) {

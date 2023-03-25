@@ -198,4 +198,8 @@ public abstract class ResetManager {
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
     }
+
+    public void activateInstance(MinecraftInstance instance, int num) {
+        this.julti.activateInstance(instance, num);
+    }
 }

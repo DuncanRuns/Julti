@@ -118,15 +118,20 @@ public final class JultiOptions {
     public String playSound = "";
     public float playVolume = 0.0f;
 
+    // Experimental
+    public boolean enableExperimentalOptions = false;
+    public boolean showDebug = false;
+    public boolean autoFullscreen = false;
+    public boolean pieChartOnLoad = false;
+    public boolean preventWindowNaming = false;
+    public boolean noCopeMode = false;
+    public boolean alwaysOnTopProjector = false;
+
+
     // Hidden
     public List<String> lastInstances = new ArrayList<>();
     public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
-    public boolean noCopeMode = false;
-    public boolean pieChartOnLoad = false;
-    public boolean autoFullscreen = false;
-    public boolean showDebug = false;
-    public boolean preventWindowNaming = false;
 
     // Auto Reset
     public boolean autoResetForBeach = false;

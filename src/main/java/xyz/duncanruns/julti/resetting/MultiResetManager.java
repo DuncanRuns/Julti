@@ -53,7 +53,7 @@ public class MultiResetManager extends ResetManager {
             actionResults.add(ActionResult.INSTANCE_RESET);
             sleep(100);
         }
-        nextInstance.activate(instanceNum);
+        this.julti.activateInstance(nextInstance, instanceNum);
         actionResults.add(ActionResult.INSTANCE_ACTIVATED);
         if (!resetFirst) {
             selectedInstance.reset(false);

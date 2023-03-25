@@ -47,7 +47,7 @@ public class ActivateCommand extends Command {
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
-            i.activate(1 + allInstances.indexOf(i));
+            julti.activateInstance(i, 1 + allInstances.indexOf(i));
             julti.switchScene(i);
             sleep(500);
         }

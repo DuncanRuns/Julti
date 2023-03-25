@@ -596,6 +596,9 @@ public class Julti {
             log(Level.WARN, "No OBS Window found!");
             return;
         }
+        if (options.alwaysOnTopProjector) {
+            HwndUtil.setOnTop(hwnd, true);
+        }
         HwndUtil.activateHwnd(hwnd);
         HwndUtil.maximizeHwnd(hwnd);
         this.switchToWallScene();
@@ -616,5 +619,12 @@ public class Julti {
     public void resetInstanceData() {
         this.instanceManager.resetInstanceData();
         this.manageMissingInstances();
+    }
+
+    public void activateInstance(MinecraftInstance instance, int num) {
+        if (JultiOptions.getInstance().alwaysOnTopProjector && this.isWallActive()) {
+            HwndUtil.minimizeHwnd(HwndUtil.getOBSWallHwnd(JultiOptions.getInstance().obsWindowNameFormat));
+        }
+        instance.activate(num);
     }
 }

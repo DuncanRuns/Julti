@@ -46,7 +46,7 @@ public class OptionsGUI extends JFrame {
                 OptionsGUI.this.onClose();
             }
         });
-        this.setSize(600, 400);
+        this.setSize(650, 400);
         this.setVisible(true);
     }
 
@@ -64,8 +64,36 @@ public class OptionsGUI extends JFrame {
         this.addComponentsSound();
         this.addComponentsAffinity();
         this.addComponentsOther();
+        if (JultiOptions.getInstance().enableExperimentalOptions) {
+            this.addComponentsExperimental();
+        }
         this.revalidate();
         this.repaint();
+    }
+
+    private void addComponentsExperimental() {
+        JPanel panel = this.createNewOptionsPanel("Experimental");
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Debug Messages", "showDebug")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prevent Window Naming", "preventWindowNaming")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("No Cope Mode (Reset when you open to lan)", "noCopeMode")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Always On Top Projector", "alwaysOnTopProjector")));
     }
 
     private void addComponentsSound() {
@@ -199,6 +227,21 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchOfflineName", "Offline Name", this)));
             panel.add(GUIUtil.createSpacer());
         }
+
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Experimental Options", "enableExperimentalOptions", b -> {
+            if (!b) {
+                options.autoFullscreen = false;
+                options.showDebug = false;
+                options.pieChartOnLoad = false;
+                options.preventWindowNaming = false;
+                options.noCopeMode = false;
+                options.alwaysOnTopProjector = false;
+            }
+            this.reload();
+        })));
     }
 
     private void runMMCExecutableHelper(JTextField mmcField) {
@@ -539,8 +582,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unpause on Switch", "unpauseOnSwitch")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode")));
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("clipboardOnReset", "Clipboard On Reset", this)));
     }
