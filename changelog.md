@@ -1,3 +1,9 @@
+Changes in v0.18.0:
+- Added experimental features tab, which you can enable in the other options tab
+  - This will let you access some hidden features from the GUI which you previously could only enable through the command line.
+- Added new experimental feature: "Always On Top Projector"
+  - This could help solve issues such as instances appearing on top of the wall while the wall is supposed to be focused. 
+
 Changes in v0.17.2:
 - Lots of bug fixes and changes for non-borderless users
 - Removed F3 as a modifier key, allowing it to be used as a hotkey
