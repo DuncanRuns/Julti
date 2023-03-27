@@ -26,6 +26,7 @@ public class ScriptManager {
             "Fight Dragon;1;opentolan; chatmessage /gamemode creative; chatmessage /clear; chatmessage /effect give @s minecraft:saturation 10 100; chatmessage /replaceitem entity @s weapon.offhand bread 3; chatmessage /replaceitem entity @s hotbar.8 cobblestone 23; chatmessage /replaceitem entity @s hotbar.7 ender_pearl 5; chatmessage /give @s iron_axe; chatmessage /give @s iron_pickaxe; chatmessage /give @s iron_shovel; chatmessage /give @s water_bucket; chatmessage /give @s flint_and_steel; chatmessage /give @s bread 3; chatmessage /give @s string 60; chatmessage /give @s oak_planks 17; chatmessage /give @s obsidian 4; chatmessage /give @s crafting_table; chatmessage /gamemode survival; chatmessage /give @s oak_boat; chatmessage /setblock ~ ~ ~ end_portal;";
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
     private static CancelRequester cancelRequester = CancelRequesters.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
+    private static Thread runningScriptThread = null;
 
     public static void reload() {
         String scriptsFileContents = "";
@@ -63,6 +64,10 @@ public class ScriptManager {
     }
 
     public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
+        if ((runningScriptThread == null || !runningScriptThread.isAlive()) && !cancelRequester.isCancelRequested()) {
+            cancelRequester.cancel();
+        }
+
         if (!getScriptNames().contains(scriptName)) {
             log(Level.ERROR, "Could not run script " + scriptName + " because it does not exists.");
             return false;
@@ -71,6 +76,8 @@ public class ScriptManager {
         if (!cancelRequester.isCancelRequested()) {
             return false;
         }
+
+        runningScriptThread = null;
         cancelRequester = new CancelRequester();
 
         Script script = getScript(scriptName);
@@ -80,15 +87,20 @@ public class ScriptManager {
             return false;
         }
 
-        new Thread(() -> {
-            String[] commands = script.getCommands().split(";");
+        runningScriptThread = new Thread(() -> {
+            try {
+                String[] commands = script.getCommands().split(";");
 
-            for (int i = 0; i < commands.length && !cancelRequester.isCancelRequested(); i++) {
-                julti.runCommand(commands[i], cancelRequester);
+                for (int i = 0; i < commands.length && !cancelRequester.isCancelRequested(); i++) {
+                    julti.runCommand(commands[i], cancelRequester);
+                }
+
+            } catch (Exception ignored) {
+            } finally {
+                cancelRequester.cancel();
             }
-
-            cancelRequester.cancel();
-        }, "script-runner").start();
+        }, "script-runner");
+        runningScriptThread.start();
         return true;
     }
 
@@ -110,18 +122,18 @@ public class ScriptManager {
         return null;
     }
 
+    public static void requestCancel() {
+        if (cancelRequester.cancel()) {
+            log(Level.INFO, "Script canceled");
+        }
+    }
+
     public static boolean isDuplicateImport(String scriptString) {
         if (!Script.isSavableString(scriptString)) {
             return false;
         }
         Script script = Script.fromSavableString(scriptString);
         return getScript(script.getName()) != null;
-    }
-
-    public static void requestCancel() {
-        if (cancelRequester.cancel()) {
-            log(Level.INFO, "Script canceled");
-        }
     }
 
     public static boolean forceAddScript(String savableString) {
