@@ -29,7 +29,7 @@ public class OpenToLanCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
         if (selectedInstance != null) {
-            selectedInstance.openToLan();
+            selectedInstance.openToLan(false);
         }
     }
 }

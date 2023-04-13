@@ -50,7 +50,6 @@ public class MultiResetManager extends ResetManager {
         instancePool.removeIf(instance -> instance.equals(selectedInstance));
         instancePool.sort((o1, o2) -> o2.getWallSortingNum() - o1.getWallSortingNum());
         MinecraftInstance nextInstance = instancePool.get(0);
-        int instanceNum = InstanceManager.getManager().getInstanceNum(nextInstance);
 
         if (resetFirst) {
             selectedInstance.reset();

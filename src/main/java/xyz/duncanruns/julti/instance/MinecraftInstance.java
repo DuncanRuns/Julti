@@ -190,6 +190,7 @@ public class MinecraftInstance {
             this.presser.pressKey(this.gameOptions.createWorldKey);
         }
         this.resetPressed = true;
+        this.openedToLan = false;
 
         if (wasFullscreen) {
             // Wait until window actually un-fullscreens
@@ -215,14 +216,19 @@ public class MinecraftInstance {
         KeyboardUtil.keyUp(Win32VK.VK_LMENU);
         User32.INSTANCE.SetForegroundWindow(this.hwnd);
         User32.INSTANCE.BringWindowToTop(this.hwnd);
+        this.stateTracker.tryUpdate();
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
-                this.presser.pressEsc();
-                this.presser.pressEsc();
-                if (JultiOptions.getInstance().unpauseOnSwitch && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
+                this.presser.pressF3Esc();
+                this.presser.pressF3Esc();
+                JultiOptions options = JultiOptions.getInstance();
+                if (options.unpauseOnSwitch && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
                     this.presser.pressEsc();
                 }
-                if (JultiOptions.getInstance().autoFullscreen) {
+                if (options.coopMode) {
+                    this.openToLan(!options.unpauseOnSwitch);
+                }
+                if (options.autoFullscreen) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
                 }
             }
@@ -321,6 +327,11 @@ public class MinecraftInstance {
             if (options.unpauseOnSwitch) {
                 this.presser.pressEsc();
             }
+
+            if (options.coopMode) {
+                this.openToLan(!options.unpauseOnSwitch);
+            }
+
             if (options.autoFullscreen) {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
             }
@@ -517,7 +528,7 @@ public class MinecraftInstance {
         this.windowStateChangedToPlaying = true;
     }
 
-    public void openToLan() {
+    public void openToLan(boolean skipUnpauseCheck) {
         if (this.openedToLan) {
             return;
         } else if (!this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
@@ -527,7 +538,9 @@ public class MinecraftInstance {
             return;
         }
 
-        this.getToUnpausedState();
+        if(!skipUnpauseCheck) {
+            this.getToUnpausedState();
+        }
 
         this.presser.releaseAllModifiers();
         this.presser.pressEsc();
