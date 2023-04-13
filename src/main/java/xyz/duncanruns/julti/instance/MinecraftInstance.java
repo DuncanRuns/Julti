@@ -222,11 +222,11 @@ public class MinecraftInstance {
                 this.presser.pressF3Esc();
                 this.presser.pressF3Esc();
                 JultiOptions options = JultiOptions.getInstance();
-                if (options.unpauseOnSwitch && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
+                if ((options.unpauseOnSwitch || options.coopMode) && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
                     this.presser.pressEsc();
                 }
                 if (options.coopMode) {
-                    this.openToLan(!options.unpauseOnSwitch);
+                    this.openToLan(true);
                 }
                 if (options.autoFullscreen) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
@@ -324,12 +324,12 @@ public class MinecraftInstance {
 
         // Unpause if window is active
         if (ActiveWindowTracker.isWindowActive(this.hwnd)) {
-            if (options.unpauseOnSwitch) {
+            if (options.unpauseOnSwitch || options.coopMode) {
                 this.presser.pressEsc();
             }
 
             if (options.coopMode) {
-                this.openToLan(!options.unpauseOnSwitch);
+                this.openToLan(true);
             }
 
             if (options.autoFullscreen) {
@@ -538,7 +538,7 @@ public class MinecraftInstance {
             return;
         }
 
-        if(!skipUnpauseCheck) {
+        if (!skipUnpauseCheck) {
             this.getToUnpausedState();
         }
 
@@ -566,6 +566,8 @@ public class MinecraftInstance {
     }
 
     private void getToUnpausedState() {
+        sleep(50);
+        this.getStateTracker().tryUpdate();
         while (!this.stateTracker.getInWorldType().equals(InWorldState.UNPAUSED)) {
             this.presser.pressEsc();
             sleep(50);
