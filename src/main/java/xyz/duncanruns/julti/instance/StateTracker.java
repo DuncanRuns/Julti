@@ -122,7 +122,7 @@ public class StateTracker {
             return;
         }
 
-        if(args.length > 0) {
+        if(args.length > 1) {
             // Get loading percent
             this.loadingPercent = Byte.parseByte(args[1]);
         }else{
