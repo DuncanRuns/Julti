@@ -1,8 +1,8 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatMarginBorder;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,15 +14,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class InstancesPanel extends JPanel {
-    private final Julti julti;
     private final JPanel mainPanel;
     private final Supplier<Boolean> shouldUpdateSupplier;
     private final Supplier<Boolean> shouldShutdownSupplier;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ArrayList<SingleInstancePanel> instancePanels = new ArrayList<>();
 
-    public InstancesPanel(Julti julti, Supplier<Boolean> shouldUpdateSupplier, Supplier<Boolean> shouldShutdownSupplier) {
-        this.julti = julti;
+    public InstancesPanel(Supplier<Boolean> shouldUpdateSupplier, Supplier<Boolean> shouldShutdownSupplier) {
         this.shouldUpdateSupplier = shouldUpdateSupplier;
         this.shouldShutdownSupplier = shouldShutdownSupplier;
 
@@ -50,11 +48,11 @@ public class InstancesPanel extends JPanel {
             return;
         }
 
-        List<MinecraftInstance> instances = this.julti.getInstanceManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
 
         if (this.instancePanels.size() != instances.size()) {
             while (this.instancePanels.size() < instances.size()) {
-                this.instancePanels.add((SingleInstancePanel) this.mainPanel.add(new SingleInstancePanel(this.julti)));
+                this.instancePanels.add((SingleInstancePanel) this.mainPanel.add(new SingleInstancePanel()));
             }
             while (this.instancePanels.size() > instances.size()) {
                 this.mainPanel.remove(this.instancePanels.remove(0));

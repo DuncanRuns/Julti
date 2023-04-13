@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FileUtil {
+public final class FileUtil {
     private FileUtil() {
     }
 

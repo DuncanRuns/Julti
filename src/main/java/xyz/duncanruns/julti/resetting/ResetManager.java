@@ -1,15 +1,13 @@
 package xyz.duncanruns.julti.resetting;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.instance.InstanceManager;
+import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.InstanceManager;
+import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.util.KeyboardUtil;
-import xyz.duncanruns.julti.util.LogReceiver;
 import xyz.duncanruns.julti.util.MouseUtil;
 
 import javax.annotation.Nullable;
@@ -18,20 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class ResetManager {
-    private static final Logger LOGGER = LogManager.getLogger("ResetManager");
-
-    protected final InstanceManager instanceManager;
-    protected final Julti julti;
-
-    public ResetManager(Julti julti) {
-        this.julti = julti;
-        this.instanceManager = julti.getInstanceManager();
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
-    }
 
     public List<ActionResult> doReset() {
         String toCopy = JultiOptions.getInstance().clipboardOnReset;
@@ -72,25 +56,15 @@ public abstract class ResetManager {
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         JultiOptions options = JultiOptions.getInstance();
         if (options.useAffinity) {
-            AffinityManager.ping(this.julti);
-            AffinityManager.ping(this.julti, options.affinityBurst + 1);
+            AffinityManager.ping();
+            AffinityManager.ping(options.affinityBurst + 1);
         }
     }
 
     public void notifyWorldLoaded(MinecraftInstance instance) {
         if (JultiOptions.getInstance().useAffinity) {
-            AffinityManager.ping(this.julti);
+            AffinityManager.ping();
         }
-    }
-
-    public void notifyInstanceAvailable(MinecraftInstance instance) {
-    }
-
-    public boolean shouldDirtCover(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().autoResetForBeach) {
-            return instance.hasPreviewEverStarted() && (((!this.getLockedInstances().contains(instance)) && (!instance.isPreviewLoaded()) && (!instance.isWorldLoaded())) || instance.shouldDirtCover());
-        }
-        return instance.shouldDirtCover();
     }
 
     public List<MinecraftInstance> getLockedInstances() {
@@ -101,10 +75,10 @@ public abstract class ResetManager {
     protected MinecraftInstance getHoveredWallInstance() {
         JultiOptions options = JultiOptions.getInstance();
         Point point = MouseUtil.getMousePos();
-        Rectangle bounds = this.julti.getWallBounds();
-        Dimension sceneSize = this.julti.getOBSSceneSize();
+        Rectangle bounds = ActiveWindowTracker.getActiveWindowBounds();
+        Dimension sceneSize = OBSStateManager.getInstance().getOBSSceneSize();
         if (sceneSize == null) {
-            sceneSize = new Dimension(options.windowSize[0], options.windowSize[1]);
+            sceneSize = new Dimension(options.playingWindowSize[0], options.playingWindowSize[1]);
         }
         point.translate(-bounds.x, -bounds.y);
         Point posOnScene = new Point(point);
@@ -113,7 +87,7 @@ public abstract class ResetManager {
             posOnScene.y = posOnScene.y * sceneSize.height / bounds.height;
         }
 
-        for (MinecraftInstance instance : this.instanceManager.getInstances()) {
+        for (MinecraftInstance instance : InstanceManager.getManager().getInstances()) {
             if (this.getInstancePosition(instance, sceneSize).contains(posOnScene)) {
                 return instance;
             }
@@ -127,10 +101,11 @@ public abstract class ResetManager {
      * user's override settings.
      *
      * @param instance the instance to get the position of
+     *
      * @return the position of the instance
      */
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
-        List<MinecraftInstance> instances = this.instanceManager.getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
 
         JultiOptions options = JultiOptions.getInstance();
         int totalRows;
@@ -146,7 +121,7 @@ public abstract class ResetManager {
 
         int instanceInd = instances.indexOf(instance);
 
-        Dimension size = sceneSize == null ? this.julti.getOBSSceneSize() : sceneSize;
+        Dimension size = sceneSize == null ? OBSStateManager.getInstance().getOBSSceneSize() : sceneSize;
 
         // Using floats here so there won't be any gaps in the wall after converting back to int
         float iWidth = size.width / (float) totalColumns;
@@ -176,30 +151,30 @@ public abstract class ResetManager {
     }
 
     public boolean resetInstance(MinecraftInstance instance) {
-        instance.reset(this.instanceManager.getInstances().size() == 1);
+        instance.reset();
         return true;
     }
 
     public boolean resetInstance(MinecraftInstance instance, boolean bypassConditions) {
-        instance.reset(this.instanceManager.getInstances().size() == 1);
+        instance.reset();
         return true;
     }
 
     public boolean lockInstance(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().unsquishOnLock) {
-            new Thread(() -> instance.ensureWindowState(false, false), "unsquisher").start();
+        if (JultiOptions.getInstance().prepareWindowOnLock) {
+            // We use doLater because this is a laggy method that isn't incredibly important.
+            Julti.doLater(instance::ensurePlayingWindowState);
         }
         return false;
     }
 
     public MinecraftInstance getRelativeInstance(int offset) {
-        MinecraftInstance selectedInstance = this.instanceManager.getSelectedInstance();
-        List<MinecraftInstance> instances = this.instanceManager.getInstances();
+        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
     }
 
-    public void activateInstance(MinecraftInstance instance, int num) {
-        this.julti.activateInstance(instance, num);
+    public void reload() {
     }
 }

@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.util;
 import javax.sound.sampled.*;
 import java.io.File;
 
-public class SoundUtil {
+public final class SoundUtil {
     private SoundUtil() {
     }
 
@@ -26,6 +26,7 @@ public class SoundUtil {
      *
      * @param soundFile the file of the sound to be played (should be a .wav file)
      * @param volume    the volume of the played sound (between 0.0 and 1.0)
+     *
      * @author Draconix
      * @author DuncanRuns
      */

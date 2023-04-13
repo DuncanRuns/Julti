@@ -1,11 +1,9 @@
 package xyz.duncanruns.julti.gui;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.util.LogReceiver;
+import xyz.duncanruns.julti.messages.OptionChangeQMessage;
+import xyz.duncanruns.julti.messages.ShutdownQMessage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,21 +11,29 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class JultiGUI extends JFrame {
-    private static final Logger LOGGER = LogManager.getLogger("InstanceManager");
-    private final Julti julti;
+    private static final JultiGUI INSTANCE = new JultiGUI();
+
     private boolean closed;
     private ControlPanel controlPanel;
 
-    public JultiGUI(Julti julti) {
-        this.julti = julti;
+
+    public JultiGUI() {
         this.closed = false;
         this.setLayout(new GridBagLayout());
         this.setupComponents();
         this.setupWindow();
     }
 
+    public static JultiGUI getInstance() {
+        return INSTANCE;
+    }
+
+    public void setVisible() {
+        this.setVisible(true);
+    }
+
     private void setupComponents() {
-        this.add(new LogPanel(this.julti), new GridBagConstraints(
+        this.add(new LogPanel(), new GridBagConstraints(
                 0,
                 0,
                 1,
@@ -41,7 +47,7 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        this.controlPanel = new ControlPanel(this.julti, this);
+        this.controlPanel = new ControlPanel();
         this.add(this.controlPanel, new GridBagConstraints(
                 1,
                 0,
@@ -56,7 +62,7 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        this.add(new InstancesPanel(this.julti, () -> this.isActive() || this.isOptionsActive(), this::isClosed), new GridBagConstraints(
+        this.add(new InstancesPanel(() -> this.isActive() || this.isOptionsActive(), this::isClosed), new GridBagConstraints(
                 0,
                 1,
                 1,
@@ -76,7 +82,6 @@ public class JultiGUI extends JFrame {
         int[] lastGUIPos = JultiOptions.getInstance().lastGUIPos;
         this.setLocation(lastGUIPos[0], lastGUIPos[1]);
         this.setTitle("Julti");
-        this.setVisible(true);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -96,13 +101,8 @@ public class JultiGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
-        JultiOptions.getInstance().lastGUIPos = new int[]{this.getLocation().x, this.getLocation().y};
-        this.julti.stop();
-        System.exit(0);
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
+        Julti.getInstance().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
+        Julti.getInstance().queueMessageAndWait(new ShutdownQMessage());
+        System.exit(0); // For some reason there are hanging threads left, not even started by Julti
     }
 }

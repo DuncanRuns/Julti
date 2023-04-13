@@ -8,14 +8,16 @@ import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.gui.JultiGUI;
+import xyz.duncanruns.julti.management.LogReceiver;
 
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
 
+import static xyz.duncanruns.julti.Julti.log;
+
 public final class UpdateUtil {
-    private static final Logger LOGGER = LogManager.getLogger("UpdateChecker");
 
     private UpdateUtil() {
     }
@@ -23,6 +25,7 @@ public final class UpdateUtil {
     public static void main(String[] args) {
         FlatDarkLaf.setup();
         checkForUpdates(null);
+        System.exit(0);
     }
 
     public static void checkForUpdates(JultiGUI gui) {
@@ -57,11 +60,6 @@ public final class UpdateUtil {
         } catch (Exception e) {
             log(Level.WARN, "Update check failed! Maybe you are not connected to the internet.");
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     private static int[] getVersionNums(String versionString) {

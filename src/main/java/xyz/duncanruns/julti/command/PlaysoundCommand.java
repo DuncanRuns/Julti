@@ -1,7 +1,6 @@
 package xyz.duncanruns.julti.command;
 
 import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.util.SoundUtil;
@@ -9,6 +8,8 @@ import xyz.duncanruns.julti.util.SoundUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class PlaysoundCommand extends Command {
     @Override
@@ -32,7 +33,7 @@ public class PlaysoundCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         float volume = Float.parseFloat(args[0]);
         String soundString = CommandManager.combineArgs(CommandManager.withoutFirst(args));
 

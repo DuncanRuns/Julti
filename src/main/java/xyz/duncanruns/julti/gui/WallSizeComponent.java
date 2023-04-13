@@ -1,12 +1,15 @@
 package xyz.duncanruns.julti.gui;
 
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.NumberFormatter;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.NumberFormat;
 
 public class WallSizeComponent extends JPanel {
@@ -15,12 +18,6 @@ public class WallSizeComponent extends JPanel {
         this.setLayout(new BoxLayout(this, 1));
 
         this.reload();
-    }
-
-    public void reload() {
-        this.removeAll();
-        this.add(GUIUtil.leftJustify(new JLabel("Wall Size (rows x columns)")));
-        this.add(GUIUtil.leftJustify(getSizePanel()));
     }
 
     private static JPanel getSizePanel() {
@@ -40,31 +37,38 @@ public class WallSizeComponent extends JPanel {
         JultiOptions options = JultiOptions.getInstance();
         rowField.setValue(options.overrideRowsAmount);
         columnField.setValue(options.overrideColumnsAmount);
-        DocumentListener documentListener = new DocumentListener() {
+
+        KeyListener listener = new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void keyTyped(KeyEvent e) {
                 this.update();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void keyReleased(KeyEvent e) {
                 this.update();
             }
 
             private void update() {
-                JultiOptions options = JultiOptions.getInstance();
-                options.overrideRowsAmount = (int) rowField.getValue();
-                options.overrideColumnsAmount = (int) columnField.getValue();
+                int x = (int) rowField.getValue();
+                int y = (int) columnField.getValue();
+                Julti.waitForExecute(() -> {
+                    JultiOptions options = JultiOptions.getInstance();
+                    options.overrideRowsAmount = x;
+                    options.overrideColumnsAmount = y;
+                    Julti.doLater(() -> ResetHelper.getManager().reload());
+                });
             }
         };
-        rowField.getDocument().addDocumentListener(documentListener);
-        columnField.getDocument().addDocumentListener(documentListener);
+        rowField.addKeyListener(listener);
+        columnField.addKeyListener(listener);
         GUIUtil.setActualSize(sizePanel, 200, 23);
         return sizePanel;
+    }
+
+    public void reload() {
+        this.removeAll();
+        this.add(GUIUtil.leftJustify(new JLabel("Wall Size (rows x columns)")));
+        this.add(GUIUtil.leftJustify(getSizePanel()));
     }
 }

@@ -5,6 +5,8 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
+import static xyz.duncanruns.julti.Julti.log;
+
 public class OptionCommand extends Command {
     private final CommandManager innerManager = new CommandManager(new Command[]{
             new OptionListCommand(),
@@ -33,8 +35,8 @@ public class OptionCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
-        this.innerManager.runCommand(args, julti, cancelRequester);
+    public void run(String[] args, CancelRequester cancelRequester) {
+        Julti.waitForExecute(() -> this.innerManager.runCommand(args, cancelRequester));
     }
 
     private static class OptionListCommand extends Command {
@@ -60,7 +62,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+        public void run(String[] args, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             StringBuilder optionNames = new StringBuilder();
             for (String optionName : options.getOptionNamesWithType()) {
@@ -96,7 +98,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+        public void run(String[] args, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             String optionName = args[0];
             String value = options.getValueString(optionName);
@@ -132,7 +134,7 @@ public class OptionCommand extends Command {
         }
 
         @Override
-        public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+        public void run(String[] args, CancelRequester cancelRequester) {
             JultiOptions options = JultiOptions.getInstance();
             String[] valueArgs = CommandManager.withoutFirst(args);
             String all = CommandManager.combineArgs(valueArgs);

@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.gui;
 
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.script.Script;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
@@ -10,13 +9,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class ScriptsGUI extends JFrame {
-    private final Julti julti;
     private boolean closed = false;
     private JPanel panel;
 
-    public ScriptsGUI(Julti julti, JultiGUI gui) {
-        this.julti = julti;
-        this.setLocation(gui.getLocation());
+    public ScriptsGUI() {
+        this.setLocation(JultiGUI.getInstance().getLocation());
         this.setupWindow();
         this.reload();
     }
@@ -60,7 +57,7 @@ public class ScriptsGUI extends JFrame {
         this.panel.add(GUIUtil.createSpacer(15));
 
         for (String name : ScriptManager.getScriptNames()) {
-            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(this.julti, name, ScriptManager.getHotkeyContext(name), this::reload)));
+            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(name, ScriptManager.getHotkeyContext(name), this::reload)));
         }
 
         verticalScrollBar.setValue(i);

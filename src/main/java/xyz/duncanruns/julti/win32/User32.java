@@ -2,28 +2,31 @@ package xyz.duncanruns.julti.win32;
 
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
-import com.sun.jna.platform.win32.WinDef.*;
-import com.sun.jna.platform.win32.WinUser.INPUT;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.win32.StdCallLibrary;
 
 /**
- * JNA interface with Window's user32.dll
+ * JNA interface with Window's user32.dll.
+ * This interface is an extension of the User32 interface packaged with JNA.
  *
- * @author Pete S & DuncanRuns & Lxnus
+ * @author Pete S, DuncanRuns, & Lxnus
  */
-public interface User32 extends StdCallLibrary {
+public interface User32 extends com.sun.jna.platform.win32.User32 {
     User32 INSTANCE = Native.load("user32", User32.class);
-
-    HWND GetForegroundWindow();
+    int MOUSEEVENTF_ABSOLUTE = 0x8000;
+    int MOUSEEVENTF_LEFTDOWN = 0x0002;
+    int MOUSEEVENTF_LEFTUP = 0x0004;
+    int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+    int MOUSEEVENTF_MIDDLEUP = 0x0040;
+    int MOUSEEVENTF_MOVE = 0x0001;
+    int MOUSEEVENTF_RIGHTDOWN = 0x0008;
+    int MOUSEEVENTF_RIGHTUP = 0x0010;
+    int MOUSEEVENTF_WHEEL = 0x0800;
+    int MOUSEEVENTF_XDOWN = 0x0080;
+    int MOUSEEVENTF_XUP = 0x0100;
+    int MOUSEEVENTF_HWHEEL = 0x01000;
 
     boolean SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT flags);
 
     int GetWindowTextA(HWND hWnd, byte[] lpString, int nMaxCount);
-
-    boolean EnumWindows(WNDENUMPROC lpEnumFunc, HWND userData);
-
-    boolean IsWindow(HWND hWnd);
 
     LONG GetWindowLongA(HWND hWnd, int nIndex);
 
@@ -35,47 +38,19 @@ public interface User32 extends StdCallLibrary {
 
     BOOL SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-    boolean ShowWindow(HWND hWnd, int nCmdShow);
-
     boolean SetWindowTextA(HWND hWnd, String lpString);
-
-    int SetForegroundWindow(HWND hWnd);
-
-    boolean BringWindowToTop(HWND hWnd);
-
-    boolean MoveWindow(HWND hWnd, int x, int y, int nWidth, int nHeight, boolean bRepaint);
 
     boolean IsIconic(HWND hWnd);
 
     UINT MapVirtualKeyA(UINT uCode, UINT uMapType);
 
-    int GetWindowThreadProcessId(HWND hwnd, IntByReference lpdwProcessId);
-
-    short GetAsyncKeyState(int vKey);
-
-    UINT SendInput(DWORD dword, INPUT[] inputs, int inputSize);
-
     HDC GetWindowDC(HWND hWnd);
-
-    boolean GetClientRect(HWND hWnd, RECT rect);
-
-    boolean GetWindowRect(HWND hWnd, RECT rect);
-
-    HDC GetDC(HWND hWnd);
-
-    int ReleaseDC(HWND hWnd, HDC hDC);
 
     int FillRect(HDC hdc, RECT rect, HBRUSH hbrush);
 
     boolean IsZoomed(HWND hWnd);
 
     BOOL GetCursorInfo(CURSORINFO pci);
-
-    BOOL GetCursorPos(POINT point);
-
-    interface WNDENUMPROC extends StdCallCallback {
-        boolean callback(HWND hWnd, LPARAM arg);
-    }
 
     @Structure.FieldOrder({"cbSize", "flags", "hCursor", "ptScreenPos"})
     class CURSORINFO extends Structure {
