@@ -115,6 +115,7 @@ public final class Julti {
 
     public void run() {
         ResourceUtil.makeResources();
+        OBSStateManager.getInstance().tryOutputLSInfo();
         this.reload();
         long cycles = 0;
         log(Level.INFO, "Welcome to Julti!");
