@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.util.DoAllFastUtil;
 import xyz.duncanruns.julti.util.MouseUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 import xyz.duncanruns.julti.win32.User32;
@@ -78,6 +79,7 @@ public final class InstanceManager {
     private void onAllInstancesFound() {
         this.renameWindows();
         SleepBGUtil.disableLock();
+        DoAllFastUtil.doAllFast(MinecraftInstance::discoverInformation);
         this.instances.forEach(instance -> {
             instance.activate(true);
             MouseUtil.clickTopLeft(instance.getHwnd());
@@ -146,7 +148,7 @@ public final class InstanceManager {
     }
 
     public void renameWindows() {
-        if(JultiOptions.getInstance().preventWindowNaming) {
+        if (JultiOptions.getInstance().preventWindowNaming) {
             return;
         }
         int i = 1;
