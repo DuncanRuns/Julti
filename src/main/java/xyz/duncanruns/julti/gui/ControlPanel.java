@@ -40,7 +40,8 @@ public class ControlPanel extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     if (0 == JOptionPane.showConfirmDialog(JultiGUI.getInstance(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
-                        InstanceManager.getManager().redetectInstances();
+                        Julti.doLater(() -> InstanceManager.getManager().redetectInstances());
+
                     }
                 }
             });
@@ -49,7 +50,8 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    InstanceManager.getManager().getInstances().forEach(MinecraftInstance::discoverInformation);
+                    Julti.doLater(() -> InstanceManager.getManager().getInstances().forEach(MinecraftInstance::discoverInformation));
+
                 }
             });
 
@@ -65,7 +67,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    InstanceManager.getManager().getInstances().forEach(MinecraftInstance::closeWindow);
+                    Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
                 }
             });
 
@@ -73,7 +75,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    InstanceManager.getManager().renameWindows();
+                    Julti.doLater(() -> InstanceManager.getManager().renameWindows());
                 }
             });
 
@@ -82,7 +84,7 @@ public class ControlPanel extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     SleepBGUtil.disableLock();
-                    Julti.waitForExecute(() -> DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState));
+                    Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState));
                 }
             });
 
