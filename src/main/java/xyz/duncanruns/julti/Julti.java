@@ -163,6 +163,7 @@ public final class Julti {
         // Cancel all hotkeys if instances are missing
         if (InstanceManager.getManager().areInstancesMissing()) {
             this.hotkeyQueue.forEach(QMessage::markProcessed);
+            this.hotkeyQueue.clear();
             return;
         }
 
