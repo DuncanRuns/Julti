@@ -41,7 +41,6 @@ public class ControlPanel extends JPanel {
                     Thread.currentThread().setName("julti-gui");
                     if (0 == JOptionPane.showConfirmDialog(JultiGUI.getInstance(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
                         Julti.doLater(() -> InstanceManager.getManager().redetectInstances());
-
                     }
                 }
             });
