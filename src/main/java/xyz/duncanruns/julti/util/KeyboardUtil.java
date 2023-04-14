@@ -63,12 +63,16 @@ public final class KeyboardUtil {
     }
 
     public static void copyToClipboard(String string) {
-        Toolkit.getDefaultToolkit()
-                .getSystemClipboard()
-                .setContents(
-                        new StringSelection(string),
-                        null
-                );
+        try {
+            Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .setContents(
+                            new StringSelection(string),
+                            null
+                    );
+        } catch (Exception ignored) {
+            // Sometimes it just fails I guess :(
+        }
     }
 
     // This code may cause a system exit. Removed for safety.
