@@ -66,11 +66,13 @@ public final class AffinityManager {
                 setAffinity(instance, options.threadsLocked);
             } else {
                 StateTracker stateTracker = instance.getStateTracker();
-                if (stateTracker.isCurrentState(InstanceState.WAITING) || stateTracker.isCurrentState (InstanceState.TITLE)) {
+                if (stateTracker.isCurrentState(InstanceState.WAITING)
+                        || stateTracker.isCurrentState(InstanceState.TITLE)
+                        || stateTracker.isCurrentState(InstanceState.GENERATING)) {
                     setAffinity(instance, options.threadsPrePreview);
                 } else if (System.currentTimeMillis() - instance.getStateTracker().getLastStartOf(InstanceState.PREVIEWING) < options.affinityBurst) {
                     setAffinity(instance, options.threadsStartPreview);
-                } else if (stateTracker.isCurrentState (InstanceState.PREVIEWING)) {
+                } else if (stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                     setAffinity(instance, options.threadsPreview);
                 } else {
                     setAffinity(instance, options.threadsWorldLoaded);
