@@ -19,7 +19,7 @@ public final class ResetCounter {
     private static void updateFile(int count) {
         synchronized (WRITE_LOCK) {
             try {
-                FileUtil.writeString(JultiOptions.getJultiDir().resolve("resets.txt"), String.valueOf(JultiOptions.getInstance().resetCounter));
+                FileUtil.writeString(JultiOptions.getJultiDir().resolve("resets.txt"), String.valueOf(count));
             } catch (Exception ignored) {
             }
         }
