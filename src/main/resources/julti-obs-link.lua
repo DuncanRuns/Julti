@@ -1,6 +1,6 @@
 --[[
 
-    Julti OBS Link v1.1.0
+    Julti OBS Link v1.2.0
     
     The purpose of the OBS Link Script is to generate and control a Julti scene to assist with multi-instance speedrunning.
 
@@ -34,13 +34,18 @@ obs = obslua
 
 -- Variables --
 
-julti_dir = os.getenv("UserProfile"):gsub("\\","/") .. "/.Julti/"
+julti_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.Julti/"
 timers_activated = false
 last_state_text = ""
 last_scene_name = ""
 
 total_width = 0
 total_height = 0
+
+-- script settings
+win_cap_instead = false
+reuse_for_verification = false
+invisible_dirt_covers = false
 
 -- File Functions --
 
@@ -80,8 +85,15 @@ end
 
 -- Instance --
 
-function set_instance_data(num, lock_visible, cover_visible, x, y, width, height)
+function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height)
     local group = get_group_as_scene("Instance " .. num)
+
+    if invisible_dirt_covers and dirt_cover then
+        local scene = get_scene("Julti")
+        local item = obs.obs_scene_find_source(scene, "Instance " .. num)
+        set_position(item, total_width + 1000, 0)
+        return
+    end
 
     -- Lock Display: visibility and crop
     local item = obs.obs_scene_find_source(group, "Lock Display")
@@ -90,7 +102,7 @@ function set_instance_data(num, lock_visible, cover_visible, x, y, width, height
 
     -- Dirt Cover: visibility and bounds
     local item = obs.obs_scene_find_source(group, "Dirt Cover Display")
-    obs.obs_sceneitem_set_visible(item, cover_visible)
+    obs.obs_sceneitem_set_visible(item, dirt_cover)
     set_position_with_bounds(item, 0, 0, width, height)
 
     -- Minecraft capture: position and bounds
@@ -108,13 +120,13 @@ function set_instance_data_from_string(instance_num, data_string)
     -- Example: "2,0,0,960,540"
     local nums = split_string(data_string, ",")
     set_instance_data(
-        instance_num, --instance number
+        instance_num,                         --instance number
         (nums[1] == "1") or (nums[1] == "3"), -- lock visible
         (nums[1] == "2") or (nums[1] == "3"), -- cover visible
-        tonumber(nums[2]), -- x
-        tonumber(nums[3]), -- y
-        tonumber(nums[4]), -- width
-        tonumber(nums[5])) -- height
+        tonumber(nums[2]),                    -- x
+        tonumber(nums[3]),                    -- y
+        tonumber(nums[4]),                    -- width
+        tonumber(nums[5]))                    -- height
 end
 
 -- Misc Functions --
@@ -179,9 +191,10 @@ end
 
 function switch_to_scene(scene_name)
     local scene_source = get_source(scene_name)
-    if (scene_source == nil) then return end
+    if (scene_source == nil) then return false end
     obs.obs_frontend_set_current_scene(scene_source)
     release_source(scene_source)
+    return true
 end
 
 function get_video_info()
@@ -285,9 +298,12 @@ function generate_scenes()
         found_ae = true
     end
 
-    _setup_verification_scene()
+    _clear_verification_scene()
 
     _setup_julti_scene()
+
+    _setup_verification_scene()
+
 
     -- Reset variables to have loop update stuff automatically
     last_state_text = ""
@@ -308,6 +324,28 @@ function generate_scenes()
     end
 end
 
+function _clear_verification_scene()
+    if scene_exists("Verification") then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "Verification scene already existed,")
+        obs.script_log(200, "captures and sound group will be replaced.")
+        local scene = get_scene("Verification")
+        local items = obs.obs_scene_enum_items(scene)
+        for _, item in ipairs(items) do
+            local name = get_sceneitem_name(item)
+            if name == "Minecraft Audio" or
+                (string.find(name, "Verification Capture ") ~= nil) or
+                (string.find(name, "Minecraft Capture ") ~= nil) or
+                (string.find(name, "Square ") ~= nil) then
+                obs.obs_sceneitem_remove(item)
+            end
+        end
+        obs.sceneitem_list_release(items)
+    else
+        create_scene("Verification")
+    end
+end
+
 function _setup_cover_scene()
     create_scene("Dirt Cover Display")
     local scene = get_scene("Dirt Cover Display")
@@ -324,25 +362,6 @@ function _setup_cover_scene()
 end
 
 function _setup_verification_scene()
-    if scene_exists("Verification") then
-        obs.script_log(200, "------------------------------")
-        obs.script_log(200, "Verification scene already existed,")
-        obs.script_log(200, "window captures and sound group will be replaced.")
-        local scene = get_scene("Verification")
-        local items = obs.obs_scene_enum_items(scene)
-        for _, item in ipairs(items) do
-            local name = get_sceneitem_name(item)
-            if name == "Minecraft Audio" or
-                (string.find(name, "Verification Capture ") ~= nil) or
-                (string.find(name, "Square ") ~= nil) then
-                obs.obs_sceneitem_remove(item)
-            end
-        end
-        obs.sceneitem_list_release(items)
-    else
-        create_scene("Verification")
-    end
-
     local scene = get_scene("Verification")
 
     local out = get_state_file_string()
@@ -401,10 +420,17 @@ function _setup_verification_scene()
         local row = math.floor(instance_index / total_columns)
         local col = math.floor(instance_index % total_columns)
 
-        local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
-            instance_num .. ':GLFW30:javaw.exe"}')
-        local verif_cap_source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num,
-            settings, nil)
+        local verif_cap_source = nil
+
+        if reuse_for_verification then
+            verif_cap_source = get_source("Minecraft Capture " .. instance_num)
+        else
+            local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
+                instance_num .. ':GLFW30:javaw.exe"}')
+            verif_cap_source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num,
+                settings, nil)
+        end
+
         local verif_item = obs.obs_scene_add(scene, verif_cap_source)
         set_position_with_bounds(verif_item, col * i_width, row * i_height, i_width - i_height, i_height)
 
@@ -581,10 +607,20 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
     release_source(source)
 
-    local settings = obs.obs_data_create_from_json(
-        '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
-        .. num .. ':GLFW30:javaw.exe"}')
-    local source = obs.obs_source_create("game_capture", "Minecraft Capture " .. num, settings, nil)
+    local settings = nil
+    local source = nil
+
+    if win_cap_instead then
+        settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
+            num .. ':GLFW30:javaw.exe"}')
+        source = obs.obs_source_create("window_capture", "Minecraft Capture " .. num, settings, nil)
+    else
+        settings = obs.obs_data_create_from_json(
+            '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
+            .. num .. ':GLFW30:javaw.exe"}')
+        source = obs.obs_source_create("game_capture", "Minecraft Capture " .. num, settings, nil)
+    end
+
     obs.obs_data_release(settings)
     local mcsi = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, mcsi)
@@ -600,12 +636,20 @@ function script_description()
 end
 
 function script_properties()
-    local properties = obs.obs_properties_create()
-    local generate_scenes_button = obs.obs_properties_add_button(
-        properties, "generate_scenes_button", "Generate Scenes", generate_scenes)
-    local generate_stream_scenes_button = obs.obs_properties_add_button(
-        properties, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
-    return properties
+    local props = obs.obs_properties_create()
+
+    obs.obs_properties_add_bool(props, "win_cap_instead", "Use Window Capture for Julti Scene Sources")
+    obs.obs_properties_add_bool(props, "reuse_for_verification",
+        "Reuse Julti Scene Sources for Verification Scene\n(Better for source record or window cap)")
+
+    obs.obs_properties_add_button(
+        props, "generate_scenes_button", "Generate Scenes", generate_scenes)
+    obs.obs_properties_add_button(
+        props, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
+
+    obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
+
+    return props
 end
 
 function script_load(settings)
@@ -619,6 +663,10 @@ function script_load(settings)
 end
 
 function script_update(settings)
+    win_cap_instead = obs.obs_data_get_bool(settings, "win_cap_instead")
+    reuse_for_verification = obs.obs_data_get_bool(settings, "reuse_for_verification")
+    invisible_dirt_covers = obs.obs_data_get_bool(settings, "invisible_dirt_covers")
+
     if timers_activated then
         return
     end
@@ -641,7 +689,7 @@ function loop()
 
     local is_on_a_julti_scene = (current_scene_name == "Julti") or (current_scene_name == "Lock Display") or
         (current_scene_name == "Dirt Cover Display") or (current_scene_name == "Walling") or
-        (current_scene_name == "Playing")
+        (current_scene_name == "Playing") or (string.find(current_scene_name, "Playing ") ~= nil)
 
     if not is_on_a_julti_scene then
         return
@@ -664,6 +712,10 @@ function loop()
     for k, data_string in pairs(data_strings) do
         if user_location == nil then
             user_location = data_string
+            -- Prevent wall updates if switching to a single instance scene to allow transitions to work
+            if user_location ~= "W" and switch_to_scene("Playing " .. user_location) then
+                return
+            end
         else
             instance_num = instance_num + 1
             set_instance_data_from_string(instance_num, data_string)
