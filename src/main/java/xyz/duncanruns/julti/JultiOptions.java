@@ -55,7 +55,6 @@ public final class JultiOptions {
     // Window
     public boolean letJultiMoveWindows = true;
     public boolean useBorderless = true;
-    public boolean useMaximize = true;
 
     public int[] windowPos = new int[]{0, 0};
     public int[] playingWindowSize = MonitorUtil.getPrimaryMonitor().size;
