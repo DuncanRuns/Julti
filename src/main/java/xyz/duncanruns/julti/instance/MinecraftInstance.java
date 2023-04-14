@@ -219,10 +219,10 @@ public class MinecraftInstance {
         this.stateTracker.tryUpdate();
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
-                this.presser.pressF3Esc();
-                this.presser.pressF3Esc();
                 JultiOptions options = JultiOptions.getInstance();
                 if ((options.unpauseOnSwitch || options.coopMode) && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
+                    this.presser.pressEsc();
+                    this.presser.pressEsc();
                     this.presser.pressEsc();
                 }
                 if (options.coopMode) {
