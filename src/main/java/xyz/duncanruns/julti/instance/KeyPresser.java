@@ -25,8 +25,10 @@ public class KeyPresser {
         KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32VK.VK_ESCAPE);
     }
 
-    public void pressKey(int virtualKey) {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, virtualKey);
+    public void pressKey(Integer virtualKey) {
+        if (virtualKey != null) {
+            KeyboardUtil.sendKeyToHwnd(this.hwnd, virtualKey);
+        }
     }
 
     public void pressShiftTabEnter() {
