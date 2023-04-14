@@ -175,6 +175,7 @@ public final class InstanceManager {
         this.instances.clear();
         this.instances.addAll(InstanceChecker.getInstance().getAllOpenedInstances());
         this.instances.sort(Comparator.comparingInt(MinecraftInstance::getNameSortingNum));
+        this.saveInstances();
         this.onAllInstancesFound();
     }
 
