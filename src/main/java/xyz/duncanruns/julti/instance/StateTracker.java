@@ -122,10 +122,10 @@ public class StateTracker {
             return;
         }
 
-        if(args.length > 1) {
+        if (args.length > 1) {
             // Get loading percent
             this.loadingPercent = Byte.parseByte(args[1]);
-        }else{
+        } else {
             Julti.log(Level.ERROR, "Invalid state in " + this.path + ": \"" + out + "\"");
         }
     }

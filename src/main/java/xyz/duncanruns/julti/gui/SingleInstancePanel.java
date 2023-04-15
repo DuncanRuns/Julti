@@ -44,7 +44,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == 1) {
             Thread.currentThread().setName("julti-gui");
-            Julti.getInstance().activateInstance(this.instance);
+            Julti.doLater(() -> Julti.getInstance().activateInstance(this.instance));
         }
     }
 
@@ -53,6 +53,23 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         if (e.isPopupTrigger()) {
             this.doPop(e);
         }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            this.doPop(e);
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 
     private void doPop(MouseEvent e) {
@@ -88,22 +105,5 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             }
         });
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-            this.doPop(e);
-        }
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
     }
 }

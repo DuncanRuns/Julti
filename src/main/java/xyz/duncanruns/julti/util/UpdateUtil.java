@@ -2,13 +2,10 @@ package xyz.duncanruns.julti.util;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.gui.JultiGUI;
-import xyz.duncanruns.julti.management.LogReceiver;
 
 import javax.swing.*;
 import java.awt.*;

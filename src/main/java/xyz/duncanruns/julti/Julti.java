@@ -2,7 +2,6 @@ package xyz.duncanruns.julti;
 
 import com.google.common.collect.ImmutableMap;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.logging.log4j.Level;
@@ -11,14 +10,13 @@ import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.LogReceiver;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.messages.*;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
-import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
@@ -128,7 +126,7 @@ public final class Julti {
     }
 
     private void tick(long cycles) {
-        ActiveWindowTracker.update();
+        ActiveWindowManager.update();
         InstanceManager.getManager().tick(cycles);
         if (cycles % 100 == 0) {
             this.ensureLocation();
@@ -142,7 +140,7 @@ public final class Julti {
     private void ensureLocation() {
         MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
         boolean instanceActive = selectedInstance != null;
-        boolean wallActive = !instanceActive && ActiveWindowTracker.isWallActive();
+        boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
         if (wallActive) {
             OBSStateManager.getInstance().setLocationToWall();
         } else if (instanceActive) {
@@ -183,7 +181,7 @@ public final class Julti {
         if (hotkeyCode.startsWith("script:")) {
             String scriptName = hotkeyCode.split(":")[1];
             boolean instanceActive = InstanceManager.getManager().getSelectedInstance() != null;
-            boolean wallActive = !instanceActive && ActiveWindowTracker.isWallActive();
+            boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
             if ((!instanceActive) && (!wallActive)) {
                 return;
             }
@@ -232,15 +230,15 @@ public final class Julti {
 
     public void activateInstance(MinecraftInstance instance, boolean doingSetup) {
         instance.activate(doingSetup);
-        if (JultiOptions.getInstance().alwaysOnTopProjector && ActiveWindowTracker.isWallActive()) {
-            User32.INSTANCE.ShowWindow(ActiveWindowTracker.getActiveHwnd(), User32.SW_MINIMIZE);
+        if (JultiOptions.getInstance().alwaysOnTopProjector && ActiveWindowManager.isWallActive()) {
+            User32.INSTANCE.ShowWindow(ActiveWindowManager.getActiveHwnd(), User32.SW_MINIMIZE);
         }
         OBSStateManager.getInstance().setLocation(InstanceManager.getManager().getInstanceNum(instance));
     }
 
     public void focusWall() {
         SleepBGUtil.disableLock();
-        AtomicReference<HWND> wallHwnd = new AtomicReference<>(ActiveWindowTracker.getLastWallHwnd());
+        AtomicReference<HWND> wallHwnd = new AtomicReference<>(ActiveWindowManager.getLastWallHwnd());
         if (wallHwnd.get() == null) {
             User32.INSTANCE.EnumWindows((hwnd, data) -> {
                 if (WindowTitleUtil.isOBSTitle(WindowTitleUtil.getHwndTitle(hwnd))) {
@@ -259,10 +257,7 @@ public final class Julti {
             // Set always on top
             User32.INSTANCE.SetWindowPos(hwnd, new HWND(new Pointer(-1)), 0, 0, 0, 0, new WinDef.UINT(0x0002 | 0x0001));
         }
-        KeyboardUtil.keyDown(Win32VK.VK_LMENU);
-        KeyboardUtil.keyUp(Win32VK.VK_LMENU);
-        User32.INSTANCE.SetForegroundWindow(hwnd);
-        User32.INSTANCE.BringWindowToTop(hwnd);
+        ActiveWindowManager.activateHwnd(hwnd);
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
         OBSStateManager.getInstance().setLocationToWall();
     }

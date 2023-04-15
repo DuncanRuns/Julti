@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.instance;
 
-import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.commons.text.StringEscapeUtils;
@@ -8,7 +7,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
-import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.User32;
@@ -211,11 +210,11 @@ public class MinecraftInstance {
     }
 
     public void activate(boolean doingSetup) {
+        if (this.isWindowMarkedMissing()) {
+            return;
+        }
         this.activeSinceReset = true;
-        KeyboardUtil.keyDown(Win32VK.VK_LMENU);
-        KeyboardUtil.keyUp(Win32VK.VK_LMENU);
-        User32.INSTANCE.SetForegroundWindow(this.hwnd);
-        User32.INSTANCE.BringWindowToTop(this.hwnd);
+        ActiveWindowManager.activateHwnd(this.hwnd);
         this.stateTracker.tryUpdate();
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
@@ -323,7 +322,7 @@ public class MinecraftInstance {
         }
 
         // Unpause if window is active
-        if (ActiveWindowTracker.isWindowActive(this.hwnd)) {
+        if (ActiveWindowManager.isWindowActive(this.hwnd)) {
             if (options.unpauseOnSwitch || options.coopMode) {
                 this.presser.pressEsc();
             }
@@ -483,6 +482,11 @@ public class MinecraftInstance {
     }
 
     private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds) {
+
+        if (!JultiOptions.getInstance().letJultiMoveWindows) {
+            return;
+        }
+
         boolean currentlyBorderless = WindowStateUtil.isHwndBorderless(this.hwnd);
         boolean currentlyMaximized = WindowStateUtil.isHwndMaximized(this.hwnd);
         Rectangle currentBounds = WindowStateUtil.getHwndRectangle(this.hwnd);
@@ -513,13 +517,16 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                !options.useBorderless && options.resettingWindowSize == options.playingWindowSize,
+                !options.useBorderless && !options.autoFullscreen && options.resettingWindowSize == options.playingWindowSize,
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1])
         );
     }
 
     public void ensurePlayingWindowState() {
         JultiOptions options = JultiOptions.getInstance();
+        if (options.autoFullscreen) {
+            return;
+        }
         this.ensureWindowState(
                 options.useBorderless,
                 !options.useBorderless,

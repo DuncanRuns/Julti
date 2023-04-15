@@ -1,12 +1,11 @@
 package xyz.duncanruns.julti.resetting;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
@@ -72,7 +71,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallFullReset() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         List<MinecraftInstance> lockedInstances = new ArrayList<>(this.getLockedInstances());
@@ -96,7 +95,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallSingleReset() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         MinecraftInstance selectedInstance = this.getHoveredWallInstance();
@@ -111,7 +110,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallLock() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         MinecraftInstance clickedInstance = this.getHoveredWallInstance();
@@ -127,7 +126,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallFocusReset() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
 
@@ -149,7 +148,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallPlay() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         MinecraftInstance clickedInstance = this.getHoveredWallInstance();
@@ -165,7 +164,7 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doWallPlayLock() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         if (this.lockedInstances.isEmpty()) {

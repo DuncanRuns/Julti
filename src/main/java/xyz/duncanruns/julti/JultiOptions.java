@@ -123,6 +123,7 @@ public final class JultiOptions {
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;
     public boolean alwaysOnTopProjector = false;
+    // public boolean forceActivate = false;
 
 
     // Hidden

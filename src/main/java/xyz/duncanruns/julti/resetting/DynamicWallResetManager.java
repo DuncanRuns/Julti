@@ -3,7 +3,7 @@ package xyz.duncanruns.julti.resetting;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
@@ -90,7 +90,7 @@ public class DynamicWallResetManager extends WallResetManager {
             this.isFirstReset = false;
             return actionResults;
         }
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return actionResults;
         }
 
@@ -116,7 +116,7 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public List<ActionResult> doWallFocusReset() {
-        if (!ActiveWindowTracker.isWallActive()) {
+        if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         // Regular play instance method

@@ -2,8 +2,6 @@ package xyz.duncanruns.julti.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.io.IOException;

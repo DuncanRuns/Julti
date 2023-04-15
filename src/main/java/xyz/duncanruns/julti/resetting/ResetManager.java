@@ -4,7 +4,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
-import xyz.duncanruns.julti.management.ActiveWindowTracker;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.util.KeyboardUtil;
@@ -75,7 +75,7 @@ public abstract class ResetManager {
     protected MinecraftInstance getHoveredWallInstance() {
         JultiOptions options = JultiOptions.getInstance();
         Point point = MouseUtil.getMousePos();
-        Rectangle bounds = ActiveWindowTracker.getActiveWindowBounds();
+        Rectangle bounds = ActiveWindowManager.getActiveWindowBounds();
         Dimension sceneSize = OBSStateManager.getInstance().getOBSSceneSize();
         if (sceneSize == null) {
             sceneSize = new Dimension(options.playingWindowSize[0], options.playingWindowSize[1]);

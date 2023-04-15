@@ -8,14 +8,15 @@ import xyz.duncanruns.julti.win32.User32;
 import java.awt.*;
 
 public final class WindowStateUtil {
-    private WindowStateUtil(){}
-
     private static final int BORDERLESS_STYLE = ~(User32.WS_BORDER
             | User32.WS_DLGFRAME
             | User32.WS_THICKFRAME
             | User32.WS_MINIMIZEBOX
             | User32.WS_MAXIMIZEBOX
             | User32.WS_SYSMENU);
+
+    private WindowStateUtil() {
+    }
 
     public static boolean isHwndBorderless(HWND hwnd) {
         long oldStyle = getHwndStyle(hwnd);
