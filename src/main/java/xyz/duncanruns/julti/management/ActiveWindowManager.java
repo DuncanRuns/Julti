@@ -1,11 +1,9 @@
 package xyz.duncanruns.julti.management;
 
 import com.sun.jna.platform.win32.Kernel32;
-import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
-import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
