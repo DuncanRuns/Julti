@@ -66,7 +66,9 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
+                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getInstance(), "Are you sure you'd like to close all of your instances?", "Julti: Close Instances", JOptionPane.OK_CANCEL_OPTION)) {
+                        Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
+                    }
                 }
             });
 
