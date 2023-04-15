@@ -685,6 +685,11 @@ function loop()
         last_scene_name = current_scene_name
     end
 
+    -- Check doing stuff too early
+    if current_scene_name == nil then
+        return
+    end
+
     -- Check on Julti scene before continuing
 
     local is_on_a_julti_scene = (current_scene_name == "Julti") or (current_scene_name == "Lock Display") or
