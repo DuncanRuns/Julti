@@ -1,9 +1,12 @@
 package xyz.duncanruns.julti.management;
 
 import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
+import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
@@ -64,21 +67,26 @@ public final class ActiveWindowManager {
         // intendedActiveHwnd = hwnd;
         // intendedActiveHwndTime = System.currentTimeMillis();
 
-        // Using Erlend Robaye's answer from https://stackoverflow.com/questions/20444735/issue-with-setforegroundwindow-in-net
-        // I believe specnr also uses this
-        int currentlyFocusedWindowProcessId = User32.INSTANCE.GetWindowThreadProcessId(User32.INSTANCE.GetForegroundWindow(), new IntByReference(0));
-        int appThread = Kernel32.INSTANCE.GetCurrentThreadId();
+        if (JultiOptions.getInstance().useAltSwitching) {
 
-        User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), true);
-        // If the order of SetForegroundWindow and BringWindowToTop are switched, keyboard focus gets fucked
-        User32.INSTANCE.SetForegroundWindow(hwnd);
-        User32.INSTANCE.BringWindowToTop(hwnd);
-        User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), false);
+            // fuck
+            KeyboardUtil.keyDown(Win32VK.VK_LMENU);
+            KeyboardUtil.keyUp(Win32VK.VK_LMENU);
+            User32.INSTANCE.SetForegroundWindow(hwnd);
+            User32.INSTANCE.BringWindowToTop(hwnd);
 
-        // Old kind of method
-        //KeyboardUtil.keyDown(Win32VK.VK_LMENU);
-        //KeyboardUtil.keyUp(Win32VK.VK_LMENU);
-        //User32.INSTANCE.SetForegroundWindow(hwnd);
-        //User32.INSTANCE.BringWindowToTop(hwnd);
+        } else {
+
+            // Using Erlend Robaye's answer from https://stackoverflow.com/questions/20444735/issue-with-setforegroundwindow-in-net
+            // I believe specnr also uses this
+            int currentlyFocusedWindowProcessId = User32.INSTANCE.GetWindowThreadProcessId(User32.INSTANCE.GetForegroundWindow(), new IntByReference(0));
+            int appThread = Kernel32.INSTANCE.GetCurrentThreadId();
+
+            User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), true);
+            // If the order of SetForegroundWindow and BringWindowToTop are switched, keyboard focus gets fucked
+            User32.INSTANCE.SetForegroundWindow(hwnd);
+            User32.INSTANCE.BringWindowToTop(hwnd);
+            User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), false);
+        }
     }
 }

@@ -120,9 +120,11 @@ public final class JultiOptions {
     public boolean enableExperimentalOptions = false;
     public boolean showDebug = false;
     public boolean autoFullscreen = false;
+    public boolean usePlayingSizeWithFullscreen = false;
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;
     public boolean alwaysOnTopProjector = false;
+    public boolean useAltSwitching = false;
     // public boolean forceActivate = false;
 
 

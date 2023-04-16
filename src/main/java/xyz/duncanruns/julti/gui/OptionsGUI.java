@@ -88,6 +88,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen")));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
 
         panel.add(GUIUtil.createSpacer());
@@ -95,6 +98,9 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Always On Top Projector", "alwaysOnTopProjector")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
     }
 
     private void addComponentsSound() {
@@ -216,10 +222,12 @@ public class OptionsGUI extends JFrame {
             if (!b) {
                 Julti.waitForExecute(() -> {
                     options.autoFullscreen = false;
+                    options.usePlayingSizeWithFullscreen = false;
                     options.showDebug = false;
                     options.pieChartOnLoad = false;
                     options.preventWindowNaming = false;
                     options.alwaysOnTopProjector = false;
+                    options.useAltSwitching = false;
                 });
             }
             this.reload();

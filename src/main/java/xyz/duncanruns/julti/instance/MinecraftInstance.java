@@ -517,14 +517,14 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                !options.useBorderless && !options.autoFullscreen && options.resettingWindowSize == options.playingWindowSize,
+                !options.useBorderless && !(options.autoFullscreen && !options.usePlayingSizeWithFullscreen) && options.resettingWindowSize == options.playingWindowSize,
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1])
         );
     }
 
     public void ensurePlayingWindowState() {
         JultiOptions options = JultiOptions.getInstance();
-        if (options.autoFullscreen) {
+        if (options.autoFullscreen && !options.usePlayingSizeWithFullscreen) {
             return;
         }
         this.ensureWindowState(
