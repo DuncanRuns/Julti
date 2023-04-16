@@ -640,8 +640,10 @@ public class OptionsGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
-        OBSStateManager.getInstance().tryOutputLSInfo();
-        SleepBGUtil.disableLock();
-        Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState));
+        Julti.doLater(() -> {
+            OBSStateManager.getInstance().tryOutputLSInfo();
+            SleepBGUtil.disableLock();
+            DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState);
+        });
     }
 }
