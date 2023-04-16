@@ -171,7 +171,7 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
         List<MinecraftInstance> instancePool = new ArrayList<>(this.lockedInstances);
-        instancePool.sort((o1, o2) -> o2.getWallSortingNum() - o1.getWallSortingNum());
+        instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
         List<ActionResult> out = this.playInstanceFromWall(instancePool.get(0));
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping();

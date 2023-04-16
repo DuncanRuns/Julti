@@ -192,7 +192,7 @@ public class StateTracker {
         return this.inWorldState;
     }
 
-    public int getWallSortingNum() {
+    public int getResetSortingNum() {
         if (this.isCurrentState(InstanceState.WAITING)) {
             return -1;
         }

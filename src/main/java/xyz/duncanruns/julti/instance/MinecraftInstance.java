@@ -42,6 +42,7 @@ public class MinecraftInstance {
     private boolean windowMissing = false;
 
     private boolean resetPressed = false;
+    private boolean resetEverPressed = false;
     private boolean activeSinceReset = false;
     private boolean windowStateChangedToPlaying = false;
     private long lastSetVisible = 0;
@@ -189,6 +190,7 @@ public class MinecraftInstance {
             this.presser.pressKey(this.gameOptions.createWorldKey);
         }
         this.resetPressed = true;
+        this.resetEverPressed = true;
         this.openedToLan = false;
 
         if (wasFullscreen) {
@@ -262,11 +264,14 @@ public class MinecraftInstance {
         }
     }
 
-    public int getWallSortingNum() {
-        if (this.resetPressed) {
-            return -1;
+    public int getResetSortingNum() {
+        if (!this.resetEverPressed) {
+            return 10000000;
         }
-        return this.stateTracker.getWallSortingNum();
+        if (this.resetPressed) {
+            return -2;
+        }
+        return this.stateTracker.getResetSortingNum();
     }
 
     private void onWorldLoad() {
