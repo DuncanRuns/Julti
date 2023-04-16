@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.util;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 public class DoAllFastUtil {
 
     public static void doAllFast(Consumer<MinecraftInstance> consumer) {
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = new ArrayList<>(InstanceManager.getManager().getInstances());
         doAllFast(instances, consumer);
     }
 
