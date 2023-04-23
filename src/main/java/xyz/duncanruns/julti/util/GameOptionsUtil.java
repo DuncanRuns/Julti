@@ -131,20 +131,19 @@ public final class GameOptionsUtil {
 
     public static Integer getKey(Path instancePath, String keybindingTranslation) {
         String out = tryGetOption(instancePath, keybindingTranslation, true);
-        if (out != null) {
-            Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
-            if (vkFromMCTranslation == null) {
-                // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
-                Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
-            } else {
-                return vkFromMCTranslation;
-            }
+        Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
+        if (vkFromMCTranslation == null && out != null) {
+            // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
+            Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
+        } else if (vkFromMCTranslation != null) {
+            return vkFromMCTranslation;
         }
+
 
         // Try again without standard settings
         out = tryGetOption(instancePath, keybindingTranslation, false);
-        Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
-        if (out != null && vkFromMCTranslation == null) {
+        vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
+        if (vkFromMCTranslation == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
         }
