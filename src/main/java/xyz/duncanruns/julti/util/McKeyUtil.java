@@ -146,6 +146,9 @@ public final class McKeyUtil {
     }
 
     public static Integer getVkFromMCTranslation(String translationKey) {
+        if (translationKey == null) {
+            return null;
+        }
         Integer glfwKey = TRANSLATIONS_TO_GLFW.get(translationKey);
         Integer vkKey = getVkFromGLFW(glfwKey);
         if (vkKey == null || vkKey <= 0) {
