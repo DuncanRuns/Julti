@@ -375,6 +375,14 @@ function _setup_verification_scene()
         obs.script_log(200, "Warning: Could not a loading square size, defaulting to 90x90.")
     end
     local square_size = split_string(square_size_string, ",")
+    local square_width = square_size[1]
+    local square_height = square_size[2]
+
+    if square_width == nil or square_height == nil then
+        square_width = 90
+        square_height = 90
+        obs.script_log(200, "Warning: Could not a loading square size, defaulting to 90x90.")
+    end
 
     local instance_count = (#(split_string(out, ";"))) - 1
 
@@ -448,7 +456,7 @@ function _setup_verification_scene()
         obs.obs_sceneitem_set_alignment(verif_item_2, 9)
         set_position(verif_item_2, 0, 10000)
 
-        set_crop(square_group_item, 0, 10000 - square_size[2], 10000 - square_size[1], 0)
+        set_crop(square_group_item, 0, 10000 - square_height, 10000 - square_width, 0)
         set_position_with_bounds(square_group_item, col * i_width + (i_width - i_height), row * i_height, i_height,
             i_height)
 
