@@ -10,7 +10,9 @@ import java.util.function.Consumer;
 /**
  * Execute operations on a list of objects or all minecraft instances in parallel.
  */
-public class DoAllFastUtil {
+public final class DoAllFastUtil {
+    private DoAllFastUtil() {
+    }
 
     public static void doAllFast(Consumer<MinecraftInstance> consumer) {
         List<MinecraftInstance> instances = new ArrayList<>(InstanceManager.getManager().getInstances());
