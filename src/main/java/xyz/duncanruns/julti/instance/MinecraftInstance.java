@@ -559,6 +559,9 @@ public class MinecraftInstance {
         this.presser.pressTab(7);
         this.presser.pressEnter();
         this.presser.pressShiftTab(1);
+        if (MCVersionUtil.isNewerThan(this.versionString, "1.16.5")) {
+            this.presser.pressTab(2);
+        }
         this.presser.pressEnter();
         this.presser.pressTab();
         this.presser.pressEnter();
