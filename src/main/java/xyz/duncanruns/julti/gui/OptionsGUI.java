@@ -463,7 +463,12 @@ public class OptionsGUI extends JFrame {
         })));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay", b -> this.reload())));
+
+        if (options.wallLockInsteadOfPlay) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Smart Switch", "wallSmartSwitch")));
+        }
 
 
         if (!options.wallResetAllAfterPlaying) {

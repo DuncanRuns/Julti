@@ -42,6 +42,7 @@ public final class JultiOptions {
     // Wall
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallLockInsteadOfPlay = true;
+    public boolean wallSmartSwitch = false;
     public boolean wallBypass = true;
     public boolean returnToWallIfNoneLoaded = true;
     public boolean autoCalcWallSize = true;

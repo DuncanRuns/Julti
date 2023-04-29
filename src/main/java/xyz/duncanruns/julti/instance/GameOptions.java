@@ -6,5 +6,5 @@ public class GameOptions {
     public Integer fullscreenKey = null;
     public Integer chatKey = null;
 
-    private Boolean usingStandardSettings = null;
+    private final Boolean usingStandardSettings = null;
 }
