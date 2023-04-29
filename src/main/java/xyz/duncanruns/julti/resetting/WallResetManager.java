@@ -232,7 +232,7 @@ public class WallResetManager extends ResetManager {
                     // This can cause infinite recursion if messed with badly
                     // This point of the code can only be accessed if the instance parameter has not loaded in generation
                     // Take note that the instance passed into playInstanceFromWall must be a loaded instance!
-                    this.playInstanceFromWall(ssInstance);
+                    results.addAll(this.playInstanceFromWall(ssInstance));
                 }
             }
             return results;
