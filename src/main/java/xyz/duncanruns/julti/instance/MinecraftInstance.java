@@ -183,8 +183,11 @@ public class MinecraftInstance {
         }
 
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
-            this.presser.pressShiftTabEnter();
-            this.presser.pressKey(this.gameOptions.createWorldKey);
+            if(MCVersionUtil.isOlderThan(this.versionString,"1.16.1")) {
+                this.presser.pressShiftTabEnter();
+            }else {
+                this.presser.pressKey(this.gameOptions.createWorldKey);
+            }
         } else {
             this.presser.pressKey(this.gameOptions.leavePreviewKey);
             this.presser.pressKey(this.gameOptions.createWorldKey);
