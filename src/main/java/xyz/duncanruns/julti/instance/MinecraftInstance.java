@@ -183,9 +183,9 @@ public class MinecraftInstance {
         }
 
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
-            if(MCVersionUtil.isOlderThan(this.versionString,"1.16.1")) {
+            if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
                 this.presser.pressShiftTabEnter();
-            }else {
+            } else {
                 this.presser.pressKey(this.gameOptions.createWorldKey);
             }
         } else {
@@ -238,9 +238,9 @@ public class MinecraftInstance {
             }
         }
         if (doingSetup) {
-            this.ensureResettingWindowState();
+            Julti.doLater(this::ensureResettingWindowState);
         } else {
-            this.ensurePlayingWindowState();
+            Julti.doLater(this::ensurePlayingWindowState);
         }
     }
 
