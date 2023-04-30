@@ -226,12 +226,12 @@ public class WallResetManager extends ResetManager {
             List<ActionResult> results = new ArrayList<>(this.lockInstance(instance) ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList());
 
             if (options.wallSmartSwitch) {
+                // ! This code is on the edge of dangerous !
+                // This can cause infinite recursion if messed with badly
+                // This point of the code can only be accessed if the instance parameter has not loaded in generation
+                // Take note that the instance passed into playInstanceFromWall must be a loaded instance!
                 MinecraftInstance ssInstance = this.getNextPlayableLockedInstance(true);
                 if (ssInstance != null) {
-                    // ! This code is on the edge of dangerous !
-                    // This can cause infinite recursion if messed with badly
-                    // This point of the code can only be accessed if the instance parameter has not loaded in generation
-                    // Take note that the instance passed into playInstanceFromWall must be a loaded instance!
                     results.addAll(this.playInstanceFromWall(ssInstance));
                 }
             }
