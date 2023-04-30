@@ -18,8 +18,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public final class AffinityManager {
+    private static final Object LOCK = new Object();
     public static final int AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors();
     private static ScheduledExecutorService EXECUTOR = null;
+    private static boolean paused = false;
 
 
     private AffinityManager() {
@@ -47,6 +49,15 @@ public final class AffinityManager {
     }
 
     public static void tick() {
+        synchronized (LOCK) {
+            if (paused) {
+                return;
+            }
+            setAffinityForAllInstances();
+        }
+    }
+
+    private static void setAffinityForAllInstances() {
         InstanceManager instanceManager = InstanceManager.getManager();
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = instanceManager.getInstances();
@@ -105,6 +116,27 @@ public final class AffinityManager {
             ping();
         } else {
             getExecutor().schedule(AffinityManager::tick, delay, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public static void jumpAffinity(MinecraftInstance instance) {
+        setAffinity(instance, JultiOptions.getInstance().threadsPlaying);
+    }
+
+    /**
+     * Pause the affinity manager to carry out a specific task, usually instance activation.
+     * <p>
+     * Should be paired with {@link AffinityManager#unpause()} shortly afterwards.
+     */
+    public static void pause() {
+        synchronized (LOCK) {
+            paused = true;
+        }
+    }
+
+    public static void unpause() {
+        synchronized (LOCK) {
+            paused = false;
         }
     }
 }

@@ -6,6 +6,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
@@ -219,7 +220,12 @@ public class MinecraftInstance {
             return;
         }
         this.activeSinceReset = true;
+
+        AffinityManager.pause();
+        AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
+        AffinityManager.unpause();
+
         this.stateTracker.tryUpdate();
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
