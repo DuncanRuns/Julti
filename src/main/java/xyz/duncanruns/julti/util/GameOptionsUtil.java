@@ -28,8 +28,11 @@ public final class GameOptionsUtil {
         return null;
     }
 
-    public static String tryGetOption(Path instancePath, String optionName, boolean tryUseSS) {
+    public static boolean tryGetBoolOption(Path instancePath, String optionName, boolean tryUseSS) {
+        return Objects.equals(tryGetOption(instancePath, optionName, tryUseSS), "true");
+    }
 
+    public static String tryGetOption(Path instancePath, String optionName, boolean tryUseSS) {
         // This should prevent any crazy out of pocket bullshits like 1 in a million parsing error situations
         try {
             return getOption(instancePath, optionName, tryUseSS);

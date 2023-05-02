@@ -116,6 +116,7 @@ public class MinecraftInstance {
         this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview");
         this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen");
         this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat");
+        this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
 
         this.discoverName();
     }
@@ -221,16 +222,19 @@ public class MinecraftInstance {
         }
         this.activeSinceReset = true;
 
+        JultiOptions options = JultiOptions.getInstance();
+
         AffinityManager.pause();
         AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
+        if (options.usePlayingSizeWithFullscreen && options.autoFullscreen) {
+            this.ensureResettingWindowState(false);
+        }
         AffinityManager.unpause();
 
-        this.stateTracker.tryUpdate();
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
-                JultiOptions options = JultiOptions.getInstance();
-                if ((options.unpauseOnSwitch || options.coopMode) && this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
+                if ((options.unpauseOnSwitch || options.coopMode)) {
                     this.presser.pressEsc();
                     this.presser.pressEsc();
                     this.presser.pressEsc();
@@ -243,17 +247,19 @@ public class MinecraftInstance {
                 }
             }
         }
-        if (doingSetup) {
-            Julti.doLater(() -> this.ensureResettingWindowState(false));
-        } else {
-            Julti.doLater(() -> this.ensurePlayingWindowState(false));
+        if (!options.autoFullscreen) {
+            if (doingSetup) {
+                Julti.doLater(() -> this.ensureResettingWindowState(false));
+            } else {
+                Julti.doLater(() -> this.ensurePlayingWindowState(false));
+            }
         }
     }
 
     private void onStateChange() {
         // The next state after reset should be WAITING, if it changes to something that is not WAITING, send the key again
         if (this.resetPressed) {
-            if (this.stateTracker.isCurrentState(InstanceState.WAITING)) {
+            if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                 this.resetPressed = false;
             } else {
                 this.reset();
@@ -292,11 +298,12 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getInstance();
 
+        if (this.gameOptions.pauseOnLostFocus) {
+            Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus, some features cannot be used!");
+            return;
+        }
+
         if (!bypassPieChartGate && options.pieChartOnLoad) {
-            // Unpause
-            if (this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
-                this.presser.pressEsc();
-            }
             // Open pie chart
             this.presser.pressShiftF3();
 
@@ -542,9 +549,6 @@ public class MinecraftInstance {
 
     public void ensurePlayingWindowState(boolean offload) {
         JultiOptions options = JultiOptions.getInstance();
-        if (options.autoFullscreen && !options.usePlayingSizeWithFullscreen) {
-            return;
-        }
         this.ensureWindowState(
                 options.useBorderless,
                 !options.useBorderless,

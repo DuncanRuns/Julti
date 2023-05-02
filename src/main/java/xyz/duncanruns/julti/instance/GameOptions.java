@@ -5,6 +5,5 @@ public class GameOptions {
     public Integer leavePreviewKey = null;
     public Integer fullscreenKey = null;
     public Integer chatKey = null;
-
-    private final Boolean usingStandardSettings = null;
+    public Boolean pauseOnLostFocus = null;
 }
