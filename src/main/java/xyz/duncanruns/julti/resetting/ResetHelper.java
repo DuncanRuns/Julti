@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.resetting;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.SoundUtil;
 
+import java.awt.*;
 import java.util.List;
 
 public class ResetHelper {
@@ -18,7 +19,7 @@ public class ResetHelper {
         }
     }
 
-    public static void run(String hotkeyCode) {
+    public static void run(String hotkeyCode, Point mousePosition) {
         switch (hotkeyCode) {
             case "reset":
                 playActionSounds(getManager().doReset());
@@ -30,19 +31,19 @@ public class ResetHelper {
                 playActionSounds(getManager().doWallFullReset());
                 break;
             case "wallSingleReset":
-                playActionSounds(getManager().doWallSingleReset());
+                playActionSounds(getManager().doWallSingleReset(mousePosition));
                 break;
             case "wallLock":
-                playActionSounds(getManager().doWallLock());
+                playActionSounds(getManager().doWallLock(mousePosition));
                 break;
             case "wallPlay":
-                playActionSounds(getManager().doWallPlay());
+                playActionSounds(getManager().doWallPlay(mousePosition));
                 break;
             case "wallFocusReset":
-                playActionSounds(getManager().doWallFocusReset());
+                playActionSounds(getManager().doWallFocusReset(mousePosition));
                 break;
             case "wallPlayLock":
-                playActionSounds(getManager().doWallPlayLock());
+                playActionSounds(getManager().doWallPlayLock(mousePosition));
                 break;
         }
     }

@@ -22,6 +22,7 @@ import xyz.duncanruns.julti.util.SleepBGUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
+import java.awt.*;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -168,7 +169,7 @@ public final class Julti {
         while (!this.hotkeyQueue.isEmpty()) {
             HotkeyPressQMessage message = this.hotkeyQueue.poll();
             try {
-                this.runHotkeyAction(message.getHotkeyCode());
+                this.runHotkeyAction(message.getHotkeyCode(), message.getMousePosition());
             } catch (Exception e) {
                 message.markFailed();
                 this.onCrashMessage(new CrashQMessage(e));
@@ -177,7 +178,7 @@ public final class Julti {
         }
     }
 
-    private void runHotkeyAction(String hotkeyCode) {
+    private void runHotkeyAction(String hotkeyCode, Point mousePosition) {
         if (hotkeyCode.startsWith("script:")) {
             String scriptName = hotkeyCode.split(":")[1];
             boolean instanceActive = InstanceManager.getManager().getSelectedInstance() != null;
@@ -189,7 +190,7 @@ public final class Julti {
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.requestCancel();
         } else {
-            ResetHelper.run(hotkeyCode);
+            ResetHelper.run(hotkeyCode, mousePosition);
         }
     }
 

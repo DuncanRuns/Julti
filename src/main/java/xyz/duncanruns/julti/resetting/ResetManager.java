@@ -8,7 +8,6 @@ import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.util.KeyboardUtil;
-import xyz.duncanruns.julti.util.MouseUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -33,23 +32,23 @@ public abstract class ResetManager {
         return Collections.emptyList();
     }
 
-    public List<ActionResult> doWallSingleReset() {
+    public List<ActionResult> doWallSingleReset(Point mousePosition) {
         return Collections.emptyList();
     }
 
-    public List<ActionResult> doWallLock() {
+    public List<ActionResult> doWallLock(Point mousePosition) {
         return Collections.emptyList();
     }
 
-    public List<ActionResult> doWallFocusReset() {
+    public List<ActionResult> doWallFocusReset(Point mousePosition) {
         return Collections.emptyList();
     }
 
-    public List<ActionResult> doWallPlay() {
+    public List<ActionResult> doWallPlay(Point mousePosition) {
         return Collections.emptyList();
     }
 
-    public List<ActionResult> doWallPlayLock() {
+    public List<ActionResult> doWallPlayLock(Point mousePosition) {
         return Collections.emptyList();
     }
 
@@ -72,9 +71,9 @@ public abstract class ResetManager {
     }
 
     @Nullable
-    protected MinecraftInstance getHoveredWallInstance() {
+    protected MinecraftInstance getHoveredWallInstance(Point mousePosition) {
         JultiOptions options = JultiOptions.getInstance();
-        Point point = MouseUtil.getMousePos();
+        Point point = new Point(mousePosition.x, mousePosition.y);
         Rectangle bounds = ActiveWindowManager.getActiveWindowBounds();
         Dimension sceneSize = OBSStateManager.getInstance().getOBSSceneSize();
         if (sceneSize == null) {
@@ -163,7 +162,7 @@ public abstract class ResetManager {
     public boolean lockInstance(MinecraftInstance instance) {
         if (JultiOptions.getInstance().prepareWindowOnLock) {
             // We use doLater because this is a laggy method that isn't incredibly important.
-            Julti.doLater(instance::ensurePlayingWindowState);
+            Julti.doLater(() -> instance.ensurePlayingWindowState(true));
         }
         return false;
     }

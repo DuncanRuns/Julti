@@ -64,7 +64,7 @@ public final class UpdateUtil {
         versionString = versionString.startsWith("v") ? versionString.substring(1) : versionString;
         // Remove suffix
         for (char c : new char[]{'+', '-'}) {
-            if (versionString.contains("" + c)) {
+            if (versionString.contains(String.valueOf(c))) {
                 versionString = versionString.substring(0, versionString.indexOf(c));
             }
         }

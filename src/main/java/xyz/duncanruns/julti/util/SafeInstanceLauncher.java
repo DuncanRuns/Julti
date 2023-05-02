@@ -73,7 +73,7 @@ public final class SafeInstanceLauncher {
             return;
         }
         int instanceNum = InstanceManager.getManager().getInstanceNum(instance);
-        instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
+        instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
     }
 
     private static boolean startMultiMC(String multiMCLocation, CancelRequester cancelRequester) throws IOException {
@@ -159,7 +159,7 @@ public final class SafeInstanceLauncher {
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
-            instance.launch(launchOffline ? (options.launchOfflineName.replace("*", "" + instanceNum)) : null);
+            instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
         }
     }
 }

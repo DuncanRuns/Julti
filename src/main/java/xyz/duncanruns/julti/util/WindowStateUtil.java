@@ -6,8 +6,11 @@ import com.sun.jna.platform.win32.WinDef.RECT;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class WindowStateUtil {
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int BORDERLESS_STYLE = ~(User32.WS_BORDER
             | User32.WS_DLGFRAME
             | User32.WS_THICKFRAME
@@ -59,6 +62,10 @@ public final class WindowStateUtil {
         RECT rect = new RECT();
         User32.INSTANCE.GetWindowRect(hwnd, rect);
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+    }
+
+    public static void queueSetHwndRectangle(HWND hwnd, Rectangle rectangle) {
+        EXECUTOR.execute(() -> setHwndRectangle(hwnd, rectangle));
     }
 
     public static void setHwndRectangle(HWND hwnd, Rectangle rectangle) {

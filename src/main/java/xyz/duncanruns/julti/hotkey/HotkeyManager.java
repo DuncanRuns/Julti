@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
+import xyz.duncanruns.julti.util.MouseUtil;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -60,7 +61,7 @@ public final class HotkeyManager {
             sleep(1);
             for (Pair<Hotkey, String> hotkeyAction : this.hotkeys) {
                 if (hotkeyAction.getLeft().wasPressed()) {
-                    Julti.getInstance().queueMessage(new HotkeyPressQMessage(hotkeyAction.getRight()));
+                    Julti.getInstance().queueMessage(new HotkeyPressQMessage(hotkeyAction.getRight(), MouseUtil.getMousePos()));
                 }
             }
         }

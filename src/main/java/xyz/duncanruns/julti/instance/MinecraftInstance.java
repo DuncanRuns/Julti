@@ -211,7 +211,7 @@ public class MinecraftInstance {
         this.activeSinceReset = false;
         if (this.windowStateChangedToPlaying) {
             // Do the window state change later to ensure resetting is fast
-            Julti.doLater(this::ensureResettingWindowState);
+            Julti.doLater(() -> this.ensureResettingWindowState(true));
         }
     }
 
@@ -244,9 +244,9 @@ public class MinecraftInstance {
             }
         }
         if (doingSetup) {
-            Julti.doLater(this::ensureResettingWindowState);
+            Julti.doLater(() -> this.ensureResettingWindowState(false));
         } else {
-            Julti.doLater(this::ensurePlayingWindowState);
+            Julti.doLater(() -> this.ensurePlayingWindowState(false));
         }
     }
 
@@ -495,7 +495,7 @@ public class MinecraftInstance {
         return i.get();
     }
 
-    private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds) {
+    private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
 
         if (!JultiOptions.getInstance().letJultiMoveWindows) {
             return;
@@ -523,20 +523,24 @@ public class MinecraftInstance {
         }
 
         if (!currentBounds.equals(bounds)) {
-            WindowStateUtil.setHwndRectangle(this.hwnd, bounds);
+            if (offload) {
+                WindowStateUtil.queueSetHwndRectangle(this.hwnd, bounds);
+            } else {
+                WindowStateUtil.setHwndRectangle(this.hwnd, bounds);
+            }
         }
     }
 
-    public void ensureResettingWindowState() {
+    public void ensureResettingWindowState(boolean offload) {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
                 !options.useBorderless && !(options.autoFullscreen && !options.usePlayingSizeWithFullscreen) && options.resettingWindowSize == options.playingWindowSize,
-                new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1])
-        );
+                new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1]),
+                offload);
     }
 
-    public void ensurePlayingWindowState() {
+    public void ensurePlayingWindowState(boolean offload) {
         JultiOptions options = JultiOptions.getInstance();
         if (options.autoFullscreen && !options.usePlayingSizeWithFullscreen) {
             return;
@@ -544,8 +548,8 @@ public class MinecraftInstance {
         this.ensureWindowState(
                 options.useBorderless,
                 !options.useBorderless,
-                new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1])
-        );
+                new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]),
+                offload);
         this.windowStateChangedToPlaying = true;
     }
 

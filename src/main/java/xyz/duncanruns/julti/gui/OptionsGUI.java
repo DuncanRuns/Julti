@@ -3,7 +3,6 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
-import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
@@ -646,7 +645,7 @@ public class OptionsGUI extends JFrame {
         Julti.doLater(() -> {
             OBSStateManager.getInstance().tryOutputLSInfo();
             SleepBGUtil.disableLock();
-            DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState);
+            DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
         });
     }
 }

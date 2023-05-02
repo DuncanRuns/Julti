@@ -85,7 +85,7 @@ public class ControlPanel extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     SleepBGUtil.disableLock();
-                    Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::ensureResettingWindowState));
+                    Julti.doLater(() -> DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false)));
                 }
             });
 

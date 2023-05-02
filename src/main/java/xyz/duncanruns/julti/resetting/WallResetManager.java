@@ -11,6 +11,7 @@ import xyz.duncanruns.julti.util.DoAllFastUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,11 +95,11 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallSingleReset() {
+    public List<ActionResult> doWallSingleReset(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
-        MinecraftInstance selectedInstance = this.getHoveredWallInstance();
+        MinecraftInstance selectedInstance = this.getHoveredWallInstance(mousePosition);
         if (selectedInstance == null) {
             return Collections.emptyList();
         }
@@ -109,11 +110,11 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallLock() {
+    public List<ActionResult> doWallLock(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
-        MinecraftInstance clickedInstance = this.getHoveredWallInstance();
+        MinecraftInstance clickedInstance = this.getHoveredWallInstance(mousePosition);
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
@@ -125,13 +126,13 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallFocusReset() {
+    public List<ActionResult> doWallFocusReset(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
 
         // Regular play instance method
-        MinecraftInstance clickedInstance = this.getHoveredWallInstance();
+        MinecraftInstance clickedInstance = this.getHoveredWallInstance(mousePosition);
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
@@ -147,11 +148,11 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallPlay() {
+    public List<ActionResult> doWallPlay(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
-        MinecraftInstance clickedInstance = this.getHoveredWallInstance();
+        MinecraftInstance clickedInstance = this.getHoveredWallInstance(mousePosition);
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
@@ -163,7 +164,7 @@ public class WallResetManager extends ResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallPlayLock() {
+    public List<ActionResult> doWallPlayLock(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }

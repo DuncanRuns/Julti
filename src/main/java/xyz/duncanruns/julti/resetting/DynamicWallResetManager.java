@@ -115,12 +115,12 @@ public class DynamicWallResetManager extends WallResetManager {
     }
 
     @Override
-    public List<ActionResult> doWallFocusReset() {
+    public List<ActionResult> doWallFocusReset(Point mousePosition) {
         if (!ActiveWindowManager.isWallActive()) {
             return Collections.emptyList();
         }
         // Regular play instance method
-        MinecraftInstance clickedInstance = this.getHoveredWallInstance();
+        MinecraftInstance clickedInstance = this.getHoveredWallInstance(mousePosition);
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
