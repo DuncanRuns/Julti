@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
@@ -19,6 +20,7 @@ import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
+import xyz.duncanruns.julti.util.UpdateUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
@@ -120,6 +122,10 @@ public final class Julti {
         log(Level.INFO, "Welcome to Julti!");
         String libraryPathThing = System.getProperty("java.library.path");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + libraryPathThing.substring(0, libraryPathThing.indexOf(";")));
+
+        // Schedule update checker after Julti startup processes
+        Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getInstance())).start());
+
         while (this.running) {
             sleep(1);
             this.tick(cycles++);
