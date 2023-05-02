@@ -318,28 +318,12 @@ public class MinecraftInstance {
             return;
         }
 
-        // Pause the game
-        if (this.stateTracker.getInWorldType() == InWorldState.PAUSED) {
-            // Game is paused already
-
-            if (options.useF3) {
-                // F3
-                // Unpause and re-pause with f3+esc
-                this.presser.pressEsc();
-                this.presser.pressF3Esc();
-            }
-            // No F3 does not need to be handled since the game is already paused correctly
-
+        if (options.useF3) {
+            // F3
+            this.presser.pressF3Esc();
         } else {
-            // Game is not yet paused
-
-            if (options.useF3) {
-                // F3
-                this.presser.pressF3Esc();
-            } else {
-                // No F3
-                this.presser.pressEsc();
-            }
+            // No F3
+            this.presser.pressEsc();
         }
 
         // Unpause if window is active
