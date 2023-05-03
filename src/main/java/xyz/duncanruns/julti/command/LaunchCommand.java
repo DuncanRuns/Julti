@@ -1,12 +1,14 @@
 package xyz.duncanruns.julti.command;
 
 import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
 import java.util.List;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class LaunchCommand extends Command {
 
@@ -31,12 +33,12 @@ public class LaunchCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toLaunch;
         if (args[0].equals("all")) {
-            toLaunch = julti.getInstanceManager().getInstances();
+            toLaunch = InstanceManager.getManager().getInstances();
         } else {
-            toLaunch = CommandManager.getInstances(args[0], julti);
+            toLaunch = CommandManager.getInstances(args[0]);
         }
 
         if (toLaunch.isEmpty()) {

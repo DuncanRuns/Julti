@@ -1,11 +1,13 @@
 package xyz.duncanruns.julti.command;
 
 import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 
 import java.util.List;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class CloseCommand extends Command {
 
@@ -30,12 +32,12 @@ public class CloseCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toClose;
         if (args[0].equals("all")) {
-            toClose = julti.getInstanceManager().getInstances();
+            toClose = InstanceManager.getManager().getInstances();
         } else {
-            toClose = CommandManager.getInstances(args[0], julti);
+            toClose = CommandManager.getInstances(args[0]);
         }
 
         if (toClose.isEmpty()) {

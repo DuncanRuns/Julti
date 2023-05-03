@@ -2,8 +2,8 @@ package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
 import com.formdev.flatlaf.ui.FlatMarginBorder;
-import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.util.LogReceiver;
+import xyz.duncanruns.julti.command.CommandManager;
+import xyz.duncanruns.julti.management.LogReceiver;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -12,10 +12,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 public class LogPanel extends JPanel {
-    private final Julti julti;
 
-    public LogPanel(Julti julti) {
-        this.julti = julti;
+    public LogPanel() {
         this.setupWindow();
     }
 
@@ -51,7 +49,9 @@ public class LogPanel extends JPanel {
                 command = command.substring(1);
             }
             String finalCommand = command;
-            new Thread(() -> this.julti.runCommand(finalCommand), "julti-gui").start();
+            for (String s : finalCommand.split(";")) {
+                CommandManager.getMainManager().runCommand(s);
+            }
             commandLine.setText("");
         });
         commandLine.addFocusListener(new FocusListener() {

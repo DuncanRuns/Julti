@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.command;
 
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
@@ -27,7 +26,7 @@ public class SleepCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         long millis = Long.parseLong(args[0]);
         long endTime = System.currentTimeMillis() + millis;
         long currentTime;

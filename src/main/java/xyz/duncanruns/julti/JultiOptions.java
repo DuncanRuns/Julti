@@ -4,11 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.util.FileUtil;
-import xyz.duncanruns.julti.util.HotkeyUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
-import xyz.duncanruns.julti.win32.Win32Con;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -24,24 +24,25 @@ import java.util.stream.Collectors;
 
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
+    private final static Gson GSON_OBJECT_MAKER = new Gson();
     private static JultiOptions INSTANCE = null;
+
+    private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
 
     private transient final Path location;
     private transient final String profileName;
 
     // Reset
-    public boolean pauseOnLoad = true;
     public boolean useF3 = true;
     public boolean unpauseOnSwitch = true;
     public String clipboardOnReset = "";
     public int resetMode = 1; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
     public boolean coopMode = false;
-    public int dirtReleasePercent = 0;
 
     // Wall
-    public boolean cleanWall = false;
     public boolean wallResetAllAfterPlaying = false;
     public boolean wallLockInsteadOfPlay = true;
+    public boolean wallSmartSwitch = false;
     public boolean wallBypass = true;
     public boolean returnToWallIfNoneLoaded = true;
     public boolean autoCalcWallSize = true;
@@ -50,14 +51,16 @@ public final class JultiOptions {
     public long wallResetCooldown = 150L;
     public float lockedInstanceSpace = 16.666668f;
     public boolean dwReplaceLocked = true;
+    public boolean doDirtCovers = false;
 
     // Window
     public boolean letJultiMoveWindows = true;
     public boolean useBorderless = true;
-    public boolean unsquishOnLock = false;
-    public int[] windowPos = MonitorUtil.getPrimaryMonitor().position;
-    public int[] windowSize = MonitorUtil.getPrimaryMonitor().size;
-    public float wideResetSquish = 1f;
+
+    public int[] windowPos = new int[]{0, 0};
+    public int[] playingWindowSize = MonitorUtil.getPrimaryMonitor().size;
+    public int[] resettingWindowSize = MonitorUtil.getPrimaryMonitor().size;
+    public boolean prepareWindowOnLock = false;
 
     // Hotkeys
     public List<Integer> resetHotkey = Collections.singletonList((int) 'U');
@@ -85,10 +88,6 @@ public final class JultiOptions {
     // OBS
     public int instanceSpacing = 0;
     public String obsWindowNameFormat = "* projector (scene) - *";
-    public boolean obsPressHotkeys = false;
-    public boolean obsUseNumpad = true;
-    public boolean obsUseAlt = false;
-    public List<Integer> switchToWallHotkey = Collections.singletonList(Win32Con.VK_F12);
 
     // Other
     public String multiMCPath = "";
@@ -99,13 +98,13 @@ public final class JultiOptions {
 
     // Affinity
     public boolean useAffinity = true;
-    public int threadsPlaying = Math.max(1, AffinityManager.AVAILABLE_THREADS);
-    public int threadsPrePreview = Math.max(1, AffinityManager.AVAILABLE_THREADS);
-    public int threadsStartPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 28 / 32);
-    public int threadsPreview = Math.max(1, AffinityManager.AVAILABLE_THREADS * 11 / 32);
-    public int threadsWorldLoaded = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
-    public int threadsLocked = Math.max(1, AffinityManager.AVAILABLE_THREADS);
-    public int threadsBackground = Math.max(1, AffinityManager.AVAILABLE_THREADS * 8 / 32);
+    public int threadsPlaying = Math.max(1, MAX_THREADS);
+    public int threadsPrePreview = Math.max(1, MAX_THREADS);
+    public int threadsStartPreview = Math.max(1, MAX_THREADS * 28 / 32);
+    public int threadsPreview = Math.max(1, MAX_THREADS * 11 / 32);
+    public int threadsWorldLoaded = Math.max(1, MAX_THREADS * 8 / 32);
+    public int threadsLocked = Math.max(1, MAX_THREADS);
+    public int threadsBackground = Math.max(1, MAX_THREADS * 8 / 32);
     public int affinityBurst = 300;
 
     // Sounds
@@ -122,21 +121,18 @@ public final class JultiOptions {
     public boolean enableExperimentalOptions = false;
     public boolean showDebug = false;
     public boolean autoFullscreen = false;
+    public boolean usePlayingSizeWithFullscreen = false;
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;
-    public boolean noCopeMode = false;
     public boolean alwaysOnTopProjector = false;
+    public boolean useAltSwitching = false;
+    // public boolean forceActivate = false;
 
 
     // Hidden
-    public List<String> lastInstances = new ArrayList<>();
+    public List<String> instancePaths = new ArrayList<>();
     public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
-
-    // Auto Reset
-    public boolean autoResetForBeach = false;
-    public boolean autoResetBackground = true;
-    public boolean autoCheckAllOnWall = true;
 
     public JultiOptions(Path location) {
         this.location = location;
@@ -179,29 +175,16 @@ public final class JultiOptions {
         return jultiDir.resolve("profiles").resolve("default.json");
     }
 
-    public boolean tryLoad() {
-        if (Files.isRegularFile(this.location)) {
-            try {
-                // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
-                Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(FileUtil.readString(this.location), JultiOptions.class);
-                return true;
-            } catch (Exception ignored) {
-            }
-        }
-        return false;
-    }
-
     public static Path getJultiDir() {
         return Paths.get(System.getProperty("user.home")).resolve(".Julti");
     }
 
-    public static boolean changeProfile(String profileName) {
+    public static boolean tryChangeProfile(String profileName) {
         Path selectedFilePath = getJultiDir().resolve("selectedprofile.txt");
         try {
             ensureJultiDir();
             FileUtil.writeString(selectedFilePath, profileName);
-            INSTANCE = null;
+            getInstance(true);
             return true;
         } catch (Exception ignored) {
             return false;
@@ -249,8 +232,61 @@ public final class JultiOptions {
         return resolve.toFile().delete();
     }
 
-    public String testJson() {
-        return GSON_WRITER.toJson(this);
+    public boolean tryLoad() {
+        if (Files.isRegularFile(this.location)) {
+            try {
+                // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
+                String jsonString = FileUtil.readString(this.location);
+                OldOptions oldOptions = GSON_OBJECT_MAKER.fromJson(jsonString, OldOptions.class);
+                Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
+                gson.fromJson(jsonString, JultiOptions.class);
+                this.processOldOptions(oldOptions);
+                return true;
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
+    }
+
+    private void processOldOptions(OldOptions oldOptions) {
+        List<String> changes = new ArrayList<>();
+        if (oldOptions.lastInstances != null) {
+            // Just a name change, no logging needed
+            this.instancePaths = oldOptions.lastInstances;
+        }
+        if (oldOptions.unsquishOnLock != null) {
+            this.prepareWindowOnLock = oldOptions.unsquishOnLock;
+        }
+        if (oldOptions.noCopeMode != null && oldOptions.noCopeMode) {
+            changes.add("No Cope Mode was previously enabled, but has been removed");
+        }
+        if (oldOptions.dirtReleasePercent != null) {
+            this.doDirtCovers = oldOptions.dirtReleasePercent >= 0;
+            changes.add("A percentage was set for dirt covers, this option has been removed");
+        }
+        if (oldOptions.windowSize != null) {
+            this.resettingWindowSize = this.playingWindowSize = oldOptions.windowSize;
+        }
+        if (oldOptions.wideResetSquish != null) {
+            changes.add("Wide reset squish has been replaced by resetting window size, your old settings have been converted");
+            this.resettingWindowSize = new int[]{this.resettingWindowSize[0], (int) (this.resettingWindowSize[1] / oldOptions.wideResetSquish)};
+        }
+        if (oldOptions.pauseOnLoad != null && !oldOptions.pauseOnLoad) {
+            changes.add("The \"Pause on Load\" was disabled, the option has been removed and worlds will now always pause on load");
+        }
+
+        if (changes.isEmpty()) {
+            return;
+        }
+
+        StringBuilder out = new StringBuilder("--------------------\nYou have updated Julti from an older version, the following changes to your options have been made:");
+        changes.forEach(s -> out.append("\n- ").append(s));
+        out.append("\n--------------------");
+        Julti.doLater(() -> {
+            for (String s : out.toString().split("\n")) {
+                Julti.log(Level.INFO, s);
+            }
+        });
     }
 
     public boolean trySave() {
@@ -269,7 +305,7 @@ public final class JultiOptions {
     }
 
     public List<Path> getLastInstancePaths() {
-        return this.lastInstances.stream().map(Paths::get).collect(Collectors.toList());
+        return this.instancePaths.stream().map(Paths::get).collect(Collectors.toList());
     }
 
     public String getValueString(String optionName) {
@@ -297,48 +333,11 @@ public final class JultiOptions {
         if (optionField == null || Modifier.isTransient(optionField.getModifiers())) {
             return null;
         }
-        if (optionField.getType().isPrimitive()) {
-            // Basic value to change
-            Class<?> clazz = optionField.getType();
-            try {
-                if (boolean.class == clazz) {
-                    return optionField.getBoolean(this);
-                }
-                if (byte.class == clazz) {
-                    return optionField.getByte(this);
-                }
-                if (short.class == clazz) {
-                    return optionField.getShort(this);
-                }
-                if (int.class == clazz) {
-                    return optionField.getInt(this);
-                }
-                if (long.class == clazz) {
-                    return optionField.getLong(this);
-                }
-                if (float.class == clazz) {
-                    return optionField.getFloat(this);
-                }
-                if (double.class == clazz) {
-                    return optionField.getDouble(this);
-                }
-            } catch (Exception e) {
-                // This should theoretically never run
-                return null;
-            }
-        } else {
-            try {
-                return optionField.get(this);
-            } catch (IllegalAccessException ignored) {
-            }
+        try {
+            return optionField.get(this);
+        } catch (IllegalAccessException ignored) {
         }
         return null;
-    }
-
-    public HotkeyUtil.Hotkey getHotkeyFromSetting(String name) {
-        List<Integer> keys = (List<Integer>) this.getValue(name);
-        boolean ignoreModifiers = (Boolean) this.getValue(name + "IM");
-        return ignoreModifiers ? new HotkeyUtil.HotkeyIM(keys) : new HotkeyUtil.Hotkey(keys);
     }
 
     public ScriptHotkeyData getScriptHotkeyData(String scriptName) {
@@ -383,63 +382,54 @@ public final class JultiOptions {
         return names;
     }
 
-    public boolean trySetValue(String optionName, String valueString) {
+    /**
+     * A magical all-encompassing option value setter that handles many types of objects.
+     * <p>
+     * If the option is a primitive field, the object will be converted to a String and then parsed to the
+     * appropriate wrapper object before setting.
+     * <p>
+     * If the option is a String field, toString() will be called on the value object.
+     * <p>
+     * If the option is not a primitive or String field, the value will be directly set
+     *
+     * @param optionName the name of the field in this options object
+     * @param value      the value object
+     *
+     * @return true if the value was set successfully, otherwise false
+     */
+    public boolean trySetValue(String optionName, Object value) {
         try {
-            Field optionField = this.getClass().getField(optionName);
-            if (optionField.getType().isPrimitive()) {
-                Class<?> clazz = optionField.getType();
-                if (boolean.class == clazz) {
-                    optionField.setBoolean(this, Boolean.parseBoolean(valueString));
-                }
-                if (byte.class == clazz) {
-                    optionField.setByte(this, Byte.parseByte(valueString));
-                }
-                if (short.class == clazz) {
-                    optionField.setShort(this, Short.parseShort(valueString));
-                }
-                if (int.class == clazz) {
-                    optionField.setInt(this, Integer.parseInt(valueString));
-                }
-                if (long.class == clazz) {
-                    optionField.setLong(this, Long.parseLong(valueString));
-                }
-                if (float.class == clazz) {
-                    optionField.setFloat(this, Float.parseFloat(valueString));
-                }
-                if (double.class == clazz) {
-                    optionField.setDouble(this, Double.parseDouble(valueString));
-                }
-                return true;
-            } else if (optionField.getType().isArray()) {
-                // Only int arrays exist for now, so assuming int.
-                String[] words = valueString.split(" ");
-                int[] ints = new int[words.length];
-                for (int i = 0; i < ints.length; i++) {
-                    String word = words[i];
-                    if (word.endsWith(",")) {
-                        word = word.substring(0, word.length() - 1);
-                    }
-                    ints[i] = Integer.parseInt(word);
-                }
-                optionField.set(this, ints);
-                return true;
-            } else {
-                optionField.set(this, valueString);
-                return true;
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
-    }
 
-    public boolean trySetHotkey(String optionName, List<Integer> keys) {
-        try {
+            // Get field and class objects
+
             Field optionField = this.getClass().getField(optionName);
-            optionField.set(this, keys);
+            Class<?> fieldClazz = optionField.getType();
+            Class<?> valueClazz = value.getClass();
+
+            // Convert the object if possible
+
+            // If the field type is a primitive (or a primitive wrapper), we can convert the value object to the correct wrapper class
+            if (ClassUtils.isPrimitiveOrWrapper(fieldClazz)) {
+                // Get the wrapper class of the field
+                Class<?> wrapperClazz = ClassUtils.primitiveToWrapper(fieldClazz);
+                // Check if the value object is already the correct class
+                if (valueClazz != wrapperClazz) {
+                    // We can use the valueOf(String) static method from the wrapper class
+                    value = wrapperClazz.getMethod("valueOf", String.class).invoke(null, value.toString());
+                }
+            } else if (fieldClazz == String.class) {
+                // If the option field is a string field, we can use toString() to ensure the value object is a String
+                value = value.toString();
+            }
+
+            // Set the field
+
+            optionField.set(this, value);
             return true;
-        } catch (Exception ignored) {
+
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
     public boolean copyTo(String profileName) {
@@ -451,5 +441,16 @@ public final class JultiOptions {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    private static class OldOptions {
+        public int[] windowSize = null;
+        public Float wideResetSquish = null;
+        public Integer dirtReleasePercent = null;
+        public Boolean pauseOnLoad = null;
+        public List<String> lastInstances = null;
+        public Boolean noCopeMode = null;
+        public Boolean unsquishOnLock = null;
+        public Boolean cleanWall = null;
     }
 }

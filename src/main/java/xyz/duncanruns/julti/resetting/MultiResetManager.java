@@ -1,9 +1,11 @@
 package xyz.duncanruns.julti.resetting;
 
-import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
+import xyz.duncanruns.julti.util.DoAllFastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +13,10 @@ import java.util.List;
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public class MultiResetManager extends ResetManager {
-    public MultiResetManager(Julti julti) {
-        super(julti);
+    private static final MultiResetManager INSTANCE = new MultiResetManager();
+
+    public static ResetManager getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -20,7 +24,7 @@ public class MultiResetManager extends ResetManager {
         JultiOptions options = JultiOptions.getInstance();
         List<ActionResult> actionResults = new ArrayList<>();
 
-        int instanceCount = this.instanceManager.getSize();
+        int instanceCount = InstanceManager.getManager().getSize();
 
         // Return if no instances
         if (instanceCount == 0) {
@@ -28,7 +32,7 @@ public class MultiResetManager extends ResetManager {
         }
 
         // Get selected instance, return if no selected instance,
-        MinecraftInstance selectedInstance = this.instanceManager.getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
         if (selectedInstance == null) {
             return actionResults;
         }
@@ -37,34 +41,32 @@ public class MultiResetManager extends ResetManager {
 
         // if there is only a single instance, reset it and return.
         if (instanceCount == 1) {
-            selectedInstance.reset(true);
+            selectedInstance.reset();
             actionResults.add(ActionResult.INSTANCE_RESET);
             return actionResults;
         }
 
-        List<MinecraftInstance> instancePool = new ArrayList<>(this.instanceManager.getInstances());
+        List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getManager().getInstances());
         instancePool.removeIf(instance -> instance.equals(selectedInstance));
-        instancePool.sort((o1, o2) -> o2.getWallSortingNum() - o1.getWallSortingNum());
+        instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
         MinecraftInstance nextInstance = instancePool.get(0);
-        int instanceNum = this.instanceManager.getInstanceNum(nextInstance);
 
         if (resetFirst) {
-            selectedInstance.reset(false);
+            selectedInstance.reset();
             actionResults.add(ActionResult.INSTANCE_RESET);
             sleep(100);
         }
-        this.julti.activateInstance(nextInstance, instanceNum);
+        Julti.getInstance().activateInstance(nextInstance);
         actionResults.add(ActionResult.INSTANCE_ACTIVATED);
         if (!resetFirst) {
-            selectedInstance.reset(false);
+            selectedInstance.reset();
             actionResults.add(ActionResult.INSTANCE_RESET);
         }
-        this.julti.switchScene(instanceNum);
 
         super.doReset();
 
         if (options.useAffinity) {
-            AffinityManager.ping(this.julti);
+            AffinityManager.ping();
         }
         return actionResults;
     }
@@ -74,23 +76,22 @@ public class MultiResetManager extends ResetManager {
     public List<ActionResult> doBGReset() {
         List<ActionResult> actionResults = new ArrayList<>();
 
-        MinecraftInstance selectedInstance = this.instanceManager.getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
         if (selectedInstance == null) {
             return actionResults;
         }
-        List<MinecraftInstance> instances = this.instanceManager.getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
 
-        for (MinecraftInstance instance : instances) {
+        DoAllFastUtil.doAllFast(instances, instance -> {
             if (instance.equals(selectedInstance)) {
-                continue;
+                return;
             }
             if (this.resetInstance(instance)) {
                 actionResults.add(ActionResult.INSTANCE_RESET);
             }
-
-        }
+        });
         if (JultiOptions.getInstance().useAffinity) {
-            AffinityManager.ping(this.julti);
+            AffinityManager.ping();
         }
         return actionResults;
     }

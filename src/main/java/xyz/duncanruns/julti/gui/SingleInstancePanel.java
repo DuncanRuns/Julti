@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
@@ -16,11 +17,9 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
 
     private final JLabel nameLabel = new JLabel("Unknown");
     private final JLabel statusLabel = new JLabel("Unknown");
-    private final Julti julti;
     private MinecraftInstance instance;
 
-    public SingleInstancePanel(Julti julti) {
-        this.julti = julti;
+    public SingleInstancePanel() {
         this.setBorder(new FlatBorder());
         this.setLayout(new FlowLayout());
         JPanel panel = new JPanel();
@@ -45,8 +44,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == 1) {
             Thread.currentThread().setName("julti-gui");
-            this.julti.activateInstance(this.instance, this.julti.getInstanceManager().getInstanceNum(this.instance));
-            this.julti.switchScene(this.instance);
+            Julti.doLater(() -> Julti.getInstance().activateInstance(this.instance));
         }
     }
 
@@ -55,42 +53,6 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         if (e.isPopupTrigger()) {
             this.doPop(e);
         }
-    }
-
-    private void doPop(MouseEvent e) {
-        JPopupMenu popupMenu = new JPopupMenu();
-        if (this.instance.hasWindow()) {
-            GUIUtil.addMenuItem(popupMenu, "Close", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Thread.currentThread().setName("julti-gui");
-                    SingleInstancePanel.this.instance.closeWindow();
-                }
-            });
-        } else {
-            GUIUtil.addMenuItem(popupMenu, "Launch", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Thread.currentThread().setName("julti-gui");
-                    SafeInstanceLauncher.launchInstance(SingleInstancePanel.this.instance, SingleInstancePanel.this.julti);
-                }
-            });
-        }
-        GUIUtil.addMenuItem(popupMenu, "Open Folder", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SingleInstancePanel.this.instance.openFolder();
-            }
-        });
-        GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Thread.currentThread().setName("julti-gui");
-                SingleInstancePanel.this.julti.getInstanceManager().removeInstance(SingleInstancePanel.this.instance);
-                SingleInstancePanel.this.julti.storeLastInstances();
-            }
-        });
-        popupMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 
     @Override
@@ -108,5 +70,40 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
 
+    }
+
+    private void doPop(MouseEvent e) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        if (this.instance.hasWindow()) {
+            GUIUtil.addMenuItem(popupMenu, "Close", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Thread.currentThread().setName("julti-gui");
+                    SingleInstancePanel.this.instance.closeWindow();
+                }
+            });
+        } else {
+            GUIUtil.addMenuItem(popupMenu, "Launch", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Thread.currentThread().setName("julti-gui");
+                    SafeInstanceLauncher.launchInstance(SingleInstancePanel.this.instance);
+                }
+            });
+        }
+        GUIUtil.addMenuItem(popupMenu, "Open Folder", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SingleInstancePanel.this.instance.openFolder();
+            }
+        });
+        GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Thread.currentThread().setName("julti-gui");
+                InstanceManager.getManager().removeInstance(SingleInstancePanel.this.instance);
+            }
+        });
+        popupMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 }

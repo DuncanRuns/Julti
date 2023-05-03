@@ -8,15 +8,14 @@ import xyz.duncanruns.julti.util.GUIUtil;
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ScriptsGUI extends JFrame {
-    private final Julti julti;
     private boolean closed = false;
     private JPanel panel;
 
-    public ScriptsGUI(Julti julti, JultiGUI gui) {
-        this.julti = julti;
-        this.setLocation(gui.getLocation());
+    public ScriptsGUI() {
+        this.setLocation(JultiGUI.getInstance().getLocation());
         this.setupWindow();
         this.reload();
     }
@@ -60,7 +59,7 @@ public class ScriptsGUI extends JFrame {
         this.panel.add(GUIUtil.createSpacer(15));
 
         for (String name : ScriptManager.getScriptNames()) {
-            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(this.julti, name, ScriptManager.getHotkeyContext(name), this::reload)));
+            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(name, ScriptManager.getHotkeyContext(name), this::reload)));
         }
 
         verticalScrollBar.setValue(i);
@@ -73,32 +72,39 @@ public class ScriptsGUI extends JFrame {
     }
 
     private void startImportScriptDialog() {
-        String ans = JOptionPane.showInputDialog(this, "Enter the script string here:", "Julti: Import Script", JOptionPane.QUESTION_MESSAGE);
-        if (ans == null) {
-            return;
-        }
-        ans = ans.replace("\n", ";");
-
-        if (ScriptManager.addScript(ans)) {
-            this.reload();
-            return;
-        }
-
-
-        if (Script.isSavableString(ans)) {
-            if (ScriptManager.isDuplicateImport(ans)) {
-                int replaceAns = JOptionPane.showConfirmDialog(this, "A script by the same name already exists, replace it?", "Julti: Import Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                if (replaceAns != 0) {
-                    return;
-                }
-                ScriptManager.forceAddScript(ans);
-            } else {
-                JOptionPane.showMessageDialog(this, "Could not import script. An unknown error occurred.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE);
+        // Single element array as a reference holder
+        final String[] ans = {JOptionPane.showInputDialog(this, "Enter the script string here:", "Julti: Import Script", JOptionPane.QUESTION_MESSAGE)};
+        final AtomicReference<Runnable> outputFromProcessing = new AtomicReference<>(() -> {
+        });
+        Julti.waitForExecute(() -> {
+            if (ans[0] == null) {
+                return;
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Could not import script. The entered string was not a script string.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE);
-        }
-        this.reload();
+            ans[0] = ans[0].replace("\n", ";");
+
+            if (ScriptManager.addScript(ans[0])) {
+                this.reload();
+                return;
+            }
+            if (Script.isSavableString(ans[0])) {
+                if (ScriptManager.isDuplicateImport(ans[0])) {
+                    outputFromProcessing.set(() -> {
+                        int replaceAns = JOptionPane.showConfirmDialog(this, "A script by the same name already exists, replace it?", "Julti: Import Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                        if (replaceAns != 0) {
+                            return;
+                        }
+                        Julti.doLater(() -> ScriptManager.forceAddScript(ans[0]));
+                    });
+                } else {
+                    outputFromProcessing.set(() -> JOptionPane.showMessageDialog(this, "Could not import script. An unknown error occurred.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE));
+
+                }
+            } else {
+                outputFromProcessing.set(() -> JOptionPane.showMessageDialog(this, "Could not import script. The entered string was not a script string.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE));
+            }
+            this.reload();
+        });
+        outputFromProcessing.get().run();
     }
 
     public boolean isClosed() {

@@ -1,6 +1,6 @@
 --[[
 
-    Julti OBS Link v1.1.0
+    Julti OBS Link v1.2.0
     
     The purpose of the OBS Link Script is to generate and control a Julti scene to assist with multi-instance speedrunning.
 
@@ -34,13 +34,18 @@ obs = obslua
 
 -- Variables --
 
-julti_dir = os.getenv("UserProfile"):gsub("\\","/") .. "/.Julti/"
+julti_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.Julti/"
 timers_activated = false
 last_state_text = ""
 last_scene_name = ""
 
 total_width = 0
 total_height = 0
+
+-- script settings
+win_cap_instead = false
+reuse_for_verification = false
+invisible_dirt_covers = false
 
 -- File Functions --
 
@@ -70,8 +75,8 @@ function get_state_file_string()
     return nil
 end
 
-function get_square_crop_string()
-    local success, result = pcall(read_first_line, julti_dir .. "loadingsquarecrop")
+function get_square_size_string()
+    local success, result = pcall(read_first_line, julti_dir .. "loadingsquaresize")
     if success then
         return result
     end
@@ -80,8 +85,15 @@ end
 
 -- Instance --
 
-function set_instance_data(num, lock_visible, cover_visible, x, y, width, height)
+function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height)
     local group = get_group_as_scene("Instance " .. num)
+
+    if invisible_dirt_covers and dirt_cover then
+        local scene = get_scene("Julti")
+        local item = obs.obs_scene_find_source(scene, "Instance " .. num)
+        set_position(item, total_width + 1000, 0)
+        return
+    end
 
     -- Lock Display: visibility and crop
     local item = obs.obs_scene_find_source(group, "Lock Display")
@@ -90,7 +102,7 @@ function set_instance_data(num, lock_visible, cover_visible, x, y, width, height
 
     -- Dirt Cover: visibility and bounds
     local item = obs.obs_scene_find_source(group, "Dirt Cover Display")
-    obs.obs_sceneitem_set_visible(item, cover_visible)
+    obs.obs_sceneitem_set_visible(item, dirt_cover)
     set_position_with_bounds(item, 0, 0, width, height)
 
     -- Minecraft capture: position and bounds
@@ -108,13 +120,13 @@ function set_instance_data_from_string(instance_num, data_string)
     -- Example: "2,0,0,960,540"
     local nums = split_string(data_string, ",")
     set_instance_data(
-        instance_num, --instance number
+        instance_num,                         --instance number
         (nums[1] == "1") or (nums[1] == "3"), -- lock visible
         (nums[1] == "2") or (nums[1] == "3"), -- cover visible
-        tonumber(nums[2]), -- x
-        tonumber(nums[3]), -- y
-        tonumber(nums[4]), -- width
-        tonumber(nums[5])) -- height
+        tonumber(nums[2]),                    -- x
+        tonumber(nums[3]),                    -- y
+        tonumber(nums[4]),                    -- width
+        tonumber(nums[5]))                    -- height
 end
 
 -- Misc Functions --
@@ -179,9 +191,10 @@ end
 
 function switch_to_scene(scene_name)
     local scene_source = get_source(scene_name)
-    if (scene_source == nil) then return end
+    if (scene_source == nil) then return false end
     obs.obs_frontend_set_current_scene(scene_source)
     release_source(scene_source)
+    return true
 end
 
 function get_video_info()
@@ -285,9 +298,12 @@ function generate_scenes()
         found_ae = true
     end
 
-    _setup_verification_scene()
+    _clear_verification_scene()
 
     _setup_julti_scene()
+
+    _setup_verification_scene()
+
 
     -- Reset variables to have loop update stuff automatically
     last_state_text = ""
@@ -308,6 +324,28 @@ function generate_scenes()
     end
 end
 
+function _clear_verification_scene()
+    if scene_exists("Verification") then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "Verification scene already existed,")
+        obs.script_log(200, "captures and sound group will be replaced.")
+        local scene = get_scene("Verification")
+        local items = obs.obs_scene_enum_items(scene)
+        for _, item in ipairs(items) do
+            local name = get_sceneitem_name(item)
+            if name == "Minecraft Audio" or
+                (string.find(name, "Verification Capture ") ~= nil) or
+                (string.find(name, "Minecraft Capture ") ~= nil) or
+                (string.find(name, "Square ") ~= nil) then
+                obs.obs_sceneitem_remove(item)
+            end
+        end
+        obs.sceneitem_list_release(items)
+    else
+        create_scene("Verification")
+    end
+end
+
 function _setup_cover_scene()
     create_scene("Dirt Cover Display")
     local scene = get_scene("Dirt Cover Display")
@@ -324,24 +362,6 @@ function _setup_cover_scene()
 end
 
 function _setup_verification_scene()
-    if scene_exists("Verification") then
-        obs.script_log(200, "------------------------------")
-        obs.script_log(200, "Verification scene already existed,")
-        obs.script_log(200, "window captures and sound group will be replaced.")
-        local scene = get_scene("Verification")
-        local items = obs.obs_scene_enum_items(scene)
-        for _, item in ipairs(items) do
-            local name = get_sceneitem_name(item)
-            if name == "Minecraft Audio" or
-                (string.find(name, "Verification Capture ") ~= nil) then
-                obs.obs_sceneitem_remove(item)
-            end
-        end
-        obs.sceneitem_list_release(items)
-    else
-        create_scene("Verification")
-    end
-
     local scene = get_scene("Verification")
 
     local out = get_state_file_string()
@@ -349,12 +369,20 @@ function _setup_verification_scene()
         return
     end
 
-    local square_crop_string = get_square_crop_string()
-    if square_crop_string == nil then
-        square_crop_string = "1830,270"
-        obs.script_log(200, "Warning: Could not a loading square crop, defaulting to 1920x1080 squish level 3 crop.")
+    local square_size_string = get_square_size_string()
+    if square_size_string == nil then
+        square_size_string = "90,90"
+        obs.script_log(200, "Warning: Could not a loading square size, defaulting to 90x90.")
     end
-    local square_crop = split_string(square_crop_string, ",")
+    local square_size = split_string(square_size_string, ",")
+    local square_width = square_size[1]
+    local square_height = square_size[2]
+
+    if square_width == nil or square_height == nil then
+        square_width = 90
+        square_height = 90
+        obs.script_log(200, "Warning: Could not a loading square size, defaulting to 90x90.")
+    end
 
     local instance_count = (#(split_string(out, ";"))) - 1
 
@@ -378,13 +406,13 @@ function _setup_verification_scene()
 
     -- Size ratio is the ratio between width and height
     -- If there is not enough width relative to the height, the loading square would take too much space
-    if size_ratio < 3.5 then
+    if size_ratio < 2.5 then
         goto increase_again
     end
 
     -- If there is 17.5% or more empty space from unfilled grid spaces, add another row
     missing = (total_rows * total_columns - instance_count) / (total_rows * total_columns)
-    if missing > 0.2 then
+    if missing > 0.175 then
         goto increase_again
     end
 
@@ -392,30 +420,53 @@ function _setup_verification_scene()
     local i_width = math.floor(total_width / total_columns)
     local i_height = math.floor(total_height / total_rows)
 
+    local filler_source = obs.obs_source_create("color_source", "Filler", nil, nil)
+
+
     for instance_num = 1, instance_count, 1 do
         local instance_index = instance_num - 1
         local row = math.floor(instance_index / total_columns)
         local col = math.floor(instance_index % total_columns)
 
-        local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
-        instance_num .. ':GLFW30:javaw.exe"}')
-        local source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num, settings, nil)
-        local item = obs.obs_scene_add(scene, source)
-        local item2 = obs.obs_scene_add(scene, source)
-        local item3 = obs.obs_scene_add(scene, source)
-        set_position_with_bounds(item, col * i_width, row * i_height, i_width - (2 * i_height), i_height)
-        set_position_with_bounds(item2, col * i_width + (i_width - i_height), row * i_height, i_height, i_height)
-        set_position_with_bounds(item3, col * i_width + (i_width - (2 * i_height)), row * i_height, i_height, i_height)
-        set_crop(item2, 0, square_crop[2], square_crop[1], 0)
-        set_crop(item3, square_crop[3], square_crop[4], square_crop[3], square_crop[5])
-        obs.obs_sceneitem_set_scale_filter(item2, obs.OBS_SCALE_POINT)
-        obs.obs_sceneitem_set_scale_filter(item3, obs.OBS_SCALE_POINT)
-        obs.obs_data_release(settings)
-    end
+        local verif_cap_source = nil
 
-    local source = get_source("Minecraft Audio")
-    obs.obs_scene_add(scene, source)
-    release_source(source)
+        if reuse_for_verification then
+            verif_cap_source = get_source("Minecraft Capture " .. instance_num)
+        else
+            local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
+                instance_num .. ':GLFW30:javaw.exe"}')
+            verif_cap_source = obs.obs_source_create("window_capture", "Verification Capture " .. instance_num,
+                settings, nil)
+        end
+
+        local verif_item = obs.obs_scene_add(scene, verif_cap_source)
+        set_position_with_bounds(verif_item, col * i_width, row * i_height, i_width - i_height, i_height)
+
+
+        local square_group_item = obs.obs_scene_add_group(scene, "Square " .. instance_num)
+        obs.obs_sceneitem_set_scale_filter(square_group_item, obs.OBS_SCALE_POINT)
+
+        local square_group_scene = get_group_as_scene("Square " .. instance_num)
+
+        local filler_item = obs.obs_scene_add(square_group_scene, filler_source)
+        set_position_with_bounds(filler_item, 0, 0, 10000, 10000)
+        obs.obs_sceneitem_set_visible(filler_item, false)
+
+        local verif_item_2 = obs.obs_scene_add(square_group_scene, verif_cap_source)
+        obs.obs_sceneitem_set_alignment(verif_item_2, 9)
+        set_position(verif_item_2, 0, 10000)
+
+        set_crop(square_group_item, 0, 10000 - square_height, 10000 - square_width, 0)
+        set_position_with_bounds(square_group_item, col * i_width + (i_width - i_height), row * i_height, i_height,
+            i_height)
+
+        obs.obs_data_release(settings)
+        release_source(verif_cap_source)
+    end
+    local audio_group_source = get_source("Minecraft Audio")
+    obs.obs_scene_add(scene, audio_group_source)
+    release_source(filler_source)
+    release_source(audio_group_source)
 end
 
 function _setup_sound_scene()
@@ -449,7 +500,7 @@ function _setup_lock_scene()
 
     -- Blacksmith Example
     local blacksmith_data = obs.obs_data_create_from_json('{"file":"' ..
-    julti_dir .. 'blacksmith_example.png' .. '"}')
+        julti_dir .. 'blacksmith_example.png' .. '"}')
     local blacksmith_source = obs.obs_source_create("image_source", "Blacksmith Example", blacksmith_data, nil)
     obs.obs_scene_add(group, blacksmith_source)
     release_source(blacksmith_source)
@@ -474,7 +525,7 @@ function _setup_lock_scene()
 
     -- Lock image
     local lock_data = obs.obs_data_create_from_json('{"file":"' ..
-    julti_dir .. 'lock.png' .. '"}')
+        julti_dir .. 'lock.png' .. '"}')
     local lock_source = obs.obs_source_create("image_source", "Lock Image", lock_data, nil)
     obs.obs_scene_add(scene, lock_source)
     release_source(lock_source)
@@ -541,7 +592,7 @@ function _setup_minecraft_sounds(instance_count)
     for num = 1, instance_count, 1 do
         -- '{"priority": 1, "window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}'
         local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
-        num .. ':GLFW30:javaw.exe"}')
+            num .. ':GLFW30:javaw.exe"}')
         local source = obs.obs_source_create("wasapi_process_output_capture", "Minecraft Audio " .. num, settings, nil)
         obs.obs_scene_add(group, source)
         release_source(source)
@@ -564,10 +615,20 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
     release_source(source)
 
-    local settings = obs.obs_data_create_from_json(
-        '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
-        .. num .. ':GLFW30:javaw.exe"}')
-    local source = obs.obs_source_create("game_capture", "Minecraft Capture " .. num, settings, nil)
+    local settings = nil
+    local source = nil
+
+    if win_cap_instead then
+        settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
+            num .. ':GLFW30:javaw.exe"}')
+        source = obs.obs_source_create("window_capture", "Minecraft Capture " .. num, settings, nil)
+    else
+        settings = obs.obs_data_create_from_json(
+            '{"capture_mode": "window","priority": 1,"window": "Minecraft* - Instance '
+            .. num .. ':GLFW30:javaw.exe"}')
+        source = obs.obs_source_create("game_capture", "Minecraft Capture " .. num, settings, nil)
+    end
+
     obs.obs_data_release(settings)
     local mcsi = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, mcsi)
@@ -583,12 +644,20 @@ function script_description()
 end
 
 function script_properties()
-    local properties = obs.obs_properties_create()
-    local generate_scenes_button = obs.obs_properties_add_button(
-        properties, "generate_scenes_button", "Generate Scenes", generate_scenes)
-    local generate_stream_scenes_button = obs.obs_properties_add_button(
-        properties, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
-    return properties
+    local props = obs.obs_properties_create()
+
+    obs.obs_properties_add_bool(props, "win_cap_instead", "Use Window Capture for Julti Scene Sources")
+    obs.obs_properties_add_bool(props, "reuse_for_verification",
+        "Reuse Julti Scene Sources for Verification Scene\n(Better for source record or window cap)")
+
+    obs.obs_properties_add_button(
+        props, "generate_scenes_button", "Generate Scenes", generate_scenes)
+    obs.obs_properties_add_button(
+        props, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
+
+    obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
+
+    return props
 end
 
 function script_load(settings)
@@ -602,6 +671,10 @@ function script_load(settings)
 end
 
 function script_update(settings)
+    win_cap_instead = obs.obs_data_get_bool(settings, "win_cap_instead")
+    reuse_for_verification = obs.obs_data_get_bool(settings, "reuse_for_verification")
+    invisible_dirt_covers = obs.obs_data_get_bool(settings, "invisible_dirt_covers")
+
     if timers_activated then
         return
     end
@@ -620,11 +693,16 @@ function loop()
         last_scene_name = current_scene_name
     end
 
+    -- Check doing stuff too early
+    if current_scene_name == nil then
+        return
+    end
+
     -- Check on Julti scene before continuing
 
     local is_on_a_julti_scene = (current_scene_name == "Julti") or (current_scene_name == "Lock Display") or
         (current_scene_name == "Dirt Cover Display") or (current_scene_name == "Walling") or
-        (current_scene_name == "Playing")
+        (current_scene_name == "Playing") or (string.find(current_scene_name, "Playing ") ~= nil)
 
     if not is_on_a_julti_scene then
         return
@@ -647,6 +725,10 @@ function loop()
     for k, data_string in pairs(data_strings) do
         if user_location == nil then
             user_location = data_string
+            -- Prevent wall updates if switching to a single instance scene to allow transitions to work
+            if user_location ~= "W" and switch_to_scene("Playing " .. user_location) then
+                return
+            end
         else
             instance_num = instance_num + 1
             set_instance_data_from_string(instance_num, data_string)

@@ -1,14 +1,11 @@
 package xyz.duncanruns.julti.script;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
+import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.util.FileUtil;
-import xyz.duncanruns.julti.util.LogReceiver;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +15,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import static xyz.duncanruns.julti.Julti.log;
+
 public class ScriptManager {
-    private static final Logger LOGGER = LogManager.getLogger("Script Manager");
     private static final Path SCRIPTS_PATH = JultiOptions.getJultiDir().resolve("scripts.txt");
     private static final String DEFAULT_SCRIPTS = "Warmup + Launch;0;log Launching all instances...; launch all; wait launch all; log Waiting 5 seconds for title screen...; sleep 5000; log Activating all instances to remove mouse jank...; activate all; activate wall; log Waiting 8 seconds for obs pickup...; sleep 8000; log Resetting all and waiting for world load...; reset all; wait load all; log Unpausing all instances...; activate all; activate wall; log Waiting 20 seconds for warmup...; sleep 20000; log Resetting all and returning to wall...; reset all; activate wall; log Warmup done;\n" +
             "Start Coping;1;opentolan; chatmessage /gamemode spectator;\n" +
@@ -27,6 +25,8 @@ public class ScriptManager {
     private static final List<Script> SCRIPTS = new CopyOnWriteArrayList<>();
     private static CancelRequester cancelRequester = CancelRequesters.ALWAYS_CANCEL_REQUESTER; // Will change from fake requester to other requesters
     private static Thread runningScriptThread = null;
+
+    private static final Object LOCK = new Object();
 
     public static void reload() {
         String scriptsFileContents = "";
@@ -59,11 +59,17 @@ public class ScriptManager {
         }
     }
 
-    public static boolean runScript(Julti julti, String scriptName) {
-        return runScript(julti, scriptName, false, (byte) 0);
+    public static boolean runScript(String scriptName) {
+        return runScript(scriptName, false, (byte) 0);
     }
 
-    public static boolean runScript(Julti julti, String scriptName, boolean fromHotkey, byte hotkeyContext) {
+    public static boolean runScript(String scriptName, boolean fromHotkey, byte hotkeyContext) {
+        synchronized (LOCK) {
+            return runScriptInternal(scriptName, fromHotkey, hotkeyContext);
+        }
+    }
+
+    private static boolean runScriptInternal(String scriptName, boolean fromHotkey, byte hotkeyContext) {
         if ((runningScriptThread == null || !runningScriptThread.isAlive()) && !cancelRequester.isCancelRequested()) {
             cancelRequester.cancel();
         }
@@ -92,7 +98,7 @@ public class ScriptManager {
                 String[] commands = script.getCommands().split(";");
 
                 for (int i = 0; i < commands.length && !cancelRequester.isCancelRequested(); i++) {
-                    julti.runCommand(commands[i], cancelRequester);
+                    CommandManager.getMainManager().runCommand(commands[i], cancelRequester);
                 }
 
             } catch (Exception ignored) {
@@ -106,11 +112,6 @@ public class ScriptManager {
 
     public static List<String> getScriptNames() {
         return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 
     private static Script getScript(String scriptName) {

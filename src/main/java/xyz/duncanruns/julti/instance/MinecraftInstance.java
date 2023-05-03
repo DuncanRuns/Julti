@@ -1,401 +1,459 @@
 package xyz.duncanruns.julti.instance;
 
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.ResetCounter;
+import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
+import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
-import xyz.duncanruns.julti.win32.Win32Con;
+import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public class MinecraftInstance {
+    // Main information
+    private final HWND hwnd;
+    private int pid;
+    private final Path path;
+    private final String versionString;
 
-    private static final Logger LOGGER = LogManager.getLogger("MinecraftInstance");
-    private static final Pattern startPreviewPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]:  ?Starting Preview at \\(-?\\d+\\.\\d+, -?\\d+\\.\\d+, -?\\d+\\.\\d+\\)$");
-    private static final Pattern startPreviewWithBiomePattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]:  ?Starting Preview at \\(-?\\d+(\\.\\d+)?, -?\\d+(\\.\\d+)?, -?\\d+(\\.\\d+)?\\) in biome .+$");
-    private static final Pattern spawnAreaPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: .+: \\d+ ?%$");
-    private static final Pattern advancementsLoadedPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.+/INFO]: Loaded 1?\\d advancements$");
-    private static final Pattern openToLanPattern = Pattern.compile("^\\[\\d\\d:\\d\\d:\\d\\d] \\[.*/INFO]: Started serving on \\d+$");
-
-    // Basic instance information
-    private final WindowTitleInfo titleInfo;
-    private HWND hwnd;
-    private Path instancePath = null;
+    // Discoverable Information
+    private final GameOptions gameOptions;
     private String name = null;
 
-    // Missing Window Stuff
-    private boolean notMC = false; // true when a MinecraftInstance is constructed with a window handle which points to a non-mc window
-    private boolean missingReported = false;
-    private boolean replaced = false;
+    private final StateTracker stateTracker;
+    private final KeyPresser presser;
 
-    // Information to be discovered
-    private MCVersion version = null;
-    private ResetType resetType = null;
-    private Integer createWorldKey = null;
-    private Integer fullscreenKey = null;
-    private Integer leavePreviewKey = null;
-    private Boolean usingWorldPreview = null;
-    private Boolean usingStandardSettings = null;
-    private byte f1SS = -2; // -2 = undetermined, -1 = not present in SS, 0 = false in SS, 1 = true in SS
+    private boolean windowMissing = false;
 
-    // State tracking
-    private boolean inPreview = false;
-    private boolean worldLoaded = false;
-    private long timeLastAppeared = -1L;
-    private long lastPreviewStart = -1L;
-    private long lastResetPress = -1L;
-    private String biome = "";
-    private int loadingPercent = 0;
-    private boolean dirtCover = false;
-    private boolean available = false;
-    private boolean worldEverLoaded = false;
-    private boolean shouldPressDelayedWLKeys = false; // "Should press delayed world load keys"
-    private boolean activeSinceLastReset = false;
+    private boolean resetPressed = false;
+    private boolean resetEverPressed = false;
+    private boolean activeSinceReset = false;
+    private boolean windowStateChangedToPlaying = false;
+    private long lastSetVisible = 0;
     private boolean openedToLan = false;
-    private boolean firstActivate = true;
 
-    // Log tracking
-    private long logProgress = -1;
-    private FileTime lastLogModify = null;
-    private Integer pid = null;
-
-    public MinecraftInstance(Path instancePath) {
-        this.hwnd = null;
-        this.titleInfo = new WindowTitleInfo();
-        this.instancePath = instancePath;
-        this.notMC = false;
-    }
-
-    public MinecraftInstance(HWND hwnd) {
+    public MinecraftInstance(HWND hwnd, Path path, String versionString) {
         this.hwnd = hwnd;
-        this.titleInfo = new WindowTitleInfo(this.getCurrentWindowTitle());
+        this.path = path;
+        this.versionString = versionString;
+        this.gameOptions = new GameOptions();
+        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange);
+        this.presser = new KeyPresser(hwnd);
     }
 
-    private String getCurrentWindowTitle() {
-        if (!this.hasWindow()) {
-            return "Missing Window";
-        }
-        return HwndUtil.getHwndTitle(this.hwnd);
+    public MinecraftInstance(Path path) {
+        this.hwnd = null;
+        this.versionString = null;
+        this.presser = null;
+        this.gameOptions = null;
+        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null);
+
+        this.path = path;
+        this.windowMissing = true;
     }
 
-    public boolean hasWindow() {
-        if (this.hwnd != null && HwndUtil.hwndExists(this.hwnd)) {
+    /**
+     * First checks if the window is already marked as missing, and if it is not marked already, calls the IsWindow
+     * function to determine if it should be marked as missing.
+     * <p>
+     * This function uses a native windows call, to quickly check if the window is marked as missing, use {@link MinecraftInstance#isWindowMarkedMissing()}.
+     *
+     * @return true if the window is missing, otherwise false
+     */
+    public boolean checkWindowMissing() {
+        if (this.isWindowMarkedMissing()) {
             return true;
-        } else {
-            this.hwnd = null;
-            return false;
         }
+        if (!User32.INSTANCE.IsWindow(this.hwnd)) {
+            this.markWindowMissing();
+            return true;
+        }
+        return false;
     }
 
-    private static String getOptionFromString(String optionName, String optionsString) {
-        String[] lines = optionsString.trim().split("\\n");
-        for (int i = lines.length - 1; i >= 0; i--) {
-            String line = lines[i];
-            if (line.startsWith(optionName + ":")) {
-                String[] optionKeyValArr = line.split(":");
-                if (optionKeyValArr.length < 2) {
-                    continue;
-                }
-                return optionKeyValArr[1];
-            }
-        }
-        return null;
+    /**
+     * Check if the window is marked as missing. To actually check if the window is missing, use {@link MinecraftInstance#checkWindowMissing()}.
+     *
+     * @return true if the window has been marked as missing, otherwise false
+     */
+    public boolean isWindowMarkedMissing() {
+        return this.windowMissing;
     }
 
-    public boolean hasWindowOrBeenReplaced() {
-        return this.hasWindow() || this.hasBeenReplaced();
+    public void markWindowMissing() {
+        if (!this.windowMissing) {
+            Julti.log(Level.INFO, "Instance " + this.getName() + " has gone missing.");
+        }
+
+        this.windowMissing = true;
     }
 
-    public boolean hasBeenReplaced() {
-        return this.replaced;
+    public void discoverInformation() {
+        // Find info like keybinds, standard settings, etc.
+
+        // Process ID
+        this.pid = PidUtil.getPidFromHwnd(this.hwnd);
+
+        // Keybinds
+        this.gameOptions.createWorldKey = GameOptionsUtil.getKey(this.getPath(), "key_Create New World");
+        this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview");
+        this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen");
+        this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat");
+        this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
+
+        this.discoverName();
     }
 
-    public void markReplaced() {
-        this.replaced = true;
-    }
+    private void discoverName() {
+        // Get instance path
+        Path instancePath = this.getPath();
 
-    public boolean isUsingF1() {
-        if (JultiOptions.getInstance().pieChartOnLoad) {
-            return false;
-        }
-
-        // Stupid compact logic, probably don't touch
-        if (this.f1SS != -2) {
-            return this.f1SS != -1;
-        }
-        String out = this.tryGetStandardOption("f1");
-        if (out == null) {
-            this.f1SS = -1;
-        } else if (out.equals("true")) {
-            this.f1SS = 1;
-        } else {
-            this.f1SS = 0;
-        }
-        return this.f1SS != -1;
-    }
-
-    public void ensureGoodStandardSettings() {
-        this.getInstancePath();
-        if (!this.isUsingStandardSettings()) {
-            return;
-        }
-
-        String[] goodSettings = new String[]{
-                "changeOnResize:true",
-                "fullscreen:false",
-                "pauseOnLostFocus:false",
-                "key_Cycle ChunkMap Positions:key.keyboard.unknown"
-        };
-
-        for (String setting : goodSettings) {
-
-            String[] settingVals = setting.split(":");
-            String optionName = settingVals[0];
-            String desiredValue = settingVals[1];
-            String currentValue = this.tryGetStandardOption(optionName);
-
-            if (desiredValue.equals(currentValue)) {
-                continue;
-            }
-
-            this.forceStandardSetting(optionName, desiredValue);
-            log(Level.INFO, "Set \"" + optionName + "\" to \"" + desiredValue + "\" in standard settings for " + this.getName());
-        }
-
-        if (Objects.equals(this.getStandardOption("f1"), null)) {
-            this.forceStandardSetting("f1", "false");
-            log(Level.INFO, "Set \"f1\" to \"false\" in standard settings for " + this.getName());
-        }
-    }
-
-    private void forceStandardSetting(String optionName, String optionValue) {
-        Path path = this.getInstancePath().resolve("config").resolve("standardoptions.txt");
-        while (true) {
+        // Check MultiMC/Prism name
+        if (this.usesMultiMC()) {
             try {
-                String contents = FileUtil.readString(path).trim();
-                if (!contents.endsWith(".txt")) {
-                    break;
+                Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
+                for (String line : Files.readAllLines(mmcConfigPath)) {
+                    line = line.trim();
+                    if (line.startsWith("name=")) {
+                        this.name = StringEscapeUtils.unescapeJson(line.split("=")[1]);
+                    }
                 }
-                Path deeperPath = Paths.get(contents);
-                if (!Files.exists(deeperPath)) {
-                    break;
-                }
-                path = deeperPath;
-            } catch (IOException ignored) {
-                break;
-            }
-        }
-        List<String> currentLines;
-        try {
-            currentLines = Files.readAllLines(path);
-        } catch (IOException ignored) {
-            return;
-        }
-
-        StringBuilder out = new StringBuilder();
-
-        for (String currentLine : currentLines) {
-            if (!currentLine.startsWith(optionName + ":")) {
-                out.append("\n").append(currentLine);
-            }
-        }
-        out.append("\n").append(optionName).append(":").append(optionValue);
-
-        try {
-            FileUtil.writeString(path, out.toString().trim());
-        } catch (IOException ignored) {
-        }
-
-    }
-
-    public boolean isFullscreen() {
-        return Objects.equals(this.tryGetOption("fullscreen", false), "true");
-    }
-
-    public String tryGetOption(String optionName, boolean tryUseSS) {
-
-        // This should prevent any crazy out of pocket bullshits like 1 in a million parsing error situations
-        try {
-            return this.getOption(optionName, tryUseSS);
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
-
-    public String getOption(String optionName, boolean tryUseSS) {
-        if (tryUseSS) {
-            String out = this.tryGetStandardOption(optionName);
-            if (out != null) {
-                return out;
+            } catch (Exception ignored) {
+                // Failed to check if it uses MultiMC, ignore and move on to taking folder name
             }
         }
 
-        Path path = this.getInstancePath().resolve("options.txt");
-
-        if (!Files.exists(path)) {
-            return null;
+        if (instancePath.getName(instancePath.getNameCount() - 1).toString().equals(".minecraft")) {
+            instancePath = instancePath.getParent();
+            // If this runs, instancePath is no longer an accurate variable name, and describes the parent path
         }
-
-        String out;
-        try {
-            out = FileUtil.readString(path);
-        } catch (IOException e) {
-            // This should never be reached
-            return null;
+        String name = instancePath.getName(instancePath.getNameCount() - 1).toString();
+        if (name.equals("Roaming")) {
+            name = "Default Launcher";
         }
-
-        return getOptionFromString(optionName, out).trim();
+        this.name = name;
     }
 
-    private String tryGetStandardOption(String optionName) {
-        try {
-            return this.getStandardOption(optionName);
-        } catch (Exception ignored) {
-            return null;
-        }
+    private boolean usesMultiMC() {
+        return Files.exists(this.getPath().getParent().resolve("instance.cfg"));
     }
 
-    private String getStandardOption(String optionName) {
-        String out = this.getStandardOption(optionName, this.getInstancePath().resolve("config").resolve("standardoptions.txt"));
-        if (out != null) {
-            return out.trim();
-        }
-        return null;
-    }
 
-    /**
-     * Determines the gui scale that actually gets used during resets on this instance.
-     */
-    public int getResettingGuiScale(int resettingWidth, int resettingHeight) {
-        // Get values
-        int guiScale = 0;
-        try {
-            guiScale = Integer.parseInt(this.tryGetOption("guiScale", true));
-        } catch (NumberFormatException ignored) {
-        }
-        boolean forceUnicodeFont = Objects.equals(this.tryGetOption("forceUnicodeFont", true), "true");
-
-        // Minecraft code magic
-        int i = 1;
-        while ((i != guiScale)
-                && (i < resettingWidth)
-                && (i < resettingHeight)
-                && (resettingWidth / (i + 1) >= 320)
-                && (resettingHeight / (i + 1) >= 240)) {
-            ++i;
-        }
-        if (forceUnicodeFont && i % 2 != 0) {
-            ++i;
-        }
-
-        return i;
-    }
-
-    private String getStandardOption(String optionName, Path path) {
-        if (!Files.exists(path)) {
-            return null;
-        }
-
-        String out;
-        try {
-            out = FileUtil.readString(path).trim();
-        } catch (IOException e) {
-            // This should never be reached
-            return null;
-        }
-
-        if (!out.contains("\n")) {
-            if (out.endsWith(".txt")) {
-                return this.getStandardOption(optionName, Paths.get(out));
-            }
-        }
-
-        return getOptionFromString(optionName, out);
-    }
-
-    public boolean hasWindowQuick() {
-        return this.hwnd != null;
-    }
-
-    public long getLastPreviewStart() {
-        return this.lastPreviewStart;
-    }
-
-    public long getTimeLastAppeared() {
-        return this.timeLastAppeared;
-    }
-
-    /**
-     * Updates the timeLastAppeared field to the current time. Normally would be based on dirt covers, but can be set by a third party such as dynamic wall.
-     */
-    public void updateTimeLastAppeared() {
-        this.timeLastAppeared = System.currentTimeMillis();
-    }
-
-    public String getOriginalTitle() {
-        if (this.titleInfo.waiting()) {
-            this.titleInfo.provide(HwndUtil.getHwndTitle(this.hwnd));
-        }
-        return this.titleInfo.getOriginalTitle();
-    }
-
-    public boolean isActuallyMC() {
-        this.getInstancePath();
-        return !this.notMC;
-    }
-
-    public Path getInstancePath() {
-        if (this.instancePath != null) {
-            return this.instancePath;
-        }
-
-        if (this.notMC || !this.hasWindow()) {
-            return null;
-        }
-
-        this.instancePath = HwndUtil.getInstancePathFromPid(this.getPid());
-        if (this.instancePath == null) {
-            this.notMC = true;
-        }
-
-        return this.instancePath;
-    }
-
-    public int getPid() {
-        if (this.pid == null) {
-            this.pid = HwndUtil.getPidFromHwnd(this.hwnd);
-            return this.pid;
-        }
-        return this.pid;
+    public MinecraftInstance createLazyCopy() {
+        return new MinecraftInstance(this.getHwnd(), this.getPath(), this.getVersionString());
     }
 
     public HWND getHwnd() {
-        // Note: if hwnd == null, the instance is unusable. The proper way to manage this is to replace the object with a new one.
         return this.hwnd;
+    }
+
+    public int getPid() {
+        return this.pid;
+    }
+
+    public Path getPath() {
+        return this.path;
+    }
+
+    public String getVersionString() {
+        return this.versionString;
+    }
+
+    public void reset() {
+        boolean wasFullscreen = false;
+        Rectangle ogRect = null;
+        if (this.activeSinceReset && this.isFullscreen()) {
+            wasFullscreen = true;
+            ogRect = WindowStateUtil.getHwndRectangle(this.hwnd);
+        }
+
+        if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
+            if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
+                this.presser.pressShiftTabEnter();
+            } else {
+                this.presser.pressKey(this.gameOptions.createWorldKey);
+            }
+        } else {
+            this.presser.pressKey(this.gameOptions.leavePreviewKey);
+            this.presser.pressKey(this.gameOptions.createWorldKey);
+        }
+        this.resetPressed = true;
+        this.resetEverPressed = true;
+        this.openedToLan = false;
+
+        if (wasFullscreen) {
+            // Wait until window actually un-fullscreens
+            // Or until 2 ish seconds have passed
+            for (int i = 0; i < 200; i++) {
+                if (!Objects.equals(ogRect, WindowStateUtil.getHwndRectangle(this.hwnd))) {
+                    break;
+                }
+                sleep(10);
+            }
+        }
+
+        this.activeSinceReset = false;
+        if (this.windowStateChangedToPlaying) {
+            // Do the window state change later to ensure resetting is fast
+            Julti.doLater(() -> this.ensureResettingWindowState(true));
+        }
+    }
+
+    public void activate(boolean doingSetup) {
+        if (this.isWindowMarkedMissing()) {
+            return;
+        }
+        this.activeSinceReset = true;
+
+        JultiOptions options = JultiOptions.getInstance();
+
+        AffinityManager.pause();
+        AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
+        ActiveWindowManager.activateHwnd(this.hwnd);
+        if (options.usePlayingSizeWithFullscreen && options.autoFullscreen) {
+            this.ensureResettingWindowState(false);
+        }
+        AffinityManager.unpause();
+
+        if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
+            if (!doingSetup) {
+                if ((options.unpauseOnSwitch || options.coopMode)) {
+                    this.presser.pressEsc();
+                    this.presser.pressEsc();
+                    this.presser.pressEsc();
+                }
+                if (options.coopMode) {
+                    this.openToLan(true);
+                }
+                if (options.autoFullscreen) {
+                    this.presser.pressKey(this.gameOptions.fullscreenKey);
+                }
+            }
+        }
+        if (!options.autoFullscreen) {
+            if (doingSetup) {
+                Julti.doLater(() -> this.ensureResettingWindowState(false));
+            } else {
+                Julti.doLater(() -> this.ensurePlayingWindowState(false));
+            }
+        }
+    }
+
+    private void onStateChange() {
+        // The next state after reset should be WAITING, if it changes to something that is not WAITING, send the key again
+        if (this.resetPressed) {
+            if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
+                this.resetPressed = false;
+            } else {
+                this.reset();
+                return;
+            }
+        }
+        switch (this.stateTracker.getInstanceState()) {
+            case PREVIEWING:
+                this.onPreviewLoad();
+                break;
+            case INWORLD:
+                this.onWorldLoad();
+                break;
+            case GENERATING:
+                ResetCounter.increment();
+                break;
+        }
+    }
+
+    public int getResetSortingNum() {
+        if (!this.resetEverPressed) {
+            return 10000000;
+        }
+        if (this.resetPressed) {
+            return -2;
+        }
+        return this.stateTracker.getResetSortingNum();
+    }
+
+    private void onWorldLoad() {
+        this.onWorldLoad(false);
+    }
+
+    private void onWorldLoad(boolean bypassPieChartGate) {
+        //Julti.log(Level.INFO, this.getName() + "'s world loaded.");
+
+        JultiOptions options = JultiOptions.getInstance();
+
+        if (this.gameOptions.pauseOnLostFocus) {
+            Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus, some features cannot be used!");
+            return;
+        }
+
+        if (!bypassPieChartGate && options.pieChartOnLoad) {
+            // Open pie chart
+            this.presser.pressShiftF3();
+
+            // Schedule the scheduling of the completion of onWorldLoad
+            new Timer("delayed-world-load-scheduler").schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Julti.doLater(() -> MinecraftInstance.this.onWorldLoad(true));
+                }
+            }, 150);
+
+            return;
+        }
+
+        if (options.useF3) {
+            // F3
+            this.presser.pressF3Esc();
+        } else {
+            // No F3
+            this.presser.pressEsc();
+        }
+
+        // Unpause if window is active
+        if (ActiveWindowManager.isWindowActive(this.hwnd)) {
+            if (options.unpauseOnSwitch || options.coopMode) {
+                this.presser.pressEsc();
+            }
+
+            if (options.coopMode) {
+                this.openToLan(true);
+            }
+
+            if (options.autoFullscreen) {
+                this.presser.pressKey(this.gameOptions.fullscreenKey);
+            }
+        }
+        ResetHelper.getManager().notifyWorldLoaded(this);
+    }
+
+    private void onPreviewLoad() {
+        if (JultiOptions.getInstance().useF3) {
+            this.presser.pressF3Esc();
+        }
+        ResetHelper.getManager().notifyPreviewLoaded(this);
+    }
+
+    public boolean isResettable() {
+        return (
+                this.stateTracker.isResettable()
+        ) && (
+                System.currentTimeMillis() - this.lastSetVisible > JultiOptions.getInstance().wallResetCooldown
+        );
+    }
+
+    /**
+     * A method to call when an instance is shown to ensure the wallResetCooldown setting takes effect.
+     */
+    public void setVisible() {
+        this.lastSetVisible = System.currentTimeMillis();
+    }
+
+    public boolean shouldCoverWithDirt() {
+        return this.resetPressed || this.stateTracker.shouldCoverWithDirt();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = this.hwnd.hashCode();
+        result = 31 * result + this.path.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        MinecraftInstance that = (MinecraftInstance) o;
+
+        return this.path.equals(that.path);
+    }
+
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+
+    // This exists so a million wrapper methods don't have to
+    public StateTracker getStateTracker() {
+        return this.stateTracker;
+    }
+
+    public String getName() {
+        if (this.name == null) {
+            this.discoverName();
+        }
+        return this.name;
+    }
+
+
+    public boolean isFullscreen() {
+        return Objects.equals(GameOptionsUtil.tryGetOption(this.getPath(), "fullscreen", false), "true");
+    }
+
+    public boolean hasWindow() {
+        return !this.isWindowMarkedMissing();
+    }
+
+    private String getMMCInstanceFolderName() {
+        // If the instance does not belong to MultiMC, this may be invalid
+        return this.path.getName(this.path.getNameCount() - 2).toString();
+    }
+
+    public void launch(String offlineName) {
+        try {
+            String multiMCPath = JultiOptions.getInstance().multiMCPath;
+            if (!multiMCPath.isEmpty()) {
+                String cmd;
+                if (offlineName == null) {
+                    cmd = multiMCPath.trim() + " --launch \"" + this.getMMCInstanceFolderName() + "\"";
+                } else {
+                    cmd = multiMCPath.trim() + " --launch \"" + this.getMMCInstanceFolderName() + "\" -o -n " + offlineName;
+                }
+                Runtime.getRuntime().exec(cmd);
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void closeWindow() {
+        if (User32.INSTANCE.IsWindow(this.hwnd)) {
+            User32.INSTANCE.SendNotifyMessageA(this.hwnd, new WinDef.UINT(User32.WM_SYSCOMMAND), new WinDef.WPARAM(/*SC_CLOSE*/0xF060), new WinDef.LPARAM(0));
+            Julti.log(Level.INFO, "Closed " + this.getName());
+        } else {
+            Julti.log(Level.WARN, "Could not close " + this.getName() + " because it is not open.");
+        }
+    }
+
+    public void openFolder() {
+        try {
+            Desktop.getDesktop().browse(this.path.toUri());
+        } catch (IOException ignored) {
+
+        }
     }
 
     /**
@@ -428,964 +486,110 @@ public class MinecraftInstance {
         return i.get();
     }
 
-    public String getName() {
-        // Return existing name
-        if (this.name != null) {
-            return this.name;
-        }
+    private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
 
-        // Get instance path
-        Path instancePath = this.getInstancePath();
-        if (instancePath == null) {
-            return "Unknown Instance"; //This name should probably never be seen, regardless it is here.
-        }
-
-        // Check MultiMC/Prism name
-        if (this.usesMultiMC()) {
-            try {
-                Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
-                for (String line : Files.readAllLines(mmcConfigPath)) {
-                    line = line.trim();
-                    if (line.startsWith("name=")) {
-                        this.name = StringEscapeUtils.unescapeJson(line.split("=")[1]);
-                        return this.name;
-                    }
-                }
-            } catch (Exception ignored) {
-                // Fail, continue to get folder name instead
-            }
-        }
-
-        if (instancePath.getName(instancePath.getNameCount() - 1).toString().equals(".minecraft")) {
-            instancePath = instancePath.getParent();
-            // If this runs, instancePath is no longer an accurate variable name, and describes the parent path
-        }
-        this.name = instancePath.getName(instancePath.getNameCount() - 1).toString();
-        if (this.name.equals("Roaming")) {
-            return "Default Launcher";
-        }
-        return this.name;
-    }
-
-    private boolean usesMultiMC() {
-        return Files.exists(this.getInstancePath().getParent().resolve("instance.cfg"));
-    }
-
-    public int getWallSortingNum() {
-        int i = 0;
-        if (this.isPreviewLoaded()) {
-            i += 1280000;
-        }
-        if (this.isWorldLoaded()) {
-            i += 2560000;
-        }
-        i += 10000 * Math.max(0, this.getLoadingPercent());
-        i += (System.currentTimeMillis() - this.getLastResetPress());
-        return i;
-    }
-
-    public boolean isPreviewLoaded() {
-        return this.inPreview;
-    }
-
-    public boolean isWorldLoaded() {
-        return this.worldLoaded;
-    }
-
-    public int getLoadingPercent() {
-        return this.loadingPercent;
-    }
-
-    public long getLastResetPress() {
-        return this.lastResetPress;
-    }
-
-    public boolean justWentMissing() {
-        if (!this.hasWindow() && !this.missingReported) {
-            this.missingReported = true;
-            return true;
-        }
-        return false;
-    }
-
-    public void pressFullscreenKey() {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getFullscreenKey());
-    }
-
-    public Integer getFullscreenKey() {
-        if (this.fullscreenKey == null) {
-            this.fullscreenKey = this.getKey("key_key.fullscreen");
-        }
-        return this.fullscreenKey;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-
-        MinecraftInstance that = (MinecraftInstance) o;
-
-        if (this.hwnd == null && that.hwnd == null) {
-            return false;
-        }
-
-        return Objects.equals(this.hwnd, that.hwnd);
-    }
-
-    @Override
-    public String toString() {
-        return "Instance \"" + this.getName() + "\"";
-    }
-
-    /**
-     * @param instanceNum -1 for not updating title, otherwise the real instance number (index + 1).
-     */
-    synchronized public void activate(int instanceNum) {
-        JultiOptions options = JultiOptions.getInstance();
-        this.activeSinceLastReset = true;
-        if (this.hasWindow()) {
-            if (!this.firstActivate) {
-                new Thread(() -> this.ensureWindowState(false, false), "window-resizer").start();
-            }
-            HwndUtil.showHwnd(this.hwnd);
-            HwndUtil.activateHwnd(this.hwnd);
-            if (this.firstActivate) {
-                this.firstActivate = false;
-                this.clickTopLeftCorner();
-            }
-            if (this.worldLoaded) {
-                new Thread(() -> {
-                    int i = 100;
-                    while (!this.isActive() && i > 0) {
-                        sleep(10);
-                        i--;
-                    }
-                    if (options.unpauseOnSwitch) {
-                        this.pressEsc();
-                        if (options.wideResetSquish > 1.0) {
-                            // 2 Extra Escape Presses to make sure mouse is centered on next menu open
-                            this.pressEsc();
-                            this.pressEsc();
-                        }
-                    }
-                    if (options.coopMode) {
-                        this.openToLan(!options.unpauseOnSwitch);
-                    }
-                    if (this.shouldDoCleanWall()) {
-                        this.pressF1();
-                    }
-                    if (options.autoFullscreen) {
-                        this.pressFullscreenKey();
-                    }
-                    if (instanceNum != -1) {
-                        this.setWindowTitle("Minecraft* - Instance " + instanceNum);
-                    }
-                }, "instance-activate-finisher").start();
-            }
-            if (instanceNum != -1) {
-                this.setWindowTitle("Minecraft* - Instance " + instanceNum);
-            }
-            log(Level.INFO, "Activated instance " + this.getName());
-        } else {
-            log(Level.WARN, "Could not activate instance " + this.getName() + " (not opened)");
-        }
-    }
-
-    private void clickTopLeftCorner() {
-        MouseUtil.clickTopLeft(this.hwnd);
-    }
-
-    private boolean shouldDoCleanWall() {
-        JultiOptions options = JultiOptions.getInstance();
-        return options.resetMode != 0 && this.isUsingF1() && options.unpauseOnSwitch && options.cleanWall;
-    }
-
-    public void ensureWindowState() {
-        this.ensureWindowState(false, true);
-    }
-
-    /**
-     * Ensure window state resizes the window and sets its maximized/borderless state depending on Julti options and parameters
-     *
-     * @param force         skips any checks to see if the window state is already in an ideal state
-     * @param allowSquished allows squished instances (where height = the set height divided by the squish level) as an ideal state
-     */
-    public void ensureWindowState(boolean force, boolean allowSquished) {
-        JultiOptions options = JultiOptions.getInstance();
-
-        // "Do nothing" conditions
-        if (!options.letJultiMoveWindows) {
-            return;
-        }
-        Rectangle rectangle = this.getWindowRectangle();
-
-        boolean heightMatches = options.windowSize[1] == rectangle.height;
-        boolean squishMatches = false;
-        if (!force && !heightMatches && allowSquished) {
-            squishMatches = options.windowSize[1] / options.wideResetSquish == rectangle.height;
-        }
-        if (!force && options.windowPos[0] == rectangle.x &&
-                options.windowPos[1] == rectangle.y &&
-                options.windowSize[0] == rectangle.width &&
-                (heightMatches || squishMatches) &&
-                options.useBorderless == this.isBorderless() &&
-                (options.useBorderless || squishMatches || this.isMaximized())
-        ) {
+        if (!JultiOptions.getInstance().letJultiMoveWindows) {
             return;
         }
 
-        if (options.useBorderless) {
-            this.setBorderless();
-        } else {
-            this.undoBorderless();
+        boolean currentlyBorderless = WindowStateUtil.isHwndBorderless(this.hwnd);
+        boolean currentlyMaximized = WindowStateUtil.isHwndMaximized(this.hwnd);
+        Rectangle currentBounds = WindowStateUtil.getHwndRectangle(this.hwnd);
+
+        if (useBorderless && !currentlyBorderless) {
+            WindowStateUtil.setHwndBorderless(this.hwnd);
+        } else if (currentlyBorderless && !useBorderless) {
+            WindowStateUtil.undoHwndBorderless(this.hwnd);
         }
 
-
-        if (!options.useBorderless) {
-            this.maximize();
-        } else {
-            this.restore();
-            this.move(options.windowPos[0], options.windowPos[1], options.windowSize[0], options.windowSize[1]);
+        if (currentlyMaximized && !maximize) {
+            WindowStateUtil.restoreHwnd(this.hwnd);
+        } else if (maximize && !currentlyMaximized) {
+            WindowStateUtil.maximizeHwnd(this.hwnd);
         }
 
+        // If we are maximizing, there is no point trying to set size/position
+        if (maximize) {
+            return;
+        }
+
+        if (!currentBounds.equals(bounds)) {
+            if (offload) {
+                WindowStateUtil.queueSetHwndRectangle(this.hwnd, bounds);
+            } else {
+                WindowStateUtil.setHwndRectangle(this.hwnd, bounds);
+            }
+        }
     }
 
-    public Rectangle getWindowRectangle() {
-        return HwndUtil.getHwndRectangle(this.hwnd);
+    public void ensureResettingWindowState(boolean offload) {
+        JultiOptions options = JultiOptions.getInstance();
+        this.ensureWindowState(
+                options.useBorderless,
+                !options.useBorderless && !(options.autoFullscreen && !options.usePlayingSizeWithFullscreen) && options.resettingWindowSize == options.playingWindowSize,
+                new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1]),
+                offload);
     }
 
-    public boolean isBorderless() {
-        return HwndUtil.isHwndBorderless(this.hwnd);
+    public void ensurePlayingWindowState(boolean offload) {
+        JultiOptions options = JultiOptions.getInstance();
+        this.ensureWindowState(
+                options.useBorderless,
+                !options.useBorderless,
+                new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]),
+                offload);
+        this.windowStateChangedToPlaying = true;
     }
 
-    public boolean isMaximized() {
-        return HwndUtil.isHwndMaximized(this.hwnd);
-    }
-
-    public void setBorderless() {
-        HwndUtil.setHwndBorderless(this.hwnd);
-    }
-
-    public void undoBorderless() {
-        HwndUtil.undoHwndBorderless(this.hwnd);
-    }
-
-    public void maximize() {
-        HwndUtil.maximizeHwnd(this.hwnd);
-    }
-
-    public void restore() {
-        HwndUtil.restoreHwnd(this.hwnd);
-    }
-
-    public void move(int x, int y, int w, int h) {
-        HwndUtil.moveHwnd(this.hwnd, x, y, w, h);
-    }
-
-    private boolean isActive() {
-        return Objects.equals(HwndUtil.getCurrentHwnd(), this.hwnd);
-    }
-
-    private void pressEsc() {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_ESCAPE);
-    }
-
-    public void openToLan(boolean alreadyInMenu) {
+    public void openToLan(boolean skipUnpauseCheck) {
         if (this.openedToLan) {
             return;
-        }
-        KeyboardUtil.releaseAllModifiers();
-        if (!alreadyInMenu) {
-            this.pressEsc();
-        }
-        this.pressTab(7);
-        this.pressEnter();
-        this.pressShiftTab(1);
-        this.pressEnter();
-        this.pressTab(1);
-        this.pressEnter();
-
-    }
-
-    public void setWindowTitle(String title) {
-        if (this.hasWindow() && !JultiOptions.getInstance().preventWindowNaming) {
-            HwndUtil.setHwndTitle(this.hwnd, title);
-        }
-    }
-
-    private void pressTab(int tabTimes) {
-        for (int i = 0; i < tabTimes; i++) {
-            KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_TAB);
-        }
-    }
-
-    private void pressShiftTab(int tabTimes) {
-        KeyboardUtil.sendKeyDownToHwnd(this.hwnd, Win32Con.VK_LSHIFT, true);
-        this.pressTab(tabTimes);
-        KeyboardUtil.sendKeyUpToHwnd(this.hwnd, Win32Con.VK_LSHIFT, true);
-    }
-
-    public boolean isUsingStandardSettings() {
-        if (this.usingStandardSettings != null) {
-            return this.usingStandardSettings;
-        }
-
-        boolean exists = this.doesModExist("standardsettings");
-        this.usingStandardSettings = exists;
-        return exists;
-    }
-
-    private void pressF1() {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_F1);
-    }
-
-    private boolean doesModExist(String modName) {
-        Path modsPath = this.getInstancePath().resolve("mods");
-        try (Stream<Path> list = Files.list(modsPath)) {
-            for (Path modPath : list.collect(Collectors.toList())) {
-                String jarName = modPath.getName(modPath.getNameCount() - 1).toString();
-                if (jarName.startsWith(modName) && jarName.endsWith(".jar")) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
-    }
-
-    public void squish(float squish) {
-        if (squish == 1f) {
+        } else if (!this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
+            return;
+        } else if (WindowTitleUtil.getHwndTitle(this.hwnd).endsWith("(LAN)")) {
+            this.openedToLan = true;
             return;
         }
 
-        JultiOptions options = JultiOptions.getInstance();
-        Rectangle resultRectangle = new Rectangle(options.windowPos[0], options.windowPos[1], options.windowSize[0], (int) (options.windowSize[1] / squish));
-        if (this.isMaximized()) {
-            this.restore();
-        } else {
-            if (this.getWindowRectangle().equals(resultRectangle)) {
-                return;
-            }
+        if (!skipUnpauseCheck) {
+            this.getToUnpausedState();
         }
-        this.move(resultRectangle.x, resultRectangle.y, resultRectangle.width, resultRectangle.height);
+
+        this.presser.releaseAllModifiers();
+        this.presser.pressEsc();
+        this.presser.pressTab(7);
+        this.presser.pressEnter();
+        this.presser.pressShiftTab(1);
+        if (MCVersionUtil.isNewerThan(this.versionString, "1.16.5")) {
+            this.presser.pressTab(2);
+        }
+        this.presser.pressEnter();
+        this.presser.pressTab();
+        this.presser.pressEnter();
+        this.openedToLan = true;
     }
 
-    public void closeWindow() {
-        if (this.hasWindow()) {
-            HwndUtil.sendCloseMessage(this.hwnd);
-            log(Level.INFO, "Closed " + this.getName());
-        } else {
-            log(Level.WARN, "Could not close " + this.getName() + " because it is not open.");
+    public void sendChatMessage(String chatMessage, boolean skipUnpauseCheck) {
+        if (!skipUnpauseCheck) {
+            this.getToUnpausedState();
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
-    }
-
-    public void launch(String offlineName) {
-        try {
-            String multiMCPath = JultiOptions.getInstance().multiMCPath;
-            if (!multiMCPath.isEmpty()) {
-                String cmd;
-                if (offlineName == null) {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getInstanceFolderName() + "\"";
-                } else {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getInstanceFolderName() + "\" -o -n " + offlineName;
-                }
-                Runtime.getRuntime().exec(cmd);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getInstanceFolderName() {
-        return this.getInstancePath().getName(this.getInstancePath().getNameCount() - 2).toString();
-    }
-
-    private void pressF3Esc() {
-        KeyboardUtil.sendKeyDownToHwnd(this.hwnd, Win32Con.VK_F3, true);
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_ESCAPE);
-        KeyboardUtil.sendKeyUpToHwnd(this.hwnd, Win32Con.VK_F3, true);
-    }
-
-    private void pressF3() {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_F3);
-    }
-
-    synchronized public void reset(boolean singleInstance) {
-        // If no window, do nothing
-        if (!this.hasWindow()) {
-            log(Level.INFO, "Could not reset instance " + this.getName() + " (not opened)");
-            return;
-        }
-
-        // Before taking any action, store some info useful for fullscreen management
-        boolean wasFullscreen = false;
-        if (this.activeSinceLastReset) {
-            wasFullscreen = this.isFullscreen();
-        }
-        Rectangle ogRect = null;
-        if (wasFullscreen) {
-            ogRect = this.getWindowRectangle();
-        }
-
-        // This delay is only used for pressing keys before the reset key
-        boolean shouldDelay = false;
-        if (this.isWorldLoaded() && this.activeSinceLastReset) {
-            if (wasFullscreen) {
-                this.pressFullscreenKey();
-                shouldDelay = true;
-            }
-            if (this.isUsingF1()) {
-                this.pressF1();
-                shouldDelay = true;
-            }
-        }
-
-        if (shouldDelay) {
-            Rectangle finalOgRect = ogRect;
-            boolean finalWasFullscreen = wasFullscreen;
-            new Timer("reset-finisher").schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    MinecraftInstance.this.finishReset(singleInstance, finalWasFullscreen, finalOgRect);
-                }
-            }, 50);
-        } else {
-            this.finishReset(singleInstance, wasFullscreen, ogRect);
-        }
-    }
-
-    private void finishReset(boolean singleInstance, boolean wasFullscreen, Rectangle ogRect) {
-        JultiOptions options = JultiOptions.getInstance();
-
-        this.pressResetKeys();
-
-        //Update states
-        this.worldLoaded = false;
-        this.loadingPercent = -1;
-        this.setInPreview(false);
-        this.dirtCover = options.dirtReleasePercent >= 0;
-        this.available = false;
-        this.shouldPressDelayedWLKeys = false;
-        this.activeSinceLastReset = false;
-
-        if (wasFullscreen) {
-            // Wait until window actually un-fullscreens
-            // Or until 2 ish seconds have passed
-            for (int i = 0; i < 200; i++) {
-                if (!Objects.equals(ogRect, this.getWindowRectangle())) {
-                    break;
-                }
-                sleep(10);
-            }
-        }
-
-        // Window Resizing and Shid
-        new Timer("delayed-window-fixer").schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (!options.letJultiMoveWindows) {
-                    return;
-                }
-                if (wasFullscreen && options.useBorderless) {
-                    MinecraftInstance.this.setBorderless();
-                }
-                if (!singleInstance && options.letJultiMoveWindows) {
-                    MinecraftInstance.this.squish(options.wideResetSquish);
-                }
-            }
-        }, 50);
-
-        // Log and reset counter update
-        log(Level.INFO, "Reset instance " + this.getName());
-        ResetCounter.increment();
-    }
-
-    private void pressResetKeys() {
-        this.lastResetPress = System.currentTimeMillis();
-        switch (this.getResetType()) {
-            case MODERN_ATUM_EXIT:
-                if (this.leavePreviewKey != null) {
-                    KeyboardUtil.sendKeyToHwnd(this.hwnd, this.leavePreviewKey);
-                }
-                KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getCreateWorldKey());
-                break;
-            case LEAVE_PREVIEW_EXIT:
-                if (this.inPreview) {
-                    KeyboardUtil.sendKeyToHwnd(this.hwnd, this.getLeavePreviewKey());
-                } else {
-                    this.runNoAtumLeave();
-                }
-                break;
-            case VANILLA_EXIT:
-                this.runNoAtumLeave();
-        }
-    }
-
-    private void runNoAtumLeave() {
-        MCVersion version = this.getVersion();
-
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_ESCAPE);
-        if (version.getMajor() > 12) {
-            this.pressShiftTab(1);
-        } else if (version.getMajor() == 8 && version.getMinor() == 9) {
-            sleep(70); // Magic Number
-            // Anchiale Support
-            for (int i = 0; i < 7; i++) {
-                this.pressTab(1);
-            }
-        } else {
-            sleep(70); // Magic Number
-            this.pressTab(1);
-        }
-        this.pressEnter();
-    }
-
-    public MCVersion getVersion() {
-        if (this.version != null) {
-            return this.version;
-        }
-
-        if (!this.usesMultiMC()) {
-            // This sucks.
-            return this.getVersionFromTitle();
-        }
-
-        Path mmcPackPath = this.getInstancePath().getParent().resolve("mmc-pack.json");
-
-        String out;
-        try {
-            out = FileUtil.readString(mmcPackPath);
-        } catch (IOException e) {
-            log(Level.ERROR, "Error reading from MultiMC instance info, using window title instead.");
-            return this.getVersionFromTitle();
-        }
-
-        JSONObject json = new JSONObject(out);
-        String versionString = null;
-
-        for (Object component : json.getJSONArray("components")) {
-            if (component instanceof JSONObject && "net.minecraft".equals(((JSONObject) component).get("uid"))) {
-                versionString = (String) ((JSONObject) component).get("version");
-                break;
-            }
-        }
-
-        if (versionString == null) {
-            log(Level.ERROR, "Could not find MC version from MultiMC instance info, using window title instead.");
-            return this.getVersionFromTitle();
-        }
-
-        String[] versionNums = versionString.split("\\.");
-        this.version = new MCVersion(Integer.parseInt(versionNums[1]), Integer.parseInt(versionNums[2]));
-        return this.version;
-    }
-
-    /**
-     * This method should only be used inside getVersion().
-     */
-    private MCVersion getVersionFromTitle() {
-        if (this.titleInfo.waiting()) {
-            log(Level.WARN, "Warning: Game version is unknown because the window title does not contain the version, defaulting to 1.16.1.");
-            return this.titleInfo.getVersion();
-        }
-        this.version = this.titleInfo.getVersion();
-        return this.version;
-    }
-
-    public boolean isUsingWorldPreview() {
-        if (this.usingWorldPreview != null) {
-            return this.usingWorldPreview;
-        }
-
-        boolean exists = this.doesModExist("worldpreview");
-        this.usingWorldPreview = exists;
-        return exists;
-    }
-
-    private Integer getLeavePreviewKey() {
-        if (this.leavePreviewKey == null) {
-            this.leavePreviewKey = this.getKey("key_Leave Preview");
-        }
-        return this.leavePreviewKey;
-    }
-
-    public Integer getCreateWorldKey() {
-        if (this.createWorldKey == null) {
-            this.createWorldKey = this.getKey("key_Create New World");
-        }
-        return this.createWorldKey;
-    }
-
-    private Integer getKey(String keybindingTranslation) {
-        String out = this.tryGetOption(keybindingTranslation, true);
-        if (out == null) {
-            return null;
-        }
-        Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
-        if (vkFromMCTranslation == null) {
-            log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
-        }
-        return vkFromMCTranslation;
-    }
-
-    private ResetType getResetType() {
-        if (this.resetType != null) {
-            return this.resetType;
-        }
-        if (this.getCreateWorldKey() != null) {
-            this.getLeavePreviewKey();
-            this.resetType = ResetType.MODERN_ATUM_EXIT;
-            log(Level.DEBUG, this + " using MODERN_ATUM_EXIT");
-        } else if (this.getLeavePreviewKey() != null) {
-            this.resetType = ResetType.LEAVE_PREVIEW_EXIT;
-            log(Level.DEBUG, this + " using LEAVE_PREVIEW_EXIT");
-        } else {
-            this.resetType = ResetType.VANILLA_EXIT;
-            log(Level.DEBUG, this + " using VANILLA_EXIT");
-        }
-        return this.resetType;
-    }
-
-    private void setInPreview(boolean inPreview) {
-        if (inPreview && !this.inPreview) {
-            this.lastPreviewStart = System.currentTimeMillis();
-        }
-        this.inPreview = inPreview;
-    }
-
-    public void checkLog(Julti julti) {
-        if (this.hasWindow()) {
-            String newLogContents = this.getNewLogContents();
-            this.checkLogContents(newLogContents, julti);
-        }
-    }
-
-    public boolean shouldDirtCover() {
-        return this.dirtCover;
-    }
-
-    public boolean isAvailable() {
-        return this.available;
-    }
-
-    private void setAvailable(Julti julti) {
-        if (!this.available) {
-            this.available = true;
-            julti.getResetManager().notifyInstanceAvailable(this);
-            this.updateTimeLastAppeared();
-        }
-    }
-
-    public boolean hasPreviewEverStarted() {
-        return this.lastPreviewStart != -1L;
-    }
-
-    public boolean hasWorldEverLoaded() {
-        return this.worldEverLoaded;
-    }
-
-    public String getBiome() {
-        return this.biome;
-    }
-
-    private void checkLogContents(String newLogContents, final Julti julti) {
-        JultiOptions options = JultiOptions.getInstance();
-        if (!newLogContents.isEmpty()) {
-            for (String line : newLogContents.split("\n")) {
-                line = line.trim();
-                if (this.isUsingWorldPreview() && !options.autoResetForBeach && startPreviewPattern.matcher(line).matches()) {
-                    this.onPreviewLoad(options, julti);
-                } else if (this.isUsingWorldPreview() && options.autoResetForBeach && startPreviewWithBiomePattern.matcher(line).matches()) {
-                    this.onPreviewLoadWithBiome(options, julti, line);
-                } else if (advancementsLoadedPattern.matcher(line).matches()) {
-                    this.onWorldLoad(options, julti);
-                } else if ((this.isPreviewLoaded() || !this.isUsingWorldPreview()) && spawnAreaPattern.matcher(line).matches()) {
-                    this.onPercentLoadingLog(julti, line);
-                } else if (openToLanPattern.matcher(line).matches()) {
-                    this.openedToLan = true;
-                    if ((!options.coopMode) && options.noCopeMode) {
-                        julti.getResetManager().doReset();
-                    }
-                }
-            }
-        }
-    }
-
-    private void onPercentLoadingLog(Julti julti, String line) {
-        String[] args = line.replace(" %", "%").split(" ");
-        try {
-            this.loadingPercent = Integer.parseInt(args[args.length - 1].replace("%", ""));
-            // Return if not using world preview as the below functionality would not matter
-            if (!this.isUsingWorldPreview()) {
-                return;
-            }
-            JultiOptions options = JultiOptions.getInstance();
-            if (this.isPreviewLoaded() && this.dirtCover && this.loadingPercent >= options.dirtReleasePercent) {
-                this.updateTimeLastAppeared();
-                this.dirtCover = false;
-                this.setAvailable(julti);
-            } else {
-                this.dirtCover = this.loadingPercent < options.dirtReleasePercent;
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    private void onWorldLoad(JultiOptions options, Julti julti) {
-        log(Level.DEBUG, this.getName() + ": World loaded");
-
-        // Return if world already loaded
-        if (this.isWorldLoaded()) {
-            return;
-        }
-
-        // Return if reset is supposed to happen
-        if (this.loadingPercent == -1) {
-            this.reset(false);
-            return;
-        }
-
-        // Update states
-        this.setInPreview(false);
-        this.worldLoaded = true;
-        this.worldEverLoaded = true;
-        this.dirtCover = false;
-        this.setAvailable(julti);
-        this.loadingPercent = 100;
-        this.openedToLan = false;
-
-        // Key press shenanigans
-        if (options.pieChartOnLoad) {
-            this.pressShiftF3();
-            this.shouldPressDelayedWLKeys = true;
-            new Timer("world-loader").schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if (MinecraftInstance.this.shouldPressDelayedWLKeys) {
-                        MinecraftInstance.this.finishWorldLoad(julti);
-                    }
-                }
-            }, 150);
-        } else {
-            this.finishWorldLoad(julti);
-        }
-    }
-
-    private void finishWorldLoad(Julti julti) {
-        JultiOptions options = JultiOptions.getInstance();
-        boolean active = this.isActive();
-        if (this.shouldDoCleanWall()) {
-            // Simple xor considers all 4 cases of f1:true vs f1:false combined with instance currently active
-            if (active ^ this.f1SS == 0) {
-                this.pressF1();
-            }
-        }
-        if (options.pauseOnLoad && (!active || !options.unpauseOnSwitch)) {
-            if (options.useF3) {
-                this.pressF3Esc();
-            } else {
-                this.pressEsc();
-            }
-        } else if (active) {
-            if (options.coopMode) {
-                this.openToLan(!options.unpauseOnSwitch);
-            }
-            if (options.autoFullscreen) {
-                this.pressFullscreenKey();
-            }
-        }
-        julti.getResetManager().notifyWorldLoaded(this);
-    }
-
-    private void onPreviewLoad(JultiOptions options, Julti julti) {
-        log(Level.DEBUG, this.getName() + ": Preview loaded");
-
-        this.setInPreview(true);
-        this.dirtCover = options.dirtReleasePercent >= 0;
-        this.loadingPercent = -1;
-        this.worldLoaded = false;
-        if (options.useF3) {
-            this.pressF3Esc();
-        }
-        julti.getResetManager().notifyPreviewLoaded(this);
-        if (options.dirtReleasePercent < 0) {
-            this.setAvailable(julti);
-        }
-    }
-
-    private void onPreviewLoadWithBiome(JultiOptions options, Julti julti, String line) {
-        this.setInPreview(true);
-        this.dirtCover = options.dirtReleasePercent >= 0;
-        this.loadingPercent = -1;
-        this.worldLoaded = false;
-        if (options.useF3) {
-            this.pressF3Esc();
-        }
-        String[] args = line.split(" ");
-        this.biome = args[args.length - 1];
-        julti.getResetManager().notifyPreviewLoaded(this);
-        if (options.dirtReleasePercent < 0) {
-            this.setAvailable(julti);
-        }
-    }
-
-    private void pressShiftF3() {
-        KeyboardUtil.sendKeyDownToHwnd(this.hwnd, Win32Con.VK_RSHIFT, true);
-        this.pressF3();
-        KeyboardUtil.sendKeyUpToHwnd(this.hwnd, Win32Con.VK_RSHIFT, true);
-    }
-
-    String getNewLogContents() {
-        Path logPath = this.getLogPath();
-
-        // If log progress has not been jumped, jump and return
-        if (this.logProgress == -1) {
-            this.tryJumpLogProgress();
-            return "";
-        }
-
-        // If modification date has not changed, return
-        try {
-            FileTime newModifyTime = Files.getLastModifiedTime(logPath);
-            if (!newModifyTime.equals(this.lastLogModify)) {
-                this.lastLogModify = newModifyTime;
-            } else {
-                return "";
-            }
-        } catch (Exception ignored) {
-            return "";
-        }
-
-        // If file size is significantly less than log progress, reset log progress
-        try {
-            long size = Files.size(logPath);
-            if (size < (this.logProgress / 2)) {
-                this.tryJumpLogProgress();
-                log(Level.INFO, "Log reading restarted! (" + this.getName() + ")");
-                return "";
-            }
-        } catch (IOException ignored) {
-        }
-
-
-        // Read new bytes then format and return as a string
-        try (InputStream stream = Files.newInputStream(logPath)) {
-            stream.skip(this.logProgress);
-
-            ArrayList<Byte> byteList = new ArrayList<>();
-
-            int next = stream.read();
-            while (next != -1) {
-                byteList.add((byte) next);
-                this.logProgress++;
-                next = stream.read();
-            }
-
-            byte[] bytes = new byte[byteList.size()];
-            for (int i = 0; i < bytes.length; i++) {
-                bytes[i] = byteList.get(i);
-            }
-
-            return new String(bytes, StandardCharsets.UTF_8);
-        } catch (Exception ignored) {
-            return "";
-        }
-    }
-
-    /**
-     * Sets logProgress to the amount of bytes in the latest log of the instance.
-     * Failure is ignored, as logProgress will still be -1 afterwards, indicating the task would still need to be done.
-     */
-    private void tryJumpLogProgress() {
-        try {
-            Path logPath = this.getLogPath();
-            if (Files.isRegularFile(logPath)) {
-                this.logProgress = Files.readAllBytes(logPath).length;
-                this.lastLogModify = Files.getLastModifiedTime(logPath);
-            }
-        } catch (IOException ignored) {
-        }
-    }
-
-    public Path getLogPath() {
-        Path instancePath = this.getInstancePath();
-        if (this.notMC) {
-            return null;
-        }
-        return instancePath.resolve("logs").resolve("latest.log");
-    }
-
-    public void tryClearWorlds() {
-        try {
-            this.clearWorlds();
-        } catch (Exception ignored) {
-        }
-    }
-
-    private void clearWorlds() throws IOException {
-        Path savesPath = this.getInstancePath().resolve("saves");
-        List<Path> worldsToRemove = new ArrayList<>();
-        for (String string : savesPath.toFile().list()) {
-            if (!string.startsWith("_")) {
-                worldsToRemove.add(savesPath.resolve(string));
-            }
-        }
-        worldsToRemove.removeIf(path -> (!path.toFile().isDirectory()) || (path.resolve("Reset Safe.txt").toFile().isFile()));
-        worldsToRemove.sort((o1, o2) -> (int) (o2.toFile().lastModified() - o1.toFile().lastModified()));
-        for (int i = 0; i < 6 && !worldsToRemove.isEmpty(); i++) {
-            worldsToRemove.remove(0);
-        }
-        int i = 0;
-        int total = worldsToRemove.size();
-        for (Path path : worldsToRemove) {
-            if (++i % 50 == 0) {
-                InstanceManager.log(Level.INFO, "Clearing " + this.getName() + ": " + i + "/" + total);
-            }
-            Files.walk(path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        }
-    }
-
-    public boolean wasPreviewInLastMillis(int millis) {
-        return System.currentTimeMillis() - this.lastPreviewStart < millis;
-    }
-
-    public void openFolder() {
-        try {
-            Desktop.getDesktop().browse(this.getInstancePath().toUri());
-        } catch (IOException ignored) {
-
-        }
-    }
-
-    public void sendChatMessage(String chatMessage) {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, 0x54);
-        sleep(100); // magic number
+        this.presser.pressKey(this.gameOptions.chatKey);
+        sleep(100);
         for (char c : chatMessage.toCharArray()) {
             KeyboardUtil.sendCharToHwnd(this.hwnd, c);
         }
-        this.pressEnter();
+        this.presser.pressEnter();
     }
 
-    private void pressEnter() {
-        KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32Con.VK_RETURN);
-    }
-
-    private enum ResetType {
-        VANILLA_EXIT, // Esc+Shift+Tab+Enter always
-        LEAVE_PREVIEW_EXIT, // Esc+Shift+Tab+Enter but use leavePreviewKey when in preview
-        MODERN_ATUM_EXIT // Use createWorldKey always
+    private void getToUnpausedState() {
+        sleep(50);
+        this.getStateTracker().tryUpdate();
+        while (!this.stateTracker.getInWorldType().equals(InWorldState.UNPAUSED)) {
+            this.presser.pressEsc();
+            sleep(50);
+            if (!this.getStateTracker().tryUpdate()) {
+                Julti.log(Level.ERROR, "Failed to update state for instance " + this.getName() + "!");
+            }
+        }
     }
 }

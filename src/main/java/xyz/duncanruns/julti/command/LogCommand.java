@@ -1,8 +1,9 @@
 package xyz.duncanruns.julti.command;
 
 import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class LogCommand extends Command {
     @Override
@@ -26,7 +27,7 @@ public class LogCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         log(Level.INFO, CommandManager.combineArgs(args));
     }
 }

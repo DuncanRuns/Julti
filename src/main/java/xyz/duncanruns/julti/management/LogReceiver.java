@@ -1,4 +1,4 @@
-package xyz.duncanruns.julti.util;
+package xyz.duncanruns.julti.management;
 
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.JultiOptions;

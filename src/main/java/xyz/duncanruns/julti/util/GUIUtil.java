@@ -1,8 +1,11 @@
 package xyz.duncanruns.julti.util;
 
-import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.hotkey.Hotkey;
+import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 
 import javax.swing.*;
@@ -51,7 +54,7 @@ public final class GUIUtil {
     public static JButton createValueChangerButton(final String optionName, final String displayName, final Component parent, final String valueSuffix) {
         final Supplier<String> buttonTextGetter = () -> {
             Object val = JultiOptions.getInstance().getValue(optionName);
-            return displayName + ": " + val + valueSuffix;
+            return (displayName.isEmpty() ? "" : (displayName + ": ")) + val + valueSuffix;
         };
 
         JButton button = new JButton(buttonTextGetter.get());
@@ -65,11 +68,15 @@ public final class GUIUtil {
                 // Shorten the answer by the length of the answer
                 ans = ans.substring(0, ans.length() - valueSuffix.length());
             }
-            if (!JultiOptions.getInstance().trySetValue(optionName, ans)) {
+            if (!queueOptionChangeAndWait(optionName, ans)) {
                 JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
             }
             button.setText(buttonTextGetter.get());
         });
+    }
+
+    private static boolean queueOptionChangeAndWait(String optionName, Object val) {
+        return Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage(optionName, val));
     }
 
     public static <T extends JButton> T getButtonWithMethod(T t, Consumer<ActionEvent> actionEventConsumer) {
@@ -101,7 +108,7 @@ public final class GUIUtil {
                 if ((!options.getValueString(optionName).isEmpty()) && e.getButton() == 3) {
                     int ans = JOptionPane.showConfirmDialog(parent, "Clear file selection?", "Julti: Clear file selection", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                     if (ans == 0) {
-                        options.trySetValue(optionName, "");
+                        queueOptionChangeAndWait(optionName, "");
                         button.setText("No File Selected");
                     }
                 }
@@ -118,35 +125,35 @@ public final class GUIUtil {
             int val = jfc.showOpenDialog(parent);
             if (val == JFileChooser.APPROVE_OPTION) {
                 String chosen = jfc.getSelectedFile().toPath().toString();
-                options.trySetValue(optionName, chosen);
+                queueOptionChangeAndWait(optionName, chosen);
                 button.setText(chosen);
             }
         });
         return button;
     }
 
-    public static JComponent createScriptHotkeyChangeButton(final String scriptName, Julti julti, Runnable reloadFunction) {
+    public static JComponent createScriptHotkeyChangeButton(final String scriptName, Runnable reloadFunction) {
 
         ScriptHotkeyData data = JultiOptions.getInstance().getScriptHotkeyData(scriptName);
 
-        JButton button = new JButton(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
+        JButton button = new JButton(scriptName + ": " + Hotkey.formatKeys(data.keys));
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == 3) {
                     data.keys = Collections.emptyList();
-                    JultiOptions.getInstance().setScriptHotkey(data);
-                    button.setText(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
-                    julti.setupHotkeys();
+                    Julti.waitForExecute(() -> JultiOptions.getInstance().setScriptHotkey(data));
+                    button.setText(scriptName + ": " + Hotkey.formatKeys(data.keys));
+                    HotkeyManager.getInstance().reloadHotkeys();
                 }
             }
         });
         button.addActionListener(e -> {
-            HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
+            Hotkey.onNextHotkey(() -> Julti.getInstance().isRunning(), hotkey -> {
                 data.keys = hotkey.getKeys();
-                JultiOptions.getInstance().setScriptHotkey(data);
-                button.setText(scriptName + ": " + HotkeyUtil.formatKeys(data.keys));
-                julti.setupHotkeys();
+                Julti.waitForExecute(() -> JultiOptions.getInstance().setScriptHotkey(data));
+                button.setText(scriptName + ": " + Hotkey.formatKeys(data.keys));
+                HotkeyManager.getInstance().reloadHotkeys();
             });
             button.setText(scriptName + ": ...");
         });
@@ -156,9 +163,9 @@ public final class GUIUtil {
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         JCheckBox checkBox = createCheckBox("", data.ignoreModifiers, aBoolean -> {
             data.ignoreModifiers = !data.ignoreModifiers;
-            JultiOptions.getInstance().setScriptHotkey(data);
+            Julti.waitForExecute(() -> JultiOptions.getInstance().setScriptHotkey(data));
             reloadFunction.run();
-            julti.setupHotkeys();
+            HotkeyManager.getInstance().reloadHotkeys();
         });
         checkBox.setToolTipText("Ignore Extra Keys");
         panel.add(checkBox);
@@ -180,32 +187,33 @@ public final class GUIUtil {
         return jCheckBox;
     }
 
-    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, Julti julti, boolean includeIMOption) {
+    public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, boolean includeIMOption) {
         JButton button = new JButton();
         final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == 3) {
-                    HotkeyUtil.Hotkey hotkey = new HotkeyUtil.Hotkey(Collections.emptyList());
-                    JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
-                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
-                    julti.setupHotkeys();
+                    Hotkey hotkey = Hotkey.empty();
+                    queueOptionChangeAndWait(optionName, hotkey.getKeys());
+
+                    button.setText(hotkeyPrefix + Hotkey.formatKeys(hotkey.getKeys()));
                 }
             }
         });
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                HotkeyUtil.onNextHotkey(() -> !julti.isStopped(), hotkey -> {
-                    JultiOptions.getInstance().trySetHotkey(optionName, hotkey.getKeys());
-                    button.setText(hotkeyPrefix + HotkeyUtil.formatKeys(hotkey.getKeys()));
-                    julti.setupHotkeys();
+                Julti julti = Julti.getInstance();
+                Hotkey.onNextHotkey(julti::isRunning, hotkey -> {
+                    queueOptionChangeAndWait(optionName, hotkey.getKeys());
+                    button.setText(hotkeyPrefix + Hotkey.formatKeys(hotkey.getKeys()));
+                    HotkeyManager.getInstance().reloadHotkeys();
                 });
                 button.setText(hotkeyPrefix + "...");
             }
         });
-        button.setText(hotkeyPrefix + HotkeyUtil.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
+        button.setText(hotkeyPrefix + Hotkey.formatKeys((List<Integer>) JultiOptions.getInstance().getValue(optionName)));
         button.setFocusable(false);
 
         if (!includeIMOption) {
@@ -214,7 +222,7 @@ public final class GUIUtil {
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        JCheckBox checkBox = createCheckBoxFromOption("", optionName + "IM", b -> julti.setupHotkeys());
+        JCheckBox checkBox = createCheckBoxFromOption("", optionName + "IM", b -> HotkeyManager.getInstance().reloadHotkeys());
         checkBox.setToolTipText("Ignore Extra Keys");
         panel.add(checkBox);
         panel.add(button);
@@ -224,7 +232,7 @@ public final class GUIUtil {
 
     public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
         return createCheckBox(label, (Boolean) JultiOptions.getInstance().getValue(optionName), val -> {
-            JultiOptions.getInstance().trySetValue(optionName, String.valueOf(val));
+            queueOptionChangeAndWait(optionName, val);
             if (afterSet != null) {
                 afterSet.accept(val);
             }
@@ -259,7 +267,7 @@ public final class GUIUtil {
         slider.setSnapToTicks(true);
         slider.addChangeListener(e -> {
             int newCurrent = slider.getValue();
-            JultiOptions.getInstance().trySetValue(optionName, String.valueOf(newCurrent));
+            queueOptionChangeAndWait(optionName, newCurrent);
             label.setText(displayName + " (" + newCurrent + ")");
         });
 
@@ -291,10 +299,13 @@ public final class GUIUtil {
         slider.setPaintLabels(true);
         slider.setPaintTicks(true);
         slider.setSnapToTicks(true);
-        slider.addChangeListener(e -> {
-            int newCurrent = slider.getValue();
-            JultiOptions.getInstance().trySetValue(optionName, String.valueOf(newCurrent / 100f));
-            label.setText("Volume (" + newCurrent + "%)");
+        slider.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                int newCurrent = slider.getValue();
+                queueOptionChangeAndWait(optionName, newCurrent / 100f);
+                label.setText("Volume (" + newCurrent + "%)");
+            }
         });
 
         GUIUtil.setActualSize(slider, 200, 23);

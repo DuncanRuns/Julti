@@ -2,8 +2,6 @@ package xyz.duncanruns.julti.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.io.IOException;
@@ -12,8 +10,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static xyz.duncanruns.julti.Julti.log;
+
 public final class SyncUtil {
-    private static final Logger LOGGER = LogManager.getLogger("SyncUtil");
     private static final Object LOCK = new Object();
 
     private SyncUtil() {
@@ -32,8 +31,8 @@ public final class SyncUtil {
                 }
             }
 
-            List<Path> destinationPaths = instances.stream().filter(instance -> !instance.equals(sourceInstance)).map(MinecraftInstance::getInstancePath).collect(Collectors.toList());
-            Path sourcePath = sourceInstance.getInstancePath();
+            List<Path> destinationPaths = instances.stream().filter(instance -> !instance.equals(sourceInstance)).map(MinecraftInstance::getPath).collect(Collectors.toList());
+            Path sourcePath = sourceInstance.getPath();
 
             if (destinationPaths.isEmpty()) {
                 log(Level.WARN, "No instances to sync!");
@@ -87,10 +86,5 @@ public final class SyncUtil {
 
             log(Level.INFO, "Sync finished!");
         }
-    }
-
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
     }
 }

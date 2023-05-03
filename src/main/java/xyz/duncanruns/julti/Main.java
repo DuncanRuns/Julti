@@ -1,58 +1,48 @@
 package xyz.duncanruns.julti;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
-import xyz.duncanruns.julti.util.LogReceiver;
-import xyz.duncanruns.julti.util.UpdateUtil;
+import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.script.ScriptManager;
+import xyz.duncanruns.julti.util.KeyboardUtil;
 
-import java.util.Objects;
-import java.util.Scanner;
+import javax.swing.*;
 
-public class Main {
-
-    private static final Logger LOGGER = LogManager.getLogger("Main");
+public final class Main {
+    private Main() {
+    }
 
     public static void main(String[] args) {
-        FlatDarkLaf.setup();
-        JultiOptions.getInstance().tryLoad();
-        Julti julti = new Julti();
-        JultiGUI gui = new JultiGUI(julti);
-        julti.start();
-        gui.requestFocus();
-        new Thread(() -> UpdateUtil.checkForUpdates(gui), "update-checker").start();
-        // Command line included in GUI
-        // runJultiCLI(julti);
-    }
-
-    public static void runJultiCLI(Julti julti) {
-        Scanner scanner = new Scanner(System.in);
-        boolean running = true;
-
         try {
-            while (running) {
-                String input = scanner.nextLine();
-                // Allow staring with /
-                if (input.startsWith("/")) {
-                    input = input.substring(1);
-                }
-                if (Objects.equals(input, "stop")) {
-                    running = false;
-                } else {
-                    julti.runCommand(input);
-                }
+            runJultiApp();
+        } catch (Exception e) {
+            int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during startup or main loop!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
+            if (ans == 0) {
+                KeyboardUtil.copyToClipboard("Error during startup or main loop: " + e);
             }
-        } catch (Exception ignored) {
+            System.exit(1);
         }
-        julti.stop();
-        System.exit(0);
-
     }
 
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
+    private static void runJultiApp() {
+        // Setup GUI theme
+        FlatDarkLaf.setup();
+
+        // Load Options
+        JultiOptions.getInstance();
+        ScriptManager.reload();
+
+        // Start Affinity Manager
+        AffinityManager.start();
+
+        // Start GUI
+        JultiGUI.getInstance().setVisible();
+
+        // Start hotkey checker
+        HotkeyManager.getInstance().start();
+
+        // Run main loop
+        Julti.getInstance().run();
     }
 }

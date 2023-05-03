@@ -9,19 +9,20 @@ public final class MonitorUtil {
     }
 
     public static Monitor getPrimaryMonitor() {
-        return new Monitor(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds());
+        return new Monitor(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds(), true);
     }
 
     public static Monitor[] getAllMonitors() {
         final GraphicsDevice[] graphicsDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
         Monitor[] monitors = new Monitor[graphicsDevices.length];
         for (int i = 0; i < monitors.length; i++) {
-            monitors[i] = new Monitor(graphicsDevices[i].getDefaultConfiguration().getBounds());
+            monitors[i] = new Monitor(graphicsDevices[i].getDefaultConfiguration().getBounds(), graphicsDevices[i].getDefaultConfiguration().getBounds().equals(getPrimaryMonitor().bounds));
         }
         return monitors;
     }
 
     public static class Monitor {
+        public final boolean isPrimary;
         public final int[] position;
         public final int[] size;
         public final int x;
@@ -30,11 +31,12 @@ public final class MonitorUtil {
         public final int height;
         public final Rectangle bounds;
 
-        private Monitor(Rectangle bounds) {
-            this(bounds.x, bounds.y, bounds.width, bounds.height);
+        private Monitor(Rectangle bounds, boolean isPrimary) {
+            this(bounds.x, bounds.y, bounds.width, bounds.height, isPrimary);
         }
 
-        private Monitor(int x, int y, int width, int height) {
+        private Monitor(int x, int y, int width, int height, boolean isPrimary) {
+            this.isPrimary = isPrimary;
             this.x = x;
             this.y = y;
             this.width = width;

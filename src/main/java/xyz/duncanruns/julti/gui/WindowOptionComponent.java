@@ -1,12 +1,15 @@
 package xyz.duncanruns.julti.gui;
 
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.NumberFormatter;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.NumberFormat;
 
 public class WindowOptionComponent extends JPanel {
@@ -15,15 +18,6 @@ public class WindowOptionComponent extends JPanel {
         this.setLayout(new BoxLayout(this, 1));
 
         this.reload();
-    }
-
-    public void reload() {
-        this.removeAll();
-        this.add(GUIUtil.leftJustify(new JLabel("Window Position")));
-        this.add(GUIUtil.leftJustify(getPositionPanel()));
-        this.add(GUIUtil.leftJustify(new JLabel("Window Size")));
-        this.add(GUIUtil.leftJustify(getSizePanel()));
-
     }
 
     private static JPanel getPositionPanel() {
@@ -43,29 +37,24 @@ public class WindowOptionComponent extends JPanel {
         int[] windowPos = JultiOptions.getInstance().windowPos;
         xField.setValue(windowPos[0]);
         yField.setValue(windowPos[1]);
-        DocumentListener documentListener = new DocumentListener() {
+        KeyListener keyListener = new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void keyTyped(KeyEvent e) {
                 this.update();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void keyReleased(KeyEvent e) {
                 this.update();
             }
 
             private void update() {
-                JultiOptions.getInstance().windowPos[0] = (int) xField.getValue();
-                JultiOptions.getInstance().windowPos[1] = (int) yField.getValue();
+                int[] value = {(int) xField.getValue(), (int) yField.getValue()};
+                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("windowPos", value));
             }
         };
-        xField.getDocument().addDocumentListener(documentListener);
-        yField.getDocument().addDocumentListener(documentListener);
+        xField.addKeyListener(keyListener);
+        yField.addKeyListener(keyListener);
         GUIUtil.setActualSize(positionPanel, 200, 23);
         return positionPanel;
     }
@@ -84,33 +73,77 @@ public class WindowOptionComponent extends JPanel {
         GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
-        final int[] windowSize = JultiOptions.getInstance().windowSize;
+        int[] windowSize = JultiOptions.getInstance().playingWindowSize;
         xField.setValue(windowSize[0]);
         yField.setValue(windowSize[1]);
-        DocumentListener documentListener = new DocumentListener() {
+        KeyListener keyListener = new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
+            public void keyTyped(KeyEvent e) {
                 this.update();
             }
 
             @Override
-            public void removeUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+            public void keyReleased(KeyEvent e) {
                 this.update();
             }
 
             private void update() {
-                windowSize[0] = (int) xField.getValue();
-                windowSize[1] = (int) yField.getValue();
+                int[] value = {(int) xField.getValue(), (int) yField.getValue()};
+                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("playingWindowSize", value));
             }
         };
-        xField.getDocument().addDocumentListener(documentListener);
-        yField.getDocument().addDocumentListener(documentListener);
+        xField.addKeyListener(keyListener);
+        yField.addKeyListener(keyListener);
         GUIUtil.setActualSize(positionPanel, 200, 23);
         return positionPanel;
+    }
+
+    private static JPanel getRSizePanel() {
+        JPanel positionPanel = new JPanel();
+        positionPanel.setLayout(new BoxLayout(positionPanel, 0));
+        NumberFormat format = NumberFormat.getInstance();
+        format.setGroupingUsed(false);
+        NumberFormatter formatter = new NumberFormatter(format);
+        formatter.setValueClass(Integer.class);
+        formatter.setCommitsOnValidEdit(true);
+        JFormattedTextField xField = new JFormattedTextField(formatter);
+        JFormattedTextField yField = new JFormattedTextField(formatter);
+        GUIUtil.setActualSize(xField, 50, 23);
+        GUIUtil.setActualSize(yField, 50, 23);
+        positionPanel.add(xField);
+        positionPanel.add(yField);
+        int[] windowSize = JultiOptions.getInstance().resettingWindowSize;
+        xField.setValue(windowSize[0]);
+        yField.setValue(windowSize[1]);
+        KeyListener keyListener = new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                this.update();
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                this.update();
+            }
+
+            private void update() {
+                int[] value = {(int) xField.getValue(), (int) yField.getValue()};
+                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("resettingWindowSize", value));
+            }
+        };
+        xField.addKeyListener(keyListener);
+        yField.addKeyListener(keyListener);
+        GUIUtil.setActualSize(positionPanel, 200, 23);
+        return positionPanel;
+    }
+
+    public void reload() {
+        this.removeAll();
+        this.add(GUIUtil.leftJustify(new JLabel("Window Position")));
+        this.add(GUIUtil.leftJustify(getPositionPanel()));
+        this.add(GUIUtil.leftJustify(new JLabel("Playing Window Size")));
+        this.add(GUIUtil.leftJustify(getSizePanel()));
+        this.add(GUIUtil.leftJustify(new JLabel("Resetting Window Size")));
+        this.add(GUIUtil.leftJustify(getRSizePanel()));
     }
 }

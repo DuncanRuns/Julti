@@ -4,9 +4,11 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 
 import java.util.List;
 
+import static xyz.duncanruns.julti.Julti.log;
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public class ActivateCommand extends Command {
@@ -32,23 +34,23 @@ public class ActivateCommand extends Command {
     }
 
     @Override
-    public void run(String[] args, Julti julti, CancelRequester cancelRequester) {
+    public void run(String[] args, CancelRequester cancelRequester) {
         if (args[0].equals("wall")) {
-            julti.focusWall();
+            Julti.waitForExecute(() -> Julti.getInstance().focusWall());
             return;
         }
-        List<MinecraftInstance> instances = args[0].equals("all") ? julti.getInstanceManager().getInstances() : CommandManager.getInstances(args[0], julti);
+        List<MinecraftInstance> instances = args[0].equals("all") ? InstanceManager.getManager().getInstances() : CommandManager.getInstances(args[0]);
         if (instances.size() == 0) {
             log(Level.ERROR, "No instance found");
             return;
         }
-        List<MinecraftInstance> allInstances = julti.getInstanceManager().getInstances();
+        // Do setup mode for multiple instances
+        boolean doingSetup = instances.size() > 1;
         for (MinecraftInstance i : instances) {
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
-            julti.activateInstance(i, 1 + allInstances.indexOf(i));
-            julti.switchScene(i);
+            Julti.waitForExecute(() -> Julti.getInstance().activateInstance(i, doingSetup));
             sleep(500);
         }
     }

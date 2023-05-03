@@ -1,15 +1,17 @@
 package xyz.duncanruns.julti.gui;
 
-import xyz.duncanruns.julti.AffinityManager;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.management.OBSStateManager;
+import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
+import xyz.duncanruns.julti.util.DoAllFastUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -21,16 +23,17 @@ import java.util.List;
 
 public class OptionsGUI extends JFrame {
     private static final String[] RESET_MODES = new String[]{"Multi", "Wall", "Dynamic Wall"};
-
     private boolean closed = false;
-    private final Julti julti;
     private JTabbedPane tabbedPane;
 
-    public OptionsGUI(Julti julti, JultiGUI gui) {
-        this.julti = julti;
-        this.setLocation(gui.getLocation());
+    public OptionsGUI() {
+        this.setLocation(JultiGUI.getInstance().getLocation());
         this.setupWindow();
         this.reloadComponents();
+    }
+
+    private static void changeProfile(String profile) {
+        Julti.waitForExecute(() -> Julti.getInstance().changeProfile(profile));
     }
 
     private JTabbedPane getTabbedPane() {
@@ -84,16 +87,19 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen")));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prevent Window Naming", "preventWindowNaming")));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("No Cope Mode (Reset when you open to lan)", "noCopeMode")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Always On Top Projector", "alwaysOnTopProjector")));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Always On Top Projector", "alwaysOnTopProjector")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
     }
 
     private void addComponentsSound() {
@@ -149,10 +155,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
             this.reload();
             if (b) {
-                AffinityManager.start(this.julti);
+                AffinityManager.start();
             } else {
                 AffinityManager.stop();
-                AffinityManager.release(this.julti);
+                AffinityManager.release();
             }
         })));
 
@@ -185,39 +191,19 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("resetCounter", "Reset Counter", this)));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path (.exe):")));
         panel.add(GUIUtil.createSpacer());
 
-        JTextField mmcField = new JTextField(options.multiMCPath);
-        GUIUtil.setActualSize(mmcField, 300, 23);
-        mmcField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                this.update();
-            }
-
-            private void update() {
-                options.multiMCPath = mmcField.getText();
-            }
-        });
-        panel.add((GUIUtil.leftJustify(mmcField)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("multiMCPath", "", this)));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> this.runMMCExecutableHelper(mmcField))));
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
+            this.runMMCExecutableHelper();
+            this.reload();
+        })));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Launch Instances Offline", "launchOffline", b -> this.reload())));
@@ -233,18 +219,21 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Experimental Options", "enableExperimentalOptions", b -> {
             if (!b) {
-                options.autoFullscreen = false;
-                options.showDebug = false;
-                options.pieChartOnLoad = false;
-                options.preventWindowNaming = false;
-                options.noCopeMode = false;
-                options.alwaysOnTopProjector = false;
+                Julti.waitForExecute(() -> {
+                    options.autoFullscreen = false;
+                    options.usePlayingSizeWithFullscreen = false;
+                    options.showDebug = false;
+                    options.pieChartOnLoad = false;
+                    options.preventWindowNaming = false;
+                    options.alwaysOnTopProjector = false;
+                    options.useAltSwitching = false;
+                });
             }
             this.reload();
         })));
     }
 
-    private void runMMCExecutableHelper(JTextField mmcField) {
+    private void runMMCExecutableHelper() {
         List<String> appNames = Arrays.asList("multimc.exe,prismlauncher.exe".split(","));
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
@@ -281,7 +270,7 @@ public class OptionsGUI extends JFrame {
         }
         if (candidates.size() == 0) {
             if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                this.browseForMMCExecutable(mmcField);
+                this.browseForMMCExecutable();
             }
             return;
         }
@@ -300,15 +289,14 @@ public class OptionsGUI extends JFrame {
             return;
         }
         if (ans == candidates.size()) {
-            this.browseForMMCExecutable(mmcField);
+            this.browseForMMCExecutable();
         } else {
             Path chosen = candidates.get(ans);
             JultiOptions.getInstance().multiMCPath = chosen.toString();
-            mmcField.setText(chosen.toString());
         }
     }
 
-    private void browseForMMCExecutable(JTextField mmcField) {
+    private void browseForMMCExecutable() {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
         jfc.setDialogTitle("Julti: Choose MultiMC Executable");
@@ -318,9 +306,7 @@ public class OptionsGUI extends JFrame {
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            String chosen = jfc.getSelectedFile().toPath().toString();
-            JultiOptions.getInstance().multiMCPath = chosen;
-            mmcField.setText(chosen);
+            JultiOptions.getInstance().multiMCPath = jfc.getSelectedFile().toPath().toString();
         }
     }
 
@@ -336,23 +322,11 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("instanceSpacing", "Instance Spacing (Border)", this)));
-        panel.add(GUIUtil.createSpacer());
 
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Press Hotkeys", "obsPressHotkeys", aBoolean -> this.reload())));
-        if (JultiOptions.getInstance().obsPressHotkeys) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Numpad", "obsUseNumpad")));
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt", "obsUseAlt")));
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("switchToWallHotkey", "Wall Scene Hotkey", this.julti, false)));
-        }
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("No settings here are required to use the OBS Link Script.")));
     }
 
@@ -372,9 +346,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("In-Game Hotkeys")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("resetHotkey", "Reset", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("resetHotkey", "Reset", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("bgResetHotkey", "Background Reset", true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
@@ -382,17 +356,17 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Hotkeys")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallResetHotkey", "Full Reset", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallResetHotkey", "Full Reset", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallSingleResetHotkey", "Reset Instance", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallSingleResetHotkey", "Reset Instance", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallLockHotkey", "Lock Instance", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayHotkey", "Play Instance", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallFocusResetHotkey", "Focus Reset", true)));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayLockHotkey", "Play Next Lock", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("wallPlayLockHotkey", "Play Next Lock", true)));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -400,11 +374,11 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(new JLabel("Script Hotkeys")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("cancelScriptHotkey", "Cancel Running Script", this.julti, true)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createHotkeyChangeButton("cancelScriptHotkey", "Cancel Running Script", true)));
 
         for (String scriptName : ScriptManager.getHotkeyableScriptNames()) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createScriptHotkeyChangeButton(scriptName, this.julti, this::reload)));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createScriptHotkeyChangeButton(scriptName, this::reload)));
         }
     }
 
@@ -428,8 +402,8 @@ public class OptionsGUI extends JFrame {
         JComboBox<String> profileSelectBox = new JComboBox<>(JultiOptions.getProfileNames());
         GUIUtil.setActualSize(profileSelectBox, 200, 22);
         profileSelectBox.addActionListener(e -> {
-            this.julti.changeProfile(profileSelectBox.getSelectedItem().toString());
-            this.reloadComponents();
+            changeProfile(profileSelectBox.getSelectedItem().toString());
+            this.reload();
         });
 
         panel.add(GUIUtil.leftJustify(profileSelectBox));
@@ -438,7 +412,7 @@ public class OptionsGUI extends JFrame {
         OptionsGUI thisGUI = this;
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), actionEvent -> {
             String toRemove = JultiOptions.getSelectedProfileName();
-            if (0 != JOptionPane.showConfirmDialog(thisGUI, "Are you sure you want to remove the profile \"" + toRemove + "\"?", "Julti: Remove Profile", JOptionPane.WARNING_MESSAGE)) {
+            if (0 != JOptionPane.showConfirmDialog(thisGUI, "Are you sure you want to remove the profile \"" + toRemove + "\"?", "Julti: Remove Profile", JOptionPane.YES_NO_OPTION)) {
                 return;
             }
             String switchTo = "";
@@ -448,9 +422,9 @@ public class OptionsGUI extends JFrame {
                     break;
                 }
             }
-            this.julti.changeProfile(switchTo);
+            changeProfile(switchTo);
             JultiOptions.removeProfile(toRemove);
-            this.reloadComponents();
+            this.reload();
         })));
 
         panel.add(GUIUtil.createSpacer());
@@ -461,8 +435,9 @@ public class OptionsGUI extends JFrame {
                     JOptionPane.showMessageDialog(thisGUI, "Profile already exists!", "Julti: Cannot Create New Profile", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                JultiOptions.getInstance().copyTo(newName);
-                this.julti.changeProfile(newName);
+                Julti.waitForExecute(() -> JultiOptions.getInstance().copyTo(newName));
+
+                changeProfile(newName);
                 this.reloadComponents();
             }
         })));
@@ -474,24 +449,23 @@ public class OptionsGUI extends JFrame {
         JultiOptions options = JultiOptions.getInstance();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
-        panel.add(GUIUtil.createSpacer());
         if (options.resetMode == 0) {
-            panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
             panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
         }
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Clean Wall (F1 on world load)", "cleanWall")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> {
-            this.reload();
-        })));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> this.reload())));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Don't Focus Unloaded Instances", "wallLockInsteadOfPlay", b -> this.reload())));
+
+        if (options.wallLockInsteadOfPlay) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Smart Switch", "wallSmartSwitch")));
+        }
 
 
         if (!options.wallResetAllAfterPlaying) {
@@ -507,7 +481,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> this.reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> {
+            this.reload();
+            Julti.doLater(() -> ResetHelper.getManager().reload());
+        })));
         if (!options.autoCalcWallSize) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(new WallSizeComponent()));
@@ -517,14 +494,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBox("Use Dirt Covers", options.dirtReleasePercent >= 0, b -> {
-            options.dirtReleasePercent = b ? 0 : -1;
-            this.reload();
-        })));
-        if (options.dirtReleasePercent >= 0) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("dirtReleasePercent", "Dirt Cover Release Percent", this, "%")));
-        }
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Dirt Covers", "doDirtCovers")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
         panel.add(GUIUtil.createSpacer());
@@ -564,9 +534,11 @@ public class OptionsGUI extends JFrame {
         JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
         resetStyleBox.setSelectedItem(RESET_MODES[options.resetMode]);
         resetStyleBox.addActionListener(e -> {
-            options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+            Julti.doLater(() -> {
+                options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+                ResetHelper.getManager().reload();
+            });
             this.reload();
-            this.julti.reloadManagers();
         });
         GUIUtil.setActualSize(resetStyleBox, 120, 23);
 
@@ -575,8 +547,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pause On Load", "pauseOnLoad")));
-        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use F3", "useF3")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unpause on Switch", "unpauseOnSwitch")));
@@ -632,40 +602,38 @@ public class OptionsGUI extends JFrame {
             MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
             StringBuilder monitorOptionsText = new StringBuilder();
             Object[] buttons = new Object[monitors.length];
+
+            List<MonitorUtil.Monitor> sortedMonitors = new ArrayList<>();
+            sortedMonitors.add(MonitorUtil.getPrimaryMonitor());
+            Arrays.stream(monitors).filter(monitor -> !monitor.isPrimary).forEach(sortedMonitors::add);
+
             int i = 0;
-            for (MonitorUtil.Monitor monitor : monitors) {
+            for (MonitorUtil.Monitor monitor : sortedMonitors) {
                 buttons[i] = String.valueOf(i + 1);
-                monitorOptionsText.append("\n#").append(++i).append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
+                monitorOptionsText.append("\n#").append(++i);
+                if (monitor.isPrimary) {
+                    monitorOptionsText.append(" (Primary)");
+                }
+                monitorOptionsText.append(" - ").append("Size: ").append(monitor.width).append("x").append(monitor.height).append(", Position: (").append(monitor.x).append(",").append(monitor.y).append(")");
             }
 
             int ans = JOptionPane.showOptionDialog(thisGUI, "Choose a monitor:\n" + monitorOptionsText.toString().trim(), "Julti: Choose Monitor", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, buttons, null);
             if (ans == -1) {
                 return;
             }
-            MonitorUtil.Monitor monitor = monitors[ans];
-            options.windowPos = monitor.position;
-            options.windowSize = monitor.size;
+            MonitorUtil.Monitor monitor = sortedMonitors.get(ans);
+            Julti.waitForExecute(() -> {
+                options.windowPos = monitor.position;
+                options.playingWindowSize = monitor.size;
+            });
             windowOptions.reload();
             this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
-
-
-        final JLabel squishLabel = new JLabel("Wide Reset Squish Level: (" + options.wideResetSquish + ")");
-        panel.add(GUIUtil.leftJustify(squishLabel));
-        JSlider squishSlider = new JSlider(0, 10, 80, (int) (options.wideResetSquish * 10));
-        squishSlider.addChangeListener(e -> {
-            options.wideResetSquish = squishSlider.getValue() / 10f;
-            squishLabel.setText("Wide Reset Squish Level: (" + options.wideResetSquish + ")");
-        });
-        GUIUtil.setActualSize(squishSlider, 200, 23);
-        panel.add(GUIUtil.leftJustify(squishSlider));
-
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unsquish When Locking", "unsquishOnLock")));
-        panel.add(GUIUtil.leftJustify(new JLabel("Warning: This option may cause the instance to become unverifiable.")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "prepareWindowOnLock")));
+        panel.add(GUIUtil.leftJustify(new JLabel("(When locking, set the size of the instance to the \"Playing\" size, making switching quicker)")));
     }
 
     public boolean isClosed() {
@@ -674,7 +642,10 @@ public class OptionsGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
-        this.julti.reloadInstancePositions();
-        this.julti.tryOutputLSInfo();
+        Julti.doLater(() -> {
+            OBSStateManager.getInstance().tryOutputLSInfo();
+            SleepBGUtil.disableLock();
+            DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
+        });
     }
 }

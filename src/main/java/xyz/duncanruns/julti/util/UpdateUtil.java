@@ -2,8 +2,6 @@ package xyz.duncanruns.julti.util;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -14,8 +12,9 @@ import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
 
+import static xyz.duncanruns.julti.Julti.log;
+
 public final class UpdateUtil {
-    private static final Logger LOGGER = LogManager.getLogger("UpdateChecker");
 
     private UpdateUtil() {
     }
@@ -23,6 +22,7 @@ public final class UpdateUtil {
     public static void main(String[] args) {
         FlatDarkLaf.setup();
         checkForUpdates(null);
+        System.exit(0);
     }
 
     public static void checkForUpdates(JultiGUI gui) {
@@ -59,17 +59,12 @@ public final class UpdateUtil {
         }
     }
 
-    public static void log(Level level, String message) {
-        LOGGER.log(level, message);
-        LogReceiver.receive(level, message);
-    }
-
     private static int[] getVersionNums(String versionString) {
         // Remove v prefix
         versionString = versionString.startsWith("v") ? versionString.substring(1) : versionString;
         // Remove suffix
         for (char c : new char[]{'+', '-'}) {
-            if (versionString.contains("" + c)) {
+            if (versionString.contains(String.valueOf(c))) {
                 versionString = versionString.substring(0, versionString.indexOf(c));
             }
         }

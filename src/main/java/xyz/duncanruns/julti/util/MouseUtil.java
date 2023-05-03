@@ -2,11 +2,11 @@ package xyz.duncanruns.julti.util;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.BaseTSD;
+import com.sun.jna.platform.win32.Win32VK;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.julti.win32.User32;
-import xyz.duncanruns.julti.win32.Win32Con;
 
 import java.awt.*;
 
@@ -44,35 +44,35 @@ public final class MouseUtil {
         mi.mouseData = new WinDef.DWORD(vk == 5 || vk == 6 ? vk - 4 : 0);
         int buttonEventBit = 0;
         if (isDown) {
-            switch (vk) {
-                case Win32Con.VK_LBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_LEFTDOWN;
+            switch (Win32VK.fromValue(vk)) {
+                case VK_LBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_LEFTDOWN;
                     break;
-                case Win32Con.VK_RBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_RIGHTDOWN;
+                case VK_RBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_RIGHTDOWN;
                     break;
-                case Win32Con.VK_MBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_MIDDLEDOWN;
+                case VK_MBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_MIDDLEDOWN;
                     break;
-                case Win32Con.VK_XBUTTON1:
-                case Win32Con.VK_XBUTTON2:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_XDOWN;
+                case VK_XBUTTON1:
+                case VK_XBUTTON2:
+                    buttonEventBit = User32.MOUSEEVENTF_XDOWN;
                     break;
             }
         } else {
-            switch (vk) {
-                case Win32Con.VK_LBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_LEFTUP;
+            switch (Win32VK.fromValue(vk)) {
+                case VK_LBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_LEFTUP;
                     break;
-                case Win32Con.VK_RBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_RIGHTUP;
+                case VK_RBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_RIGHTUP;
                     break;
-                case Win32Con.VK_MBUTTON:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_MIDDLEUP;
+                case VK_MBUTTON:
+                    buttonEventBit = User32.MOUSEEVENTF_MIDDLEUP;
                     break;
-                case Win32Con.VK_XBUTTON1:
-                case Win32Con.VK_XBUTTON2:
-                    buttonEventBit = Win32Con.MOUSEEVENTF_XUP;
+                case VK_XBUTTON1:
+                case VK_XBUTTON2:
+                    buttonEventBit = User32.MOUSEEVENTF_XUP;
                     break;
             }
         }

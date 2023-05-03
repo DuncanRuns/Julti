@@ -1,6 +1,6 @@
 package xyz.duncanruns.julti.util;
 
-import xyz.duncanruns.julti.win32.Win32Con;
+import com.sun.jna.platform.win32.Win32VK;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -146,6 +146,9 @@ public final class McKeyUtil {
     }
 
     public static Integer getVkFromMCTranslation(String translationKey) {
+        if (translationKey == null) {
+            return null;
+        }
         Integer glfwKey = TRANSLATIONS_TO_GLFW.get(translationKey);
         Integer vkKey = getVkFromGLFW(glfwKey);
         if (vkKey == null || vkKey <= 0) {
@@ -172,27 +175,27 @@ public final class McKeyUtil {
         }
         if (key >= 290 && key <= 313)  // Function keys
         {
-            return key - 290 + Win32Con.VK_F1;
+            return key - 290 + Win32VK.VK_F1.code;
         }
         if (key == 282)  // Num Lock
         {
-            return Win32Con.VK_NUMLOCK;
+            return Win32VK.VK_NUMLOCK.code;
         }
         if (key >= 320 && key <= 329)  // Num keys
         {
-            return key - 320 + Win32Con.VK_NUMPAD0;
+            return key - 320 + Win32VK.VK_NUMPAD0.code;
         }
         if (key == 334)  // Add key
         {
-            return Win32Con.VK_ADD;
+            return Win32VK.VK_ADD.code;
         }
         if (key == 330)  // Decimal key
         {
-            return Win32Con.VK_DECIMAL;
+            return Win32VK.VK_DECIMAL.code;
         }
         if (key == 335)  // Numpad enter key
         {
-            return Win32Con.VK_RETURN; // definitely wrong lol
+            return Win32VK.VK_RETURN.code; // definitely wrong lol
         }
         if (key == 336)  // Equals (on numpad) key
         {
@@ -200,31 +203,31 @@ public final class McKeyUtil {
         }
         if (key == 332)  // Multiply key
         {
-            return Win32Con.VK_MULTIPLY;
+            return Win32VK.VK_MULTIPLY.code;
         }
         if (key == 331)  // Divide key
         {
-            return Win32Con.VK_DIVIDE;
+            return Win32VK.VK_DIVIDE.code;
         }
         if (key == 333)  // Subtract key
         {
-            return Win32Con.VK_SUBTRACT;
+            return Win32VK.VK_SUBTRACT.code;
         }
         if (key == 264)  // Down key
         {
-            return Win32Con.VK_DOWN;
+            return Win32VK.VK_DOWN.code;
         }
         if (key == 263)  // Left key
         {
-            return Win32Con.VK_LEFT;
+            return Win32VK.VK_LEFT.code;
         }
         if (key == 262)  // Right key
         {
-            return Win32Con.VK_RIGHT;
+            return Win32VK.VK_RIGHT.code;
         }
         if (key == 265)  // Up key
         {
-            return Win32Con.VK_UP;
+            return Win32VK.VK_UP.code;
         }
         if (key == 39)  // Apostrophe
         {
@@ -272,99 +275,99 @@ public final class McKeyUtil {
         }
         if (key == 32)  // Space
         {
-            return Win32Con.VK_SPACE;
+            return Win32VK.VK_SPACE.code;
         }
         if (key == 258)  // Tab
         {
-            return Win32Con.VK_TAB;
+            return Win32VK.VK_TAB.code;
         }
         if (key == 342)  // Left alt
         {
-            return Win32Con.VK_LMENU;
+            return Win32VK.VK_LMENU.code;
         }
         if (key == 341)  // Left ctrl
         {
-            return Win32Con.VK_LCONTROL;
+            return Win32VK.VK_LCONTROL.code;
         }
         if (key == 340)  // Left shift
         {
-            return Win32Con.VK_LSHIFT;
+            return Win32VK.VK_LSHIFT.code;
         }
         if (key == 343)  // Left win
         {
-            return Win32Con.VK_LWIN;
+            return Win32VK.VK_LWIN.code;
         }
         if (key == 346)  // Right alt
         {
-            return Win32Con.VK_RMENU;
+            return Win32VK.VK_RMENU.code;
         }
         if (key == 345)  // Right control
         {
-            return Win32Con.VK_RCONTROL;
+            return Win32VK.VK_RCONTROL.code;
         }
         if (key == 344)  // Right shift
         {
-            return Win32Con.VK_RSHIFT;
+            return Win32VK.VK_RSHIFT.code;
         }
         if (key == 347)  // Right win
         {
-            return Win32Con.VK_RWIN;
+            return Win32VK.VK_RWIN.code;
         }
         if (key == 257)  // Enter
         {
-            return Win32Con.VK_RETURN;
+            return Win32VK.VK_RETURN.code;
         }
         if (key == 256)  // Escape
         {
-            return Win32Con.VK_ESCAPE;
+            return Win32VK.VK_ESCAPE.code;
         }
         if (key == 259)  // Backspace
         {
-            return Win32Con.VK_BACK;
+            return Win32VK.VK_BACK.code;
         }
         if (key == 261)  // Del
         {
-            return Win32Con.VK_DELETE;
+            return Win32VK.VK_DELETE.code;
         }
         if (key == 269)  // End
         {
-            return Win32Con.VK_END;
+            return Win32VK.VK_END.code;
         }
         if (key == 268)  // Home
         {
-            return Win32Con.VK_HOME;
+            return Win32VK.VK_HOME.code;
         }
         if (key == 260)  // Insert
         {
-            return Win32Con.VK_INSERT;
+            return Win32VK.VK_INSERT.code;
         }
         if (key == 267)  // PgDn
         {
-            return Win32Con.VK_NEXT;
+            return Win32VK.VK_NEXT.code;
         }
         if (key == 266)  // PgUp
         {
-            return Win32Con.VK_PRIOR;
+            return Win32VK.VK_PRIOR.code;
         }
         if (key == 280)  // Caps lock
         {
-            return Win32Con.VK_CAPITAL;
+            return Win32VK.VK_CAPITAL.code;
         }
         if (key == 284)  // Pause
         {
-            return Win32Con.VK_PAUSE;
+            return Win32VK.VK_PAUSE.code;
         }
         if (key == 281)  // Scroll lock
         {
-            return Win32Con.VK_SCROLL;
+            return Win32VK.VK_SCROLL.code;
         }
         if (key == 348)  // "Menu"
         {
-            return Win32Con.VK_APPS;  // Might be wrong
+            return Win32VK.VK_APPS.code;  // Might be wrong
         }
         if (key == 283)  // Print screen
         {
-            return Win32Con.VK_SNAPSHOT;
+            return Win32VK.VK_SNAPSHOT.code;
         }
         if (key == 161 || key == 162)  // what even are these "world" keys
         {
