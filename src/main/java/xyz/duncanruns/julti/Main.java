@@ -8,12 +8,18 @@ import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 
 import javax.swing.*;
+import java.util.Arrays;
 
 public final class Main {
+    public static String[] args;
+
     private Main() {
     }
 
     public static void main(String[] args) {
+        Main.args = args;
+        System.out.println("Launched with args: " + Arrays.toString(args));
+
         try {
             runJultiApp();
         } catch (Exception e) {

@@ -1,13 +1,11 @@
 package xyz.duncanruns.julti.util;
 
-import com.github.tuupertunut.powershelllibjava.PowerShell;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.win32.User32;
 
-import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,7 +17,6 @@ import java.util.regex.Pattern;
  * from the vanilla launcher, MultiMC, or Prism Launcher.
  */
 public final class InstanceInfoUtil {
-    private static final PowerShell POWER_SHELL;
     // Version Patterns
     private static final Pattern VANILLA_VERSION_PATTERN = Pattern.compile(" --version (.+?) ");
     private static final Pattern MULTIMC_VERSION_PATTERN = Pattern.compile("minecraft-(.+)-client.jar");
@@ -29,14 +26,6 @@ public final class InstanceInfoUtil {
     // MultiMC Path Patterns
     private static final Pattern MULTIMC_PATH_PATTERN = Pattern.compile("-Djava\\.library\\.path=(.+?) ");
     private static final Pattern MULTIMC_PATH_PATTERN_SPACES = Pattern.compile("\"-Djava\\.library\\.path=(.+?)\"");
-
-    static {
-        try {
-            POWER_SHELL = PowerShell.open();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     private InstanceInfoUtil() {
@@ -74,7 +63,7 @@ public final class InstanceInfoUtil {
 
     private static String getCommandLine(int pid) {
         try {
-            return POWER_SHELL.executeCommands("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
+            return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
         } catch (Exception ignored) {
         }
         return null;

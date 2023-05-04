@@ -25,6 +25,9 @@ import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -69,6 +72,28 @@ public final class Julti {
     public static void log(Level level, String message) {
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
+    }
+
+    private static void checkDeleteOldJar() {
+        List<String> argList = Arrays.asList(Main.args);
+        if (!argList.contains("-deleteOldJar")) {
+            return;
+        }
+
+        File toDelete = new File(argList.get(argList.indexOf("-deleteOldJar") + 1));
+
+        log(Level.INFO, "Deleting old jar " + toDelete.getName());
+
+        for (int i = 0; i < 200 && !toDelete.delete(); i++) {
+            sleep(10);
+        }
+
+        if (toDelete.exists()) {
+            log(Level.ERROR, "Failed to delete " + toDelete.getName());
+        } else {
+            log(Level.INFO, "Deleted " + toDelete.getName());
+        }
+
     }
 
     private void changeProfile(QMessage message) {
@@ -117,14 +142,15 @@ public final class Julti {
     public void run() {
         ResourceUtil.makeResources();
         OBSStateManager.getInstance().tryOutputLSInfo();
+        checkDeleteOldJar();
         this.reload();
         long cycles = 0;
         log(Level.INFO, "Welcome to Julti!");
-        String libraryPathThing = System.getProperty("java.library.path");
-        log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + libraryPathThing.substring(0, libraryPathThing.indexOf(";")));
+        String usedJava = System.getProperty("java.home");
+        log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + usedJava);
 
         // Schedule update checker after Julti startup processes
-        Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getInstance())).start());
+        Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getInstance()), "update-checker").start());
 
         while (this.running) {
             sleep(1);

@@ -15,6 +15,7 @@ public class JultiGUI extends JFrame {
 
     private boolean closed;
     private ControlPanel controlPanel;
+    private boolean updating = false;
 
 
     public JultiGUI() {
@@ -103,6 +104,13 @@ public class JultiGUI extends JFrame {
         this.closed = true;
         Julti.getInstance().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
         Julti.getInstance().queueMessageAndWait(new ShutdownQMessage());
-        System.exit(0); // For some reason there are hanging threads left, not even started by Julti
+        if (!this.updating) {
+            System.exit(0); // For some reason there are hanging threads left, not even started by Julti
+        }
+    }
+
+    public void closeForUpdate() {
+        this.updating = true;
+        this.dispose();
     }
 }
