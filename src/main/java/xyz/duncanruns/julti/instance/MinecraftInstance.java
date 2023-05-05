@@ -227,8 +227,8 @@ public class MinecraftInstance {
         AffinityManager.pause();
         AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
-        if (options.usePlayingSizeWithFullscreen && options.autoFullscreen) {
-            this.ensureResettingWindowState(false);
+        if (!doingSetup && options.usePlayingSizeWithFullscreen && options.autoFullscreen) {
+            this.ensurePlayingWindowState(false);
         }
         AffinityManager.unpause();
 
