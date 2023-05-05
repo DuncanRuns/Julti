@@ -86,6 +86,8 @@ public final class MCVersionUtil {
         for (int i = 0; i < 3; i++) {
             if (intsX[i] > intsY[i]) {
                 return true;
+            } else if (intsX[i] < intsY[i]) {
+                return false;
             }
         }
         return false;
