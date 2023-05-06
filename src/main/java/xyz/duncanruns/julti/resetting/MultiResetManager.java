@@ -37,7 +37,10 @@ public class MultiResetManager extends ResetManager {
             return actionResults;
         }
 
-        boolean resetFirst = options.coopMode || selectedInstance.isFullscreen();
+        boolean resetFirst = options.coopMode;
+
+        selectedInstance.ensureNotFullscreen();
+
 
         // if there is only a single instance, reset it and return.
         if (instanceCount == 1) {
