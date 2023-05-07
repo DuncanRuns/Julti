@@ -177,13 +177,6 @@ public class MinecraftInstance {
     }
 
     public void reset() {
-        boolean wasFullscreen = false;
-        Rectangle ogRect = null;
-        if (this.activeSinceReset && this.isFullscreen()) {
-            wasFullscreen = true;
-            ogRect = WindowStateUtil.getHwndRectangle(this.hwnd);
-        }
-
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
                 this.presser.pressShiftTabEnter();
@@ -197,17 +190,6 @@ public class MinecraftInstance {
         this.resetPressed = true;
         this.resetEverPressed = true;
         this.openedToLan = false;
-
-        if (wasFullscreen) {
-            // Wait until window actually un-fullscreens
-            // Or until 2 ish seconds have passed
-            for (int i = 0; i < 200; i++) {
-                if (!Objects.equals(ogRect, WindowStateUtil.getHwndRectangle(this.hwnd))) {
-                    break;
-                }
-                sleep(10);
-            }
-        }
 
         this.activeSinceReset = false;
         if (this.windowStateChangedToPlaying) {
@@ -409,7 +391,7 @@ public class MinecraftInstance {
 
 
     public boolean isFullscreen() {
-        return Objects.equals(GameOptionsUtil.tryGetOption(this.getPath(), "fullscreen", false), "true");
+        return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
     }
 
     public boolean hasWindow() {
@@ -535,7 +517,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                !options.useBorderless,
+                (!options.useBorderless) && (!options.autoFullscreen),
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]),
                 offload);
         this.windowStateChangedToPlaying = true;
@@ -590,6 +572,22 @@ public class MinecraftInstance {
             if (!this.getStateTracker().tryUpdate()) {
                 Julti.log(Level.ERROR, "Failed to update state for instance " + this.getName() + "!");
             }
+        }
+    }
+
+    public void ensureNotFullscreen() {
+        if ((!this.activeSinceReset) || (!this.isFullscreen())) {
+            return;
+        }
+
+        Rectangle rectangle = WindowStateUtil.getHwndRectangle(this.hwnd);
+
+        this.presser.pressKey(this.gameOptions.fullscreenKey);
+        do {
+            sleep(5);
+        } while (this.isFullscreen());
+        while (Objects.equals(WindowStateUtil.getHwndRectangle(this.hwnd), rectangle)) {
+            sleep(5);
         }
     }
 }
