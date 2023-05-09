@@ -3,10 +3,10 @@ package xyz.duncanruns.julti.gui;
 import javax.swing.*;
 import java.awt.*;
 
-public class DownloadingJultiScreen extends JFrame {
+public class DownloadProgressFrame extends JFrame {
     private final JProgressBar bar;
 
-    public DownloadingJultiScreen(Point location) {
+    public DownloadProgressFrame(Point location) {
         this.setLayout(new GridBagLayout());
         JLabel text = new JLabel("Downloading Julti...");
         GridBagConstraints gbc = new GridBagConstraints();

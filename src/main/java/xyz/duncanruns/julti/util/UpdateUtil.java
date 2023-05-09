@@ -9,7 +9,7 @@ import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.Main;
-import xyz.duncanruns.julti.gui.DownloadingJultiScreen;
+import xyz.duncanruns.julti.gui.DownloadProgressFrame;
 import xyz.duncanruns.julti.gui.JultiGUI;
 
 import javax.swing.*;
@@ -112,8 +112,7 @@ public final class UpdateUtil {
         JultiGUI.getInstance().closeForUpdate();
 
         if (!Files.exists(newJarPath)) {
-            DownloadingJultiScreen downloadingJultiScreen = new DownloadingJultiScreen(location);
-            downloadAssetWithProgress(asset, newJarPath, downloadingJultiScreen.getBar());
+            downloadAssetWithProgress(asset, newJarPath, new DownloadProgressFrame(location).getBar());
         }
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
