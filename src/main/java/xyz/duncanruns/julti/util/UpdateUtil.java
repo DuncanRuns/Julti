@@ -14,9 +14,11 @@ import xyz.duncanruns.julti.gui.JultiGUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -75,6 +77,9 @@ public final class UpdateUtil {
             if (shouldSuggestUpdate) {
                 options.lastCheckedVersion = latestVersion;
                 if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + Julti.VERSION + ", and the latest version is " + latestVersion + ".\nWould you like to update now?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
+                    if (Julti.isRanFromAlternateLocation()) {
+                        JOptionPane.showMessageDialog(gui, "Julti has detected that it is being ran from an alternate location. If you are using a shortcut, you will likely need to recreate it once the update has finished.", "Julti: Ran from Alternate Location", JOptionPane.INFORMATION_MESSAGE);
+                    }
                     // Desktop.getDesktop().browse(new URI("https://github.com/DuncanRuns/Julti/releases"));
                     tryUpdateAndLaunch(asset);
                 }
@@ -92,7 +97,7 @@ public final class UpdateUtil {
         try {
             updateAndLaunch(asset);
         } catch (Exception e) {
-            int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during startup or main loop!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
+            int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during an update!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
             if (ans == 0) {
                 KeyboardUtil.copyToClipboard("Error during updating: " + e);
             }
@@ -100,19 +105,21 @@ public final class UpdateUtil {
         }
     }
 
-    private static void updateAndLaunch(GHAsset asset) throws IOException, PowerShellExecutionException, URISyntaxException {
+    private static void updateAndLaunch(GHAsset asset) throws IOException, PowerShellExecutionException {
+        Path newJarPath = Julti.getSourcePath().resolveSibling(asset.getName());
+
         Point location = JultiGUI.getInstance().getLocation();
         JultiGUI.getInstance().closeForUpdate();
 
-        if (!Files.exists(Paths.get(asset.getName()))) {
+        if (!Files.exists(newJarPath)) {
             DownloadingJultiScreen downloadingJultiScreen = new DownloadingJultiScreen(location);
-            downloadingJultiScreen.download(asset);
+            downloadAssetWithProgress(asset, newJarPath, downloadingJultiScreen.getBar());
         }
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
 
         // Use powershell's start-process to start it detached
-        String powerCommand = String.format("start-process \"%s\" \"-jar %s -deleteOldJar %s\"", javaExe, asset.getName(), new File(UpdateUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toPath().getFileName().toString());
+        String powerCommand = String.format("start-process '%s' '-jar \"%s\" -deleteOldJar \"%s\"'", javaExe, newJarPath, Julti.getSourcePath());
         Julti.log(Level.INFO, "Exiting and running powershell command: " + powerCommand);
         PowerShellUtil.execute(powerCommand);
 
@@ -152,5 +159,28 @@ public final class UpdateUtil {
             }
         }
         return isGreater;
+    }
+
+    public static void downloadAssetWithProgress(GHAsset asset, Path newJarPath, JProgressBar bar) throws IOException {
+        URL url = new URL(asset.getBrowserDownloadUrl());
+        URLConnection connection = url.openConnection();
+        connection.connect();
+        int fileSize = connection.getContentLength();
+        bar.setMaximum(fileSize);
+        bar.setValue(0);
+        int i = 0;
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(newJarPath.toFile())) {
+            byte[] dataBuffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+                i += bytesRead;
+                if (i >= 102400) {
+                    bar.setValue(bar.getValue() + i);
+                    i = 0;
+                }
+            }
+        }
     }
 }

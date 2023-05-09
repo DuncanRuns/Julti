@@ -26,6 +26,9 @@ import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +40,9 @@ import java.util.function.Consumer;
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public final class Julti {
-    private static final Julti INSTANCE = new Julti();
     public static final String VERSION = Julti.class.getPackage().getImplementationVersion() == null ? "DEV" : Julti.class.getPackage().getImplementationVersion();
+
+    private static final Julti INSTANCE = new Julti();
     private static final Logger LOGGER = LogManager.getLogger("Julti");
 
     private boolean running = true;
@@ -53,6 +57,7 @@ public final class Julti {
             .put(RunnableQMessage.class, m -> ((RunnableQMessage) m).getRunnable().run())
     ).build();
 
+    private final boolean usingShortcut = false;
 
     private Julti() {
     }
@@ -94,6 +99,26 @@ public final class Julti {
             log(Level.INFO, "Deleted " + toDelete.getName());
         }
 
+    }
+
+    /**
+     * Returns the path of the "code source".
+     * <p>
+     * This will be a path to the jar file when running as a jar, and a root directory of the compiled classes when ran in a development environment.
+     */
+    public static Path getSourcePath() {
+        try {
+            return Paths.get(UpdateUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns true if the code source's parent is not equal to the current working directory.
+     */
+    public static boolean isRanFromAlternateLocation() {
+        return !Paths.get("").toAbsolutePath().equals(getSourcePath().getParent());
     }
 
     private void changeProfile(QMessage message) {
@@ -148,6 +173,9 @@ public final class Julti {
         log(Level.INFO, "Welcome to Julti!");
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + usedJava);
+        if (isRanFromAlternateLocation()) {
+            log(Level.INFO, "Julti is being ran from another location");
+        }
 
         // Schedule update checker after Julti startup processes
         Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getInstance()), "update-checker").start());
