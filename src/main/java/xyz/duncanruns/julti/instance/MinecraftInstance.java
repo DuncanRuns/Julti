@@ -17,8 +17,10 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -580,13 +582,14 @@ public class MinecraftInstance {
             return;
         }
 
-        Rectangle rectangle = WindowStateUtil.getHwndRectangle(this.hwnd);
-
         this.presser.pressKey(this.gameOptions.fullscreenKey);
         do {
             sleep(5);
         } while (this.isFullscreen());
-        while (Objects.equals(WindowStateUtil.getHwndRectangle(this.hwnd), rectangle)) {
+
+        int i = 0;
+        // Fullscreened MC windows are naturally borderless, and using isHwndBorderless works for checking this
+        while (WindowStateUtil.isHwndBorderless(this.hwnd) && (i++ < 50)) {
             sleep(5);
         }
     }
