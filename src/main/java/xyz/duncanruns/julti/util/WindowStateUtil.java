@@ -22,23 +22,22 @@ public final class WindowStateUtil {
     }
 
     public static boolean isHwndBorderless(HWND hwnd) {
-        long oldStyle = getHwndStyle(hwnd);
-        long newStyle = oldStyle;
-        newStyle &= BORDERLESS_STYLE;
-        return newStyle == oldStyle;
+        int style = getHwndStyle(hwnd);
+        int styleWithBorderless = style & BORDERLESS_STYLE;
+        return styleWithBorderless == style;
     }
 
     public static void setHwndBorderless(HWND hwnd) {
-        long style = getHwndStyle(hwnd);
+        int style = getHwndStyle(hwnd);
         style &= BORDERLESS_STYLE;
         setHwndStyle(hwnd, style);
     }
 
-    public static long getHwndStyle(HWND hwnd) {
-        return User32.INSTANCE.GetWindowLongA(hwnd, User32.GWL_STYLE).longValue();
+    public static int getHwndStyle(HWND hwnd) {
+        return User32.INSTANCE.GetWindowLongA(hwnd, User32.GWL_STYLE).intValue();
     }
 
-    public static void setHwndStyle(HWND hwnd, long style) {
+    public static void setHwndStyle(HWND hwnd, int style) {
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, new LONG(style));
     }
 
