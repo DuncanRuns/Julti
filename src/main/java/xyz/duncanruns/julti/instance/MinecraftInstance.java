@@ -217,7 +217,7 @@ public class MinecraftInstance {
         AffinityManager.pause();
         AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
-        if (!doingSetup && options.usePlayingSizeWithFullscreen && options.autoFullscreen) {
+        if (!doingSetup && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen)) {
             this.ensurePlayingWindowState(false);
         }
         AffinityManager.unpause();
@@ -237,12 +237,8 @@ public class MinecraftInstance {
                 }
             }
         }
-        if (!options.autoFullscreen) {
-            if (doingSetup) {
-                Julti.doLater(() -> this.ensureResettingWindowState(false));
-            } else {
-                Julti.doLater(() -> this.ensurePlayingWindowState(false));
-            }
+        if (!options.autoFullscreen && doingSetup) {
+            Julti.doLater(() -> this.ensureResettingWindowState(false));
         }
     }
 
