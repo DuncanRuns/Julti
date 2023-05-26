@@ -260,6 +260,7 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public void reload() {
+        this.displayInstancesIndices = new ArrayList<>();
         this.refreshDisplayInstances();
     }
 
