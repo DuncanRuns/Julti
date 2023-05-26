@@ -36,7 +36,7 @@ public class MinecraftInstance {
     private final String versionString;
 
     // Discoverable Information
-    private final GameOptions gameOptions;
+    private GameOptions gameOptions = null;
     private String name = null;
 
     private final StateTracker stateTracker;
@@ -55,7 +55,6 @@ public class MinecraftInstance {
         this.hwnd = hwnd;
         this.path = path;
         this.versionString = versionString;
-        this.gameOptions = new GameOptions();
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange);
         this.presser = new KeyPresser(hwnd);
     }
@@ -64,7 +63,6 @@ public class MinecraftInstance {
         this.hwnd = null;
         this.versionString = null;
         this.presser = null;
-        this.gameOptions = null;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null);
 
         this.path = path;
@@ -108,6 +106,8 @@ public class MinecraftInstance {
     }
 
     public void discoverInformation() {
+        this.gameOptions = new GameOptions();
+
         // Find info like keybinds, standard settings, etc.
 
         // Process ID
