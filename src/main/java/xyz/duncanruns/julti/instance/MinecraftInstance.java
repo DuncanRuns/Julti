@@ -179,6 +179,7 @@ public class MinecraftInstance {
     }
 
     public void reset() {
+        // Press Reset Keys
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
                 this.presser.pressShiftTabEnter();
@@ -189,11 +190,16 @@ public class MinecraftInstance {
             this.presser.pressKey(this.gameOptions.leavePreviewKey);
             this.presser.pressKey(this.gameOptions.createWorldKey);
         }
+
+        // Set values
         this.resetPressed = true;
         this.resetEverPressed = true;
         this.openedToLan = false;
-
         this.activeSinceReset = false;
+
+        // Increment Reset Counter
+        ResetCounter.increment();
+
         if (this.windowStateChangedToPlaying) {
             // Do the window state change later to ensure resetting is fast
             Julti.doLater(() -> this.ensureResettingWindowState(true));
@@ -256,9 +262,6 @@ public class MinecraftInstance {
                 break;
             case INWORLD:
                 this.onWorldLoad();
-                break;
-            case GENERATING:
-                ResetCounter.increment();
                 break;
         }
     }
