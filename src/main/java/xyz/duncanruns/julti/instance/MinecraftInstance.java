@@ -197,6 +197,9 @@ public class MinecraftInstance {
         this.openedToLan = false;
         this.activeSinceReset = false;
 
+        // Jump affinity
+        AffinityManager.jumpPrePreviewAffinity(this);
+
         // Increment Reset Counter
         ResetCounter.increment();
 
@@ -215,7 +218,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
 
         AffinityManager.pause();
-        AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
+        AffinityManager.jumpPlayingAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
         if (!doingSetup && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen)) {
             this.ensurePlayingWindowState(false);
@@ -350,6 +353,10 @@ public class MinecraftInstance {
 
     public boolean shouldCoverWithDirt() {
         return this.resetPressed || this.stateTracker.shouldCoverWithDirt();
+    }
+
+    public boolean isResetPressed() {
+        return this.resetPressed;
     }
 
     @Override
