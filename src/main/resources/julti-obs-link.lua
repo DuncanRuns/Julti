@@ -46,6 +46,7 @@ total_height = 0
 win_cap_instead = false
 reuse_for_verification = false
 invisible_dirt_covers = false
+center_align_instances = false
 
 -- File Functions --
 
@@ -85,13 +86,19 @@ end
 
 -- Instance --
 
-function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height)
+function invisible_cover(num)
+    local scene = get_scene("Julti")
+    local item = obs.obs_scene_find_source(scene, "Instance " .. num)
+    set_position(item, total_width + 1000, 0)
+end
+
+function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height, center_align)
+    center_align = center_align or false
+
     local group = get_group_as_scene("Instance " .. num)
 
     if invisible_dirt_covers and dirt_cover then
-        local scene = get_scene("Julti")
-        local item = obs.obs_scene_find_source(scene, "Instance " .. num)
-        set_position(item, total_width + 1000, 0)
+        invisible_cover(num)
         return
     end
 
@@ -103,11 +110,11 @@ function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height)
     -- Dirt Cover: visibility and bounds
     local item = obs.obs_scene_find_source(group, "Dirt Cover Display")
     obs.obs_sceneitem_set_visible(item, dirt_cover)
-    set_position_with_bounds(item, 0, 0, width, height)
+    set_position_with_bounds(item, 0, 0, width, height, center_align)
 
     -- Minecraft capture: position and bounds
     local item = obs.obs_scene_find_source(group, "Minecraft Capture " .. num)
-    set_position_with_bounds(item, 0, 0, width, height)
+    set_position_with_bounds(item, 0, 0, width, height, center_align)
 
     -- Instance Group: position
     local scene = get_scene("Julti")
@@ -203,19 +210,31 @@ function get_video_info()
     return video_info
 end
 
-function set_position_with_bounds(scene_item, x, y, width, height)
+function set_position_with_bounds(scene_item, x, y, width, height, center_align)
+    center_align = center_align or false
+
     local bounds = obs.vec2()
     bounds.x = width
     bounds.y = height
-    obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)
-    set_position(scene_item, x, y)
-    obs.obs_sceneitem_set_bounds(scene_item, bounds)
+
+    if center_align then
+        obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_NONE)
+    else
+        obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)
+        obs.obs_sceneitem_set_bounds(scene_item, bounds)
+    end
+
+    set_position(scene_item, x, y, center_align)
 end
 
-function set_position(scene_item, x, y)
+function set_position(scene_item, x, y, center_align)
+    center_align = center_align or false
+
+    obs.obs_sceneitem_set_alignment(scene_item, center_align and 0 or 5)
+
     local pos = obs.vec2()
-    pos.x = x
-    pos.y = y
+    pos.x = x + (center_align and total_width / 2 or 0)
+    pos.y = y + (center_align and total_height / 2 or 0)
     obs.obs_sceneitem_set_pos(scene_item, pos)
 end
 
@@ -453,8 +472,8 @@ function _setup_verification_scene()
         obs.obs_sceneitem_set_visible(filler_item, false)
 
         local verif_item_2 = obs.obs_scene_add(square_group_scene, verif_cap_source)
-        obs.obs_sceneitem_set_alignment(verif_item_2, 9)
         set_position(verif_item_2, 0, 10000)
+        obs.obs_sceneitem_set_alignment(verif_item_2, 9)
 
         set_crop(square_group_item, 0, 10000 - square_height, 10000 - square_width, 0)
         set_position_with_bounds(square_group_item, col * i_width + (i_width - i_height), row * i_height, i_height,
@@ -496,7 +515,9 @@ function _setup_lock_scene()
     -- intuitively the scene item returned from add group would need to be released, but it does not
     obs.obs_scene_add_group(scene, "Example Instances")
     local group = get_group_as_scene("Example Instances")
-    obs.obs_sceneitem_set_locked(obs.obs_scene_find_source(scene, "Example Instances"), true)
+    local group_source = obs.obs_scene_find_source(scene, "Example Instances")
+    obs.obs_sceneitem_set_locked(group_source, true)
+    obs.obs_sceneitem_set_visible(group_source, false)
 
     -- Blacksmith Example
     local blacksmith_data = obs.obs_data_create_from_json('{"file":"' ..
@@ -633,7 +654,7 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     local mcsi = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, mcsi)
     set_position_with_bounds(mcsi, 0, 0, total_width, total_height)
-    set_instance_data(num, false, false, 0, y, total_width, i_height)
+    set_instance_data(num, false, false, 0, y, total_width, i_height, center_align_instances)
     release_source(source)
 end
 
@@ -656,6 +677,8 @@ function script_properties()
         props, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
 
     obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
+    obs.obs_properties_add_bool(props, "center_align_instances",
+        "Align instances to center\n(for EyeZoom/stretched window users)")
 
     return props
 end
@@ -673,6 +696,7 @@ end
 function script_update(settings)
     win_cap_instead = obs.obs_data_get_bool(settings, "win_cap_instead")
     reuse_for_verification = obs.obs_data_get_bool(settings, "reuse_for_verification")
+    center_align_instances = obs.obs_data_get_bool(settings, "center_align_instances")
     invisible_dirt_covers = obs.obs_data_get_bool(settings, "invisible_dirt_covers")
 
     if timers_activated then
@@ -752,7 +776,19 @@ function loop()
     if user_location ~= "W" then
         local scene = get_scene("Julti")
         bring_to_top(obs.obs_scene_find_source(scene, "Instance " .. user_location))
-        set_instance_data(tonumber(user_location), false, false, 0, 0, total_width, total_height)
+        set_instance_data(tonumber(user_location), false, false, 0, 0, total_width, total_height, center_align_instances)
+        
+        -- hide bordering instances
+        if not center_align_instances then
+            return
+        end
+        for k, data_string in pairs(data_strings) do
+            if k == tonumber(user_location) then
+                goto continue
+            end
+            invisible_cover(k)
+            ::continue::
+        end
     end
 end
 
