@@ -585,18 +585,25 @@ public class MinecraftInstance {
 
     public void ensureNotFullscreen() {
         if ((!this.activeSinceReset) || (!this.isFullscreen())) {
+            Julti.log(Level.DEBUG, "Skipping fullscreen check because " + (!this.activeSinceReset ? "the instance was not active" : "the instance is not in fullscreen"));
             return;
         }
 
+        Julti.log(Level.DEBUG, "Pressing fullscreen key...");
         this.presser.pressKey(this.gameOptions.fullscreenKey);
+
+        Julti.log(Level.DEBUG, "Waiting for fullscreen option to turn false...");
         do {
             sleep(5);
         } while (this.isFullscreen());
 
         int i = 0;
+
+        Julti.log(Level.DEBUG, "Waiting for window border to reappear...");
         // Fullscreened MC windows are naturally borderless, and using isHwndBorderless works for checking this
         while (WindowStateUtil.isHwndBorderless(this.hwnd) && (i++ < 50)) {
             sleep(5);
         }
+        Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
     }
 }
