@@ -399,7 +399,11 @@ public class MinecraftInstance {
 
 
     public boolean isFullscreen() {
-        return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
+        if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
+            return this.activeSinceReset && JultiOptions.getInstance().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
+        } else {
+            return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
+        }
     }
 
     public boolean hasWindow() {
