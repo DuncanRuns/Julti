@@ -126,16 +126,16 @@ public class DynamicWallResetManager extends WallResetManager {
         }
         List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance));
 
+        // Get list of instances to reset
+        List<MinecraftInstance> toReset = this.getDisplayInstances();
+        toReset.removeIf(Objects::isNull);
+        toReset.remove(clickedInstance);
+
         // Reset all others
-        DoAllFastUtil.doAllFast(instance -> {
-            if (this.getLockedInstances().contains(instance) || (!this.getDisplayInstances().contains(instance))) {
-                return;//(continue;)
-            }
-            if (!instance.equals(clickedInstance)) {
-                if (this.resetInstance(instance)) {
-                    synchronized (actionResults) {
-                        actionResults.add(ActionResult.INSTANCE_RESET);
-                    }
+        DoAllFastUtil.doAllFast(toReset, instance -> {
+            if (this.resetInstance(instance)) {
+                synchronized (actionResults) {
+                    actionResults.add(ActionResult.INSTANCE_RESET);
                 }
             }
         });

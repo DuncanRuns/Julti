@@ -137,10 +137,22 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
 
+        // Get list of instances to reset
+        List<MinecraftInstance> toReset = new ArrayList<>(InstanceManager.getManager().getInstances());
+        toReset.removeAll(this.lockedInstances);
+        toReset.remove(clickedInstance);
+
         List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance));
 
         // Reset all others
-        actionResults.addAll(this.resetNonLockedExcept(clickedInstance));
+        DoAllFastUtil.doAllFast(toReset, instance -> {
+            if (this.resetInstance(instance)) {
+                synchronized (actionResults) {
+                    actionResults.add(ActionResult.INSTANCE_RESET);
+                }
+            }
+        });
+
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping();
         }
