@@ -5,19 +5,19 @@ import com.sun.jna.platform.win32.Win32VK;
 import java.util.Hashtable;
 import java.util.Map;
 
-public final class McKeyUtil {
+public final class MCKeyUtil {
     public static final Hashtable<String, Integer> TRANSLATIONS_TO_GLFW = mapTranslationsToGLFW();
     public static final Hashtable<Integer, Integer> GLFW_TO_VK = mapGLFWToVK();
     public static final Hashtable<Integer, Integer> LWJGL_TO_VK = mapLWJGLToVK();
 
-    private McKeyUtil() {
+    private MCKeyUtil() {
     }
 
     private static Hashtable<Integer, Integer> mapLWJGLToVK() {
         Hashtable<Integer, Integer> table = new Hashtable<>();
         for (Map.Entry<Integer, String> entry : mapLWJGLToTranslations().entrySet()) {
             Integer a = entry.getKey();
-            Integer b = McKeyUtil.getVkFromMCTranslation(entry.getValue());
+            Integer b = MCKeyUtil.getVkFromMCTranslation(entry.getValue());
             if (b == null) {
                 continue;
             }

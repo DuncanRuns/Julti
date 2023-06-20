@@ -139,7 +139,7 @@ public final class GameOptionsUtil {
         }
 
         String out = tryGetOption(instancePath, optionsValue, true);
-        Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
+        Integer vkFromMCTranslation = MCKeyUtil.getVkFromMCTranslation(out);
         if (vkFromMCTranslation == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
@@ -150,7 +150,7 @@ public final class GameOptionsUtil {
 
         // Try again without standard settings
         out = tryGetOption(instancePath, optionsValue, false);
-        vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
+        vkFromMCTranslation = MCKeyUtil.getVkFromMCTranslation(out);
         if (vkFromMCTranslation == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
@@ -160,7 +160,7 @@ public final class GameOptionsUtil {
 
     private static Integer getKeyPre113(Path instancePath, String optionsValue) {
         String out = tryGetOption(instancePath, optionsValue, true);
-        Integer vkFromLWJGL = McKeyUtil.getVkFromLWJGL(out);
+        Integer vkFromLWJGL = MCKeyUtil.getVkFromLWJGL(out);
         if (vkFromLWJGL == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
@@ -171,7 +171,7 @@ public final class GameOptionsUtil {
 
         // Try again without standard settings
         out = tryGetOption(instancePath, optionsValue, false);
-        vkFromLWJGL = McKeyUtil.getVkFromLWJGL(out);
+        vkFromLWJGL = MCKeyUtil.getVkFromLWJGL(out);
         if (vkFromLWJGL == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
