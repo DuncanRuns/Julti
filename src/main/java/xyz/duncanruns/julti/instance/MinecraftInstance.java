@@ -182,7 +182,9 @@ public class MinecraftInstance {
     public void reset() {
         // Press Reset Keys
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
-            if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
+            if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
+                this.presser.pressKey(this.gameOptions.createWorldKey); // Thanks pix
+            } else if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
                 this.presser.pressShiftTabEnter();
             } else {
                 this.presser.pressKey(this.gameOptions.createWorldKey);
