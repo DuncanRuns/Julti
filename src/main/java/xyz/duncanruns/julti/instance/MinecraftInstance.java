@@ -113,11 +113,12 @@ public class MinecraftInstance {
         // Process ID
         this.pid = PidUtil.getPidFromHwnd(this.hwnd);
 
+        boolean pre113 = MCVersionUtil.isOlderThan(this.versionString, "1.13");
         // Keybinds
-        this.gameOptions.createWorldKey = GameOptionsUtil.getKey(this.getPath(), "key_Create New World");
-        this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview");
-        this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen");
-        this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat");
+        this.gameOptions.createWorldKey = GameOptionsUtil.getKey(this.getPath(), "key_Create New World", pre113);
+        this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview", pre113);
+        this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen", pre113);
+        this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat", pre113);
         this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
 
         this.discoverName();

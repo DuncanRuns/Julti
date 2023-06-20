@@ -132,8 +132,13 @@ public final class GameOptionsUtil {
         return getOptionFromString(optionName, out);
     }
 
-    public static Integer getKey(Path instancePath, String keybindingTranslation) {
-        String out = tryGetOption(instancePath, keybindingTranslation, true);
+    public static Integer getKey(Path instancePath, String optionsValue, boolean pre113) {
+
+        if (pre113) {
+            return getKeyPre113(instancePath, optionsValue);
+        }
+
+        String out = tryGetOption(instancePath, optionsValue, true);
         Integer vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
         if (vkFromMCTranslation == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
@@ -144,13 +149,34 @@ public final class GameOptionsUtil {
 
 
         // Try again without standard settings
-        out = tryGetOption(instancePath, keybindingTranslation, false);
+        out = tryGetOption(instancePath, optionsValue, false);
         vkFromMCTranslation = McKeyUtil.getVkFromMCTranslation(out);
         if (vkFromMCTranslation == null && out != null) {
             // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
             Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
         }
         return vkFromMCTranslation; // null is a valid return value
+    }
+
+    private static Integer getKeyPre113(Path instancePath, String optionsValue) {
+        String out = tryGetOption(instancePath, optionsValue, true);
+        Integer vkFromLWJGL = McKeyUtil.getVkFromLWJGL(out);
+        if (vkFromLWJGL == null && out != null) {
+            // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
+            Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
+        } else if (vkFromLWJGL != null) {
+            return vkFromLWJGL;
+        }
+
+
+        // Try again without standard settings
+        out = tryGetOption(instancePath, optionsValue, false);
+        vkFromLWJGL = McKeyUtil.getVkFromLWJGL(out);
+        if (vkFromLWJGL == null && out != null) {
+            // out != null, meaning there is a value there, but the value isn't valid because it doesn't match any existing keys
+            Julti.log(Level.WARN, "INVALID KEY IN OPTIONS: " + out);
+        }
+        return vkFromLWJGL; // null is a valid return value
     }
 
 }

@@ -533,4 +533,16 @@ public final class McKeyUtil {
         }
         return LWJGL_TO_VK.getOrDefault(key, -1);
     }
+
+    public static Integer getVkFromLWJGL(String key) {
+        if (key == null) {
+            return null;
+        }
+        try {
+            Integer intKey = Integer.valueOf(key);
+            return getVkFromLWJGL(intKey);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }
