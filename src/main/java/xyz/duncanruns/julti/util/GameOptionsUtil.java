@@ -17,8 +17,15 @@ public final class GameOptionsUtil {
         String[] lines = optionsString.trim().split("\\n");
         for (int i = lines.length - 1; i >= 0; i--) {
             String line = lines[i];
-            if (line.startsWith(optionName + ":")) {
-                String[] optionKeyValArr = line.split(":");
+
+            String[] optionKeyValArr = line.split(":");
+            String lineKey = optionKeyValArr[0];
+
+            if (lineKey.endsWith("§r")) {
+                lineKey = lineKey.split("§")[0];
+            }
+
+            if (Objects.equals(optionName, lineKey)) {
                 if (optionKeyValArr.length < 2) {
                     continue;
                 }
