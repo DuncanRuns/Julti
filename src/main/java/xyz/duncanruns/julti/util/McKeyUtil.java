@@ -2,16 +2,16 @@ package xyz.duncanruns.julti.util;
 
 import com.sun.jna.platform.win32.Win32VK;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 public final class McKeyUtil {
-    public static final Dictionary<String, Integer> TRANSLATIONS_TO_GLFW = getTranslationsToGLFW();
+    public static final Hashtable<String, Integer> TRANSLATIONS_TO_GLFW = mapTranslationsToGLFW();
+    public static final Hashtable<Integer, Integer> GLFW_TO_VK = mapGLFWToVK();
 
     private McKeyUtil() {
     }
 
-    private static Dictionary<String, Integer> getTranslationsToGLFW() {
+    private static Hashtable<String, Integer> mapTranslationsToGLFW() {
         Hashtable<String, Integer> table = new Hashtable<>();
         table.put("key.keyboard.unknown", -1);
         table.put("key.mouse.left", 0);
@@ -145,6 +145,17 @@ public final class McKeyUtil {
         return table;
     }
 
+    private static Hashtable<Integer, Integer> mapGLFWToVK() {
+        Hashtable<Integer, Integer> table = new Hashtable<>();
+        for (int glfwKey = 0; glfwKey < 500; glfwKey++) {
+            int virtualKey = getVkFromGLFWInternal(glfwKey);
+            if (virtualKey != -1) {
+                table.put(glfwKey, virtualKey);
+            }
+        }
+        return table;
+    }
+
     public static Integer getVkFromMCTranslation(String translationKey) {
         if (translationKey == null) {
             return null;
@@ -161,6 +172,10 @@ public final class McKeyUtil {
         if (key == null) {
             return null;
         }
+        return GLFW_TO_VK.getOrDefault(key, -1);
+    }
+
+    public static Integer getVkFromGLFWInternal(Integer key) {
         if (key <= 7 && key >= -1)  // Unknown or Mouse
         {
             return -1;
