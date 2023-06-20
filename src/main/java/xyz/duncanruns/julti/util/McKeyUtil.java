@@ -162,7 +162,7 @@ public final class McKeyUtil {
         }
         Integer glfwKey = TRANSLATIONS_TO_GLFW.get(translationKey);
         Integer vkKey = getVkFromGLFW(glfwKey);
-        if (vkKey == null || vkKey <= 0) {
+        if (vkKey == null || vkKey < 0) {
             return null;
         }
         return vkKey;
