@@ -39,18 +39,22 @@ public final class InstanceInfoUtil {
      * @return the extracted instance info of the Minecraft instance
      */
     public static FoundInstanceInfo getInstanceInfoFromHwnd(HWND hwnd) {
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: getting info from " + hwnd);
         // Get command line
         String commandLine = getCommandLine(getPidFromHwnd(hwnd));
         // If no command line, return null
         if (commandLine == null) {
+            Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line null!");
             return null;
         }
         // Check launcher type
         try {
             if (commandLine.contains("--gameDir")) {
+                Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected vanilla launcher.");
                 // Vanilla
                 return getVanillaInfo(commandLine);
             } else if (commandLine.contains("-Djava.library.path=")) {
+                Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected MultiMC launcher.");
                 // MultiMC or Prism
                 return getMultiMCInfo(commandLine);
             }
@@ -58,10 +62,12 @@ public final class InstanceInfoUtil {
             Julti.log(Level.ERROR, "An exception occured while obtaining instance information: " + e);
         }
         // If the command line does not match MultiMC or Vanilla, or if there was an exception, return null
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla, or there was an exception, returning null");
         return null;
     }
 
     private static String getCommandLine(int pid) {
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: Getting command line from " + pid);
         try {
             return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
         } catch (Exception ignored) {
@@ -70,8 +76,10 @@ public final class InstanceInfoUtil {
     }
 
     private static int getPidFromHwnd(HWND hwnd) {
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: Getting PID from " + hwnd);
         final IntByReference pidPointer = new IntByReference();
         User32.INSTANCE.GetWindowThreadProcessId(hwnd, pidPointer);
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: PID is " + pidPointer.getValue());
         return pidPointer.getValue();
     }
 

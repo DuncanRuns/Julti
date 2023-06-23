@@ -172,10 +172,15 @@ public final class InstanceManager {
     }
 
     public void redetectInstances() {
+        Julti.log(Level.DEBUG, "Redect running...");
         this.instances.clear();
+        Julti.log(Level.DEBUG, "Cleared instances");
         this.instances.addAll(InstanceChecker.getInstance().getAllOpenedInstances());
+        Julti.log(Level.DEBUG, "Added instances");
         this.instances.sort(Comparator.comparingInt(MinecraftInstance::getNameSortingNum));
+        Julti.log(Level.DEBUG, "Sorted instances");
         this.saveInstances();
+        Julti.log(Level.DEBUG, "Saved instances");
         this.onAllInstancesFound();
     }
 

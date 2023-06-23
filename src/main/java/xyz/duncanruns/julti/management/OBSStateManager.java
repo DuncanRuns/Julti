@@ -89,10 +89,12 @@ public class OBSStateManager {
     }
 
     public void tryOutputLSInfo() {
+        Julti.log(Level.DEBUG, "OBSStateManager: Trying to output loading square info...");
         JultiOptions options = JultiOptions.getInstance();
         List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
 
         if (instances.size() == 0) {
+            Julti.log(Level.DEBUG, "OBSStateManager: No instances, cancelling.");
             return;
         }
 
@@ -113,7 +115,8 @@ public class OBSStateManager {
 
         try {
             FileUtil.writeString(JultiOptions.getJultiDir().resolve("loadingsquaresize"), loadingSquareSize + "," + (loadingSquareSize + extraHeight));
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "OBSStateManager: Failed to write loadingsquaresize! " + e);
         }
 
 
