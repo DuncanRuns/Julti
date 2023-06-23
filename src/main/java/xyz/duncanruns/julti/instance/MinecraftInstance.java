@@ -11,6 +11,7 @@ import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
+import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -121,7 +122,41 @@ public class MinecraftInstance {
         this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat", pre113);
         this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
 
+        this.checkFabricMods();
+
         this.discoverName();
+    }
+
+    private void checkFabricMods() {
+        try {
+            this.gameOptions.jars = FabricJarUtil.getAllJarInfos(this.getPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        FabricJarInfo wpInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview");
+
+        boolean hasStateOutput = true;
+        if (wpInfo == null && FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output") == null) {
+            hasStateOutput = false;
+        } else if (wpInfo != null) {
+            Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
+            if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
+                System.out.println("Falsey! " + matcher.group());
+                hasStateOutput = false;
+            }
+        }
+
+        if (!hasStateOutput) {
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have an updated version of world preview or the state output mod and will likely not function!");
+        }
+
+        boolean hasSS = FabricJarUtil.getJarInfo(this.gameOptions.jars, "standardsettings") != null;
+
+        if (!hasSS) {
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have the standard settings mod!");
+        }
+
     }
 
     private void discoverName() {
