@@ -32,7 +32,7 @@
 
 obs = obslua
 
--- Variables --
+---- Variables ----
 
 julti_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.Julti/"
 timers_activated = false
@@ -42,13 +42,19 @@ last_scene_name = ""
 total_width = 0
 total_height = 0
 
--- script settings
+
+-- Script Settings
 win_cap_instead = false
 reuse_for_verification = false
 invisible_dirt_covers = false
 center_align_instances = false
 
--- File Functions --
+
+-- Constants
+ALIGN_TOP_LEFT = 5 -- equivalent to obs.OBS_ALIGN_TOP | obs.OBS_ALIGN_LEFT
+ALIGN_CENTER = 0   -- equivalent to obs.OBS_ALIGN_CENTER
+
+---- File Functions ----
 
 function read_first_line(filename)
     local rfile = io.open(filename, "r")
@@ -84,9 +90,9 @@ function get_square_size_string()
     return nil
 end
 
--- Instance --
+---- Instance ----
 
-function invisible_cover(num)
+function teleport_off_canvas(num)
     local scene = get_scene("Julti")
     local item = obs.obs_scene_find_source(scene, "Instance " .. num)
     set_position(item, total_width + 1000, 0)
@@ -98,7 +104,7 @@ function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height, c
     local group = get_group_as_scene("Instance " .. num)
 
     if invisible_dirt_covers and dirt_cover then
-        invisible_cover(num)
+        teleport_off_canvas(num)
         return
     end
 
@@ -136,7 +142,7 @@ function set_instance_data_from_string(instance_num, data_string)
         tonumber(nums[5]))                    -- height
 end
 
--- Misc Functions --
+---- Misc Functions ----
 
 function split_string(input_string, split_char)
     local out = {}
@@ -147,7 +153,7 @@ function split_string(input_string, split_char)
     return out
 end
 
--- Obs Functions --
+---- Obs Functions ----
 
 function get_scene(name)
     local source = get_source(name)
@@ -211,6 +217,7 @@ function get_video_info()
 end
 
 function set_position_with_bounds(scene_item, x, y, width, height, center_align)
+    -- default value false
     center_align = center_align or false
 
     local bounds = obs.vec2()
@@ -224,17 +231,16 @@ function set_position_with_bounds(scene_item, x, y, width, height, center_align)
         obs.obs_sceneitem_set_bounds(scene_item, bounds)
     end
 
-    set_position(scene_item, x, y, center_align)
+    -- set alignment of the scene item to: center_align ? CENTER : TOP_LEFT
+    obs.obs_sceneitem_set_alignment(scene_item, center_align and ALIGN_CENTER or ALIGN_TOP_LEFT)
+
+    set_position(scene_item, x + (center_align and total_width / 2 or 0), y + (center_align and total_height / 2 or 0))
 end
 
-function set_position(scene_item, x, y, center_align)
-    center_align = center_align or false
-
-    obs.obs_sceneitem_set_alignment(scene_item, center_align and 0 or 5)
-
+function set_position(scene_item, x, y)
     local pos = obs.vec2()
-    pos.x = x + (center_align and total_width / 2 or 0)
-    pos.y = y + (center_align and total_height / 2 or 0)
+    pos.x = x
+    pos.y = y
     obs.obs_sceneitem_set_pos(scene_item, pos)
 end
 
@@ -259,7 +265,7 @@ function bring_to_bottom(item)
     obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_BOTTOM)
 end
 
--- Scene Generator --
+---- Scene Generator ----
 
 function generate_stream_scenes()
     local julti_source = get_source("Julti")
@@ -654,11 +660,11 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     local mcsi = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, mcsi)
     set_position_with_bounds(mcsi, 0, 0, total_width, total_height)
-    set_instance_data(num, false, false, 0, y, total_width, i_height, center_align_instances)
+    set_instance_data(num, false, false, 0, y, total_width, i_height)
     release_source(source)
 end
 
--- Script Functions --
+---- Script Functions ----
 
 function script_description()
     return "<h1>Julti OBS Link</h1><p>Links OBS to Julti.</p>"
@@ -678,7 +684,7 @@ function script_properties()
 
     obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
     obs.obs_properties_add_bool(props, "center_align_instances",
-        "Align instances to center\n(for EyeZoom/stretched window users)")
+        "Align Active Instance to Center\n(for EyeZoom/stretched window users)")
 
     return props
 end
@@ -777,7 +783,7 @@ function loop()
         local scene = get_scene("Julti")
         bring_to_top(obs.obs_scene_find_source(scene, "Instance " .. user_location))
         set_instance_data(tonumber(user_location), false, false, 0, 0, total_width, total_height, center_align_instances)
-        
+
         -- hide bordering instances
         if not center_align_instances then
             return
@@ -786,7 +792,7 @@ function loop()
             if k == tonumber(user_location) then
                 goto continue
             end
-            invisible_cover(k)
+            teleport_off_canvas(k)
             ::continue::
         end
     end

@@ -11,6 +11,7 @@ import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
+import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -113,14 +114,49 @@ public class MinecraftInstance {
         // Process ID
         this.pid = PidUtil.getPidFromHwnd(this.hwnd);
 
+        boolean pre113 = MCVersionUtil.isOlderThan(this.versionString, "1.13");
         // Keybinds
-        this.gameOptions.createWorldKey = GameOptionsUtil.getKey(this.getPath(), "key_Create New World");
-        this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview");
-        this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen");
-        this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat");
+        this.gameOptions.createWorldKey = GameOptionsUtil.getKey(this.getPath(), "key_Create New World", pre113);
+        this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview", pre113);
+        this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen", pre113);
+        this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat", pre113);
         this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
 
+        this.checkFabricMods();
+
         this.discoverName();
+    }
+
+    private void checkFabricMods() {
+        try {
+            this.gameOptions.jars = FabricJarUtil.getAllJarInfos(this.getPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        FabricJarInfo wpInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview");
+
+        boolean hasStateOutput = true;
+        if (wpInfo == null && FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output") == null) {
+            hasStateOutput = false;
+        } else if (wpInfo != null) {
+            Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
+            if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
+                System.out.println("Falsey! " + matcher.group());
+                hasStateOutput = false;
+            }
+        }
+
+        if (!hasStateOutput) {
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have an updated version of world preview or the state output mod and will likely not function!");
+        }
+
+        boolean hasSS = FabricJarUtil.getJarInfo(this.gameOptions.jars, "standardsettings") != null;
+
+        if (!hasSS) {
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have the standard settings mod!");
+        }
+
     }
 
     private void discoverName() {
@@ -181,7 +217,9 @@ public class MinecraftInstance {
     public void reset() {
         // Press Reset Keys
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
-            if (MCVersionUtil.isOlderThan(this.versionString, "1.16.1")) {
+            if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
+                this.presser.pressKey(this.gameOptions.createWorldKey); // Thanks pix
+            } else if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
                 this.presser.pressShiftTabEnter();
             } else {
                 this.presser.pressKey(this.gameOptions.createWorldKey);
@@ -196,6 +234,9 @@ public class MinecraftInstance {
         this.resetEverPressed = true;
         this.openedToLan = false;
         this.activeSinceReset = false;
+
+        // Jump affinity
+        AffinityManager.jumpPrePreviewAffinity(this);
 
         // Increment Reset Counter
         ResetCounter.increment();
@@ -215,7 +256,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
 
         AffinityManager.pause();
-        AffinityManager.jumpAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
+        AffinityManager.jumpPlayingAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
         if (!doingSetup && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen)) {
             this.ensurePlayingWindowState(false);
@@ -352,6 +393,10 @@ public class MinecraftInstance {
         return this.resetPressed || this.stateTracker.shouldCoverWithDirt();
     }
 
+    public boolean isResetPressed() {
+        return this.resetPressed;
+    }
+
     @Override
     public int hashCode() {
         int result = this.hwnd.hashCode();
@@ -392,7 +437,11 @@ public class MinecraftInstance {
 
 
     public boolean isFullscreen() {
-        return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
+        if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
+            return this.activeSinceReset && JultiOptions.getInstance().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
+        } else {
+            return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
+        }
     }
 
     public boolean hasWindow() {
@@ -578,18 +627,25 @@ public class MinecraftInstance {
 
     public void ensureNotFullscreen() {
         if ((!this.activeSinceReset) || (!this.isFullscreen())) {
+            Julti.log(Level.DEBUG, "Skipping fullscreen check because " + (!this.activeSinceReset ? "the instance was not active" : "the instance is not in fullscreen"));
             return;
         }
 
+        Julti.log(Level.DEBUG, "Pressing fullscreen key...");
         this.presser.pressKey(this.gameOptions.fullscreenKey);
+
+        Julti.log(Level.DEBUG, "Waiting for fullscreen option to turn false...");
         do {
             sleep(5);
         } while (this.isFullscreen());
 
         int i = 0;
+
+        Julti.log(Level.DEBUG, "Waiting for window border to reappear...");
         // Fullscreened MC windows are naturally borderless, and using isHwndBorderless works for checking this
         while (WindowStateUtil.isHwndBorderless(this.hwnd) && (i++ < 50)) {
             sleep(5);
         }
+        Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
     }
 }

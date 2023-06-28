@@ -1,6 +1,8 @@
 package xyz.duncanruns.julti.management;
 
 import com.sun.jna.platform.win32.WinDef.HWND;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.util.InstanceInfoUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
@@ -43,7 +45,10 @@ public class InstanceChecker {
 
         Set<HWND> checkedWindows = new HashSet<>();
 
+        Julti.log(Level.DEBUG, "InstanceChecker: Running InstanceChecker checks...");
+
         User32.INSTANCE.EnumWindows((hWnd, arg) -> {
+
             // Add the window to checked windows
             checkedWindows.add(hWnd);
             // Return if the window was in the last checked windows
@@ -55,14 +60,18 @@ public class InstanceChecker {
             if (!WindowTitleUtil.matchesMinecraft(title)) {
                 return true;
             }
+            Julti.log(Level.DEBUG, "InstanceChecker: Minecraft title matched: " + title);
             // Get instance info, return if failing to get the path
             InstanceInfoUtil.FoundInstanceInfo instanceInfo = InstanceInfoUtil.getInstanceInfoFromHwnd(hWnd);
             if (instanceInfo == null) {
+                Julti.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo invalid!");
                 return true;
             }
+            Julti.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo found.");
             // Create the instance object
             // Add the minecraft instance to the set of opened instances
             this.openedInstances.add(new MinecraftInstance(hWnd, instanceInfo.instancePath, instanceInfo.versionString));
+            Julti.log(Level.DEBUG, "InstanceChecker: Added instance to opened instances.");
             foundAny.set(true);
 
             return true;
@@ -72,6 +81,7 @@ public class InstanceChecker {
         this.openedInstances.removeIf(instance -> !User32.INSTANCE.IsWindow(instance.getHwnd()));
         // Replace the last checked windows set
         this.lastCheckedWindows = checkedWindows;
+        Julti.log(Level.DEBUG, "InstanceChecker: Finished checks.");
     }
 
     public Set<MinecraftInstance> getAllOpenedInstances() {

@@ -79,7 +79,8 @@ public final class AffinityManager {
                 StateTracker stateTracker = instance.getStateTracker();
                 if (stateTracker.isCurrentState(InstanceState.WAITING)
                         || stateTracker.isCurrentState(InstanceState.TITLE)
-                        || stateTracker.isCurrentState(InstanceState.GENERATING)) {
+                        || stateTracker.isCurrentState(InstanceState.GENERATING)
+                        || instance.isResetPressed()) {
                     setAffinity(instance, options.threadsPrePreview);
                 } else if (System.currentTimeMillis() - instance.getStateTracker().getLastStartOf(InstanceState.PREVIEWING) < options.affinityBurst) {
                     setAffinity(instance, options.threadsStartPreview);
@@ -119,8 +120,12 @@ public final class AffinityManager {
         }
     }
 
-    public static void jumpAffinity(MinecraftInstance instance) {
+    public static void jumpPlayingAffinity(MinecraftInstance instance) {
         setAffinity(instance, JultiOptions.getInstance().threadsPlaying);
+    }
+
+    public static void jumpPrePreviewAffinity(MinecraftInstance instance) {
+        setAffinity(instance, JultiOptions.getInstance().threadsPrePreview);
     }
 
     /**
