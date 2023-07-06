@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.command;
 
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
@@ -29,7 +30,7 @@ public class ChatMessageCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
         if (selectedInstance != null) {
-            selectedInstance.sendChatMessage(CommandManager.combineArgs(args), false);
+            Julti.waitForExecute(() -> selectedInstance.sendChatMessage(CommandManager.combineArgs(args), false));
         }
     }
 }
