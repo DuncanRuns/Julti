@@ -28,6 +28,7 @@ public class CommandManager {
             new LogCommand(),
             new PlaysoundCommand(),
             new OpenFileCommand(),
+            new PowerShellCommand(),
     });
     public final Command[] commands;
 
@@ -98,7 +99,9 @@ public class CommandManager {
             }
             String[] args = withoutFirst(commandWords);
             if (args.length < command.getMinArgs() || args.length > command.getMaxArgs()) {
-                throw new CommandFailedException("Command failed: Incorrect amount of arguments!");
+                log(Level.ERROR, "Command failed: Incorrect amount of arguments!");
+                cancelRequester.cancel();
+                return;
             }
             try {
                 command.run(args, cancelRequester);
