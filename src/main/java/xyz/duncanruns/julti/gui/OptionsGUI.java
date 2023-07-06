@@ -197,7 +197,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path (.exe):")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("multiMCPath", "", this)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("multiMCPath", "MultiMC Executable Path", this)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
