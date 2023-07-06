@@ -28,7 +28,6 @@ public class CommandManager {
             new LogCommand(),
             new PlaysoundCommand(),
             new OpenFileCommand(),
-            new PowerShellCommand(),
     });
     public final Command[] commands;
 
