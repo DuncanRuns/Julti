@@ -29,7 +29,7 @@ public class OpenCommand extends Command {
 
     @Override
     public String getName() {
-        return "open";
+        return "openfile";
     }
 
     @Override
