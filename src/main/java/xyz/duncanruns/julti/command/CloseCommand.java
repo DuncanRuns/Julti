@@ -41,8 +41,7 @@ public class CloseCommand extends Command {
         }
 
         if (toClose.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         for (MinecraftInstance instance : toClose) {
             if (cancelRequester.isCancelRequested()) {

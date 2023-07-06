@@ -103,8 +103,7 @@ public class OptionCommand extends Command {
             String optionName = args[0];
             String value = options.getValueString(optionName);
             if (value == null) {
-                log(Level.WARN, "Option \"" + optionName + "\" does not exist. ");
-                throw new RuntimeException("No option with name \"" + optionName + "\".");
+                throw new CommandFailedException("Option \"" + optionName + "\" does not exist. ");
             } else {
                 log(Level.INFO, "Option \"" + optionName + "\" has a value of: " + value);
             }
@@ -142,7 +141,7 @@ public class OptionCommand extends Command {
             if (options.trySetValue(optionName, all)) {
                 log(Level.INFO, "Set \"" + optionName + "\" to " + options.getValueString(optionName) + ".");
             } else {
-                log(Level.ERROR, "Could not set value.");
+                throw new CommandFailedException("Could not set value.");
             }
         }
     }

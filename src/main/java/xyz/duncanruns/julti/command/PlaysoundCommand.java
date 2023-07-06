@@ -47,6 +47,6 @@ public class PlaysoundCommand extends Command {
             SoundUtil.playSound(wholePath.toFile(), volume);
             return;
         }
-        log(Level.ERROR, "Playsound file location could not be determined!");
+        throw new CommandFailedException("Playsound file location could not be determined!");
     }
 }

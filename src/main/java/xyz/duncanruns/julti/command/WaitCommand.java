@@ -39,8 +39,7 @@ public class WaitCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> instances = args[1].equals("all") ? InstanceManager.getManager().getInstances() : CommandManager.getInstances(args[1]);
         if (instances.size() == 0) {
-            log(Level.ERROR, "No instance found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         for (MinecraftInstance instance : instances) {
             BooleanSupplier supplier;
@@ -55,8 +54,7 @@ public class WaitCommand extends Command {
                     supplier = () -> instance.getStateTracker().isCurrentState(InstanceState.INWORLD);
                     break;
                 default:
-                    log(Level.ERROR, "Invalid wait argument! Please use launch, previewload, or load.");
-                    return;
+                    throw new CommandFailedException("Invalid wait argument! Please use launch, previewload, or load.");
             }
             while ((!cancelRequester.isCancelRequested()) && (!supplier.getAsBoolean())) {
                 sleep(50);

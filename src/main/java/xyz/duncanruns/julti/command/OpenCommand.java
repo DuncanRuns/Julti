@@ -14,7 +14,7 @@ public class OpenCommand extends Command {
 
     @Override
     public String helpDescription() {
-        return "openfile [path] - opens a specific file / app";
+        return "openfile [path] - Opens a jar, ahk, bat, or exe file";
     }
 
     @Override
@@ -39,7 +39,7 @@ public class OpenCommand extends Command {
 
         Path realPath = Paths.get(path).toAbsolutePath();
         if (!Files.isRegularFile(realPath)) {
-            throw new RuntimeException("File not found: " + realPath);
+            throw new CommandFailedException("File not found: " + realPath);
         }
 
         String fileName = realPath.getFileName().toString();
@@ -59,14 +59,14 @@ public class OpenCommand extends Command {
                 processBuilder = new ProcessBuilder(realPath.toString());
                 break;
             default:
-                throw new RuntimeException("File type \"" + pathExt + "\" not supported!");
+                throw new CommandFailedException("File type \"" + pathExt + "\" not supported!");
         }
 
         try {
             processBuilder.directory(realPath.getParent().toFile()).start();
             log(Level.INFO, "Opened file " + fileName);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CommandFailedException(e);
         }
     }
 

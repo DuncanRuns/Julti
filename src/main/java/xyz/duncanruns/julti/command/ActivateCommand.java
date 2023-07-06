@@ -41,8 +41,7 @@ public class ActivateCommand extends Command {
         }
         List<MinecraftInstance> instances = args[0].equals("all") ? InstanceManager.getManager().getInstances() : CommandManager.getInstances(args[0]);
         if (instances.size() == 0) {
-            log(Level.ERROR, "No instance found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         // Do setup mode for multiple instances
         boolean doingSetup = instances.size() > 1;
