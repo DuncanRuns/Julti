@@ -4,6 +4,9 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static xyz.duncanruns.julti.Julti.log;
 
@@ -11,7 +14,7 @@ public class OpenCommand extends Command {
 
     @Override
     public String helpDescription() {
-        return "open [path] - opens a specific file / app";
+        return "openfile [path] - opens a specific file / app";
     }
 
     @Override
@@ -21,7 +24,7 @@ public class OpenCommand extends Command {
 
     @Override
     public int getMaxArgs() {
-        return 1;
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -31,26 +34,27 @@ public class OpenCommand extends Command {
 
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
-        String path = args[0].replace("\"", "");
+        String path = CommandManager.combineArgs(args).replace("\"", "");
         ProcessBuilder processBuilder;
 
-        String pathExt = "";
-
-        int index = path.lastIndexOf(".");
-        if (index != -1) {
-            pathExt = path.substring(index + 1);
+        Path realPath = Paths.get(path).toAbsolutePath();
+        if (!Files.isRegularFile(realPath)) {
+            throw new RuntimeException();
         }
+
+        String fileName = realPath.getFileName().toString();
+        String pathExt = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf('.') + 1) : "";
 
         // this is a dumb implementation, please someone smarter than me do something about this
         switch (pathExt.toLowerCase()) {
             case "jar":
-                processBuilder = new ProcessBuilder("java", "-jar", args[0]);
+                processBuilder = new ProcessBuilder("java", "-jar", path);
                 break;
             case "ahk":
-                processBuilder = new ProcessBuilder("C:\\Program Files\\AutoHotkey\\AutoHotkey.exe", args[0]);
+                processBuilder = new ProcessBuilder("C:\\Program Files\\AutoHotkey\\AutoHotkey.exe", path);
                 break;
             default:
-                processBuilder = new ProcessBuilder(args[0]);
+                processBuilder = new ProcessBuilder(path);
                 break;
         }
 
@@ -58,7 +62,6 @@ public class OpenCommand extends Command {
             log(Level.INFO, "Application opened");
             processBuilder.start();
         } catch (IOException e) {
-            log(Level.ERROR, "Check that your application is runnable or the path is invalid");
             throw new RuntimeException(e);
         }
     }
