@@ -27,7 +27,7 @@ public class CommandManager {
             new WaitCommand(),
             new LogCommand(),
             new PlaysoundCommand(),
-            new OpenCommand(),
+            new OpenFileCommand(),
     });
     public final Command[] commands;
 

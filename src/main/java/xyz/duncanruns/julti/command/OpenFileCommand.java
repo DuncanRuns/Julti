@@ -10,7 +10,10 @@ import java.nio.file.Paths;
 
 import static xyz.duncanruns.julti.Julti.log;
 
-public class OpenCommand extends Command {
+/**
+ * @author Aeroshide
+ */
+public class OpenFileCommand extends Command {
 
     @Override
     public String helpDescription() {
