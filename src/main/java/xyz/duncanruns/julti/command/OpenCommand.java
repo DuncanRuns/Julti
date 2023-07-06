@@ -39,28 +39,32 @@ public class OpenCommand extends Command {
 
         Path realPath = Paths.get(path).toAbsolutePath();
         if (!Files.isRegularFile(realPath)) {
-            throw new RuntimeException();
+            throw new RuntimeException("File not found: " + realPath);
         }
 
         String fileName = realPath.getFileName().toString();
         String pathExt = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf('.') + 1) : "";
 
-        // this is a dumb implementation, please someone smarter than me do something about this
         switch (pathExt.toLowerCase()) {
             case "jar":
-                processBuilder = new ProcessBuilder("java", "-jar", path);
+                Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe").toAbsolutePath();
+                processBuilder = new ProcessBuilder(javaExe.toString(), "-jar", realPath.toString());
                 break;
             case "ahk":
-                processBuilder = new ProcessBuilder("C:\\Program Files\\AutoHotkey\\AutoHotkey.exe", path);
+                // TODO: custom ahk install location
+                processBuilder = new ProcessBuilder("C:\\Program Files\\AutoHotkey\\AutoHotkey.exe", realPath.toString());
+                break;
+            case "exe":
+            case "bat":
+                processBuilder = new ProcessBuilder(realPath.toString());
                 break;
             default:
-                processBuilder = new ProcessBuilder(path);
-                break;
+                throw new RuntimeException("File type \"" + pathExt + "\" not supported!");
         }
 
         try {
-            log(Level.INFO, "Application opened");
-            processBuilder.start();
+            processBuilder.directory(realPath.getParent().toFile()).start();
+            log(Level.INFO, "Opened file " + fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
