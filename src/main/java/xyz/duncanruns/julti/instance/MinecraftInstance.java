@@ -560,7 +560,10 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                !options.useBorderless && !(options.autoFullscreen && !options.usePlayingSizeWithFullscreen) && options.resettingWindowSize == options.playingWindowSize,
+                // maximize if
+                !options.useBorderless && // We aren't using borderless and
+                        (!options.autoFullscreen || options.usePlayingSizeWithFullscreen) && // We aren't using fullscreen (except if we override it) and
+                        options.resettingWindowSize == options.playingWindowSize, // there's a difference in the window sizes in the first place
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1]),
                 offload);
     }
