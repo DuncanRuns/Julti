@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -8,7 +7,6 @@ import xyz.duncanruns.julti.management.InstanceManager;
 
 import java.util.List;
 
-import static xyz.duncanruns.julti.Julti.log;
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public class ActivateCommand extends Command {
