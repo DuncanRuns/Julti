@@ -521,7 +521,6 @@ public class MinecraftInstance {
     }
 
     private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
-
         if (!JultiOptions.getInstance().letJultiMoveWindows) {
             return;
         }
@@ -572,7 +571,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                (!options.useBorderless) && (!options.autoFullscreen),
+                (!options.useBorderless) && (!options.autoFullscreen || options.useMaximizeWithFullscreen),
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]),
                 offload);
         this.windowStateChangedToPlaying = true;
