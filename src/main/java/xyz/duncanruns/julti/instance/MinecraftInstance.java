@@ -144,7 +144,6 @@ public class MinecraftInstance {
         } else if (wpInfo != null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
             if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
-                System.out.println("Falsey! " + matcher.group());
                 hasStateOutput = false;
             }
         }
