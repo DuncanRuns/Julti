@@ -1,7 +1,7 @@
 package xyz.duncanruns.julti;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
@@ -26,7 +26,7 @@ public final class Main {
             runJultiApp();
         } catch (Exception exception) {
             String detailedException = ExceptionUtil.toDetailedString(exception);
-            Julti.log(Level.ERROR, detailedException);
+            LogManager.getLogger("Julti-Crash").error(detailedException);
             int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during startup or main loop!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
             if (ans == 0) {
                 KeyboardUtil.copyToClipboard("Error during startup or main loop: " + detailedException);
