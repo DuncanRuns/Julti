@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.hotkey;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -39,6 +40,7 @@ public final class HotkeyManager {
         this.addHotkey(Hotkey.of(options.wallFocusResetHotkey, options.wallFocusResetHotkeyIM), "wallFocusReset");
         this.addHotkey(Hotkey.of(options.cancelScriptHotkey, options.cancelScriptHotkeyIM), "cancelScript");
         this.addHotkey(Hotkey.of(options.wallPlayLockHotkey, options.wallPlayLockHotkeyIM), "wallPlayLock");
+        this.addHotkey(Hotkey.of(ImmutableList.of(0xA2, 0xA0, 0x44)), "debugHover"); // LCtrl + LShift + D debug hover
 
         options.scriptHotkeys.forEach(s -> {
             ScriptHotkeyData data = ScriptHotkeyData.parseString(s);

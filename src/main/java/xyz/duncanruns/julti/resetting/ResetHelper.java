@@ -45,6 +45,9 @@ public class ResetHelper {
             case "wallPlayLock":
                 playActionSounds(getManager().doWallPlayLock(mousePosition));
                 break;
+            case "debugHover":
+                getManager().doDebugHover(mousePosition);
+                break;
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -648,5 +649,41 @@ public class MinecraftInstance {
             sleep(5);
         }
         Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
+    }
+
+    public void logAndCopyInfo() {
+
+        final StringBuilder toCopy = new StringBuilder();
+
+        Consumer<String> consumer = s -> {
+            Julti.log(Level.INFO, s);
+            if (!toCopy.toString().isEmpty()) {
+                toCopy.append("\n");
+            }
+            toCopy.append(s);
+        };
+
+        Julti.log(Level.INFO, "");
+        Julti.log(Level.INFO, "");
+        consumer.accept("Info output for " + this);
+        consumer.accept("hwnd = " + this.hwnd);
+        consumer.accept("pid = " + this.pid);
+        consumer.accept("path = " + this.path);
+        consumer.accept("versionString = " + this.versionString);
+        consumer.accept("gameOptions = " + this.gameOptions);
+        consumer.accept("name = " + this.name);
+        consumer.accept("stateTracker = " + this.stateTracker);
+        consumer.accept("windowMissing = " + this.windowMissing);
+        consumer.accept("resetPressed = " + this.resetPressed);
+        consumer.accept("resetEverPressed = " + this.resetEverPressed);
+        consumer.accept("activeSinceReset = " + this.activeSinceReset);
+        consumer.accept("windowStateChangedToPlaying = " + this.windowStateChangedToPlaying);
+        consumer.accept("lastSetVisible = " + this.lastSetVisible);
+        consumer.accept("openedToLan = " + this.openedToLan);
+        consumer.accept("isResettable() = " + this.isResettable());
+        Julti.log(Level.INFO, "");
+        Julti.log(Level.INFO, "");
+
+        KeyboardUtil.copyToClipboard(toCopy.toString());
     }
 }
