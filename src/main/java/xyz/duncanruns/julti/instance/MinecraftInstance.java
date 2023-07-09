@@ -291,7 +291,6 @@ public class MinecraftInstance {
             if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                 this.resetPressed = false;
             } else {
-                this.reset();
                 return;
             }
         }
