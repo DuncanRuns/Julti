@@ -108,6 +108,10 @@ public class MinecraftInstance {
     }
 
     public void discoverInformation() {
+        if (this.checkWindowMissing()) {
+            return;
+        }
+
         this.gameOptions = new GameOptions();
 
         // Find info like keybinds, standard settings, etc.
