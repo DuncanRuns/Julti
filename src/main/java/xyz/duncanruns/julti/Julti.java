@@ -149,8 +149,7 @@ public final class Julti {
     }
 
     private void onCrashMessage(QMessage message) {
-        this.stop();
-        Julti.log(Level.ERROR, "Shutting down due to error: " + ((CrashQMessage) message).getThrowable());
+        throw new RuntimeException(((CrashQMessage) message).getThrowable());
     }
 
     private void stop() {
@@ -214,7 +213,13 @@ public final class Julti {
         while (!this.messageQueue.isEmpty()) {
             QMessage message = this.messageQueue.poll();
             Consumer<QMessage> consumer = this.messageConsumerMap.getOrDefault(message.getClass(), this::reportUnknownMessageType);
-            consumer.accept(message);
+            try {
+                consumer.accept(message);
+            } catch (Exception e) {
+                message.markFailed();
+                message.markProcessed();
+                throw e;
+            }
             message.markProcessed();
         }
     }

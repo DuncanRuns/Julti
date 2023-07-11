@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static xyz.duncanruns.julti.Julti.log;
 
@@ -145,6 +146,35 @@ public class ControlPanel extends JPanel {
             } else {
                 this.optionsGUI.requestFocus();
             }
+        }), gbc);
+
+        if (!Objects.equals("DEV", Julti.VERSION)) {
+            return;
+        }
+
+        this.add(GUIUtil.createSpacer(2), gbc2);
+
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Dev Utilities..."), a -> {
+            JPopupMenu menu = new JPopupMenu("Dev Utilities");
+
+            GUIUtil.addMenuItem(menu, "Do waitForExecute Crash", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Julti.waitForExecute(() -> {
+                        throw new RuntimeException("Test Crash!!!");
+                    });
+                }
+            });
+
+            GUIUtil.addMenuItem(menu, "Do GUI Crash", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    throw new RuntimeException("Test Crash!!!");
+                }
+            });
+
+            Point mousePos = this.getMousePosition();
+            menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
     }
 
