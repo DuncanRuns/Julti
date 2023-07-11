@@ -124,7 +124,7 @@ public class DynamicWallResetManager extends WallResetManager {
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
-        List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance));
+        List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance, false));
 
         // Get list of instances to reset
         List<MinecraftInstance> toReset = this.getDisplayInstances();

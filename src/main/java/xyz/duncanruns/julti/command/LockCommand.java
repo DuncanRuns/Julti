@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -8,8 +7,6 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 
 import java.util.List;
-
-import static xyz.duncanruns.julti.Julti.log;
 
 public class LockCommand extends Command {
 
@@ -43,8 +40,7 @@ public class LockCommand extends Command {
         }
 
         if (toLock.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         Julti.waitForExecute(() -> toLock.forEach(i -> ResetHelper.getManager().lockInstance(i)));
     }

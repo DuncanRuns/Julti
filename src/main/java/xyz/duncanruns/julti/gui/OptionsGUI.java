@@ -87,7 +87,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen")));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
+
+        if (JultiOptions.getInstance().usePlayingSizeWithFullscreen) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize w/ Fullscreen", "useMaximizeWithFullscreen")));
+        }
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
@@ -197,7 +202,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("MultiMC Executable Path (.exe):")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("multiMCPath", "", this)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("multiMCPath", "MultiMC Executable Path", this)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
@@ -222,6 +227,7 @@ public class OptionsGUI extends JFrame {
                 Julti.waitForExecute(() -> {
                     options.autoFullscreen = false;
                     options.usePlayingSizeWithFullscreen = false;
+                    options.useMaximizeWithFullscreen = false;
                     options.showDebug = false;
                     options.pieChartOnLoad = false;
                     options.preventWindowNaming = false;

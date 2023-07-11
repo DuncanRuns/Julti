@@ -25,7 +25,6 @@ public final class BopperUtil {
         }
         clearing = true;
         new Thread(BopperUtil::clearWorldsInternal, "bopper-util").start();
-
     }
 
     private static void clearWorldsInternal() {
@@ -53,7 +52,8 @@ public final class BopperUtil {
     private static void tryClearWorlds(MinecraftInstance instance) {
         try {
             clearWorlds(instance);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Clear Worlds Exception: " + ExceptionUtil.toDetailedString(e));
         }
     }
 

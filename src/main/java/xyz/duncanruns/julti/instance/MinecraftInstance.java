@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,6 +121,7 @@ public class MinecraftInstance {
         this.gameOptions.leavePreviewKey = GameOptionsUtil.getKey(this.getPath(), "key_Leave Preview", pre113);
         this.gameOptions.fullscreenKey = GameOptionsUtil.getKey(this.getPath(), "key_key.fullscreen", pre113);
         this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat", pre113);
+
         this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
 
         this.checkFabricMods();
@@ -142,7 +144,6 @@ public class MinecraftInstance {
         } else if (wpInfo != null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
             if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
-                System.out.println("Falsey! " + matcher.group());
                 hasStateOutput = false;
             }
         }
@@ -289,7 +290,6 @@ public class MinecraftInstance {
             if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                 this.resetPressed = false;
             } else {
-                this.reset();
                 return;
             }
         }
@@ -519,7 +519,6 @@ public class MinecraftInstance {
     }
 
     private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
-
         if (!JultiOptions.getInstance().letJultiMoveWindows) {
             return;
         }
@@ -558,7 +557,10 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                !options.useBorderless && !(options.autoFullscreen && !options.usePlayingSizeWithFullscreen) && options.resettingWindowSize == options.playingWindowSize,
+                // maximize if
+                !options.useBorderless && // We aren't using borderless and
+                        (!options.autoFullscreen || options.usePlayingSizeWithFullscreen) && // We aren't using fullscreen (except if we override it) and
+                        options.resettingWindowSize == options.playingWindowSize, // there's a difference in the window sizes in the first place
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.resettingWindowSize[0], options.resettingWindowSize[1]),
                 offload);
     }
@@ -567,7 +569,7 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getInstance();
         this.ensureWindowState(
                 options.useBorderless,
-                (!options.useBorderless) && (!options.autoFullscreen),
+                (!options.useBorderless) && (!options.autoFullscreen || options.useMaximizeWithFullscreen),
                 new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]),
                 offload);
         this.windowStateChangedToPlaying = true;
@@ -647,5 +649,41 @@ public class MinecraftInstance {
             sleep(5);
         }
         Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
+    }
+
+    public void logAndCopyInfo() {
+
+        final StringBuilder toCopy = new StringBuilder();
+
+        Consumer<String> consumer = s -> {
+            Julti.log(Level.INFO, s);
+            if (!toCopy.toString().isEmpty()) {
+                toCopy.append("\n");
+            }
+            toCopy.append(s);
+        };
+
+        Julti.log(Level.INFO, "");
+        Julti.log(Level.INFO, "");
+        consumer.accept("Info output for " + this);
+        consumer.accept("hwnd = " + this.hwnd);
+        consumer.accept("pid = " + this.pid);
+        consumer.accept("path = " + this.path);
+        consumer.accept("versionString = " + this.versionString);
+        consumer.accept("gameOptions = " + this.gameOptions);
+        consumer.accept("name = " + this.name);
+        consumer.accept("stateTracker = " + this.stateTracker);
+        consumer.accept("windowMissing = " + this.windowMissing);
+        consumer.accept("resetPressed = " + this.resetPressed);
+        consumer.accept("resetEverPressed = " + this.resetEverPressed);
+        consumer.accept("activeSinceReset = " + this.activeSinceReset);
+        consumer.accept("windowStateChangedToPlaying = " + this.windowStateChangedToPlaying);
+        consumer.accept("lastSetVisible = " + this.lastSetVisible);
+        consumer.accept("openedToLan = " + this.openedToLan);
+        consumer.accept("isResettable() = " + this.isResettable());
+        Julti.log(Level.INFO, "");
+        Julti.log(Level.INFO, "");
+
+        KeyboardUtil.copyToClipboard(toCopy.toString());
     }
 }

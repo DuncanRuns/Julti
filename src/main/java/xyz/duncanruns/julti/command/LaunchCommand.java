@@ -1,14 +1,11 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
 
 import java.util.List;
-
-import static xyz.duncanruns.julti.Julti.log;
 
 public class LaunchCommand extends Command {
 
@@ -42,8 +39,7 @@ public class LaunchCommand extends Command {
         }
 
         if (toLaunch.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         SafeInstanceLauncher.launchInstances(toLaunch, cancelRequester);
     }

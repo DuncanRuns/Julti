@@ -1,13 +1,10 @@
 package xyz.duncanruns.julti.command;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 
 import java.util.List;
-
-import static xyz.duncanruns.julti.Julti.log;
 
 public class CloseCommand extends Command {
 
@@ -41,8 +38,7 @@ public class CloseCommand extends Command {
         }
 
         if (toClose.isEmpty()) {
-            log(Level.ERROR, "No instances found");
-            return;
+            throw new CommandFailedException("No instances found");
         }
         for (MinecraftInstance instance : toClose) {
             if (cancelRequester.isCancelRequested()) {

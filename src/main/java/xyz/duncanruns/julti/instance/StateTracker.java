@@ -9,6 +9,7 @@ import xyz.duncanruns.julti.util.FileUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class StateTracker {
     private final Path path;
@@ -210,5 +211,19 @@ public class StateTracker {
         }
         i += (System.currentTimeMillis() - this.getLastOccurrenceOf(InstanceState.WAITING));
         return Math.min(10000000, i);
+    }
+
+    @Override
+    public String toString() {
+        return "StateTracker{" +
+                "path=" + this.path +
+                ", instanceState=" + this.instanceState +
+                ", inWorldState=" + this.inWorldState +
+                ", fileExists=" + this.fileExists +
+                ", mTime=" + this.mTime +
+                ", loadingPercent=" + this.loadingPercent +
+                ", lastStartArr=" + Arrays.toString(this.lastStartArr) +
+                ", lastOccurrenceArr=" + Arrays.toString(this.lastOccurrenceArr) +
+                '}';
     }
 }

@@ -12,10 +12,8 @@ import xyz.duncanruns.julti.util.SleepBGUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.*;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
@@ -23,6 +21,9 @@ public class WallResetManager extends ResetManager {
     private static final WallResetManager INSTANCE = new WallResetManager();
 
     private final List<MinecraftInstance> lockedInstances = new ArrayList<>();
+
+    private MinecraftInstance lastAttemptedJoin = null;
+    private long lastAttemptedJoinTime = 0L;
 
     public static ResetManager getInstance() {
         return INSTANCE;
@@ -142,7 +143,7 @@ public class WallResetManager extends ResetManager {
         toReset.removeAll(this.lockedInstances);
         toReset.remove(clickedInstance);
 
-        List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance));
+        List<ActionResult> actionResults = new ArrayList<>(this.playInstanceFromWall(clickedInstance, false));
 
         // Reset all others
         DoAllFastUtil.doAllFast(toReset, instance -> {
@@ -168,7 +169,17 @@ public class WallResetManager extends ResetManager {
         if (clickedInstance == null) {
             return Collections.emptyList();
         }
-        List<ActionResult> out = this.playInstanceFromWall(clickedInstance);
+
+
+        boolean forceEnter = false;
+        long currentTime = System.currentTimeMillis();
+        if (Objects.equals(this.lastAttemptedJoin, clickedInstance) && currentTime - this.lastAttemptedJoinTime < 350) {
+            forceEnter = true;
+        }
+        this.lastAttemptedJoin = clickedInstance;
+        this.lastAttemptedJoinTime = currentTime;
+
+        List<ActionResult> out = this.playInstanceFromWall(clickedInstance, forceEnter);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping();
         }
@@ -185,7 +196,7 @@ public class WallResetManager extends ResetManager {
         }
         List<MinecraftInstance> instancePool = new ArrayList<>(this.lockedInstances);
         instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
-        List<ActionResult> out = this.playInstanceFromWall(instancePool.get(0));
+        List<ActionResult> out = this.playInstanceFromWall(instancePool.get(0), false);
         if (JultiOptions.getInstance().useAffinity) {
             AffinityManager.ping();
         }
@@ -233,9 +244,10 @@ public class WallResetManager extends ResetManager {
         return false;
     }
 
-    protected List<ActionResult> playInstanceFromWall(MinecraftInstance instance) {
+    protected List<ActionResult> playInstanceFromWall(MinecraftInstance instance, boolean bypassLoadCheck) {
         JultiOptions options = JultiOptions.getInstance();
-        if (options.wallLockInsteadOfPlay && !(instance.getStateTracker().isCurrentState(InstanceState.INWORLD))) {
+
+        if (!bypassLoadCheck && options.wallLockInsteadOfPlay && !(instance.getStateTracker().isCurrentState(InstanceState.INWORLD))) {
             List<ActionResult> results = new ArrayList<>(this.lockInstance(instance) ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList());
 
             if (options.wallSmartSwitch) {
@@ -245,7 +257,7 @@ public class WallResetManager extends ResetManager {
                 // Take note that the instance passed into playInstanceFromWall must be a loaded instance!
                 MinecraftInstance ssInstance = this.getNextPlayableLockedInstance(true);
                 if (ssInstance != null) {
-                    results.addAll(this.playInstanceFromWall(ssInstance));
+                    results.addAll(this.playInstanceFromWall(ssInstance, false));
                 }
             }
             return results;

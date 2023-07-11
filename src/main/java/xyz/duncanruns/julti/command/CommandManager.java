@@ -27,6 +27,7 @@ public class CommandManager {
             new WaitCommand(),
             new LogCommand(),
             new PlaysoundCommand(),
+            new OpenFileCommand(),
     });
     public final Command[] commands;
 
@@ -91,31 +92,26 @@ public class CommandManager {
             log(Level.INFO, "Commands:\n\n" + this.getDescriptions(true));
             return;
         }
-        boolean foundCommand = false;
         for (Command command : this.commands) {
             if (!command.getName().equals(commandWords[0])) {
                 continue;
             }
-            foundCommand = true;
             String[] args = withoutFirst(commandWords);
             if (args.length < command.getMinArgs() || args.length > command.getMaxArgs()) {
-                log(Level.WARN, "Command failed: Incorrect amount of arguments!");
+                log(Level.ERROR, "Command failed: Incorrect amount of arguments!");
+                cancelRequester.cancel();
                 return;
             }
             try {
                 command.run(args, cancelRequester);
-                return;
             } catch (Exception e) {
-                if (e.getClass() == RuntimeException.class) {
-                    log(Level.ERROR, "Command failed:\n" + e);
-                } else {
-                    log(Level.ERROR, "Command failed:\n" + e);
-                }
+                cancelRequester.cancel();
+                log(Level.ERROR, "Command failed:\n" + e);
             }
+            return;
         }
-        if (!foundCommand) {
-            log(Level.WARN, "Command does not exists.");
-        }
+        log(Level.ERROR, "Command does not exist.");
+        cancelRequester.cancel();
     }
 
     public String getDescriptions(boolean separateDescriptions) {

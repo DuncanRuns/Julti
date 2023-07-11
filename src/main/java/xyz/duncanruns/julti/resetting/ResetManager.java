@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.resetting;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
@@ -175,5 +176,14 @@ public abstract class ResetManager {
     }
 
     public void reload() {
+    }
+
+    public void doDebugHover(Point mousePos) {
+        MinecraftInstance instance = this.getHoveredWallInstance(mousePos);
+        if (instance != null) {
+            instance.logAndCopyInfo();
+        } else {
+            Julti.log(Level.INFO, "No instance hovered for debug.");
+        }
     }
 }
