@@ -126,9 +126,10 @@ public final class Julti {
     }
 
     public void changeProfile(String profileName) {
-        JultiOptions.getInstance().trySave();
+        if (!JultiOptions.getInstance().trySave()) {
+            return;
+        }
         if (!JultiOptions.tryChangeProfile(profileName)) {
-            Julti.log(Level.ERROR, "Profile change failed!");
             return;
         }
         this.reload();

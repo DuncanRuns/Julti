@@ -1,10 +1,12 @@
 package xyz.duncanruns.julti.script;
 
 import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.command.CommandManager;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 
 import java.io.IOException;
@@ -33,7 +35,8 @@ public class ScriptManager {
         if (Files.exists(SCRIPTS_PATH)) {
             try {
                 scriptsFileContents = FileUtil.readString(SCRIPTS_PATH);
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                scriptsFileContents = DEFAULT_SCRIPTS;
             }
         } else {
             scriptsFileContents = DEFAULT_SCRIPTS;
@@ -55,7 +58,8 @@ public class ScriptManager {
         SCRIPTS.forEach(script -> out.append(script.toSavableString()).append("\n"));
         try {
             FileUtil.writeString(SCRIPTS_PATH, out.toString().trim());
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to save scripts:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 
@@ -101,7 +105,8 @@ public class ScriptManager {
                     CommandManager.getMainManager().runCommand(commands[i], cancelRequester);
                 }
 
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Julti.log(Level.ERROR, "Error during script execution:\n" + ExceptionUtil.toDetailedString(e));
             } finally {
                 cancelRequester.cancel();
             }

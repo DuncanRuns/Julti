@@ -24,8 +24,8 @@ public final class Main {
 
         try {
             runJultiApp();
-        } catch (Exception exception) {
-            String detailedException = ExceptionUtil.toDetailedString(exception);
+        } catch (Exception e) {
+            String detailedException = ExceptionUtil.toDetailedString(e);
             LogManager.getLogger("Julti-Crash").error(detailedException);
             int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during startup or main loop!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
             if (ans == 0) {

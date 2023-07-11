@@ -70,9 +70,9 @@ public final class InstanceInfoUtil {
         Julti.log(Level.DEBUG, "InstanceInfoUtil: Getting command line from " + pid);
         try {
             return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 
     private static int getPidFromHwnd(HWND hwnd) {

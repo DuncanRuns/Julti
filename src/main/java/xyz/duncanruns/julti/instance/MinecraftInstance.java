@@ -143,7 +143,7 @@ public class MinecraftInstance {
             hasStateOutput = false;
         } else if (wpInfo != null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
-            if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
+            if (!matcher.find() || Integer.parseInt(matcher.group()) < 3) {
                 hasStateOutput = false;
             }
         }
@@ -483,8 +483,8 @@ public class MinecraftInstance {
     public void openFolder() {
         try {
             Desktop.getDesktop().browse(this.path.toUri());
-        } catch (IOException ignored) {
-
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to open instance folder:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 

@@ -96,8 +96,8 @@ public final class UpdateUtil {
     public static void tryUpdateAndLaunch(GHAsset asset) {
         try {
             updateAndLaunch(asset);
-        } catch (Exception exception) {
-            String detailedException = ExceptionUtil.toDetailedString(exception);
+        } catch (Exception e) {
+            String detailedException = ExceptionUtil.toDetailedString(e);
             Julti.log(Level.ERROR, detailedException);
             int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during an update!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
             if (ans == 0) {

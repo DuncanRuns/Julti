@@ -20,7 +20,8 @@ public class GameOptions {
         for (Field field : this.getClass().getFields()) {
             try {
                 out.append("\n    ").append(field.getName()).append(" = ").append(field.get(this));
-            } catch (IllegalAccessException ignored) {
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
         }
         out.append("\n}");

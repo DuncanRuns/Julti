@@ -57,7 +57,7 @@ public final class SafeInstanceLauncher {
                 return;
             }
         } catch (IOException e) {
-            return;
+            throw new RuntimeException(e);
         }
         if (cancelRequester.isCancelRequested()) {
             return;
@@ -134,7 +134,7 @@ public final class SafeInstanceLauncher {
                 return;
             }
         } catch (Exception e) {
-            return;
+            throw new RuntimeException(e);
         }
         if (cancelRequester.isCancelRequested()) {
             return;

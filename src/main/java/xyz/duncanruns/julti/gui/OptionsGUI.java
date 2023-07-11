@@ -441,7 +441,7 @@ public class OptionsGUI extends JFrame {
                     JOptionPane.showMessageDialog(thisGUI, "Profile already exists!", "Julti: Cannot Create New Profile", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                Julti.waitForExecute(() -> JultiOptions.getInstance().copyTo(newName));
+                Julti.waitForExecute(() -> JultiOptions.getInstance().tryCopyTo(newName));
 
                 changeProfile(newName);
                 this.reloadComponents();

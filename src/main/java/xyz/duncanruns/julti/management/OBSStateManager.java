@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.GameOptionsUtil;
 
@@ -57,7 +58,8 @@ public class OBSStateManager {
                 this.lastOut = outString;
                 FileUtil.writeString(OUT_PATH, outString);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -71,7 +73,8 @@ public class OBSStateManager {
             try {
                 String[] args = FileUtil.readString(scriptSizeOutPath).trim().split(",");
                 this.obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Julti.log(Level.ERROR, "Failed to read obsscenesize file:\n" + ExceptionUtil.toDetailedString(e));
             }
         }
         if (this.obsSceneSize != null) {
@@ -116,7 +119,7 @@ public class OBSStateManager {
         try {
             FileUtil.writeString(JultiOptions.getJultiDir().resolve("loadingsquaresize"), loadingSquareSize + "," + (loadingSquareSize + extraHeight));
         } catch (Exception e) {
-            Julti.log(Level.ERROR, "OBSStateManager: Failed to write loadingsquaresize! " + e);
+            throw new RuntimeException(e);
         }
 
 
@@ -149,6 +152,7 @@ public class OBSStateManager {
                 guiScale = Integer.parseInt(gsOption);
             }
         } catch (NumberFormatException ignored) {
+            // Failed to get options, assume 0
         }
         boolean forceUnicodeFont = Objects.equals(GameOptionsUtil.tryGetOption(instance.getPath(), "forceUnicodeFont", true), "true");
 

@@ -1,5 +1,8 @@
 package xyz.duncanruns.julti.util;
 
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
+
 import javax.sound.sampled.*;
 import java.io.File;
 
@@ -52,7 +55,8 @@ public final class SoundUtil {
                 }
             });
             clip.start();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to play sound:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 }

@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 
@@ -160,17 +161,19 @@ public final class JultiOptions {
         Path selectedFilePath = jultiDir.resolve("selectedprofile.txt");
         if (Files.isRegularFile(selectedFilePath)) {
             try {
-                String name = FileUtil.readString(selectedFilePath);
+                String name = FileUtil.readString(selectedFilePath).trim();
                 if (name.isEmpty()) {
                     name = "default";
                 }
                 return jultiDir.resolve("profiles").resolve(name + ".json");
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Julti.log(Level.ERROR, "Exception during getSelectedProfilePath:\n" + ExceptionUtil.toDetailedString(e));
             }
         } else {
             try {
                 FileUtil.writeString(selectedFilePath, "default");
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                Julti.log(Level.ERROR, "Exception during getSelectedProfilePath:\n" + ExceptionUtil.toDetailedString(e));
             }
         }
         return jultiDir.resolve("profiles").resolve("default.json");
@@ -187,7 +190,8 @@ public final class JultiOptions {
             FileUtil.writeString(selectedFilePath, profileName);
             getInstance(true);
             return true;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to change profile:\n" + ExceptionUtil.toDetailedString(e));
             return false;
         }
     }
@@ -243,7 +247,8 @@ public final class JultiOptions {
                 gson.fromJson(jsonString, JultiOptions.class);
                 this.processOldOptions(oldOptions);
                 return true;
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e));
             }
         }
         return false;
@@ -296,7 +301,8 @@ public final class JultiOptions {
             Files.createDirectories(this.location.getParent());
             FileUtil.writeString(this.location, GSON_WRITER.toJson(this));
             return true;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to save options:\n" + ExceptionUtil.toDetailedString(e));
             return false;
         }
     }
@@ -330,6 +336,7 @@ public final class JultiOptions {
         try {
             optionField = this.getClass().getField(optionName);
         } catch (NoSuchFieldException ignored) {
+            // Handled by nullability
         }
         if (optionField == null || Modifier.isTransient(optionField.getModifiers())) {
             return null;
@@ -337,6 +344,7 @@ public final class JultiOptions {
         try {
             return optionField.get(this);
         } catch (IllegalAccessException ignored) {
+            // Handled by nullability
         }
         return null;
     }
@@ -433,13 +441,14 @@ public final class JultiOptions {
         }
     }
 
-    public boolean copyTo(String profileName) {
+    public boolean tryCopyTo(String profileName) {
         try {
             ensureJultiDir();
             Files.createDirectories(this.location.getParent());
             FileUtil.writeString(this.location.resolveSibling(profileName + ".json"), GSON_WRITER.toJson(this));
             return true;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to copy profile:\n" + ExceptionUtil.toDetailedString(e));
             return false;
         }
     }

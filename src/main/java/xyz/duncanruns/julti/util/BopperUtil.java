@@ -53,7 +53,7 @@ public final class BopperUtil {
         try {
             clearWorlds(instance);
         } catch (Exception e) {
-            Julti.log(Level.ERROR, "Clear Worlds Exception: " + ExceptionUtil.toDetailedString(e));
+            Julti.log(Level.ERROR, "Clear Worlds Exception:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 
