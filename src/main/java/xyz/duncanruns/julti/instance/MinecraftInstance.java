@@ -258,6 +258,12 @@ public class MinecraftInstance {
             // Do the window state change later to ensure resetting is fast
             Julti.doLater(() -> this.ensureResettingWindowState(true));
         }
+
+        this.scheduler.schedule(() -> {
+            if (this.resetPressed) {
+                this.reset();
+            }
+        }, 500);
     }
 
     public void activate(boolean doingSetup) {
