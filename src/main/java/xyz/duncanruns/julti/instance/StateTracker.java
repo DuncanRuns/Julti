@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 
 import java.io.IOException;
@@ -140,6 +141,7 @@ public class StateTracker {
             this.update();
             return true;
         } catch (IOException e) {
+            Julti.log(Level.ERROR, "Error during state checking:\n" + ExceptionUtil.toDetailedString(e));
             return false;
         }
     }

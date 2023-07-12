@@ -20,8 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.MatchResult;
@@ -43,6 +41,7 @@ public class MinecraftInstance {
 
     private final StateTracker stateTracker;
     private final KeyPresser presser;
+    private final Scheduler scheduler;
 
     private boolean windowMissing = false;
 
@@ -59,16 +58,23 @@ public class MinecraftInstance {
         this.versionString = versionString;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange);
         this.presser = new KeyPresser(hwnd);
+        this.scheduler = new Scheduler();
     }
 
     public MinecraftInstance(Path path) {
         this.hwnd = null;
         this.versionString = null;
         this.presser = null;
+        this.scheduler = null;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null);
 
         this.path = path;
         this.windowMissing = true;
+    }
+
+    public void tick() {
+        this.getStateTracker().tryUpdate();
+        this.scheduler.checkSchedule();
     }
 
     /**
@@ -105,6 +111,7 @@ public class MinecraftInstance {
         }
 
         this.windowMissing = true;
+        this.scheduler.clear();
     }
 
     public void discoverInformation() {
@@ -220,6 +227,7 @@ public class MinecraftInstance {
     }
 
     public void reset() {
+        this.scheduler.clear();
         // Press Reset Keys
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
@@ -256,6 +264,7 @@ public class MinecraftInstance {
         if (this.isWindowMarkedMissing()) {
             return;
         }
+        this.scheduler.clear();
         this.activeSinceReset = true;
 
         JultiOptions options = JultiOptions.getInstance();
@@ -293,6 +302,7 @@ public class MinecraftInstance {
         if (this.resetPressed) {
             if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                 this.resetPressed = false;
+                this.scheduler.clear();
             } else {
                 return;
             }
@@ -322,7 +332,7 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(boolean bypassPieChartGate) {
-        //Julti.log(Level.INFO, this.getName() + "'s world loaded.");
+        this.scheduler.clear();
 
         JultiOptions options = JultiOptions.getInstance();
 
@@ -335,13 +345,8 @@ public class MinecraftInstance {
             // Open pie chart
             this.presser.pressShiftF3();
 
-            // Schedule the scheduling of the completion of onWorldLoad
-            new Timer("delayed-world-load-scheduler").schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Julti.doLater(() -> MinecraftInstance.this.onWorldLoad(true));
-                }
-            }, 150);
+            // Schedule the completion of onWorldLoad
+            this.scheduler.schedule(() -> this.onWorldLoad(true), 150);
 
             return;
         }
@@ -369,9 +374,27 @@ public class MinecraftInstance {
             }
         }
         ResetHelper.getManager().notifyWorldLoaded(this);
+        if (ActiveWindowManager.isWindowActive(this.hwnd)) {
+            return;
+        }
+        this.scheduler.schedule(() -> {
+            if (ActiveWindowManager.getActiveHwnd().equals(this.hwnd)) {
+                return;
+            }
+            if (!(this.stateTracker.isCurrentState(InstanceState.INWORLD) && this.stateTracker.getInWorldType().equals(InWorldState.UNPAUSED))) {
+                return;
+            }
+            if (options.useF3) {
+                this.presser.pressF3Esc();
+            } else {
+                this.presser.pressEsc();
+            }
+
+        }, 500);
     }
 
     private void onPreviewLoad() {
+        this.scheduler.clear();
         if (JultiOptions.getInstance().useF3) {
             this.presser.pressF3Esc();
         }

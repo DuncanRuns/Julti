@@ -194,7 +194,7 @@ public final class Julti {
         }
         this.processQMessages();
         this.processHotkeyMessages();
-        InstanceManager.getManager().updateInstanceStates();
+        InstanceManager.getManager().tickInstances();
         OBSStateManager.getInstance().tryOutputState();
     }
 

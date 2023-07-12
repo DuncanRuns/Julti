@@ -111,14 +111,12 @@ public final class InstanceManager {
         }
     }
 
-    public void updateInstanceStates() {
+    public void tickInstances() {
         for (MinecraftInstance instance : this.instances) {
             if (instance.isWindowMarkedMissing()) {
                 continue;
             }
-            if (!instance.getStateTracker().tryUpdate()) {
-                Julti.log(Level.ERROR, "Failed to update state for instance " + instance.getName() + "!");
-            }
+            instance.tick();
         }
     }
 
