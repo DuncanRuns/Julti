@@ -396,7 +396,7 @@ public class MinecraftInstance {
                 this.presser.pressEsc();
             }
 
-        }, 500);
+        }, 1000);
     }
 
     private void onPreviewLoad() {
