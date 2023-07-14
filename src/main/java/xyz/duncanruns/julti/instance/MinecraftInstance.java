@@ -309,8 +309,6 @@ public class MinecraftInstance {
             if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
                 this.resetPressed = false;
                 this.scheduler.clear();
-            } else {
-                return;
             }
         }
         switch (this.stateTracker.getInstanceState()) {
@@ -353,22 +351,22 @@ public class MinecraftInstance {
 
             // Schedule the completion of onWorldLoad
             this.scheduler.schedule(() -> this.onWorldLoad(true), 150);
-
             return;
         }
 
+        int toPress;
         if (options.useF3) {
             // F3
-            this.presser.pressF3Esc();
+            toPress = 2;
         } else {
             // No F3
-            this.presser.pressEsc();
+            toPress = 1;
         }
 
-        // Unpause if window is active
+        // Stay Unpaused if window is active
         if (ActiveWindowManager.isWindowActive(this.hwnd)) {
             if (options.unpauseOnSwitch || options.coopMode) {
-                this.presser.pressEsc();
+                toPress = 0;
             }
 
             if (options.coopMode) {
@@ -379,30 +377,25 @@ public class MinecraftInstance {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
             }
         }
-        ResetHelper.getManager().notifyWorldLoaded(this);
-        if (ActiveWindowManager.isWindowActive(this.hwnd)) {
-            return;
-        }
-        this.scheduler.schedule(() -> {
-            if (ActiveWindowManager.getActiveHwnd().equals(this.hwnd)) {
-                return;
-            }
-            if (!(this.stateTracker.isCurrentState(InstanceState.INWORLD) && this.stateTracker.getInWorldType().equals(InWorldState.UNPAUSED))) {
-                return;
-            }
-            if (options.useF3) {
-                this.presser.pressF3Esc();
-            } else {
-                this.presser.pressEsc();
-            }
 
-        }, 1000);
+        switch (toPress) {
+            case 0:
+                break;
+            case 1:
+                this.presser.pressEsc();
+                break;
+            case 2:
+                this.presser.pressF3Esc();
+                break;
+        }
+
+        ResetHelper.getManager().notifyWorldLoaded(this);
     }
 
     private void onPreviewLoad() {
         this.scheduler.clear();
         if (JultiOptions.getInstance().useF3) {
-            this.presser.pressF3Esc();
+            this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
     }
