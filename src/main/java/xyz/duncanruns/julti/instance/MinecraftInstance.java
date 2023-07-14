@@ -304,13 +304,8 @@ public class MinecraftInstance {
     }
 
     private void onStateChange() {
-        // The next state after reset should be WAITING, if it changes to something that is not WAITING, send the key again
-        if (this.resetPressed) {
-            if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
-                this.resetPressed = false;
-                this.scheduler.clear();
-            }
-        }
+        this.scheduler.clear();
+        this.resetPressed = false;
         switch (this.stateTracker.getInstanceState()) {
             case PREVIEWING:
                 this.onPreviewLoad();
