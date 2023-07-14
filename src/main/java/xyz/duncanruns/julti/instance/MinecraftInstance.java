@@ -261,9 +261,9 @@ public class MinecraftInstance {
 
         this.scheduler.schedule(() -> {
             if (this.resetPressed) {
-                this.reset();
+                this.resetPressed = false;
             }
-        }, 500);
+        }, 5000);
     }
 
     public void activate(boolean doingSetup) {
