@@ -27,13 +27,13 @@ public class OptionsGUI extends JFrame {
     private JTabbedPane tabbedPane;
 
     public OptionsGUI() {
-        this.setLocation(JultiGUI.getInstance().getLocation());
+        this.setLocation(JultiGUI.getJultiGUI().getLocation());
         this.setupWindow();
         this.reloadComponents();
     }
 
     private static void changeProfile(String profile) {
-        Julti.waitForExecute(() -> Julti.getInstance().changeProfile(profile));
+        Julti.waitForExecute(() -> Julti.getJulti().changeProfile(profile));
     }
 
     private JTabbedPane getTabbedPane() {
@@ -67,7 +67,7 @@ public class OptionsGUI extends JFrame {
         this.addComponentsSound();
         this.addComponentsAffinity();
         this.addComponentsOther();
-        if (JultiOptions.getInstance().enableExperimentalOptions) {
+        if (JultiOptions.getJultiOptions().enableExperimentalOptions) {
             this.addComponentsExperimental();
         }
         this.revalidate();
@@ -89,7 +89,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
 
-        if (JultiOptions.getInstance().usePlayingSizeWithFullscreen) {
+        if (JultiOptions.getJultiOptions().usePlayingSizeWithFullscreen) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize w/ Fullscreen", "useMaximizeWithFullscreen")));
         }
@@ -150,7 +150,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsAffinity() {
         JPanel panel = this.createNewOptionsPanel("Affinity");
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Affinity Settings")));
         panel.add(GUIUtil.createSpacer());
@@ -186,7 +186,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsOther() {
         JPanel panel = this.createNewOptionsPanel("Other");
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
         panel.add(GUIUtil.createSpacer());
@@ -298,7 +298,7 @@ public class OptionsGUI extends JFrame {
             this.browseForMMCExecutable();
         } else {
             Path chosen = candidates.get(ans);
-            JultiOptions.getInstance().multiMCPath = chosen.toString();
+            JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
         }
     }
 
@@ -312,7 +312,7 @@ public class OptionsGUI extends JFrame {
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            JultiOptions.getInstance().multiMCPath = jfc.getSelectedFile().toPath().toString();
+            JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
         }
     }
 
@@ -337,7 +337,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsHotkey() {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         JPanel panel = this.createNewOptionsPanel("Hotkeys");
 
@@ -441,7 +441,7 @@ public class OptionsGUI extends JFrame {
                     JOptionPane.showMessageDialog(thisGUI, "Profile already exists!", "Julti: Cannot Create New Profile", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                Julti.waitForExecute(() -> JultiOptions.getInstance().tryCopyTo(newName));
+                Julti.waitForExecute(() -> JultiOptions.getJultiOptions().tryCopyTo(newName));
 
                 changeProfile(newName);
                 this.reloadComponents();
@@ -452,7 +452,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsWall() {
         JPanel panel = this.createNewOptionsPanel("Wall");
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
         if (options.resetMode == 0) {
@@ -528,7 +528,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsReset() {
         JPanel panel = this.createNewOptionsPanel("Resetting");
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Reset Settings")));
         panel.add(GUIUtil.createSpacer());
@@ -579,7 +579,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsWindow() {
         JPanel panel = this.createNewOptionsPanel("Window");
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Window Settings")));
         panel.add(GUIUtil.createSpacer());
@@ -649,7 +649,7 @@ public class OptionsGUI extends JFrame {
     private void onClose() {
         this.closed = true;
         Julti.doLater(() -> {
-            OBSStateManager.getInstance().tryOutputLSInfo();
+            OBSStateManager.getOBSStateManager().tryOutputLSInfo();
             SleepBGUtil.disableLock();
             DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
         });

@@ -28,7 +28,7 @@ public final class BopperUtil {
     }
 
     private static void clearWorldsInternal() {
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
         Thread[] threads = new Thread[instances.size()];
         int i = 0;
         for (MinecraftInstance instance : instances) {

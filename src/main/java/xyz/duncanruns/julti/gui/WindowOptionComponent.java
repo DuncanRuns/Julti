@@ -34,7 +34,7 @@ public class WindowOptionComponent extends JPanel {
         GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
-        int[] windowPos = JultiOptions.getInstance().windowPos;
+        int[] windowPos = JultiOptions.getJultiOptions().windowPos;
         xField.setValue(windowPos[0]);
         yField.setValue(windowPos[1]);
         KeyListener keyListener = new KeyAdapter() {
@@ -50,7 +50,7 @@ public class WindowOptionComponent extends JPanel {
 
             private void update() {
                 int[] value = {(int) xField.getValue(), (int) yField.getValue()};
-                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("windowPos", value));
+                Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage("windowPos", value));
             }
         };
         xField.addKeyListener(keyListener);
@@ -73,7 +73,7 @@ public class WindowOptionComponent extends JPanel {
         GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
-        int[] windowSize = JultiOptions.getInstance().playingWindowSize;
+        int[] windowSize = JultiOptions.getJultiOptions().playingWindowSize;
         xField.setValue(windowSize[0]);
         yField.setValue(windowSize[1]);
         KeyListener keyListener = new KeyAdapter() {
@@ -89,7 +89,7 @@ public class WindowOptionComponent extends JPanel {
 
             private void update() {
                 int[] value = {(int) xField.getValue(), (int) yField.getValue()};
-                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("playingWindowSize", value));
+                Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage("playingWindowSize", value));
             }
         };
         xField.addKeyListener(keyListener);
@@ -112,7 +112,7 @@ public class WindowOptionComponent extends JPanel {
         GUIUtil.setActualSize(yField, 50, 23);
         positionPanel.add(xField);
         positionPanel.add(yField);
-        int[] windowSize = JultiOptions.getInstance().resettingWindowSize;
+        int[] windowSize = JultiOptions.getJultiOptions().resettingWindowSize;
         xField.setValue(windowSize[0]);
         yField.setValue(windowSize[1]);
         KeyListener keyListener = new KeyAdapter() {
@@ -128,7 +128,7 @@ public class WindowOptionComponent extends JPanel {
 
             private void update() {
                 int[] value = {(int) xField.getValue(), (int) yField.getValue()};
-                Julti.getInstance().queueMessageAndWait(new OptionChangeQMessage("resettingWindowSize", value));
+                Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage("resettingWindowSize", value));
             }
         };
         xField.addKeyListener(keyListener);

@@ -35,7 +35,7 @@ public class ResetCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toReset;
         if (args[0].equals("all")) {
-            toReset = InstanceManager.getManager().getInstances();
+            toReset = InstanceManager.getInstanceManager().getInstances();
         } else {
             toReset = CommandManager.getInstances(args[0]);
         }

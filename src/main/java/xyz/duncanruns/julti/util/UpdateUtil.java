@@ -44,7 +44,7 @@ public final class UpdateUtil {
                 return;
             }
 
-            JultiOptions options = JultiOptions.getInstance();
+            JultiOptions options = JultiOptions.getJultiOptions();
 
             // Get the version tag of the first found release (always latest) of the list of releases of the Julti repository from an anonymous GitHub connection.
             GHRelease release = GitHub.connectAnonymously().getRepository("DuncanRuns/Julti").listReleases().toList().get(0);
@@ -104,8 +104,8 @@ public final class UpdateUtil {
     private static void updateAndLaunch(GHAsset asset) throws IOException, PowerShellExecutionException {
         Path newJarPath = Julti.getSourcePath().resolveSibling(asset.getName());
 
-        Point location = JultiGUI.getInstance().getLocation();
-        JultiGUI.getInstance().closeForUpdate();
+        Point location = JultiGUI.getJultiGUI().getLocation();
+        JultiGUI.getJultiGUI().closeForUpdate();
 
         if (!Files.exists(newJarPath)) {
             downloadAssetWithProgress(asset, newJarPath, new DownloadProgressFrame(location).getBar());

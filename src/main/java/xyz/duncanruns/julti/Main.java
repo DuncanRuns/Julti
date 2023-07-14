@@ -32,17 +32,17 @@ public final class Main {
         FlatDarkLaf.setup();
 
         // Load Options
-        JultiOptions.getInstance();
+        JultiOptions.getJultiOptions();
         ScriptManager.reload();
 
         // Start Affinity Manager
         AffinityManager.start();
 
         // Start GUI
-        JultiGUI.getInstance().setVisible();
+        JultiGUI.getJultiGUI().setVisible();
 
         // Start hotkey checker
-        HotkeyManager.getInstance().start();
+        HotkeyManager.getHotkeyManager().start();
 
         // Redirect uncaught exceptions to Julti logging
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
@@ -50,6 +50,6 @@ public final class Main {
         });
 
         // Run main loop
-        Julti.getInstance().run();
+        Julti.getJulti().run();
     }
 }

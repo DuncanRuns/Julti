@@ -30,10 +30,7 @@ public final class InstanceManager {
     private InstanceManager() {
     }
 
-    /**
-     * Would be called getInstance(), but called getManager() to avoid confusion with {@link #getInstances()}
-     */
-    public static InstanceManager getManager() {
+    public static InstanceManager getInstanceManager() {
         return INSTANCE;
     }
 
@@ -47,7 +44,7 @@ public final class InstanceManager {
     }
 
     public void checkOpenedInstances() {
-        Set<MinecraftInstance> replacements = InstanceChecker.getInstance().getAllOpenedInstances();
+        Set<MinecraftInstance> replacements = InstanceChecker.getInstanceChecker().getAllOpenedInstances();
 
         // For each of Julti's instances
         AtomicBoolean instancesFound = new AtomicBoolean(false);
@@ -85,7 +82,7 @@ public final class InstanceManager {
             MouseUtil.clickTopLeft(instance.getHwnd());
             sleep(50);
         });
-        OBSStateManager.getInstance().tryOutputLSInfo();
+        OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         ResetHelper.getManager().reload();
     }
 
@@ -125,7 +122,7 @@ public final class InstanceManager {
     }
 
     public MinecraftInstance getSelectedInstance() {
-        for (MinecraftInstance instance : InstanceManager.getManager().getInstances()) {
+        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
             if (ActiveWindowManager.isWindowActive(instance.getHwnd())) {
                 return instance;
             }
@@ -146,7 +143,7 @@ public final class InstanceManager {
     }
 
     public void renameWindows() {
-        if (JultiOptions.getInstance().preventWindowNaming) {
+        if (JultiOptions.getJultiOptions().preventWindowNaming) {
             return;
         }
         int i = 1;
@@ -161,19 +158,19 @@ public final class InstanceManager {
     }
 
     public void saveInstances() {
-        JultiOptions.getInstance().instancePaths = this.instances.stream().map(instance -> instance.getPath().toString()).collect(Collectors.toList());
+        JultiOptions.getJultiOptions().instancePaths = this.instances.stream().map(instance -> instance.getPath().toString()).collect(Collectors.toList());
     }
 
     public void loadInstances() {
         this.instances.clear();
-        JultiOptions.getInstance().instancePaths.forEach(pathString -> this.instances.add(new MinecraftInstance(Paths.get(pathString))));
+        JultiOptions.getJultiOptions().instancePaths.forEach(pathString -> this.instances.add(new MinecraftInstance(Paths.get(pathString))));
     }
 
     public void redetectInstances() {
         Julti.log(Level.DEBUG, "Redect running...");
         this.instances.clear();
         Julti.log(Level.DEBUG, "Cleared instances");
-        this.instances.addAll(InstanceChecker.getInstance().getAllOpenedInstances());
+        this.instances.addAll(InstanceChecker.getInstanceChecker().getAllOpenedInstances());
         Julti.log(Level.DEBUG, "Added instances");
         this.instances.sort(Comparator.comparingInt(MinecraftInstance::getNameSortingNum));
         Julti.log(Level.DEBUG, "Sorted instances");

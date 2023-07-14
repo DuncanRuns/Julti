@@ -33,7 +33,7 @@ public class LaunchCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toLaunch;
         if (args[0].equals("all")) {
-            toLaunch = InstanceManager.getManager().getInstances();
+            toLaunch = InstanceManager.getInstanceManager().getInstances();
         } else {
             toLaunch = CommandManager.getInstances(args[0]);
         }

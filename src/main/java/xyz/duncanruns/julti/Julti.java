@@ -62,16 +62,16 @@ public final class Julti {
     private Julti() {
     }
 
-    public static Julti getInstance() {
+    public static Julti getJulti() {
         return INSTANCE;
     }
 
     public static void waitForExecute(Runnable runnable) {
-        getInstance().queueMessageAndWait(new RunnableQMessage(runnable));
+        getJulti().queueMessageAndWait(new RunnableQMessage(runnable));
     }
 
     public static void doLater(Runnable runnable) {
-        getInstance().queueMessage(new RunnableQMessage(runnable));
+        getJulti().queueMessage(new RunnableQMessage(runnable));
     }
 
     public static void log(Level level, String message) {
@@ -126,7 +126,7 @@ public final class Julti {
     }
 
     public void changeProfile(String profileName) {
-        if (!JultiOptions.getInstance().trySave()) {
+        if (!JultiOptions.getJultiOptions().trySave()) {
             return;
         }
         if (!JultiOptions.tryChangeProfile(profileName)) {
@@ -136,14 +136,14 @@ public final class Julti {
     }
 
     private void reload() {
-        InstanceManager.getManager().onOptionsLoad();
-        HotkeyManager.getInstance().reloadHotkeys();
+        InstanceManager.getInstanceManager().onOptionsLoad();
+        HotkeyManager.getHotkeyManager().reloadHotkeys();
         ResetHelper.getManager().reload();
     }
 
     private void changeOption(QMessage message) {
         OptionChangeQMessage ocMessage = (OptionChangeQMessage) message;
-        if (!JultiOptions.getInstance().trySetValue(ocMessage.getOptionName(), ocMessage.getValue())) {
+        if (!JultiOptions.getJultiOptions().trySetValue(ocMessage.getOptionName(), ocMessage.getValue())) {
             message.markFailed();
         }
     }
@@ -153,7 +153,7 @@ public final class Julti {
     }
 
     private void stop() {
-        JultiOptions.getInstance().trySave();
+        JultiOptions.getJultiOptions().trySave();
         AffinityManager.stop();
         SleepBGUtil.disableLock();
         AffinityManager.release();
@@ -166,7 +166,7 @@ public final class Julti {
 
     public void run() {
         ResourceUtil.makeResources();
-        OBSStateManager.getInstance().tryOutputLSInfo();
+        OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         checkDeleteOldJar();
         this.reload();
         long cycles = 0;
@@ -178,7 +178,7 @@ public final class Julti {
         }
 
         // Schedule update checker after Julti startup processes
-        Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getInstance()), "update-checker").start());
+        Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getJultiGUI()), "update-checker").start());
 
         while (this.running) {
             sleep(1);
@@ -188,24 +188,24 @@ public final class Julti {
 
     private void tick(long cycles) {
         ActiveWindowManager.update();
-        InstanceManager.getManager().tick(cycles);
+        InstanceManager.getInstanceManager().tick(cycles);
         if (cycles % 100 == 0) {
             this.ensureLocation();
         }
         this.processQMessages();
         this.processHotkeyMessages();
-        InstanceManager.getManager().tickInstances();
-        OBSStateManager.getInstance().tryOutputState();
+        InstanceManager.getInstanceManager().tickInstances();
+        OBSStateManager.getOBSStateManager().tryOutputState();
     }
 
     private void ensureLocation() {
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         boolean instanceActive = selectedInstance != null;
         boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
         if (wallActive) {
-            OBSStateManager.getInstance().setLocationToWall();
+            OBSStateManager.getOBSStateManager().setLocationToWall();
         } else if (instanceActive) {
-            OBSStateManager.getInstance().setLocation(InstanceManager.getManager().getInstanceNum(selectedInstance));
+            OBSStateManager.getOBSStateManager().setLocation(InstanceManager.getInstanceManager().getInstanceNum(selectedInstance));
         }
     }
 
@@ -226,7 +226,7 @@ public final class Julti {
 
     private void processHotkeyMessages() {
         // Cancel all hotkeys if instances are missing
-        if (InstanceManager.getManager().areInstancesMissing()) {
+        if (InstanceManager.getInstanceManager().areInstancesMissing()) {
             this.hotkeyQueue.forEach(QMessage::markProcessed);
             this.hotkeyQueue.clear();
             return;
@@ -247,7 +247,7 @@ public final class Julti {
     private void runHotkeyAction(String hotkeyCode, Point mousePosition) {
         if (hotkeyCode.startsWith("script:")) {
             String scriptName = hotkeyCode.split(":")[1];
-            boolean instanceActive = InstanceManager.getManager().getSelectedInstance() != null;
+            boolean instanceActive = InstanceManager.getInstanceManager().getSelectedInstance() != null;
             boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
             if ((!instanceActive) && (!wallActive)) {
                 return;
@@ -297,10 +297,10 @@ public final class Julti {
 
     public void activateInstance(MinecraftInstance instance, boolean doingSetup) {
         instance.activate(doingSetup);
-        if (JultiOptions.getInstance().alwaysOnTopProjector && ActiveWindowManager.isWallActive()) {
+        if (JultiOptions.getJultiOptions().alwaysOnTopProjector && ActiveWindowManager.isWallActive()) {
             User32.INSTANCE.ShowWindow(ActiveWindowManager.getActiveHwnd(), User32.SW_MINIMIZE);
         }
-        OBSStateManager.getInstance().setLocation(InstanceManager.getManager().getInstanceNum(instance));
+        OBSStateManager.getOBSStateManager().setLocation(InstanceManager.getInstanceManager().getInstanceNum(instance));
     }
 
     public void focusWall() {
@@ -320,12 +320,12 @@ public final class Julti {
             }
         }
         HWND hwnd = wallHwnd.get();
-        if (JultiOptions.getInstance().alwaysOnTopProjector) {
+        if (JultiOptions.getJultiOptions().alwaysOnTopProjector) {
             // Set always on top
             User32.INSTANCE.SetWindowPos(hwnd, new HWND(new Pointer(-1)), 0, 0, 0, 0, new WinDef.UINT(0x0002 | 0x0001));
         }
         ActiveWindowManager.activateHwnd(hwnd);
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
-        OBSStateManager.getInstance().setLocationToWall();
+        OBSStateManager.getOBSStateManager().setLocationToWall();
     }
 }

@@ -22,7 +22,7 @@ public final class LogReceiver {
 
     public static void receive(Level level, String message) {
         receiverQueue.execute(() -> {
-            if (level.equals(Level.DEBUG) && !JultiOptions.getInstance().showDebug) {
+            if (level.equals(Level.DEBUG) && !JultiOptions.getJultiOptions().showDebug) {
                 return;
             }
             if (logConsumer != null) {

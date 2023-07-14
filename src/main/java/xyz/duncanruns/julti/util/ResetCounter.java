@@ -16,7 +16,7 @@ public final class ResetCounter {
 
     private static void incrementInternal() {
         synchronized (LOCK) {
-            updateFile(JultiOptions.getInstance().resetCounter++);
+            updateFile(JultiOptions.getJultiOptions().resetCounter++);
         }
     }
 

@@ -44,7 +44,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == 1) {
             Thread.currentThread().setName("julti-gui");
-            Julti.doLater(() -> Julti.getInstance().activateInstance(this.instance));
+            Julti.doLater(() -> Julti.getJulti().activateInstance(this.instance));
         }
     }
 
@@ -101,7 +101,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Thread.currentThread().setName("julti-gui");
-                InstanceManager.getManager().removeInstance(SingleInstancePanel.this.instance);
+                InstanceManager.getInstanceManager().removeInstance(SingleInstancePanel.this.instance);
             }
         });
         popupMenu.show(e.getComponent(), e.getX(), e.getY());

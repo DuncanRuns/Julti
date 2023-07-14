@@ -28,7 +28,7 @@ public class InstanceChecker {
     private InstanceChecker() {
     }
 
-    public static InstanceChecker getInstance() {
+    public static InstanceChecker getInstanceChecker() {
         return INSTANCE;
     }
 

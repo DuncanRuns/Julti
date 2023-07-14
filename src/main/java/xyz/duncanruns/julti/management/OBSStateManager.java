@@ -24,12 +24,12 @@ public class OBSStateManager {
 
     private String lastOut = "";
 
-    public static OBSStateManager getInstance() {
+    public static OBSStateManager getOBSStateManager() {
         return INSTANCE;
     }
 
     public void tryOutputState() {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         // Lazy try except (I sorry)
         try {
             StringBuilder out = new StringBuilder(this.currentLocation);
@@ -39,7 +39,7 @@ public class OBSStateManager {
                 size = new Dimension(options.playingWindowSize[0], options.playingWindowSize[1]);
             }
             List<MinecraftInstance> lockedInstances = ResetHelper.getManager().getLockedInstances();
-            for (MinecraftInstance instance : InstanceManager.getManager().getInstances()) {
+            for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
                 Rectangle instancePos = ResetHelper.getManager().getInstancePosition(instance, size);
                 instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
@@ -93,8 +93,8 @@ public class OBSStateManager {
 
     public void tryOutputLSInfo() {
         Julti.log(Level.DEBUG, "OBSStateManager: Trying to output loading square info...");
-        JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        JultiOptions options = JultiOptions.getJultiOptions();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
         if (instances.size() == 0) {
             Julti.log(Level.DEBUG, "OBSStateManager: No instances, cancelling.");
@@ -123,7 +123,7 @@ public class OBSStateManager {
         }
 
 
-        if (JultiOptions.getInstance().prepareWindowOnLock) {
+        if (JultiOptions.getJultiOptions().prepareWindowOnLock) {
             // Check for alternate square size
             width = options.playingWindowSize[0];
             height = options.playingWindowSize[1];

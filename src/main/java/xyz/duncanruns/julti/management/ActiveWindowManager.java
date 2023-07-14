@@ -67,7 +67,7 @@ public final class ActiveWindowManager {
         // intendedActiveHwnd = hwnd;
         // intendedActiveHwndTime = System.currentTimeMillis();
 
-        if (JultiOptions.getInstance().useAltSwitching) {
+        if (JultiOptions.getJultiOptions().useAltSwitching) {
 
             // fuck
             KeyboardUtil.keyDown(Win32VK.VK_LMENU);

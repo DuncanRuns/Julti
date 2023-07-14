@@ -163,7 +163,7 @@ public class StateTracker {
      * @return
      */
     public boolean shouldCoverWithDirt() {
-        if (!JultiOptions.getInstance().doDirtCovers || this.isCurrentState(InstanceState.TITLE)) {
+        if (!JultiOptions.getJultiOptions().doDirtCovers || this.isCurrentState(InstanceState.TITLE)) {
             return false;
         }
         return (this.isCurrentState(InstanceState.WAITING) || this.isCurrentState(InstanceState.GENERATING));
@@ -175,7 +175,7 @@ public class StateTracker {
         return (
                 this.isCurrentState(InstanceState.INWORLD) || this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.TITLE)
         ) && (
-                currentTime - this.getLastOccurrenceOf(InstanceState.GENERATING) > JultiOptions.getInstance().wallResetCooldown
+                currentTime - this.getLastOccurrenceOf(InstanceState.GENERATING) > JultiOptions.getJultiOptions().wallResetCooldown
         );
     }
 

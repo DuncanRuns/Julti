@@ -273,7 +273,7 @@ public class MinecraftInstance {
         this.scheduler.clear();
         this.activeSinceReset = true;
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         AffinityManager.pause();
         AffinityManager.jumpPlayingAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
@@ -338,7 +338,7 @@ public class MinecraftInstance {
     private void onWorldLoad(boolean bypassPieChartGate) {
         this.scheduler.clear();
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         if (this.gameOptions.pauseOnLostFocus) {
             Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus, some features cannot be used!");
@@ -394,7 +394,7 @@ public class MinecraftInstance {
 
     private void onPreviewLoad() {
         this.scheduler.clear();
-        if (JultiOptions.getInstance().useF3) {
+        if (JultiOptions.getJultiOptions().useF3) {
             this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
@@ -404,7 +404,7 @@ public class MinecraftInstance {
         return (
                 this.stateTracker.isResettable()
         ) && (
-                System.currentTimeMillis() - this.lastSetVisible > JultiOptions.getInstance().wallResetCooldown
+                System.currentTimeMillis() - this.lastSetVisible > JultiOptions.getJultiOptions().wallResetCooldown
         );
     }
 
@@ -464,7 +464,7 @@ public class MinecraftInstance {
 
     public boolean isFullscreen() {
         if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
-            return this.activeSinceReset && JultiOptions.getInstance().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
+            return this.activeSinceReset && JultiOptions.getJultiOptions().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
         } else {
             return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
         }
@@ -481,7 +481,7 @@ public class MinecraftInstance {
 
     public void launch(String offlineName) {
         try {
-            String multiMCPath = JultiOptions.getInstance().multiMCPath;
+            String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
             if (!multiMCPath.isEmpty()) {
                 String cmd;
                 if (offlineName == null) {
@@ -545,7 +545,7 @@ public class MinecraftInstance {
     }
 
     private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
-        if (!JultiOptions.getInstance().letJultiMoveWindows) {
+        if (!JultiOptions.getJultiOptions().letJultiMoveWindows) {
             return;
         }
 
@@ -580,7 +580,7 @@ public class MinecraftInstance {
     }
 
     public void ensureResettingWindowState(boolean offload) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         this.ensureWindowState(
                 options.useBorderless,
                 // maximize if
@@ -592,7 +592,7 @@ public class MinecraftInstance {
     }
 
     public void ensurePlayingWindowState(boolean offload) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         this.ensureWindowState(
                 options.useBorderless,
                 (!options.useBorderless) && (!options.autoFullscreen || options.useMaximizeWithFullscreen),

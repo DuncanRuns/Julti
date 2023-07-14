@@ -26,7 +26,7 @@ public final class WindowTitleUtil {
     }
 
     public static boolean isOBSTitle(String title) {
-        String regex = '^' + JultiOptions.getInstance().obsWindowNameFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
+        String regex = '^' + JultiOptions.getJultiOptions().obsWindowNameFormat.toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
         return Pattern.compile(regex).matcher(title.toLowerCase()).matches();
     }
 

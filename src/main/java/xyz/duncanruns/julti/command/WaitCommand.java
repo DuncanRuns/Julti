@@ -37,7 +37,7 @@ public class WaitCommand extends Command {
 
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
-        List<MinecraftInstance> instances = args[1].equals("all") ? InstanceManager.getManager().getInstances() : CommandManager.getInstances(args[1]);
+        List<MinecraftInstance> instances = args[1].equals("all") ? InstanceManager.getInstanceManager().getInstances() : CommandManager.getInstances(args[1]);
         if (instances.size() == 0) {
             throw new CommandFailedException("No instances found");
         }
@@ -45,7 +45,7 @@ public class WaitCommand extends Command {
             BooleanSupplier supplier;
             switch (args[0]) {
                 case "launch":
-                    supplier = () -> InstanceManager.getManager().getMatchingInstance(instance).hasWindow();
+                    supplier = () -> InstanceManager.getInstanceManager().getMatchingInstance(instance).hasWindow();
                     break;
                 case "previewload":
                     supplier = () -> instance.getStateTracker().isCurrentState(InstanceState.PREVIEWING);

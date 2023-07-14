@@ -141,11 +141,11 @@ public final class JultiOptions {
         this.profileName = FilenameUtils.removeExtension(location.getFileName().toString());
     }
 
-    public static JultiOptions getInstance() {
-        return getInstance(false);
+    public static JultiOptions getJultiOptions() {
+        return getJultiOptions(false);
     }
 
-    public static JultiOptions getInstance(boolean reload) {
+    public static JultiOptions getJultiOptions(boolean reload) {
         if (reload) {
             INSTANCE = null;
         }
@@ -188,7 +188,7 @@ public final class JultiOptions {
         try {
             ensureJultiDir();
             FileUtil.writeString(selectedFilePath, profileName);
-            getInstance(true);
+            getJultiOptions(true);
             return true;
         } catch (Exception e) {
             Julti.log(Level.ERROR, "Failed to change profile:\n" + ExceptionUtil.toDetailedString(e));
