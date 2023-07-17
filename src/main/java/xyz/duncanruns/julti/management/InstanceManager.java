@@ -153,8 +153,12 @@ public final class InstanceManager {
     }
 
     public void removeInstance(MinecraftInstance instance) {
+        if (!this.instances.contains(instance)) {
+            Julti.log(Level.WARN, "An instance not found in the instances list was requested to be removed! Likely a GUI desync.");
+        }
         this.instances.remove(instance);
         this.saveInstances();
+        ResetHelper.getManager().reload();
     }
 
     public void saveInstances() {

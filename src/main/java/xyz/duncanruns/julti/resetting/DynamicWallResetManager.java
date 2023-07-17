@@ -27,7 +27,7 @@ public class DynamicWallResetManager extends WallResetManager {
 
     private List<MinecraftInstance> getDisplayInstances() {
         List<MinecraftInstance> allInstances = InstanceManager.getInstanceManager().getInstances();
-        return this.displayInstancesIndices.stream().map(i -> i == null ? null : allInstances.get(i)).collect(Collectors.toList());
+        return this.displayInstancesIndices.stream().map(i -> i == null || i >= allInstances.size() ? null : allInstances.get(i)).collect(Collectors.toList());
     }
 
     private void saveDisplayInstances(List<MinecraftInstance> displayInstances) {

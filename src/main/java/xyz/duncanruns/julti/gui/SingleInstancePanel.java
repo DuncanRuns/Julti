@@ -101,7 +101,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Thread.currentThread().setName("julti-gui");
-                InstanceManager.getInstanceManager().removeInstance(SingleInstancePanel.this.instance);
+                Julti.waitForExecute(() -> InstanceManager.getInstanceManager().removeInstance(SingleInstancePanel.this.instance));
             }
         });
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
