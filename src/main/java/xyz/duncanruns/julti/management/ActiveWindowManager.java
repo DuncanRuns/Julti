@@ -20,9 +20,6 @@ public final class ActiveWindowManager {
 
     private static HWND lastWallHwnd;
 
-    //private static HWND intendedActiveHwnd;
-    //private static long intendedActiveHwndTime;
-
     private ActiveWindowManager() {
     }
 
@@ -63,20 +60,12 @@ public final class ActiveWindowManager {
     }
 
     public static void activateHwnd(HWND hwnd) {
-        // Something to implement later if other things fail
-        // intendedActiveHwnd = hwnd;
-        // intendedActiveHwndTime = System.currentTimeMillis();
-
         if (JultiOptions.getJultiOptions().useAltSwitching) {
-
-            // fuck
             KeyboardUtil.keyDown(Win32VK.VK_LMENU);
             KeyboardUtil.keyUp(Win32VK.VK_LMENU);
             User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
-
         } else {
-
             // Using Erlend Robaye's answer from https://stackoverflow.com/questions/20444735/issue-with-setforegroundwindow-in-net
             // I believe specnr also uses this
             int currentlyFocusedWindowProcessId = User32.INSTANCE.GetWindowThreadProcessId(User32.INSTANCE.GetForegroundWindow(), new IntByReference(0));
