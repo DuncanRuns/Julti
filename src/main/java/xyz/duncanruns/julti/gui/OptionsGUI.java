@@ -324,10 +324,15 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("obsWindowNameFormat", "Projector Name Format", this)));
-        panel.add(GUIUtil.createSpacer());
-
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("instanceSpacing", "Instance Spacing (Border)", this)));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Custom Wall Window", "useCustomWallWindow", b -> this.reload())));
+
+        if (JultiOptions.getJultiOptions().useCustomWallWindow) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("customWallNameFormat", "Custom Wall Name Format", this)));
+        }
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());

@@ -8,9 +8,11 @@ import xyz.duncanruns.julti.win32.User32;
 import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 public final class WindowStateUtil {
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final Pattern OBS_EXECUTABLE_PATTERN = Pattern.compile("^.+(\\/|\\\\)obs\\d\\d.exe$");
     private static final int BORDERLESS_STYLE = ~(User32.WS_BORDER
             | User32.WS_DLGFRAME
             | User32.WS_THICKFRAME
@@ -21,10 +23,25 @@ public final class WindowStateUtil {
     private WindowStateUtil() {
     }
 
+    /**
+     * @return true if the hwnd points to a window from an OBS executable and the window does not have WS_BORDER, otherwise false
+     */
+    public static boolean isOBSProjector(HWND hwnd) {
+        return (!WindowStateUtil.hwndHasBorderBasic(hwnd)) && OBS_EXECUTABLE_PATTERN.matcher(PidUtil.getProcessExecutable(PidUtil.getPidFromHwnd(hwnd))).matches();
+    }
+
     public static boolean isHwndBorderless(HWND hwnd) {
         int style = getHwndStyle(hwnd);
         int styleWithBorderless = style & BORDERLESS_STYLE;
         return styleWithBorderless == style;
+    }
+
+    /**
+     * Only checks the WS_BORDER value
+     */
+    public static boolean hwndHasBorderBasic(HWND hwnd) {
+        int style = getHwndStyle(hwnd);
+        return (style & User32.WS_BORDER) != 0;
     }
 
     public static void setHwndBorderless(HWND hwnd) {

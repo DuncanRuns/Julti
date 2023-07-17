@@ -8,6 +8,7 @@ import com.sun.jna.ptr.IntByReference;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.util.WindowStateUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
@@ -35,7 +36,7 @@ public final class ActiveWindowManager {
         if (activeHwnd == null) {
             return false;
         }
-        return WindowTitleUtil.isOBSTitle(activeTitle);
+        return isWallHwnd(activeHwnd);
     }
 
     public static void update() {
@@ -53,6 +54,14 @@ public final class ActiveWindowManager {
         WinDef.RECT rect = new WinDef.RECT();
         User32.INSTANCE.GetWindowRect(activeHwnd, rect);
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+    }
+
+    public static boolean isWallHwnd(HWND hwnd) {
+        if (JultiOptions.getJultiOptions().useCustomWallWindow) {
+            return WindowTitleUtil.isWallTitle(hwnd == activeHwnd ? activeTitle : WindowTitleUtil.getHwndTitle(hwnd));
+        } else {
+            return WindowStateUtil.isOBSProjector(hwnd);
+        }
     }
 
     public static HWND getLastWallHwnd() {

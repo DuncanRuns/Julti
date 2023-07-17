@@ -21,7 +21,6 @@ import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ResourceUtil;
 import xyz.duncanruns.julti.util.SleepBGUtil;
 import xyz.duncanruns.julti.util.UpdateUtil;
-import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -308,7 +307,7 @@ public final class Julti {
         AtomicReference<HWND> wallHwnd = new AtomicReference<>(ActiveWindowManager.getLastWallHwnd());
         if (wallHwnd.get() == null) {
             User32.INSTANCE.EnumWindows((hwnd, data) -> {
-                if (WindowTitleUtil.isOBSTitle(WindowTitleUtil.getHwndTitle(hwnd))) {
+                if (ActiveWindowManager.isWallHwnd(hwnd)) {
                     wallHwnd.set(hwnd);
                     return false;
                 }

@@ -25,8 +25,8 @@ public final class WindowTitleUtil {
         return out.toString();
     }
 
-    public static boolean isOBSTitle(String title) {
-        String regex = '^' + JultiOptions.getJultiOptions().obsWindowNameFormat.trim().toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
+    public static boolean isWallTitle(String title) {
+        String regex = '^' + JultiOptions.getJultiOptions().customWallNameFormat.trim().toLowerCase().replaceAll("([^a-zA-Z0-9 ])", "\\\\$1").replace("\\*", ".*") + '$';
         return Pattern.compile(regex).matcher(title.toLowerCase()).matches();
     }
 

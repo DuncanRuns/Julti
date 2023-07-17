@@ -88,7 +88,8 @@ public final class JultiOptions {
 
     // OBS
     public int instanceSpacing = 0;
-    public String obsWindowNameFormat = "* projector (scene) - *";
+    public boolean useCustomWallWindow = false;
+    public String customWallNameFormat = "* projector (scene) - *";
 
     // Other
     public String multiMCPath = "";
@@ -281,6 +282,11 @@ public final class JultiOptions {
             changes.add("The \"Pause on Load\" was disabled, the option has been removed and worlds will now always pause on load");
         }
 
+        if (oldOptions.obsWindowNameFormat != null) {
+            changes.add("The obsWindowNameFormat has been removed and replaced by a better detection system. If you were not using OBS to run your wall, you can enable the new custom wall option in Julti options.");
+            this.customWallNameFormat = oldOptions.obsWindowNameFormat;
+        }
+
         if (changes.isEmpty()) {
             return;
         }
@@ -462,5 +468,6 @@ public final class JultiOptions {
         public Boolean noCopeMode = null;
         public Boolean unsquishOnLock = null;
         public Boolean cleanWall = null;
+        public String obsWindowNameFormat = null;
     }
 }
