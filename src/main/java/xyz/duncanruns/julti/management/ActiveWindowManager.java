@@ -36,6 +36,9 @@ public final class ActiveWindowManager {
         if (activeHwnd == null) {
             return false;
         }
+        if (activeHwnd.equals(lastWallHwnd)) {
+            return true;
+        }
         return isWallHwnd(activeHwnd);
     }
 
