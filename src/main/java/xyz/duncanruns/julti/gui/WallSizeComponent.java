@@ -34,7 +34,7 @@ public class WallSizeComponent extends JPanel {
         GUIUtil.setActualSize(columnField, 50, 23);
         sizePanel.add(rowField);
         sizePanel.add(columnField);
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         rowField.setValue(options.overrideRowsAmount);
         columnField.setValue(options.overrideColumnsAmount);
 
@@ -53,7 +53,7 @@ public class WallSizeComponent extends JPanel {
                 int x = (int) rowField.getValue();
                 int y = (int) columnField.getValue();
                 Julti.waitForExecute(() -> {
-                    JultiOptions options = JultiOptions.getInstance();
+                    JultiOptions options = JultiOptions.getJultiOptions();
                     options.overrideRowsAmount = x;
                     options.overrideColumnsAmount = y;
                     Julti.doLater(() -> ResetHelper.getManager().reload());

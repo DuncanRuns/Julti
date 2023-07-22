@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class ResetManager {
 
     public List<ActionResult> doReset() {
-        String toCopy = JultiOptions.getInstance().clipboardOnReset;
+        String toCopy = JultiOptions.getJultiOptions().clipboardOnReset;
         if (!toCopy.isEmpty()) {
             KeyboardUtil.copyToClipboard(toCopy);
         }
@@ -54,7 +54,7 @@ public abstract class ResetManager {
     }
 
     public void notifyPreviewLoaded(MinecraftInstance instance) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         if (options.useAffinity) {
             AffinityManager.ping();
             AffinityManager.ping(options.affinityBurst + 1);
@@ -62,7 +62,7 @@ public abstract class ResetManager {
     }
 
     public void notifyWorldLoaded(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
     }
@@ -73,10 +73,10 @@ public abstract class ResetManager {
 
     @Nullable
     protected MinecraftInstance getHoveredWallInstance(Point mousePosition) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         Point point = new Point(mousePosition.x, mousePosition.y);
         Rectangle bounds = ActiveWindowManager.getActiveWindowBounds();
-        Dimension sceneSize = OBSStateManager.getInstance().getOBSSceneSize();
+        Dimension sceneSize = OBSStateManager.getOBSStateManager().getOBSSceneSize();
         if (sceneSize == null) {
             sceneSize = new Dimension(options.playingWindowSize[0], options.playingWindowSize[1]);
         }
@@ -87,7 +87,7 @@ public abstract class ResetManager {
             posOnScene.y = posOnScene.y * sceneSize.height / bounds.height;
         }
 
-        for (MinecraftInstance instance : InstanceManager.getManager().getInstances()) {
+        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
             if (this.getInstancePosition(instance, sceneSize).contains(posOnScene)) {
                 return instance;
             }
@@ -105,9 +105,9 @@ public abstract class ResetManager {
      * @return the position of the instance
      */
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         int totalRows;
         int totalColumns;
 
@@ -121,7 +121,7 @@ public abstract class ResetManager {
 
         int instanceInd = instances.indexOf(instance);
 
-        Dimension size = sceneSize == null ? OBSStateManager.getInstance().getOBSSceneSize() : sceneSize;
+        Dimension size = sceneSize == null ? OBSStateManager.getOBSStateManager().getOBSSceneSize() : sceneSize;
 
         // Using floats here so there won't be any gaps in the wall after converting back to int
         float iWidth = size.width / (float) totalColumns;
@@ -161,7 +161,7 @@ public abstract class ResetManager {
     }
 
     public boolean lockInstance(MinecraftInstance instance) {
-        if (JultiOptions.getInstance().prepareWindowOnLock) {
+        if (JultiOptions.getJultiOptions().prepareWindowOnLock) {
             // We use doLater because this is a laggy method that isn't incredibly important.
             Julti.doLater(() -> instance.ensurePlayingWindowState(true));
         }
@@ -169,8 +169,8 @@ public abstract class ResetManager {
     }
 
     public MinecraftInstance getRelativeInstance(int offset) {
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
     }

@@ -15,7 +15,7 @@ public class ScriptsGUI extends JFrame {
     private JPanel panel;
 
     public ScriptsGUI() {
-        this.setLocation(JultiGUI.getInstance().getLocation());
+        this.setLocation(JultiGUI.getJultiGUI().getLocation());
         this.setupWindow();
         this.reload();
     }

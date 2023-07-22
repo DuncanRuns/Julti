@@ -44,7 +44,7 @@ public class CommandManager {
             return Collections.emptyList();
         }
         List<MinecraftInstance> out = new ArrayList<>();
-        List<MinecraftInstance> allInstances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> allInstances = InstanceManager.getInstanceManager().getInstances();
 
         for (String instanceArg : instancesArg.split(",")) {
             if (instanceArg.startsWith("~")) {

@@ -32,7 +32,7 @@ public class CloseCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toClose;
         if (args[0].equals("all")) {
-            toClose = InstanceManager.getManager().getInstances();
+            toClose = InstanceManager.getInstanceManager().getInstances();
         } else {
             toClose = CommandManager.getInstances(args[0]);
         }

@@ -28,7 +28,7 @@ public class OpenToLanCommand extends Command {
 
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         if (selectedInstance != null) {
             Julti.waitForExecute(() -> selectedInstance.openToLan(false));
         }

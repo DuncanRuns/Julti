@@ -15,7 +15,7 @@ public final class DoAllFastUtil {
     }
 
     public static void doAllFast(Consumer<MinecraftInstance> consumer) {
-        List<MinecraftInstance> instances = new ArrayList<>(InstanceManager.getManager().getInstances());
+        List<MinecraftInstance> instances = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         doAllFast(instances, consumer);
     }
 

@@ -9,13 +9,13 @@ import java.util.List;
 public class ResetHelper {
 
     public static ResetManager getManager() {
-        switch (JultiOptions.getInstance().resetMode) {
+        switch (JultiOptions.getJultiOptions().resetMode) {
             case 1:
-                return WallResetManager.getInstance();
+                return WallResetManager.getWallResetManager();
             case 2:
-                return DynamicWallResetManager.getInstance();
+                return DynamicWallResetManager.getDynamicWallResetManager();
             default:
-                return MultiResetManager.getInstance();
+                return MultiResetManager.getMultiResetManager();
         }
     }
 
@@ -52,7 +52,7 @@ public class ResetHelper {
     }
 
     private static void playActionSounds(List<ActionResult> actionResults) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         // Reset Sounds
         int instancesReset = (int) actionResults.stream().filter(actionResult -> actionResult.equals(ActionResult.INSTANCE_RESET)).count();

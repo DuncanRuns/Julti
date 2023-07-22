@@ -44,7 +44,7 @@ public final class UpdateUtil {
                 return;
             }
 
-            JultiOptions options = JultiOptions.getInstance();
+            JultiOptions options = JultiOptions.getJultiOptions();
 
             // Get the version tag of the first found release (always latest) of the list of releases of the Julti repository from an anonymous GitHub connection.
             GHRelease release = GitHub.connectAnonymously().getRepository("DuncanRuns/Julti").listReleases().toList().get(0);
@@ -96,22 +96,16 @@ public final class UpdateUtil {
     public static void tryUpdateAndLaunch(GHAsset asset) {
         try {
             updateAndLaunch(asset);
-        } catch (Exception exception) {
-            String detailedException = ExceptionUtil.toDetailedString(exception);
-            Julti.log(Level.ERROR, detailedException);
-            int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during an update!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
-            if (ans == 0) {
-                KeyboardUtil.copyToClipboard("Error during updating: " + detailedException);
-            }
-            System.exit(1);
+        } catch (Exception e) {
+            ExceptionUtil.showExceptionAndExit(e, "Julti has crashed during an update!");
         }
     }
 
     private static void updateAndLaunch(GHAsset asset) throws IOException, PowerShellExecutionException {
         Path newJarPath = Julti.getSourcePath().resolveSibling(asset.getName());
 
-        Point location = JultiGUI.getInstance().getLocation();
-        JultiGUI.getInstance().closeForUpdate();
+        Point location = JultiGUI.getJultiGUI().getLocation();
+        JultiGUI.getJultiGUI().closeForUpdate();
 
         if (!Files.exists(newJarPath)) {
             downloadAssetWithProgress(asset, newJarPath, new DownloadProgressFrame(location).getBar());

@@ -8,6 +8,7 @@ import com.sun.jna.ptr.IntByReference;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.util.WindowStateUtil;
 import xyz.duncanruns.julti.util.WindowTitleUtil;
 import xyz.duncanruns.julti.win32.User32;
 
@@ -19,9 +20,6 @@ public final class ActiveWindowManager {
     private static String activeTitle;
 
     private static HWND lastWallHwnd;
-
-    //private static HWND intendedActiveHwnd;
-    //private static long intendedActiveHwndTime;
 
     private ActiveWindowManager() {
     }
@@ -38,7 +36,10 @@ public final class ActiveWindowManager {
         if (activeHwnd == null) {
             return false;
         }
-        return WindowTitleUtil.isOBSTitle(activeTitle);
+        if (activeHwnd.equals(lastWallHwnd)) {
+            return true;
+        }
+        return isWallHwnd(activeHwnd);
     }
 
     public static void update() {
@@ -58,25 +59,25 @@ public final class ActiveWindowManager {
         return new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
     }
 
+    public static boolean isWallHwnd(HWND hwnd) {
+        if (JultiOptions.getJultiOptions().useCustomWallWindow) {
+            return WindowTitleUtil.isWallTitle(hwnd == activeHwnd ? activeTitle : WindowTitleUtil.getHwndTitle(hwnd));
+        } else {
+            return WindowStateUtil.isOBSProjector(hwnd);
+        }
+    }
+
     public static HWND getLastWallHwnd() {
         return lastWallHwnd;
     }
 
     public static void activateHwnd(HWND hwnd) {
-        // Something to implement later if other things fail
-        // intendedActiveHwnd = hwnd;
-        // intendedActiveHwndTime = System.currentTimeMillis();
-
-        if (JultiOptions.getInstance().useAltSwitching) {
-
-            // fuck
+        if (JultiOptions.getJultiOptions().useAltSwitching) {
             KeyboardUtil.keyDown(Win32VK.VK_LMENU);
             KeyboardUtil.keyUp(Win32VK.VK_LMENU);
             User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
-
         } else {
-
             // Using Erlend Robaye's answer from https://stackoverflow.com/questions/20444735/issue-with-setforegroundwindow-in-net
             // I believe specnr also uses this
             int currentlyFocusedWindowProcessId = User32.INSTANCE.GetWindowThreadProcessId(User32.INSTANCE.GetForegroundWindow(), new IntByReference(0));

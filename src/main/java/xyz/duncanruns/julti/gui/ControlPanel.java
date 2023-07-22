@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static xyz.duncanruns.julti.Julti.log;
 
@@ -39,8 +40,8 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getInstance(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
-                        Julti.doLater(() -> InstanceManager.getManager().redetectInstances());
+                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
+                        Julti.doLater(() -> InstanceManager.getInstanceManager().redetectInstances());
                     }
                 }
             });
@@ -49,7 +50,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    Julti.doLater(() -> InstanceManager.getManager().getInstances().forEach(MinecraftInstance::discoverInformation));
+                    Julti.doLater(() -> InstanceManager.getInstanceManager().getInstances().forEach(MinecraftInstance::discoverInformation));
 
                 }
             });
@@ -58,7 +59,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    SafeInstanceLauncher.launchInstances(InstanceManager.getManager().getInstances());
+                    SafeInstanceLauncher.launchInstances(InstanceManager.getInstanceManager().getInstances());
                 }
             });
 
@@ -66,7 +67,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getInstance(), "Are you sure you'd like to close all of your instances?", "Julti: Close Instances", JOptionPane.OK_CANCEL_OPTION)) {
+                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI(), "Are you sure you'd like to close all of your instances?", "Julti: Close Instances", JOptionPane.OK_CANCEL_OPTION)) {
                         Julti.doLater(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
                     }
                 }
@@ -76,7 +77,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    Julti.doLater(() -> InstanceManager.getManager().renameWindows());
+                    Julti.doLater(() -> InstanceManager.getInstanceManager().renameWindows());
                 }
             });
 
@@ -109,7 +110,7 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+                    List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
                     int ans = JOptionPane.showConfirmDialog(thisComponent, "Copy mods and config from " + instances.get(0) + " to all other instances?", "Julti: Sync Instances", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                     if (ans == 0) {
                         new Thread(() -> {
@@ -145,6 +146,35 @@ public class ControlPanel extends JPanel {
             } else {
                 this.optionsGUI.requestFocus();
             }
+        }), gbc);
+
+        if (!Objects.equals("DEV", Julti.VERSION)) {
+            return;
+        }
+
+        this.add(GUIUtil.createSpacer(2), gbc2);
+
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Dev Utilities..."), a -> {
+            JPopupMenu menu = new JPopupMenu("Dev Utilities");
+
+            GUIUtil.addMenuItem(menu, "Do waitForExecute Crash", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Julti.waitForExecute(() -> {
+                        throw new RuntimeException("Test Crash!!!");
+                    });
+                }
+            });
+
+            GUIUtil.addMenuItem(menu, "Do GUI Crash", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    throw new RuntimeException("Test Crash!!!");
+                }
+            });
+
+            Point mousePos = this.getMousePosition();
+            menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
     }
 

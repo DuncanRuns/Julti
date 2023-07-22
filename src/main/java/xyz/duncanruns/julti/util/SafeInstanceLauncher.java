@@ -29,7 +29,7 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstance(MinecraftInstance instance, CancelRequester cancelRequester) {
-        String multiMCPath = JultiOptions.getInstance().multiMCPath;
+        String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
         if (instance.hasWindow()) {
             log(Level.ERROR, "Could not launch " + instance + " (already open).");
             return;
@@ -49,7 +49,7 @@ public final class SafeInstanceLauncher {
             return;
         }
         log(Level.INFO, "Launching instance...");
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         String multiMCPath = options.multiMCPath;
         try {
             if (!startMultiMC(multiMCPath, cancelRequester)) {
@@ -57,7 +57,7 @@ public final class SafeInstanceLauncher {
                 return;
             }
         } catch (IOException e) {
-            return;
+            throw new RuntimeException(e);
         }
         if (cancelRequester.isCancelRequested()) {
             return;
@@ -72,7 +72,7 @@ public final class SafeInstanceLauncher {
         if (cancelRequester.isCancelRequested()) {
             return;
         }
-        int instanceNum = InstanceManager.getManager().getInstanceNum(instance);
+        int instanceNum = InstanceManager.getInstanceManager().getInstanceNum(instance);
         instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
     }
 
@@ -110,7 +110,7 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstances(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
-        String multiMCPath = JultiOptions.getInstance().multiMCPath;
+        String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
         if (multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath))) {
             log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
             return;
@@ -126,7 +126,7 @@ public final class SafeInstanceLauncher {
             return;
         }
         log(Level.INFO, "Launching instances...");
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         String multiMCPath = options.multiMCPath;
         try {
             if (!startMultiMC(multiMCPath, cancelRequester)) {
@@ -134,7 +134,7 @@ public final class SafeInstanceLauncher {
                 return;
             }
         } catch (Exception e) {
-            return;
+            throw new RuntimeException(e);
         }
         if (cancelRequester.isCancelRequested()) {
             return;

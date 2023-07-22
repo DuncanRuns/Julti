@@ -21,22 +21,22 @@ public class DynamicWallResetManager extends WallResetManager {
     private List<Integer> displayInstancesIndices = new ArrayList<>();
     private boolean isFirstReset = true;
 
-    public static ResetManager getInstance() {
+    public static DynamicWallResetManager getDynamicWallResetManager() {
         return INSTANCE;
     }
 
     private List<MinecraftInstance> getDisplayInstances() {
-        List<MinecraftInstance> allInstances = InstanceManager.getManager().getInstances();
-        return this.displayInstancesIndices.stream().map(i -> i == null ? null : allInstances.get(i)).collect(Collectors.toList());
+        List<MinecraftInstance> allInstances = InstanceManager.getInstanceManager().getInstances();
+        return this.displayInstancesIndices.stream().map(i -> i == null || i >= allInstances.size() ? null : allInstances.get(i)).collect(Collectors.toList());
     }
 
     private void saveDisplayInstances(List<MinecraftInstance> displayInstances) {
-        List<MinecraftInstance> allInstances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> allInstances = InstanceManager.getInstanceManager().getInstances();
         this.displayInstancesIndices = displayInstances.stream().map(i -> i == null ? null : allInstances.indexOf(i)).collect(Collectors.toList());
     }
 
     public void refreshDisplayInstances() {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         List<MinecraftInstance> displayInstances = this.getDisplayInstances();
 
         int totalRows = 2;
@@ -67,7 +67,7 @@ public class DynamicWallResetManager extends WallResetManager {
             return;
         }
 
-        List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getManager().getInstances());
+        List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         instancePool.removeIf(instance -> this.getLockedInstances().contains(instance));
         instancePool.removeIf(displayInstances::contains);
         instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
@@ -104,7 +104,7 @@ public class DynamicWallResetManager extends WallResetManager {
             }
         });
 
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         // Fill display with null then refresh to ensure good order
@@ -140,7 +140,7 @@ public class DynamicWallResetManager extends WallResetManager {
             }
         });
 
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return actionResults;
@@ -191,7 +191,7 @@ public class DynamicWallResetManager extends WallResetManager {
             if (Collections.replaceAll(displayInstances, instance, null)) {
                 this.saveDisplayInstances(displayInstances);
             }
-            if (JultiOptions.getInstance().dwReplaceLocked) {
+            if (JultiOptions.getJultiOptions().dwReplaceLocked) {
                 this.refreshDisplayInstances();
             }
             return true;
@@ -205,7 +205,7 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         if (sceneSize != null) {
             sceneSize = new Dimension(sceneSize);
@@ -252,7 +252,7 @@ public class DynamicWallResetManager extends WallResetManager {
 
     @Override
     public MinecraftInstance getRelativeInstance(int offset) {
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         List<MinecraftInstance> instances = this.getDisplayInstances();
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
@@ -261,15 +261,16 @@ public class DynamicWallResetManager extends WallResetManager {
     @Override
     public void reload() {
         this.displayInstancesIndices = new ArrayList<>();
+        this.isFirstReset = true;
         this.refreshDisplayInstances();
     }
 
     private Rectangle getLockedInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         int instanceIndex = this.getLockedInstances().indexOf(instance);
 
-        Dimension dwInnerSize = sceneSize == null ? OBSStateManager.getInstance().getOBSSceneSize() : sceneSize;
+        Dimension dwInnerSize = sceneSize == null ? OBSStateManager.getOBSStateManager().getOBSSceneSize() : sceneSize;
         int lockedInstanceHeight = (int) ((options.lockedInstanceSpace / 100) * dwInnerSize.height);
         dwInnerSize.height = dwInnerSize.height - lockedInstanceHeight;
 

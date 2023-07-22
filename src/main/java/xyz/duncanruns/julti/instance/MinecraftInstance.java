@@ -20,8 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.MatchResult;
@@ -43,6 +41,7 @@ public class MinecraftInstance {
 
     private final StateTracker stateTracker;
     private final KeyPresser presser;
+    private final Scheduler scheduler;
 
     private boolean windowMissing = false;
 
@@ -59,16 +58,23 @@ public class MinecraftInstance {
         this.versionString = versionString;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange);
         this.presser = new KeyPresser(hwnd);
+        this.scheduler = new Scheduler();
     }
 
     public MinecraftInstance(Path path) {
         this.hwnd = null;
         this.versionString = null;
         this.presser = null;
+        this.scheduler = null;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null);
 
         this.path = path;
         this.windowMissing = true;
+    }
+
+    public void tick() {
+        this.getStateTracker().tryUpdate();
+        this.scheduler.checkSchedule();
     }
 
     /**
@@ -105,9 +111,14 @@ public class MinecraftInstance {
         }
 
         this.windowMissing = true;
+        this.scheduler.clear();
     }
 
     public void discoverInformation() {
+        if (this.checkWindowMissing()) {
+            return;
+        }
+
         this.gameOptions = new GameOptions();
 
         // Find info like keybinds, standard settings, etc.
@@ -143,13 +154,13 @@ public class MinecraftInstance {
             hasStateOutput = false;
         } else if (wpInfo != null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
-            if (!matcher.find() || Integer.valueOf(matcher.group()) < 3) {
+            if (!matcher.find() || Integer.parseInt(matcher.group()) < 3) {
                 hasStateOutput = false;
             }
         }
 
         if (!hasStateOutput) {
-            Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have an updated version of world preview or the state output mod and will likely not function!");
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + "\" does not have an updated version of world preview or the state output mod and will likely not function!");
         }
 
         boolean hasSS = FabricJarUtil.getJarInfo(this.gameOptions.jars, "standardsettings") != null;
@@ -216,6 +227,7 @@ public class MinecraftInstance {
     }
 
     public void reset() {
+        this.scheduler.clear();
         // Press Reset Keys
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
@@ -246,15 +258,22 @@ public class MinecraftInstance {
             // Do the window state change later to ensure resetting is fast
             Julti.doLater(() -> this.ensureResettingWindowState(true));
         }
+
+        this.scheduler.schedule(() -> {
+            if (this.resetPressed) {
+                this.resetPressed = false;
+            }
+        }, 5000);
     }
 
     public void activate(boolean doingSetup) {
         if (this.isWindowMarkedMissing()) {
             return;
         }
+        this.scheduler.clear();
         this.activeSinceReset = true;
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         AffinityManager.pause();
         AffinityManager.jumpPlayingAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
@@ -285,14 +304,8 @@ public class MinecraftInstance {
     }
 
     private void onStateChange() {
-        // The next state after reset should be WAITING, if it changes to something that is not WAITING, send the key again
-        if (this.resetPressed) {
-            if (this.stateTracker.isCurrentState(InstanceState.WAITING) || this.stateTracker.isCurrentState(InstanceState.PREVIEWING)) {
-                this.resetPressed = false;
-            } else {
-                return;
-            }
-        }
+        this.scheduler.clear();
+        this.resetPressed = false;
         switch (this.stateTracker.getInstanceState()) {
             case PREVIEWING:
                 this.onPreviewLoad();
@@ -318,9 +331,9 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(boolean bypassPieChartGate) {
-        //Julti.log(Level.INFO, this.getName() + "'s world loaded.");
+        this.scheduler.clear();
 
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         if (this.gameOptions.pauseOnLostFocus) {
             Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus, some features cannot be used!");
@@ -331,29 +344,24 @@ public class MinecraftInstance {
             // Open pie chart
             this.presser.pressShiftF3();
 
-            // Schedule the scheduling of the completion of onWorldLoad
-            new Timer("delayed-world-load-scheduler").schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Julti.doLater(() -> MinecraftInstance.this.onWorldLoad(true));
-                }
-            }, 150);
-
+            // Schedule the completion of onWorldLoad
+            this.scheduler.schedule(() -> this.onWorldLoad(true), 150);
             return;
         }
 
+        int toPress;
         if (options.useF3) {
             // F3
-            this.presser.pressF3Esc();
+            toPress = 2;
         } else {
             // No F3
-            this.presser.pressEsc();
+            toPress = 1;
         }
 
-        // Unpause if window is active
+        // Stay Unpaused if window is active
         if (ActiveWindowManager.isWindowActive(this.hwnd)) {
             if (options.unpauseOnSwitch || options.coopMode) {
-                this.presser.pressEsc();
+                toPress = 0;
             }
 
             if (options.coopMode) {
@@ -364,12 +372,25 @@ public class MinecraftInstance {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
             }
         }
+
+        switch (toPress) {
+            case 0:
+                break;
+            case 1:
+                this.presser.pressEsc();
+                break;
+            case 2:
+                this.presser.pressF3Esc();
+                break;
+        }
+
         ResetHelper.getManager().notifyWorldLoaded(this);
     }
 
     private void onPreviewLoad() {
-        if (JultiOptions.getInstance().useF3) {
-            this.presser.pressF3Esc();
+        this.scheduler.clear();
+        if (JultiOptions.getJultiOptions().useF3) {
+            this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
     }
@@ -378,7 +399,7 @@ public class MinecraftInstance {
         return (
                 this.stateTracker.isResettable()
         ) && (
-                System.currentTimeMillis() - this.lastSetVisible > JultiOptions.getInstance().wallResetCooldown
+                System.currentTimeMillis() - this.lastSetVisible > JultiOptions.getJultiOptions().wallResetCooldown
         );
     }
 
@@ -438,7 +459,7 @@ public class MinecraftInstance {
 
     public boolean isFullscreen() {
         if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
-            return this.activeSinceReset && JultiOptions.getInstance().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
+            return this.activeSinceReset && JultiOptions.getJultiOptions().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
         } else {
             return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
         }
@@ -455,7 +476,7 @@ public class MinecraftInstance {
 
     public void launch(String offlineName) {
         try {
-            String multiMCPath = JultiOptions.getInstance().multiMCPath;
+            String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
             if (!multiMCPath.isEmpty()) {
                 String cmd;
                 if (offlineName == null) {
@@ -483,8 +504,8 @@ public class MinecraftInstance {
     public void openFolder() {
         try {
             Desktop.getDesktop().browse(this.path.toUri());
-        } catch (IOException ignored) {
-
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to open instance folder:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 
@@ -519,7 +540,7 @@ public class MinecraftInstance {
     }
 
     private void ensureWindowState(boolean useBorderless, boolean maximize, Rectangle bounds, boolean offload) {
-        if (!JultiOptions.getInstance().letJultiMoveWindows) {
+        if (!JultiOptions.getJultiOptions().letJultiMoveWindows) {
             return;
         }
 
@@ -554,7 +575,7 @@ public class MinecraftInstance {
     }
 
     public void ensureResettingWindowState(boolean offload) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         this.ensureWindowState(
                 options.useBorderless,
                 // maximize if
@@ -566,7 +587,7 @@ public class MinecraftInstance {
     }
 
     public void ensurePlayingWindowState(boolean offload) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         this.ensureWindowState(
                 options.useBorderless,
                 (!options.useBorderless) && (!options.autoFullscreen || options.useMaximizeWithFullscreen),

@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.GameOptionsUtil;
 
@@ -23,12 +24,12 @@ public class OBSStateManager {
 
     private String lastOut = "";
 
-    public static OBSStateManager getInstance() {
+    public static OBSStateManager getOBSStateManager() {
         return INSTANCE;
     }
 
     public void tryOutputState() {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         // Lazy try except (I sorry)
         try {
             StringBuilder out = new StringBuilder(this.currentLocation);
@@ -38,7 +39,7 @@ public class OBSStateManager {
                 size = new Dimension(options.playingWindowSize[0], options.playingWindowSize[1]);
             }
             List<MinecraftInstance> lockedInstances = ResetHelper.getManager().getLockedInstances();
-            for (MinecraftInstance instance : InstanceManager.getManager().getInstances()) {
+            for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
                 Rectangle instancePos = ResetHelper.getManager().getInstancePosition(instance, size);
                 instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
@@ -57,7 +58,8 @@ public class OBSStateManager {
                 this.lastOut = outString;
                 FileUtil.writeString(OUT_PATH, outString);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -71,7 +73,8 @@ public class OBSStateManager {
             try {
                 String[] args = FileUtil.readString(scriptSizeOutPath).trim().split(",");
                 this.obsSceneSize = new Dimension(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                Julti.log(Level.ERROR, "Failed to read obsscenesize file:\n" + ExceptionUtil.toDetailedString(e));
             }
         }
         if (this.obsSceneSize != null) {
@@ -90,8 +93,8 @@ public class OBSStateManager {
 
     public void tryOutputLSInfo() {
         Julti.log(Level.DEBUG, "OBSStateManager: Trying to output loading square info...");
-        JultiOptions options = JultiOptions.getInstance();
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        JultiOptions options = JultiOptions.getJultiOptions();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
         if (instances.size() == 0) {
             Julti.log(Level.DEBUG, "OBSStateManager: No instances, cancelling.");
@@ -116,11 +119,11 @@ public class OBSStateManager {
         try {
             FileUtil.writeString(JultiOptions.getJultiDir().resolve("loadingsquaresize"), loadingSquareSize + "," + (loadingSquareSize + extraHeight));
         } catch (Exception e) {
-            Julti.log(Level.ERROR, "OBSStateManager: Failed to write loadingsquaresize! " + e);
+            throw new RuntimeException(e);
         }
 
 
-        if (JultiOptions.getInstance().prepareWindowOnLock) {
+        if (JultiOptions.getJultiOptions().prepareWindowOnLock) {
             // Check for alternate square size
             width = options.playingWindowSize[0];
             height = options.playingWindowSize[1];
@@ -149,6 +152,7 @@ public class OBSStateManager {
                 guiScale = Integer.parseInt(gsOption);
             }
         } catch (NumberFormatException ignored) {
+            // Failed to get options, assume 0
         }
         boolean forceUnicodeFont = Objects.equals(GameOptionsUtil.tryGetOption(instance.getPath(), "forceUnicodeFont", true), "true");
 

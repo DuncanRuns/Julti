@@ -58,8 +58,8 @@ public final class AffinityManager {
     }
 
     private static void setAffinityForAllInstances() {
-        InstanceManager instanceManager = InstanceManager.getManager();
-        JultiOptions options = JultiOptions.getInstance();
+        InstanceManager instanceManager = InstanceManager.getInstanceManager();
+        JultiOptions options = JultiOptions.getJultiOptions();
         List<MinecraftInstance> instances = instanceManager.getInstances();
         MinecraftInstance selectedInstance = instanceManager.getSelectedInstance();
         List<MinecraftInstance> lockedInstances = ResetHelper.getManager().getLockedInstances();
@@ -104,7 +104,7 @@ public final class AffinityManager {
     }
 
     public static void release() {
-        InstanceManager.getManager().getInstances().forEach(i -> setAffinity(i, AVAILABLE_THREADS));
+        InstanceManager.getInstanceManager().getInstances().forEach(i -> setAffinity(i, AVAILABLE_THREADS));
     }
 
     public static void ping() {
@@ -121,11 +121,11 @@ public final class AffinityManager {
     }
 
     public static void jumpPlayingAffinity(MinecraftInstance instance) {
-        setAffinity(instance, JultiOptions.getInstance().threadsPlaying);
+        setAffinity(instance, JultiOptions.getJultiOptions().threadsPlaying);
     }
 
     public static void jumpPrePreviewAffinity(MinecraftInstance instance) {
-        setAffinity(instance, JultiOptions.getInstance().threadsPrePreview);
+        setAffinity(instance, JultiOptions.getJultiOptions().threadsPrePreview);
     }
 
     /**

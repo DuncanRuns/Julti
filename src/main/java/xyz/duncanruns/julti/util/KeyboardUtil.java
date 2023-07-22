@@ -7,6 +7,8 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinUser;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -70,8 +72,8 @@ public final class KeyboardUtil {
                             new StringSelection(string),
                             null
                     );
-        } catch (Exception ignored) {
-            // Sometimes it just fails I guess :(
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to copy string to clipboard:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 

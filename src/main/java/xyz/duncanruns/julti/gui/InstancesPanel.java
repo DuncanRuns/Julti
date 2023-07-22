@@ -48,7 +48,7 @@ public class InstancesPanel extends JPanel {
             return;
         }
 
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
         if (this.instancePanels.size() != instances.size()) {
             while (this.instancePanels.size() < instances.size()) {

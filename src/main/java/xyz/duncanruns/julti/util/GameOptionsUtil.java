@@ -43,7 +43,7 @@ public final class GameOptionsUtil {
         // This should prevent any crazy out of pocket bullshits like 1 in a million parsing error situations
         try {
             return getOption(instancePath, optionName, tryUseSS);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -66,7 +66,7 @@ public final class GameOptionsUtil {
         try {
             out = FileUtil.readString(path);
         } catch (IOException e) {
-            // This should never be reached
+            // This should never be reached but nullability helps out surely
             return null;
         }
 
@@ -76,7 +76,7 @@ public final class GameOptionsUtil {
     public static String tryGetStandardOption(Path instancePath, String optionName) {
         try {
             return getStandardOption(instancePath, optionName);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -97,7 +97,8 @@ public final class GameOptionsUtil {
         int guiScale = 0;
         try {
             guiScale = Integer.parseInt(tryGetOption(instancePath, "guiScale", true));
-        } catch (NumberFormatException ignored) {
+        } catch (NumberFormatException e) {
+            Julti.log(Level.WARN, "Invalid guiScale value found in options:\n" + ExceptionUtil.toDetailedString(e));
         }
         boolean forceUnicodeFont = Objects.equals(tryGetOption(instancePath, "forceUnicodeFont", true), "true");
 

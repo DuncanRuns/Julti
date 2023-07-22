@@ -1,15 +1,13 @@
 package xyz.duncanruns.julti;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
-import xyz.duncanruns.julti.util.KeyboardUtil;
 
-import javax.swing.*;
 import java.util.Arrays;
 
 public final class Main {
@@ -24,14 +22,8 @@ public final class Main {
 
         try {
             runJultiApp();
-        } catch (Exception exception) {
-            String detailedException = ExceptionUtil.toDetailedString(exception);
-            LogManager.getLogger("Julti-Crash").error(detailedException);
-            int ans = JOptionPane.showOptionDialog(null, "Julti has crashed during startup or main loop!", "Julti: Crash", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null, new Object[]{"Copy Error", "Cancel"}, "Copy Error");
-            if (ans == 0) {
-                KeyboardUtil.copyToClipboard("Error during startup or main loop: " + detailedException);
-            }
-            System.exit(1);
+        } catch (Exception e) {
+            ExceptionUtil.showExceptionAndExit(e, "Julti has crashed during startup or main loop!");
         }
     }
 
@@ -40,19 +32,24 @@ public final class Main {
         FlatDarkLaf.setup();
 
         // Load Options
-        JultiOptions.getInstance();
+        JultiOptions.getJultiOptions();
         ScriptManager.reload();
 
         // Start Affinity Manager
         AffinityManager.start();
 
         // Start GUI
-        JultiGUI.getInstance().setVisible();
+        JultiGUI.getJultiGUI().setVisible();
 
         // Start hotkey checker
-        HotkeyManager.getInstance().start();
+        HotkeyManager.getHotkeyManager().start();
+
+        // Redirect uncaught exceptions to Julti logging
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            Julti.log(Level.ERROR, "Uncaught exception in thread " + t + ":\n" + ExceptionUtil.toDetailedString(e));
+        });
 
         // Run main loop
-        Julti.getInstance().run();
+        Julti.getJulti().run();
     }
 }

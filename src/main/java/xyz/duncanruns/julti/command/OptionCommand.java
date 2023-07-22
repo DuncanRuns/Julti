@@ -63,7 +63,7 @@ public class OptionCommand extends Command {
 
         @Override
         public void run(String[] args, CancelRequester cancelRequester) {
-            JultiOptions options = JultiOptions.getInstance();
+            JultiOptions options = JultiOptions.getJultiOptions();
             StringBuilder optionNames = new StringBuilder();
             for (String optionName : options.getOptionNamesWithType()) {
                 if (!optionNames.toString().isEmpty()) {
@@ -99,7 +99,7 @@ public class OptionCommand extends Command {
 
         @Override
         public void run(String[] args, CancelRequester cancelRequester) {
-            JultiOptions options = JultiOptions.getInstance();
+            JultiOptions options = JultiOptions.getJultiOptions();
             String optionName = args[0];
             String value = options.getValueString(optionName);
             if (value == null) {
@@ -134,7 +134,7 @@ public class OptionCommand extends Command {
 
         @Override
         public void run(String[] args, CancelRequester cancelRequester) {
-            JultiOptions options = JultiOptions.getInstance();
+            JultiOptions options = JultiOptions.getJultiOptions();
             String[] valueArgs = CommandManager.withoutFirst(args);
             String all = CommandManager.combineArgs(valueArgs);
             String optionName = args[0];

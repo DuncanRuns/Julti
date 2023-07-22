@@ -19,7 +19,7 @@ public final class HotkeyManager {
     private HotkeyManager() {
     }
 
-    public static HotkeyManager getInstance() {
+    public static HotkeyManager getHotkeyManager() {
         return INSTANCE;
     }
 
@@ -29,7 +29,7 @@ public final class HotkeyManager {
 
     public void reloadHotkeys() {
         this.hotkeys.clear();
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         this.addHotkey(Hotkey.of(options.resetHotkey, options.resetHotkeyIM), "reset");
         this.addHotkey(Hotkey.of(options.bgResetHotkey, options.bgResetHotkeyIM), "bgReset");
@@ -59,11 +59,11 @@ public final class HotkeyManager {
     }
 
     private void run() {
-        while (Julti.getInstance().isRunning()) {
+        while (Julti.getJulti().isRunning()) {
             sleep(1);
             for (Pair<Hotkey, String> hotkeyAction : this.hotkeys) {
                 if (hotkeyAction.getLeft().wasPressed()) {
-                    Julti.getInstance().queueMessage(new HotkeyPressQMessage(hotkeyAction.getRight(), MouseUtil.getMousePos()));
+                    Julti.getJulti().queueMessage(new HotkeyPressQMessage(hotkeyAction.getRight(), MouseUtil.getMousePos()));
                 }
             }
         }

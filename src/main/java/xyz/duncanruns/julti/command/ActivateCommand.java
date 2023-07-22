@@ -34,10 +34,10 @@ public class ActivateCommand extends Command {
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
         if (args[0].equals("wall")) {
-            Julti.waitForExecute(() -> Julti.getInstance().focusWall());
+            Julti.waitForExecute(() -> Julti.getJulti().focusWall());
             return;
         }
-        List<MinecraftInstance> instances = args[0].equals("all") ? InstanceManager.getManager().getInstances() : CommandManager.getInstances(args[0]);
+        List<MinecraftInstance> instances = args[0].equals("all") ? InstanceManager.getInstanceManager().getInstances() : CommandManager.getInstances(args[0]);
         if (instances.size() == 0) {
             throw new CommandFailedException("No instances found");
         }
@@ -47,7 +47,7 @@ public class ActivateCommand extends Command {
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
-            Julti.waitForExecute(() -> Julti.getInstance().activateInstance(i, doingSetup));
+            Julti.waitForExecute(() -> Julti.getJulti().activateInstance(i, doingSetup));
             sleep(500);
         }
     }

@@ -28,7 +28,7 @@ public final class BopperUtil {
     }
 
     private static void clearWorldsInternal() {
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
         Thread[] threads = new Thread[instances.size()];
         int i = 0;
         for (MinecraftInstance instance : instances) {
@@ -53,7 +53,7 @@ public final class BopperUtil {
         try {
             clearWorlds(instance);
         } catch (Exception e) {
-            Julti.log(Level.ERROR, "Clear Worlds Exception: " + ExceptionUtil.toDetailedString(e));
+            Julti.log(Level.ERROR, "Clear Worlds Exception:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 

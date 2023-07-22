@@ -25,7 +25,7 @@ public class JultiGUI extends JFrame {
         this.setupWindow();
     }
 
-    public static JultiGUI getInstance() {
+    public static JultiGUI getJultiGUI() {
         return INSTANCE;
     }
 
@@ -80,7 +80,7 @@ public class JultiGUI extends JFrame {
 
     private void setupWindow() {
         this.setSize(800, 420);
-        int[] lastGUIPos = JultiOptions.getInstance().lastGUIPos;
+        int[] lastGUIPos = JultiOptions.getJultiOptions().lastGUIPos;
         this.setLocation(lastGUIPos[0], lastGUIPos[1]);
         this.setTitle("Julti");
         this.addWindowListener(new WindowAdapter() {
@@ -102,8 +102,8 @@ public class JultiGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
-        Julti.getInstance().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
-        Julti.getInstance().queueMessageAndWait(new ShutdownQMessage());
+        Julti.getJulti().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
+        Julti.getJulti().queueMessageAndWait(new ShutdownQMessage());
         if (!this.updating) {
             System.exit(0); // For some reason there are hanging threads left, not even started by Julti
         }

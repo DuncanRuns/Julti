@@ -26,7 +26,7 @@ public final class FabricJarUtil {
             try {
                 return getJarInfo(path);
             } catch (IOException e) {
-                Julti.log(Level.WARN, "Invalid jar " + path.getFileName() + " found in " + instancePath);
+                Julti.log(Level.WARN, "Invalid jar " + path.getFileName() + " found in " + instancePath + ". Exception below:\n" + ExceptionUtil.toDetailedString(e));
                 return null;
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());

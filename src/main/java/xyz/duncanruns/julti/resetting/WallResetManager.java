@@ -25,21 +25,21 @@ public class WallResetManager extends ResetManager {
     private MinecraftInstance lastAttemptedJoin = null;
     private long lastAttemptedJoinTime = 0L;
 
-    public static ResetManager getInstance() {
+    public static WallResetManager getWallResetManager() {
         return INSTANCE;
     }
 
     @Override
     public List<ActionResult> doReset() {
 
-        List<MinecraftInstance> instances = InstanceManager.getManager().getInstances();
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
         // Return if no instances
         if (instances.size() == 0) {
             return Collections.emptyList();
         }
 
         // Get selected instance, return if no selected instance
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         if (selectedInstance == null) {
             return Collections.emptyList();
         }
@@ -60,12 +60,12 @@ public class WallResetManager extends ResetManager {
 
     @Override
     public List<ActionResult> doBGReset() {
-        MinecraftInstance selectedInstance = InstanceManager.getManager().getSelectedInstance();
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         if (selectedInstance == null) {
             return Collections.emptyList();
         }
         List<ActionResult> out = this.resetNonLockedExcept(selectedInstance);
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return out;
@@ -89,7 +89,7 @@ public class WallResetManager extends ResetManager {
             }
         });
 
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return actionResults;
@@ -104,7 +104,7 @@ public class WallResetManager extends ResetManager {
         if (selectedInstance == null) {
             return Collections.emptyList();
         }
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return this.resetInstance(selectedInstance) ? Collections.singletonList(ActionResult.INSTANCE_RESET) : Collections.emptyList();
@@ -120,7 +120,7 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
         boolean out = this.lockInstance(clickedInstance);
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return out ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList();
@@ -139,7 +139,7 @@ public class WallResetManager extends ResetManager {
         }
 
         // Get list of instances to reset
-        List<MinecraftInstance> toReset = new ArrayList<>(InstanceManager.getManager().getInstances());
+        List<MinecraftInstance> toReset = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         toReset.removeAll(this.lockedInstances);
         toReset.remove(clickedInstance);
 
@@ -154,7 +154,7 @@ public class WallResetManager extends ResetManager {
             }
         });
 
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return actionResults;
@@ -180,7 +180,7 @@ public class WallResetManager extends ResetManager {
         this.lastAttemptedJoinTime = currentTime;
 
         List<ActionResult> out = this.playInstanceFromWall(clickedInstance, forceEnter);
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return out;
@@ -197,7 +197,7 @@ public class WallResetManager extends ResetManager {
         List<MinecraftInstance> instancePool = new ArrayList<>(this.lockedInstances);
         instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
         List<ActionResult> out = this.playInstanceFromWall(instancePool.get(0), false);
-        if (JultiOptions.getInstance().useAffinity) {
+        if (JultiOptions.getJultiOptions().useAffinity) {
             AffinityManager.ping();
         }
         return out;
@@ -206,7 +206,7 @@ public class WallResetManager extends ResetManager {
     @Override
     public void notifyPreviewLoaded(MinecraftInstance instance) {
         super.notifyPreviewLoaded(instance);
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
     }
 
     @Override
@@ -245,7 +245,7 @@ public class WallResetManager extends ResetManager {
     }
 
     protected List<ActionResult> playInstanceFromWall(MinecraftInstance instance, boolean bypassLoadCheck) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         if (!bypassLoadCheck && options.wallLockInsteadOfPlay && !(instance.getStateTracker().isCurrentState(InstanceState.INWORLD))) {
             List<ActionResult> results = new ArrayList<>(this.lockInstance(instance) ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList());
@@ -264,7 +264,7 @@ public class WallResetManager extends ResetManager {
 
         }
 
-        Julti.getInstance().activateInstance(instance);
+        Julti.getJulti().activateInstance(instance);
         this.unlockInstance(instance);
         SleepBGUtil.enableLock();
         return Collections.singletonList(ActionResult.INSTANCE_ACTIVATED);
@@ -287,7 +287,7 @@ public class WallResetManager extends ResetManager {
     }
 
     public List<ActionResult> leaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         boolean resetFirst = options.coopMode;
 
@@ -328,7 +328,7 @@ public class WallResetManager extends ResetManager {
             });
             sleep(100);
         }
-        Julti.getInstance().focusWall();
+        Julti.getJulti().focusWall();
         if (!resetFirst) {
             DoAllFastUtil.doAllFast(instances, instance -> {
                 instance.reset();
@@ -376,14 +376,14 @@ public class WallResetManager extends ResetManager {
      * @return true if an instance was activated, otherwise false
      */
     private boolean activateNextInstance(List<MinecraftInstance> instances, @Nullable MinecraftInstance nextInstance) {
-        JultiOptions options = JultiOptions.getInstance();
+        JultiOptions options = JultiOptions.getJultiOptions();
         if (!options.wallBypass || nextInstance == null) {
             // No more instances to play
-            Julti.getInstance().focusWall();
+            Julti.getJulti().focusWall();
             return false;
         } else {
             this.unlockInstance(nextInstance);
-            Julti.getInstance().activateInstance(nextInstance);
+            Julti.getJulti().activateInstance(nextInstance);
             return true;
         }
     }

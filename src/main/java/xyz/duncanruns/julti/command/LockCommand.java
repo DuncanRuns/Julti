@@ -34,7 +34,7 @@ public class LockCommand extends Command {
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> toLock;
         if (args[0].equals("all")) {
-            toLock = InstanceManager.getManager().getInstances();
+            toLock = InstanceManager.getInstanceManager().getInstances();
         } else {
             toLock = CommandManager.getInstances(args[0]);
         }
