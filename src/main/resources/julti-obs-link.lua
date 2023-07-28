@@ -302,6 +302,13 @@ function generate_scenes()
     local already_existing = {}
     local found_ae = false
 
+    local out = get_state_file_string()
+    if (out == nil) or not (string.find(out, ";")) then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(100, "Julti has not yet been set up! Please setup Julti first!")
+        return
+    end
+
     if not scene_exists("Lock Display") then
         _setup_lock_scene()
     else
@@ -323,7 +330,7 @@ function generate_scenes()
         found_ae = true
     end
 
-    _clear_verification_scene()
+    _ensure_empty_important_scenes()
 
     _setup_julti_scene()
 
@@ -349,25 +356,67 @@ function generate_scenes()
     end
 end
 
-function _clear_verification_scene()
+function _ensure_empty_important_scenes()
+    for instance_num = 0, 100 do
+        -- Empty square groups
+        local group_scene = get_group_as_scene("Square " .. instance_num)
+        if (group_scene == nil) then
+            goto continue
+        end
+        local items = obs.obs_scene_enum_items(group_scene)
+        for _, item in ipairs(items) do
+            obs.obs_sceneitem_remove(item)
+        end
+        obs.sceneitem_list_release(items)
+
+        -- Empty instance groups
+        local group_scene = get_group_as_scene("Instance " .. instance_num)
+        if (group_scene == nil) then
+            goto continue
+        end
+        local items = obs.obs_scene_enum_items(group_scene)
+        for _, item in ipairs(items) do
+            obs.obs_sceneitem_remove(item)
+        end
+        obs.sceneitem_list_release(items)
+        ::continue::
+    end
+    -- Empty sound group
+    local group_scene = get_group_as_scene("Minecraft Audio")
+    if (group_scene ~= nil) then
+        local items = obs.obs_scene_enum_items(group_scene)
+        for _, item in ipairs(items) do
+            obs.obs_sceneitem_remove(item)
+        end
+        obs.sceneitem_list_release(items)
+    end
+    -- Empty Verification scene
     if scene_exists("Verification") then
         obs.script_log(200, "------------------------------")
         obs.script_log(200, "Verification scene already existed,")
-        obs.script_log(200, "captures and sound group will be replaced.")
+        obs.script_log(200, "all sources will be replaced.")
         local scene = get_scene("Verification")
         local items = obs.obs_scene_enum_items(scene)
         for _, item in ipairs(items) do
-            local name = get_sceneitem_name(item)
-            if name == "Minecraft Audio" or
-                (string.find(name, "Verification Capture ") ~= nil) or
-                (string.find(name, "Minecraft Capture ") ~= nil) or
-                (string.find(name, "Square ") ~= nil) then
-                obs.obs_sceneitem_remove(item)
-            end
+            obs.obs_sceneitem_remove(item)
         end
         obs.sceneitem_list_release(items)
     else
         create_scene("Verification")
+    end
+    -- Empty Julti scene
+    if scene_exists("Julti") then
+        obs.script_log(200, "------------------------------")
+        obs.script_log(200, "Julti scene already existed,")
+        obs.script_log(200, "all sources will be replaced.")
+        local scene = get_scene("Julti")
+        local items = obs.obs_scene_enum_items(scene)
+        for _, item in ipairs(items) do
+            obs.obs_sceneitem_remove(item)
+        end
+        obs.sceneitem_list_release(items)
+    else
+        create_scene("Julti")
     end
 end
 
@@ -562,32 +611,12 @@ end
 
 function _setup_julti_scene()
     local out = get_state_file_string()
-    if (out == nil) or not (string.find(out, ";")) then
-        obs.script_log(100, "Julti has not yet been set up! Please setup Julti first!")
-        return
-    end
 
     local instance_count = (#(split_string(out, ";"))) - 1
 
     if instance_count == 0 then
         obs.script_log(100, "Julti has not yet been set up (No instances found)! Please setup Julti first!")
         return
-    end
-
-    if scene_exists("Julti") then
-        obs.script_log(200, "------------------------------")
-        obs.script_log(200, "Julti scene already existed,")
-        obs.script_log(200, "instance groups and sound source will be replaced.")
-        local items = obs.obs_scene_enum_items(get_scene("Julti"))
-        for _, item in ipairs(items) do
-            if (string.find(get_sceneitem_name(item), "Instance ") ~= nil) or
-                (string.find(get_sceneitem_name(item), "Sound") ~= nil) then
-                obs.obs_sceneitem_remove(item)
-            end
-        end
-        obs.sceneitem_list_release(items)
-    else
-        create_scene("Julti")
     end
 
     local y = 0
@@ -610,17 +639,14 @@ end
 function _setup_minecraft_sounds(instance_count)
     local group = get_group_as_scene("Minecraft Audio")
 
-    local items = obs.obs_scene_enum_items(group)
-    for _, item in ipairs(items) do
-        obs.obs_sceneitem_remove(item)
-    end
-    obs.sceneitem_list_release(items)
-
     for num = 1, instance_count, 1 do
         -- '{"priority": 1, "window": "Minecraft* - Instance 1:GLFW30:javaw.exe"}'
         local settings = obs.obs_data_create_from_json('{"priority": 1, "window": "Minecraft* - Instance ' ..
             num .. ':GLFW30:javaw.exe"}')
-        local source = obs.obs_source_create("wasapi_process_output_capture", "Minecraft Audio " .. num, settings, nil)
+        local source = get_source("Minecraft Audio " .. num)
+        if (source == nil) then
+            source = obs.obs_source_create("wasapi_process_output_capture", "Minecraft Audio " .. num, settings, nil)
+        end
         obs.obs_scene_add(group, source)
         release_source(source)
         obs.obs_data_release(settings)
