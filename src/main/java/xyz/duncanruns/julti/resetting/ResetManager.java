@@ -179,6 +179,9 @@ public abstract class ResetManager {
     }
 
     public void doDebugHover(Point mousePos) {
+        if (!ActiveWindowManager.isWallActive()) {
+            return;
+        }
         MinecraftInstance instance = this.getHoveredWallInstance(mousePos);
         if (instance != null) {
             instance.logAndCopyInfo();
