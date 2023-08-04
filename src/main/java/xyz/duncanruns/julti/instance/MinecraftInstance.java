@@ -148,11 +148,12 @@ public class MinecraftInstance {
         }
 
         FabricJarInfo wpInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview");
+        FabricJarInfo soInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output");
 
         boolean hasStateOutput = true;
-        if (wpInfo == null && FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output") == null) {
+        if (wpInfo == null && soInfo == null) {
             hasStateOutput = false;
-        } else if (wpInfo != null) {
+        } else if (soInfo == null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
             if (!matcher.find() || Integer.parseInt(matcher.group()) < 3) {
                 hasStateOutput = false;
