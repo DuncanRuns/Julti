@@ -148,11 +148,12 @@ public class MinecraftInstance {
         }
 
         FabricJarInfo wpInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview");
+        FabricJarInfo soInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output");
 
         boolean hasStateOutput = true;
-        if (wpInfo == null && FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output") == null) {
+        if (wpInfo == null && soInfo == null) {
             hasStateOutput = false;
-        } else if (wpInfo != null) {
+        } else if (soInfo == null) {
             Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
             if (!matcher.find() || Integer.parseInt(matcher.group()) < 3) {
                 hasStateOutput = false;
@@ -232,7 +233,7 @@ public class MinecraftInstance {
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
                 this.presser.pressKey(this.gameOptions.createWorldKey); // Thanks pix
-            } else if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
+            } else if (versionString.equals("1.17.1") || MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
                 this.presser.pressShiftTabEnter();
             } else {
                 this.presser.pressKey(this.gameOptions.createWorldKey);

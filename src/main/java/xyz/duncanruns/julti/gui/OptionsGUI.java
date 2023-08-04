@@ -105,6 +105,9 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));
     }
 
     private void addComponentsSound() {
@@ -233,6 +236,7 @@ public class OptionsGUI extends JFrame {
                     options.preventWindowNaming = false;
                     options.alwaysOnTopProjector = false;
                     options.useAltSwitching = false;
+                    options.allowResetDuringGenerating = false;
                 });
             }
             this.reload();

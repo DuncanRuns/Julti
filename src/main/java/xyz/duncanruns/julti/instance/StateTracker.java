@@ -57,13 +57,15 @@ public class StateTracker {
         if (this.mTime == newMTime) {
             return;
         }
-        this.mTime = newMTime;
-
 
         // Store previous state
         InstanceState previousState = this.instanceState;
 
-        this.setStatesFromFile();
+        if (!this.trySetStatesFromFile()) {
+            return;
+        }
+
+        this.mTime = newMTime;
 
         long time = System.currentTimeMillis();
 
@@ -78,35 +80,35 @@ public class StateTracker {
         }
     }
 
-    private void setStatesFromFile() throws IOException {
+    private boolean trySetStatesFromFile() throws IOException {
         // Read
         String out = FileUtil.readString(this.path);
 
         // Couldn't get output or output is empty (?)
         if (out.isEmpty()) {
-            return;
+            return false;
         }
 
         // Check for literal states
         switch (out) {
             case "waiting":
                 this.setState(InstanceState.WAITING);
-                return;
+                return true;
             case "title":
                 this.setState(InstanceState.TITLE);
-                return;
+                return true;
             case "inworld,paused":
                 this.setState(InstanceState.INWORLD);
                 this.inWorldState = InWorldState.PAUSED;
-                return;
+                return true;
             case "inworld,unpaused":
                 this.setState(InstanceState.INWORLD);
                 this.inWorldState = InWorldState.UNPAUSED;
-                return;
+                return true;
             case "inworld,gamescreenopen":
                 this.setState(InstanceState.INWORLD);
                 this.inWorldState = InWorldState.GAMESCREENOPEN;
-                return;
+                return true;
         }
         // Literal failed, should be generating/previewing
 
@@ -121,7 +123,7 @@ public class StateTracker {
             this.setState(InstanceState.GENERATING);
         } else {
             Julti.log(Level.ERROR, "Invalid state in " + this.path + ": \"" + out + "\"");
-            return;
+            return false;
         }
 
         if (args.length > 1) {
@@ -129,7 +131,9 @@ public class StateTracker {
             this.loadingPercent = Byte.parseByte(args[1]);
         } else {
             Julti.log(Level.ERROR, "Invalid state in " + this.path + ": \"" + out + "\"");
+            return false;
         }
+        return true;
     }
 
     private void setState(InstanceState state) {
@@ -173,10 +177,14 @@ public class StateTracker {
         long currentTime = System.currentTimeMillis();
         // Must be in preview or in the world, and the cooldown must have passed
         return (
-                this.isCurrentState(InstanceState.INWORLD) || this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.TITLE)
+                this.isCurrentState(InstanceState.INWORLD) || this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.TITLE) || (JultiOptions.getJultiOptions().allowResetDuringGenerating && this.isCurrentState(InstanceState.GENERATING))
         ) && (
-                currentTime - this.getLastOccurrenceOf(InstanceState.GENERATING) > JultiOptions.getJultiOptions().wallResetCooldown
+                currentTime - this.getLastOccurenceOfNonResettable() > JultiOptions.getJultiOptions().wallResetCooldown
         );
+    }
+
+    private long getLastOccurenceOfNonResettable() {
+        return this.getLastOccurrenceOf(JultiOptions.getJultiOptions().allowResetDuringGenerating ? InstanceState.WAITING : InstanceState.GENERATING);
     }
 
     public InstanceState getInstanceState() {
