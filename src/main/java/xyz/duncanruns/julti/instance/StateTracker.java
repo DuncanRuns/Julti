@@ -177,10 +177,14 @@ public class StateTracker {
         long currentTime = System.currentTimeMillis();
         // Must be in preview or in the world, and the cooldown must have passed
         return (
-                this.isCurrentState(InstanceState.INWORLD) || this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.TITLE)
+                this.isCurrentState(InstanceState.INWORLD) || this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.TITLE) || (JultiOptions.getJultiOptions().allowResetDuringGenerating && this.isCurrentState(InstanceState.GENERATING))
         ) && (
-                currentTime - this.getLastOccurrenceOf(InstanceState.GENERATING) > JultiOptions.getJultiOptions().wallResetCooldown
+                currentTime - this.getLastOccurenceOfNonResettable() > JultiOptions.getJultiOptions().wallResetCooldown
         );
+    }
+
+    private long getLastOccurenceOfNonResettable() {
+        return this.getLastOccurrenceOf(JultiOptions.getJultiOptions().allowResetDuringGenerating ? InstanceState.WAITING : InstanceState.GENERATING);
     }
 
     public InstanceState getInstanceState() {
