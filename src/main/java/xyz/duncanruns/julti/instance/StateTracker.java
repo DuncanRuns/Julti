@@ -58,7 +58,6 @@ public class StateTracker {
             return;
         }
 
-
         // Store previous state
         InstanceState previousState = this.instanceState;
 
