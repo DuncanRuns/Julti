@@ -357,7 +357,20 @@ function generate_scenes()
 end
 
 function _ensure_empty_important_scenes()
-    for instance_num = 0, 100 do
+    for instance_num = 1, 100 do
+        -- Delete sources
+        local source = get_source("Minecraft Capture " .. instance_num)
+        obs.obs_source_remove(source)
+        release_source(source)
+
+        local source = get_source("Verification Capture " .. instance_num)
+        obs.obs_source_remove(source)
+        release_source(source)
+
+        local source = get_source("Minecraft Audio " .. instance_num)
+        obs.obs_source_remove(source)
+        release_source(source)
+
         -- Empty square groups
         local group_scene = get_group_as_scene("Square " .. instance_num)
         if (group_scene == nil) then
