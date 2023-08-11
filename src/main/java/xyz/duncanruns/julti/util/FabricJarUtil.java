@@ -10,6 +10,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public final class FabricJarUtil {
     }
 
     private static String getJarFMJContents(Path jarPath) throws IOException {
-        try (FileSystem fs = FileSystems.newFileSystem(jarPath, null)) {
+        try (FileSystem fs = FileSystems.newFileSystem(jarPath.toUri(), Collections.emptyMap(), null)) {
             Path jsonFilePath = fs.getPath("fabric.mod.json");
             byte[] jsonData = Files.readAllBytes(jsonFilePath);
             return new String(jsonData, StandardCharsets.UTF_8);
