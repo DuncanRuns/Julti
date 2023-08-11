@@ -182,7 +182,7 @@ public final class JultiOptions {
     }
 
     public static Path getJultiDir() {
-        return Paths.get(System.getProperty("user.home")).resolve(".Julti");
+        return Paths.get(System.getProperty("user.home")).resolve(".Julti").toAbsolutePath();
     }
 
     public static boolean tryChangeProfile(String profileName) {
