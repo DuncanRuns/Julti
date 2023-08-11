@@ -47,7 +47,7 @@ jar {
 
     manifest {
         // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
-        attributes 'Main-Class': 'xyz.duncanruns.julti.Main',
+        attributes 'Main-Class': 'xyz.duncanruns.julti.JultiAppLaunch',
                 'Multi-Release': true,
                 'Implementation-Version': version
     }

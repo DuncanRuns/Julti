@@ -10,14 +10,14 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import java.util.Arrays;
 
-public final class Main {
+public final class JultiAppLaunch {
     public static String[] args;
 
-    private Main() {
+    private JultiAppLaunch() {
     }
 
     public static void main(String[] args) {
-        Main.args = args;
+        JultiAppLaunch.args = args;
         System.out.println("Launched with args: " + Arrays.toString(args));
 
         try {

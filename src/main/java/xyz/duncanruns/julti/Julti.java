@@ -79,7 +79,7 @@ public final class Julti {
     }
 
     private static void checkDeleteOldJar() {
-        List<String> argList = Arrays.asList(Main.args);
+        List<String> argList = Arrays.asList(JultiAppLaunch.args);
         if (!argList.contains("-deleteOldJar")) {
             return;
         }
