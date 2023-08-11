@@ -57,6 +57,14 @@ jar {
     }
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
 }
