@@ -29,6 +29,11 @@ public final class JultiAppLaunch {
         }
     }
 
+    public static void launchWithDevPlugin(String[] args, PluginManager.JultiPluginData pluginData) {
+        PluginManager.getPluginManager().registerPlugin(pluginData);
+        main(args);
+    }
+
     private static void runJultiApp() throws IOException {
         // Setup GUI theme
         FlatDarkLaf.setup();
@@ -50,6 +55,12 @@ public final class JultiAppLaunch {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             Julti.log(Level.ERROR, "Uncaught exception in thread " + t + ":\n" + ExceptionUtil.toDetailedString(e));
         });
+
+        // Load Plugins
+        PluginManager.getPluginManager().loadPluginsFromFolder();
+
+        // Initialize Plugins
+        PluginManager.getPluginManager().initializePlugins();
 
         // Run main loop
         Julti.getJulti().run();

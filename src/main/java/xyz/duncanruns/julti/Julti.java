@@ -173,10 +173,6 @@ public final class Julti {
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         checkDeleteOldJar();
 
-        // Load Plugins
-        log(Level.INFO, "Loading plugins...");
-        PluginManager.getPluginManager().loadPluginsFromFolder();
-
         this.reload();
         long cycles = 0;
 

@@ -24,7 +24,7 @@ public final class PluginManager {
     private static final Gson GSON = new Gson();
     private static final Path PLUGINS_PATH = JultiOptions.getJultiDir().resolve("plugins").toAbsolutePath();
 
-    private final List<JultiPluginData> loadedPluginData = new ArrayList<>();
+    private final List<JultiPluginData> loadedPluginDataList = new ArrayList<>();
 
     private PluginManager() {
     }
@@ -70,11 +70,7 @@ public final class PluginManager {
             importJar(path.toFile());
         } else {
             Julti.log(Level.WARN, "Failed to load plugin " + path + ", because there is another plugin with the same id already loaded.");
-            return;
         }
-        System.out.println(jultiPluginData.initializer);
-        PluginInitializer pluginInitializer = (PluginInitializer) Class.forName(jultiPluginData.initializer).newInstance();
-        pluginInitializer.initialize();
     }
 
     /**
@@ -85,11 +81,25 @@ public final class PluginManager {
      * @return true if the plugin has a unique id, otherwise false
      */
     public boolean registerPlugin(JultiPluginData jultiPluginData) {
-        if (this.loadedPluginData.isEmpty() || this.loadedPluginData.stream().noneMatch(jultiPluginData::matchesOther)) {
-            this.loadedPluginData.add(jultiPluginData);
+        if (this.loadedPluginDataList.isEmpty() || this.loadedPluginDataList.stream().noneMatch(jultiPluginData::matchesOther)) {
+            this.loadedPluginDataList.add(jultiPluginData);
             return true;
         }
         return false;
+    }
+
+    public void initializePlugins() {
+        this.loadedPluginDataList.forEach(pluginData -> {
+            if (pluginData.initializer == null || pluginData.initializer.isEmpty()) {
+                return;
+            }
+            try {
+                PluginInitializer pluginInitializer = (PluginInitializer) Class.forName(pluginData.initializer).newInstance();
+                pluginInitializer.initialize();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public static class JultiPluginData {
