@@ -5,9 +5,11 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public final class JultiAppLaunch {
@@ -27,7 +29,7 @@ public final class JultiAppLaunch {
         }
     }
 
-    private static void runJultiApp() {
+    private static void runJultiApp() throws IOException {
         // Setup GUI theme
         FlatDarkLaf.setup();
 

@@ -16,6 +16,8 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.LogReceiver;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.messages.*;
+import xyz.duncanruns.julti.plugin.PluginEvents;
+import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ResourceUtil;
@@ -25,6 +27,7 @@ import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -138,6 +141,7 @@ public final class Julti {
         InstanceManager.getInstanceManager().onOptionsLoad();
         HotkeyManager.getHotkeyManager().reloadHotkeys();
         ResetHelper.getManager().reload();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.RELOAD);
     }
 
     private void changeOption(QMessage message) {
@@ -156,6 +160,7 @@ public final class Julti {
         AffinityManager.stop();
         SleepBGUtil.disableLock();
         AffinityManager.release();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.STOP);
         this.running = false;
     }
 
@@ -163,12 +168,18 @@ public final class Julti {
         return this.running;
     }
 
-    public void run() {
+    public void run() throws IOException {
         ResourceUtil.makeResources();
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         checkDeleteOldJar();
+
+        // Load Plugins
+        log(Level.INFO, "Loading plugins...");
+        PluginManager.getPluginManager().loadPluginsFromFolder();
+
         this.reload();
         long cycles = 0;
+
         log(Level.INFO, "Welcome to Julti!");
         String usedJava = System.getProperty("java.home");
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + usedJava);
@@ -186,6 +197,7 @@ public final class Julti {
     }
 
     private void tick(long cycles) {
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.START_TICK);
         ActiveWindowManager.update();
         InstanceManager.getInstanceManager().tick(cycles);
         if (cycles % 100 == 0) {
@@ -195,6 +207,7 @@ public final class Julti {
         this.processHotkeyMessages();
         InstanceManager.getInstanceManager().tickInstances();
         OBSStateManager.getOBSStateManager().tryOutputState();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.END_TICK);
     }
 
     private void ensureLocation() {
