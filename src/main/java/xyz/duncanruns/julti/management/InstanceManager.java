@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
 import xyz.duncanruns.julti.util.MouseUtil;
@@ -84,6 +85,7 @@ public final class InstanceManager {
         });
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         ResetHelper.getManager().reload();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.ALL_INSTANCES_FOUND);
     }
 
 

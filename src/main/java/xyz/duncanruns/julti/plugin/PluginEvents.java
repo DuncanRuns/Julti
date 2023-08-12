@@ -50,7 +50,9 @@ public final class PluginEvents {
         // Runs when Julti is shutting down
         STOP,
         // Runs every time the wall is activated
-        WALL_ACTIVATE
+        WALL_ACTIVATE,
+        // Runs when all instances are found
+        ALL_INSTANCES_FOUND
     }
 
     public enum InstanceEventType {
