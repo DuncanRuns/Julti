@@ -14,8 +14,7 @@ import static xyz.duncanruns.julti.Julti.log;
 
 public class CommandManager {
     private final static Pattern INSTANCES_ARG_PATTERN = Pattern.compile("^(~?-?\\d+)(,(~?-?\\d+))*$");
-    private final static CommandManager MAIN_MANAGER = new CommandManager(new Command[]{
-            new ResetCommand(),
+    private final static CommandManager MAIN_MANAGER = new CommandManager(new ArrayList<>(Arrays.asList(new ResetCommand(),
             new LockCommand(),
             new LaunchCommand(),
             new CloseCommand(),
@@ -27,11 +26,11 @@ public class CommandManager {
             new WaitCommand(),
             new LogCommand(),
             new PlaysoundCommand(),
-            new OpenFileCommand(),
-    });
-    public final Command[] commands;
+            new OpenFileCommand())));
 
-    public CommandManager(Command[] commands) {
+    public final List<Command> commands;
+
+    public CommandManager(List<Command> commands) {
         this.commands = commands;
     }
 
@@ -74,6 +73,10 @@ public class CommandManager {
 
     public static String[] withoutFirst(String[] args) {
         return Arrays.copyOfRange(args, 1, args.length);
+    }
+
+    public void registerCommand(Command command) {
+        this.commands.add(command);
     }
 
     public void runCommand(String command) {

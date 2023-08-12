@@ -5,14 +5,14 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
+import java.util.Arrays;
+
 import static xyz.duncanruns.julti.Julti.log;
 
 public class OptionCommand extends Command {
-    private final CommandManager innerManager = new CommandManager(new Command[]{
-            new OptionListCommand(),
+    private final CommandManager innerManager = new CommandManager(Arrays.asList(new OptionListCommand(),
             new OptionGetCommand(),
-            new OptionSetCommand()
-    });
+            new OptionSetCommand()));
 
     @Override
     public String helpDescription() {
