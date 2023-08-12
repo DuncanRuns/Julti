@@ -323,6 +323,7 @@ public class MinecraftInstance {
                 this.onWorldLoad();
                 break;
         }
+        PluginEvents.runEvents(PluginEvents.InstanceEventType.STATE_CHANGE, this);
     }
 
     public int getResetSortingNum() {

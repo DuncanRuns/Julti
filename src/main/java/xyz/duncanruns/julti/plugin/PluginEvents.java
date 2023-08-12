@@ -57,6 +57,8 @@ public final class PluginEvents {
         // Runs every time the instance is switched to
         ACTIVATE,
         // Runs every time the instance is reset
-        RESET
+        RESET,
+        // Runs every time the instance's state changes
+        STATE_CHANGE
     }
 }
