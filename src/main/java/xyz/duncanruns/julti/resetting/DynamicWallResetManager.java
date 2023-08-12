@@ -263,6 +263,7 @@ public class DynamicWallResetManager extends WallResetManager {
         this.displayInstancesIndices = new ArrayList<>();
         this.isFirstReset = true;
         this.refreshDisplayInstances();
+        super.reload();
     }
 
     private Rectangle getLockedInstancePosition(MinecraftInstance instance, Dimension sceneSize) {

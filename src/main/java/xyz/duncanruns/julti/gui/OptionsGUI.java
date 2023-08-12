@@ -4,6 +4,8 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
+import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
+import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
@@ -22,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
-    private static final String[] RESET_MODES = new String[]{"Multi", "Wall", "Dynamic Wall"};
     private boolean closed = false;
     private JTabbedPane tabbedPane;
 
@@ -464,7 +465,7 @@ public class OptionsGUI extends JFrame {
         JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Wall Settings")));
-        if (options.resetMode == 0) {
+        if (ResetHelper.getManager() instanceof MultiResetManager) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(new JLabel("Resetting mode is on Multi! A lot of these settings are only relevant to Wall mode.")));
         }
@@ -517,7 +518,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("this also accounts for appearance based on dirt covers and dynamic wall.")));
 
 
-        if (!(options.resetMode == 2)) {
+        if (!(ResetHelper.getManager() instanceof DynamicWallResetManager)) {
             return;
         }
         // Dynamic wall settings below
@@ -546,11 +547,11 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(new JLabel("Style:")));
 
-        JComboBox<String> resetStyleBox = new JComboBox<>(RESET_MODES);
-        resetStyleBox.setSelectedItem(RESET_MODES[options.resetMode]);
+        JComboBox<String> resetStyleBox = new JComboBox<>(ResetHelper.getResetStyles().toArray(new String[0]));
+        resetStyleBox.setSelectedItem(options.resetStyle);
         resetStyleBox.addActionListener(e -> {
             Julti.doLater(() -> {
-                options.resetMode = Arrays.asList(RESET_MODES).indexOf(resetStyleBox.getSelectedItem().toString());
+                options.resetStyle = resetStyleBox.getSelectedItem().toString();
                 ResetHelper.getManager().reload();
             });
             this.reload();
