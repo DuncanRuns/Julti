@@ -17,7 +17,6 @@ import xyz.duncanruns.julti.management.LogReceiver;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.messages.*;
 import xyz.duncanruns.julti.plugin.PluginEvents;
-import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ResourceUtil;

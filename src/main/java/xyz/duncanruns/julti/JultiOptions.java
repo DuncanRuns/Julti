@@ -288,8 +288,8 @@ public final class JultiOptions {
             this.customWallNameFormat = oldOptions.obsWindowNameFormat;
         }
 
-        if(oldOptions.resetMode != null){
-            switch (oldOptions.resetMode){
+        if (oldOptions.resetMode != null) {
+            switch (oldOptions.resetMode) {
                 case 0:
                     this.resetStyle = "Multi";
                     break;
