@@ -334,5 +334,6 @@ public final class Julti {
         ActiveWindowManager.activateHwnd(hwnd);
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
         OBSStateManager.getOBSStateManager().setLocationToWall();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.WALL_ACTIVATE);
     }
 }
