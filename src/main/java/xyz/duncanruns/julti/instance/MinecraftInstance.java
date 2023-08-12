@@ -9,6 +9,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
@@ -265,8 +266,12 @@ public class MinecraftInstance {
                 this.resetPressed = false;
             }
         }, 5000);
+        PluginEvents.runEvents(PluginEvents.InstanceEventType.RESET, this);
     }
 
+    /**
+     * If implementing in a ResetManager, please use Julti.activateInstance(instance)
+     */
     public void activate(boolean doingSetup) {
         if (this.isWindowMarkedMissing()) {
             return;
@@ -301,6 +306,9 @@ public class MinecraftInstance {
         }
         if (!options.autoFullscreen && doingSetup) {
             Julti.doLater(() -> this.ensureResettingWindowState(false));
+        }
+        if (!doingSetup) {
+            PluginEvents.runEvents(PluginEvents.InstanceEventType.ACTIVATE, this);
         }
     }
 
