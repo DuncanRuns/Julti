@@ -195,6 +195,7 @@ public final class Julti {
         PluginEvents.runEvents(PluginEvents.RunnableEventType.START_TICK);
         ActiveWindowManager.update();
         InstanceManager.getInstanceManager().tick(cycles);
+        ResetHelper.getManager().tick(cycles);
         if (cycles % 100 == 0) {
             this.ensureLocation();
         }

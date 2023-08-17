@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.management;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
@@ -103,11 +104,16 @@ public final class InstanceManager {
 
     public void tick(long cycles) {
         this.instances.forEach(MinecraftInstance::checkWindowMissing);
-        if (this.checkInstancesMarkedMissing()) {
-            if (cycles % 1000 == 0) {
+        if (cycles % 1000 == 0) {
+            if (this.checkInstancesMarkedMissing()) {
                 this.checkOpenedInstances();
+                return;
+            }
+            if (this.instances.stream().anyMatch(instance -> instance.getStateTracker().isCurrentState(InstanceState.TITLE))) {
+                this.renameWindows();
             }
         }
+
     }
 
     public void tickInstances() {
@@ -150,7 +156,9 @@ public final class InstanceManager {
         }
         int i = 1;
         for (MinecraftInstance instance : this.instances) {
-            User32.INSTANCE.SetWindowTextA(instance.getHwnd(), "Minecraft* - Instance " + (i++));
+            if (!instance.isWindowMarkedMissing()) {
+                User32.INSTANCE.SetWindowTextA(instance.getHwnd(), "Minecraft* - Instance " + (i++));
+            }
         }
     }
 

@@ -38,28 +38,28 @@ public class ResetHelper {
     public static void run(String hotkeyCode, Point mousePosition) {
         switch (hotkeyCode) {
             case "reset":
-                playActionSounds(getManager().doReset());
+                processActionResults(getManager().doReset());
                 break;
             case "bgReset":
-                playActionSounds(getManager().doBGReset());
+                processActionResults(getManager().doBGReset());
                 break;
             case "wallReset":
-                playActionSounds(getManager().doWallFullReset());
+                processActionResults(getManager().doWallFullReset());
                 break;
             case "wallSingleReset":
-                playActionSounds(getManager().doWallSingleReset(mousePosition));
+                processActionResults(getManager().doWallSingleReset(mousePosition));
                 break;
             case "wallLock":
-                playActionSounds(getManager().doWallLock(mousePosition));
+                processActionResults(getManager().doWallLock(mousePosition));
                 break;
             case "wallPlay":
-                playActionSounds(getManager().doWallPlay(mousePosition));
+                processActionResults(getManager().doWallPlay(mousePosition));
                 break;
             case "wallFocusReset":
-                playActionSounds(getManager().doWallFocusReset(mousePosition));
+                processActionResults(getManager().doWallFocusReset(mousePosition));
                 break;
             case "wallPlayLock":
-                playActionSounds(getManager().doWallPlayLock(mousePosition));
+                processActionResults(getManager().doWallPlayLock(mousePosition));
                 break;
             case "debugHover":
                 getManager().doDebugHover(mousePosition);
@@ -67,8 +67,14 @@ public class ResetHelper {
         }
     }
 
-    private static void playActionSounds(List<ActionResult> actionResults) {
+    private static void processActionResults(List<ActionResult> actionResults) {
+        if (actionResults.isEmpty()) {
+            return;
+        }
+
         JultiOptions options = JultiOptions.getJultiOptions();
+
+        getManager().updateLastActionTaken();
 
         // Reset Sounds
         int instancesReset = (int) actionResults.stream().filter(actionResult -> actionResult.equals(ActionResult.INSTANCE_RESET)).count();
