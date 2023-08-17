@@ -124,7 +124,7 @@ public final class InstanceManager {
     }
 
     public MinecraftInstance getSelectedInstance() {
-        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
+        for (MinecraftInstance instance : this.getInstances()) {
             if (ActiveWindowManager.isWindowActive(instance.getHwnd())) {
                 return instance;
             }
