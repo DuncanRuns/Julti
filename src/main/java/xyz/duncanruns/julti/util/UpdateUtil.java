@@ -7,8 +7,8 @@ import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.Main;
 import xyz.duncanruns.julti.gui.DownloadProgressFrame;
 import xyz.duncanruns.julti.gui.JultiGUI;
 
@@ -70,7 +70,7 @@ public final class UpdateUtil {
             boolean canBeEqual = Julti.VERSION.contains("-") || Julti.VERSION.contains("+");
 
             boolean shouldSuggestUpdate = true;
-            if (!Arrays.asList(Main.args).contains("--suggestUpdate")) {
+            if (!Arrays.asList(JultiAppLaunch.args).contains("--suggestUpdate")) {
                 shouldSuggestUpdate = (!isAlreadyExactlyLatest) && isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual);
             }
 

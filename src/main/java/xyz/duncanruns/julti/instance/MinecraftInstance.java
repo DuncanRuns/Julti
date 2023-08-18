@@ -9,6 +9,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.instance.InstanceState.InWorldState;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
@@ -233,7 +234,7 @@ public class MinecraftInstance {
         if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
                 this.presser.pressKey(this.gameOptions.createWorldKey); // Thanks pix
-            } else if (versionString.equals("1.17.1") || MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
+            } else if (this.versionString.equals("1.17.1") || MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
                 this.presser.pressShiftTabEnter();
             } else {
                 this.presser.pressKey(this.gameOptions.createWorldKey);
@@ -265,8 +266,12 @@ public class MinecraftInstance {
                 this.resetPressed = false;
             }
         }, 5000);
+        PluginEvents.runEvents(PluginEvents.InstanceEventType.RESET, this);
     }
 
+    /**
+     * If implementing in a ResetManager, please use Julti.activateInstance(instance)
+     */
     public void activate(boolean doingSetup) {
         if (this.isWindowMarkedMissing()) {
             return;
@@ -302,6 +307,9 @@ public class MinecraftInstance {
         if (!options.autoFullscreen && doingSetup) {
             Julti.doLater(() -> this.ensureResettingWindowState(false));
         }
+        if (!doingSetup) {
+            PluginEvents.runEvents(PluginEvents.InstanceEventType.ACTIVATE, this);
+        }
     }
 
     private void onStateChange() {
@@ -315,6 +323,7 @@ public class MinecraftInstance {
                 this.onWorldLoad();
                 break;
         }
+        PluginEvents.runEvents(PluginEvents.InstanceEventType.STATE_CHANGE, this);
     }
 
     public int getResetSortingNum() {

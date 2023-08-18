@@ -265,7 +265,6 @@ public class WallResetManager extends ResetManager {
         }
 
         Julti.getJulti().activateInstance(instance);
-        this.unlockInstance(instance);
         SleepBGUtil.enableLock();
         return Collections.singletonList(ActionResult.INSTANCE_ACTIVATED);
     }
@@ -293,6 +292,9 @@ public class WallResetManager extends ResetManager {
 
         selectedInstance.ensureNotFullscreen();
 
+        // Unlock instance
+        this.unlockInstance(selectedInstance);
+
         // Reset all after playing mode
         if (options.wallResetAllAfterPlaying) {
             return this.leaveInstanceRAAPMode(instances, resetFirst);
@@ -300,9 +302,6 @@ public class WallResetManager extends ResetManager {
 
         // Get next instance
         MinecraftInstance nextInstance = this.getNextPlayableLockedInstance(options.returnToWallIfNoneLoaded);
-
-        // Unlock instance
-        this.unlockInstance(selectedInstance);
 
         if (resetFirst) {
             this.resetInstance(selectedInstance, true);

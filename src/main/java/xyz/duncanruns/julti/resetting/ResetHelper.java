@@ -4,19 +4,35 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.SoundUtil;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class ResetHelper {
 
-    public static ResetManager getManager() {
-        switch (JultiOptions.getJultiOptions().resetMode) {
-            case 1:
-                return WallResetManager.getWallResetManager();
-            case 2:
-                return DynamicWallResetManager.getDynamicWallResetManager();
-            default:
-                return MultiResetManager.getMultiResetManager();
+    private static final HashMap<String, Supplier<ResetManager>> RESET_MANAGER_MAP = new HashMap<>();
+
+    static {
+        registerResetStyle("Multi", MultiResetManager::getMultiResetManager);
+        registerResetStyle("Wall", WallResetManager::getWallResetManager);
+        registerResetStyle("Dynamic Wall", DynamicWallResetManager::getDynamicWallResetManager);
+    }
+
+    public static boolean registerResetStyle(String name, Supplier<ResetManager> resetManagerSupplier) {
+        if (RESET_MANAGER_MAP.containsKey(name)) {
+            return false;
         }
+        RESET_MANAGER_MAP.put(name, resetManagerSupplier);
+        return true;
+    }
+
+    public static Set<String> getResetStyles() {
+        return RESET_MANAGER_MAP.keySet();
+    }
+
+    public static ResetManager getManager() {
+        return RESET_MANAGER_MAP.getOrDefault(JultiOptions.getJultiOptions().resetStyle, WallResetManager::getWallResetManager).get();
     }
 
     public static void run(String hotkeyCode, Point mousePosition) {

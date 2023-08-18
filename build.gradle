@@ -4,11 +4,10 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '0.20.0+pre28'
+version '0.20.1'
 
-tasks.withType(JavaCompile) {
-    options.release = 8
-}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenLocal()
@@ -48,13 +47,21 @@ jar {
 
     manifest {
         // Thanks to answers from this: https://stackoverflow.com/questions/33020069/how-to-get-version-attribute-from-a-gradle-build-to-be-included-in-runtime-swing
-        attributes 'Main-Class': 'xyz.duncanruns.julti.Main',
+        attributes 'Main-Class': 'xyz.duncanruns.julti.JultiAppLaunch',
                 'Multi-Release': true,
                 'Implementation-Version': version
     }
 
     from {
         configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
     }
 }
 

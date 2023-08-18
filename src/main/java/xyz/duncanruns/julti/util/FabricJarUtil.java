@@ -41,8 +41,9 @@ public final class FabricJarUtil {
         return GSON.fromJson(getJarFMJContents(jarPath), FabricJarInfo.class);
     }
 
+    @SuppressWarnings("all") //Suppress the redundant cast warning which resolves an ambiguous case
     private static String getJarFMJContents(Path jarPath) throws IOException {
-        try (FileSystem fs = FileSystems.newFileSystem(jarPath, null)) {
+        try (FileSystem fs = FileSystems.newFileSystem(jarPath, (ClassLoader) null)) {
             Path jsonFilePath = fs.getPath("fabric.mod.json");
             byte[] jsonData = Files.readAllBytes(jsonFilePath);
             return new String(jsonData, StandardCharsets.UTF_8);

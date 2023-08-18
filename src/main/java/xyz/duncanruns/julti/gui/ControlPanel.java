@@ -91,6 +91,9 @@ public class ControlPanel extends JPanel {
             });
 
             Point mousePos = this.getMousePosition();
+            if (mousePos == null) {
+                mousePos = new Point(0, 0);
+            }
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
 
@@ -125,6 +128,9 @@ public class ControlPanel extends JPanel {
             });
 
             Point mousePos = this.getMousePosition();
+            if (mousePos == null) {
+                mousePos = new Point(0, 0);
+            }
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
 
@@ -174,6 +180,9 @@ public class ControlPanel extends JPanel {
             });
 
             Point mousePos = this.getMousePosition();
+            if (mousePos == null) {
+                mousePos = new Point(0, 0);
+            }
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
     }

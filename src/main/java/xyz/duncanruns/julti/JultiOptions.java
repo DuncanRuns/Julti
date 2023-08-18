@@ -37,7 +37,7 @@ public final class JultiOptions {
     public boolean useF3 = true;
     public boolean unpauseOnSwitch = true;
     public String clipboardOnReset = "";
-    public int resetMode = 1; // 0 = Multi, 1 = Wall, 2 = Dynamic Wall
+    public String resetStyle = "Wall";
     public boolean coopMode = false;
 
     // Wall
@@ -182,7 +182,7 @@ public final class JultiOptions {
     }
 
     public static Path getJultiDir() {
-        return Paths.get(System.getProperty("user.home")).resolve(".Julti");
+        return Paths.get(System.getProperty("user.home")).resolve(".Julti").toAbsolutePath();
     }
 
     public static boolean tryChangeProfile(String profileName) {
@@ -286,6 +286,20 @@ public final class JultiOptions {
         if (oldOptions.obsWindowNameFormat != null) {
             changes.add("The obsWindowNameFormat has been removed and replaced by a better detection system. If you were not using OBS to run your wall, you can enable the new custom wall option in Julti options.");
             this.customWallNameFormat = oldOptions.obsWindowNameFormat;
+        }
+
+        if (oldOptions.resetMode != null) {
+            switch (oldOptions.resetMode) {
+                case 0:
+                    this.resetStyle = "Multi";
+                    break;
+                case 1:
+                    this.resetStyle = "Wall";
+                    break;
+                case 2:
+                    this.resetStyle = "Dynamic Wall";
+                    break;
+            }
         }
 
         if (changes.isEmpty()) {
@@ -470,5 +484,6 @@ public final class JultiOptions {
         public Boolean unsquishOnLock = null;
         public Boolean cleanWall = null;
         public String obsWindowNameFormat = null;
+        public Integer resetMode = null;
     }
 }

@@ -5,19 +5,21 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
+import java.io.IOException;
 import java.util.Arrays;
 
-public final class Main {
+public final class JultiAppLaunch {
     public static String[] args;
 
-    private Main() {
+    private JultiAppLaunch() {
     }
 
     public static void main(String[] args) {
-        Main.args = args;
+        JultiAppLaunch.args = args;
         System.out.println("Launched with args: " + Arrays.toString(args));
 
         try {
@@ -27,7 +29,12 @@ public final class Main {
         }
     }
 
-    private static void runJultiApp() {
+    public static void launchWithDevPlugin(String[] args, PluginManager.JultiPluginData pluginData) {
+        PluginManager.getPluginManager().registerPlugin(pluginData);
+        main(args);
+    }
+
+    private static void runJultiApp() throws IOException {
         // Setup GUI theme
         FlatDarkLaf.setup();
 
@@ -48,6 +55,12 @@ public final class Main {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             Julti.log(Level.ERROR, "Uncaught exception in thread " + t + ":\n" + ExceptionUtil.toDetailedString(e));
         });
+
+        // Load Plugins
+        PluginManager.getPluginManager().loadPluginsFromFolder();
+
+        // Initialize Plugins
+        PluginManager.getPluginManager().initializePlugins();
 
         // Run main loop
         Julti.getJulti().run();
