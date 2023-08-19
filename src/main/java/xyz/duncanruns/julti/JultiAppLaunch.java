@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
@@ -29,8 +30,8 @@ public final class JultiAppLaunch {
         }
     }
 
-    public static void launchWithDevPlugin(String[] args, PluginManager.JultiPluginData pluginData) {
-        PluginManager.getPluginManager().registerPlugin(pluginData);
+    public static void launchWithDevPlugin(String[] args, PluginManager.JultiPluginData pluginData, PluginInitializer pluginInitializer) {
+        PluginManager.getPluginManager().registerPlugin(pluginData, pluginInitializer);
         main(args);
     }
 

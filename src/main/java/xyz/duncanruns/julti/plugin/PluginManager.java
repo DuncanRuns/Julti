@@ -17,14 +17,16 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings({"ConstantValue", "DataFlowIssue"})
 public final class PluginManager {
     private static final PluginManager INSTANCE = new PluginManager();
     private static final Gson GSON = new Gson();
     private static final Path PLUGINS_PATH = JultiOptions.getJultiDir().resolve("plugins").toAbsolutePath();
 
-    private final List<JultiPluginData> loadedPluginDataList = new ArrayList<>();
+    private final List<LoadedJultiPlugin> loadedPlugins = new ArrayList<>();
 
     private PluginManager() {
     }
@@ -48,6 +50,10 @@ public final class PluginManager {
         }
     }
 
+    public List<LoadedJultiPlugin> getLoadedPlugins() {
+        return Collections.unmodifiableList(this.loadedPlugins);
+    }
+
     public void loadPluginsFromFolder() throws IOException {
         if (!Files.exists(PLUGINS_PATH)) {
             return;
@@ -66,47 +72,40 @@ public final class PluginManager {
      */
     private void checkPluginJar(Path path) throws Exception {
         JultiPluginData jultiPluginData = JultiPluginData.fromString(getJarJPJContents(path));
-        if (this.registerPlugin(jultiPluginData)) {
+        if (this.canRegister(jultiPluginData)) {
             importJar(path.toFile());
+            this.registerPlugin(jultiPluginData);
         } else {
             Julti.log(Level.WARN, "Failed to load plugin " + path + ", because there is another plugin with the same id already loaded.");
         }
     }
 
+    private void registerPlugin(JultiPluginData jultiPluginData) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        this.registerPlugin(jultiPluginData, (PluginInitializer) (Class.forName(jultiPluginData.initializer).newInstance()));
+    }
+
     /**
-     * Loads a plugin from a plugin data object.
+     * Loads a plugin from a plugin data object and an initializer.
      *
-     * @param jultiPluginData the plugin data object
-     *
-     * @return true if the plugin has a unique id, otherwise false
+     * @param data the plugin data object
      */
-    public boolean registerPlugin(JultiPluginData jultiPluginData) {
-        if (this.loadedPluginDataList.isEmpty() || this.loadedPluginDataList.stream().noneMatch(jultiPluginData::matchesOther)) {
-            this.loadedPluginDataList.add(jultiPluginData);
-            return true;
-        }
-        return false;
+    public void registerPlugin(JultiPluginData data, PluginInitializer initializer) {
+        this.loadedPlugins.add(new LoadedJultiPlugin(data, initializer));
+    }
+
+    private boolean canRegister(JultiPluginData data) {
+        return this.loadedPlugins.isEmpty() || this.loadedPlugins.stream().map(p -> p.pluginData).noneMatch(data::matchesOther);
     }
 
     public void initializePlugins() {
-        this.loadedPluginDataList.forEach(pluginData -> {
-            if (pluginData.initializer == null || pluginData.initializer.isEmpty()) {
-                return;
-            }
-            try {
-                PluginInitializer pluginInitializer = (PluginInitializer) Class.forName(pluginData.initializer).newInstance();
-                pluginInitializer.initialize();
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        this.loadedPlugins.forEach(plugin -> plugin.pluginInitializer.initialize());
     }
 
     public static class JultiPluginData {
-        public String name = null;
-        public String id = null;
-        public String version = null;
-        public String initializer = null;
+        public final String name = null;
+        public final String id = null;
+        public final String version = null;
+        public final String initializer = null;
 
         public static JultiPluginData fromString(String string) {
             return GSON.fromJson(string, JultiPluginData.class);
@@ -114,6 +113,16 @@ public final class PluginManager {
 
         public boolean matchesOther(JultiPluginData other) {
             return other != null && this.id.equals(other.id);
+        }
+    }
+
+    public static class LoadedJultiPlugin {
+        public final JultiPluginData pluginData;
+        public final PluginInitializer pluginInitializer;
+
+        private LoadedJultiPlugin(JultiPluginData data, PluginInitializer initializer) {
+            this.pluginData = data;
+            this.pluginInitializer = initializer;
         }
     }
 }
