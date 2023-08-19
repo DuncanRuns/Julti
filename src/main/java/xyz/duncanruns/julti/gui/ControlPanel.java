@@ -19,6 +19,7 @@ import static xyz.duncanruns.julti.Julti.log;
 public class ControlPanel extends JPanel {
     private OptionsGUI optionsGUI = null;
     private ScriptsGUI scriptsGUI = null;
+    private PluginsGUI pluginsGUI = null;
 
     public ControlPanel() {
         this.setLayout(new GridBagLayout());
@@ -141,6 +142,14 @@ public class ControlPanel extends JPanel {
                 this.scriptsGUI = new ScriptsGUI();
             } else {
                 this.scriptsGUI.requestFocus();
+            }
+        }), gbc);
+
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Plugins..."), a -> {
+            if (this.pluginsGUI == null || this.pluginsGUI.isClosed()) {
+                this.pluginsGUI = new PluginsGUI();
+            } else {
+                this.pluginsGUI.requestFocus();
             }
         }), gbc);
 
