@@ -1,12 +1,21 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.plugin.PluginManager.LoadedJultiPlugin;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class PluginsGUI extends JFrame {
@@ -45,6 +54,27 @@ public class PluginsGUI extends JFrame {
         JScrollBar verticalScrollBar = ((JScrollPane) this.getContentPane()).getVerticalScrollBar();
         int i = verticalScrollBar.getValue();
         this.panel.removeAll();
+
+
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
+
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Open Plugins Folder"), a -> {
+            try {
+                Path pluginsPath = PluginManager.getPluginsPath();
+                if (!Files.exists(pluginsPath)) {
+                    // being careful with the fucky directory making
+                    new File((System.getProperty("user.home") + "/.Julti/plugins/").replace("\\", "/").replace("//", "/")).mkdirs();
+                }
+                Desktop.getDesktop().browse(JultiOptions.getJultiDir().resolve("plugins").toUri());
+            } catch (IOException e) {
+                Julti.log(Level.ERROR, "Failed to open instance folder:\n" + ExceptionUtil.toDetailedString(e));
+            }
+        }));
+
+        this.panel.add(GUIUtil.leftJustify(buttonsPanel));
+
+        this.panel.add(GUIUtil.createSpacer(15));
 
         List<LoadedJultiPlugin> loadedPlugins = PluginManager.getPluginManager().getLoadedPlugins();
         for (LoadedJultiPlugin loadedPlugin : loadedPlugins) {

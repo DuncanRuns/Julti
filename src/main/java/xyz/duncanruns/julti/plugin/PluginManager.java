@@ -33,6 +33,10 @@ public final class PluginManager {
     private PluginManager() {
     }
 
+    public static Path getPluginsPath() {
+        return PLUGINS_PATH;
+    }
+
     public static PluginManager getPluginManager() {
         return INSTANCE;
     }
