@@ -19,21 +19,21 @@ import xyz.duncanruns.julti.messages.*;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
-import xyz.duncanruns.julti.util.ResourceUtil;
-import xyz.duncanruns.julti.util.SleepBGUtil;
-import xyz.duncanruns.julti.util.UpdateUtil;
+import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.User32;
 
+import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -122,53 +122,22 @@ public final class Julti {
         return !Paths.get("").toAbsolutePath().equals(getSourcePath().getParent());
     }
 
-    /**
-     * Uses https://stackoverflow.com/questions/35129457/how-to-check-if-a-process-is-running-on-windows
-     */
-    public static boolean isWallAHKOpen() throws IOException {
-        String findProcess = "autohotkey.exe";
-        String filenameFilter = "/fi \"Imagename eq "+findProcess+"\"";
-        String tasksCmd = System.getenv("windir") + "/system32/tasklist.exe "+filenameFilter+" /FO LIST";
+    // Uses portion https://stackoverflow.com/questions/35129457/how-to-check-if-a-process-is-running-on-windows
+    // CMD help from Jojoe, thank you jojoe
+    public static void isWallAHKOpen() throws IOException {
+        String tasksCmd = System.getenv("windir") + "/system32/wbem/wmic.exe path Win32_Process where " +
+                "\"CommandLine Like '%AutoHotkey.exe% %TheWall.ahk%'\" get ProcessId /format:list";
         Process p = Runtime.getRuntime().exec(tasksCmd);
         BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-        ArrayList<String> procs = new ArrayList<String>();
-        String line = null;
-        while ((line = input.readLine()) != null)
-            procs.add(line);
-        input.close();
-        if (procs.get(0).equals("INFO: No tasks are running which match the specified criteria.")) {
-            return false;
-        }
-        procs.remove(0);
-        procs.removeAll(Arrays.asList("", null));
-        procs.removeAll(Arrays.asList("Image Name:   AutoHotkey.exe"));
-        for (int proc = 0; proc < procs.size(); proc++) {
-            String item = procs.get(proc);
-            String pid = item.replaceAll("[^0-9]", "");
-            String wmicCmd = System.getenv("windir") + "/system32/wbem/wmic.exe path Win32_Process where handle='"+pid+"' " +
-                    "get Commandline /format:list";
-            Process wmicp = Runtime.getRuntime().exec(wmicCmd);
-            BufferedReader wmicinput = new BufferedReader(new InputStreamReader(wmicp.getInputStream()));
-
-            ArrayList<String> proccl = new ArrayList<String>();
-            String cline = null;
-            while ((cline = wmicinput.readLine()) != null)
-                proccl.add(cline);
-            proccl.removeAll(Arrays.asList("", null));
-            cline = proccl.get(0);
-            cline = cline.replace("\"", "");
-            cline = cline.trim();
-            wmicinput.close();
-            String ahkscript = cline.substring(cline.length() - 11);
-            if (ahkscript.equals("TheWall.ahk")) {
-                return true;
-            }
-            return false;
-        }
-        return false;
+        ArrayList<String> pids = new ArrayList<String>();
+        String pid = null;
+        while ((pid = input.readLine()) != null)
+            pids.add(pid);
+        pids.removeAll(Arrays.asList("", null));
+        if (pids.size() > 1)
+            log(Level.WARN, "The Macro for Specnr's Wall is open. To prevent issues, close the ahk script.");
     }
-
     private void changeProfile(QMessage message) {
         this.changeProfile(((ProfileChangeQMessage) message).getProfileName());
     }
@@ -187,8 +156,7 @@ public final class Julti {
         InstanceManager.getInstanceManager().onOptionsLoad();
         HotkeyManager.getHotkeyManager().reloadHotkeys();
         ResetHelper.getManager().reload();
-        PluginEvents.RunnableEventType.RELOAD.runAll();
-
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.RELOAD);
     }
 
     private void changeOption(QMessage message) {
@@ -207,7 +175,7 @@ public final class Julti {
         AffinityManager.stop();
         SleepBGUtil.disableLock();
         AffinityManager.release();
-        PluginEvents.RunnableEventType.STOP.runAll();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.STOP);
         this.running = false;
     }
 
@@ -229,9 +197,8 @@ public final class Julti {
         if (isRanFromAlternateLocation()) {
             log(Level.INFO, "Julti is being ran from another location");
         }
-        if (isWallAHKOpen()) {
-            log(Level.WARN, "The Macro for Specnr's Wall is open. To prevent issues, please close the AHK script.");
-        }
+        isWallAHKOpen();
+
 
         // Schedule update checker after Julti startup processes
         Julti.doLater(() -> new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getJultiGUI()), "update-checker").start());
@@ -243,7 +210,7 @@ public final class Julti {
     }
 
     private void tick(long cycles) {
-        PluginEvents.RunnableEventType.START_TICK.runAll();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.START_TICK);
         ActiveWindowManager.update();
         InstanceManager.getInstanceManager().tick(cycles);
         ResetHelper.getManager().tick(cycles);
@@ -254,7 +221,7 @@ public final class Julti {
         this.processHotkeyMessages();
         InstanceManager.getInstanceManager().tickInstances();
         OBSStateManager.getOBSStateManager().tryOutputState();
-        PluginEvents.RunnableEventType.END_TICK.runAll();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.END_TICK);
     }
 
     private void ensureLocation() {
@@ -386,6 +353,6 @@ public final class Julti {
         ActiveWindowManager.activateHwnd(hwnd);
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
         OBSStateManager.getOBSStateManager().setLocationToWall();
-        PluginEvents.RunnableEventType.WALL_ACTIVATE.runAll();
+        PluginEvents.runEvents(PluginEvents.RunnableEventType.WALL_ACTIVATE);
     }
 }
