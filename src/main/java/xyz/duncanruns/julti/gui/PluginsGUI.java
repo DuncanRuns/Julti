@@ -82,7 +82,7 @@ public class PluginsGUI extends JFrame {
         }
 
         if (loadedPlugins.isEmpty()) {
-            this.panel.add(new JLabel("No plugins :("));
+            this.panel.add(GUIUtil.leftJustify(new JLabel("No plugins :(")));
         }
 
         verticalScrollBar.setValue(i);
