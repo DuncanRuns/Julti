@@ -266,7 +266,7 @@ public class MinecraftInstance {
                 this.resetPressed = false;
             }
         }, 5000);
-        PluginEvents.runEvents(PluginEvents.InstanceEventType.RESET, this);
+        PluginEvents.InstanceEventType.RESET.runAll(this);
     }
 
     /**
@@ -308,7 +308,7 @@ public class MinecraftInstance {
             Julti.doLater(() -> this.ensureResettingWindowState(false));
         }
         if (!doingSetup) {
-            PluginEvents.runEvents(PluginEvents.InstanceEventType.ACTIVATE, this);
+            PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
     }
 
@@ -323,7 +323,7 @@ public class MinecraftInstance {
                 this.onWorldLoad();
                 break;
         }
-        PluginEvents.runEvents(PluginEvents.InstanceEventType.STATE_CHANGE, this);
+        PluginEvents.InstanceEventType.STATE_CHANGE.runAll(this);
     }
 
     public int getResetSortingNum() {

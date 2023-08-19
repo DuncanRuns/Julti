@@ -140,7 +140,8 @@ public final class Julti {
         InstanceManager.getInstanceManager().onOptionsLoad();
         HotkeyManager.getHotkeyManager().reloadHotkeys();
         ResetHelper.getManager().reload();
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.RELOAD);
+        PluginEvents.RunnableEventType.RELOAD.runAll();
+
     }
 
     private void changeOption(QMessage message) {
@@ -159,7 +160,7 @@ public final class Julti {
         AffinityManager.stop();
         SleepBGUtil.disableLock();
         AffinityManager.release();
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.STOP);
+        PluginEvents.RunnableEventType.STOP.runAll();
         this.running = false;
     }
 
@@ -192,7 +193,7 @@ public final class Julti {
     }
 
     private void tick(long cycles) {
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.START_TICK);
+        PluginEvents.RunnableEventType.START_TICK.runAll();
         ActiveWindowManager.update();
         InstanceManager.getInstanceManager().tick(cycles);
         ResetHelper.getManager().tick(cycles);
@@ -203,7 +204,7 @@ public final class Julti {
         this.processHotkeyMessages();
         InstanceManager.getInstanceManager().tickInstances();
         OBSStateManager.getOBSStateManager().tryOutputState();
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.END_TICK);
+        PluginEvents.RunnableEventType.END_TICK.runAll();
     }
 
     private void ensureLocation() {
@@ -335,6 +336,6 @@ public final class Julti {
         ActiveWindowManager.activateHwnd(hwnd);
         User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
         OBSStateManager.getOBSStateManager().setLocationToWall();
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.WALL_ACTIVATE);
+        PluginEvents.RunnableEventType.WALL_ACTIVATE.runAll();
     }
 }

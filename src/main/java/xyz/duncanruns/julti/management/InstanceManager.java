@@ -86,7 +86,7 @@ public final class InstanceManager {
         });
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         ResetHelper.getManager().reload();
-        PluginEvents.runEvents(PluginEvents.RunnableEventType.ALL_INSTANCES_FOUND);
+        PluginEvents.RunnableEventType.ALL_INSTANCES_FOUND.runAll();
     }
 
 

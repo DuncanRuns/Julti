@@ -2,43 +2,11 @@ package xyz.duncanruns.julti.plugin;
 
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public final class PluginEvents {
-
-    private static final HashMap<RunnableEventType, List<Runnable>> RUNNABLE_EVENT_MAP = new HashMap<>();
-    private static final HashMap<InstanceEventType, List<Consumer<MinecraftInstance>>> INSTANCE_EVENT_MAP = new HashMap<>();
-
-    static {
-        for (RunnableEventType value : RunnableEventType.values()) {
-            RUNNABLE_EVENT_MAP.put(value, new LinkedList<>());
-        }
-        for (InstanceEventType value : InstanceEventType.values()) {
-            INSTANCE_EVENT_MAP.put(value, new LinkedList<>());
-        }
-    }
-
-    private PluginEvents() {
-    }
-
-    public static void runEvents(RunnableEventType eventType) {
-        RUNNABLE_EVENT_MAP.get(eventType).forEach(Runnable::run);
-    }
-
-    public static void runEvents(InstanceEventType eventType, MinecraftInstance instance) {
-        INSTANCE_EVENT_MAP.get(eventType).forEach(c -> c.accept(instance));
-    }
-
-    public static void registerRunnableEvent(RunnableEventType eventType, Runnable runnable) {
-        RUNNABLE_EVENT_MAP.get(eventType).add(runnable);
-    }
-
-    public static void registerInstanceEvent(InstanceEventType eventType, Consumer<MinecraftInstance> instanceConsumer) {
-        INSTANCE_EVENT_MAP.get(eventType).add(instanceConsumer);
-    }
 
     public enum RunnableEventType {
         // Runs at the start of the main loop tick
@@ -52,7 +20,17 @@ public final class PluginEvents {
         // Runs every time the wall is activated
         WALL_ACTIVATE,
         // Runs when all instances are found
-        ALL_INSTANCES_FOUND
+        ALL_INSTANCES_FOUND;
+
+        private final List<Runnable> runnables = new LinkedList<>();
+
+        public void register(Runnable runnable) {
+            this.runnables.add(runnable);
+        }
+
+        public void runAll() {
+            this.runnables.forEach(Runnable::run);
+        }
     }
 
     public enum InstanceEventType {
@@ -61,6 +39,17 @@ public final class PluginEvents {
         // Runs every time the instance is reset
         RESET,
         // Runs every time the instance's state changes
-        STATE_CHANGE
+        STATE_CHANGE;
+
+
+        private final List<Consumer<MinecraftInstance>> consumers = new LinkedList<>();
+
+        public void register(Consumer<MinecraftInstance> consumer) {
+            this.consumers.add(consumer);
+        }
+
+        public void runAll(MinecraftInstance instance) {
+            this.consumers.forEach(c -> c.accept(instance));
+        }
     }
 }
