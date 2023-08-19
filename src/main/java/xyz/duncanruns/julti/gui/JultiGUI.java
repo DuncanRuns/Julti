@@ -29,6 +29,14 @@ public class JultiGUI extends JFrame {
         return INSTANCE;
     }
 
+    public static PluginsGUI getPluginsGUI() {
+        return getJultiGUI().getControlPanel().openPluginsGui();
+    }
+
+    public ControlPanel getControlPanel() {
+        return this.controlPanel;
+    }
+
     public void setVisible() {
         this.setVisible(true);
     }

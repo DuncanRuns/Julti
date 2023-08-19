@@ -137,31 +137,13 @@ public class ControlPanel extends JPanel {
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> {
-            if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
-                this.scriptsGUI = new ScriptsGUI();
-            } else {
-                this.scriptsGUI.requestFocus();
-            }
-        }), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> this.openScriptsGUI()), gbc);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Plugins..."), a -> {
-            if (this.pluginsGUI == null || this.pluginsGUI.isClosed()) {
-                this.pluginsGUI = new PluginsGUI();
-            } else {
-                this.pluginsGUI.requestFocus();
-            }
-        }), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Plugins..."), a -> this.openPluginsGui()), gbc);
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> {
-            if (this.optionsGUI == null || this.optionsGUI.isClosed()) {
-                this.optionsGUI = new OptionsGUI();
-            } else {
-                this.optionsGUI.requestFocus();
-            }
-        }), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> this.openOptions()), gbc);
 
         if (!Objects.equals("DEV", Julti.VERSION)) {
             return;
@@ -194,6 +176,33 @@ public class ControlPanel extends JPanel {
             }
             menu.show(this, mousePos.x, mousePos.y);
         }), gbc);
+    }
+
+    private ScriptsGUI openScriptsGUI() {
+        if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
+            this.scriptsGUI = new ScriptsGUI();
+        } else {
+            this.scriptsGUI.requestFocus();
+        }
+        return this.scriptsGUI;
+    }
+
+    public PluginsGUI openPluginsGui() {
+        if (this.pluginsGUI == null || this.pluginsGUI.isClosed()) {
+            this.pluginsGUI = new PluginsGUI();
+        } else {
+            this.pluginsGUI.requestFocus();
+        }
+        return this.pluginsGUI;
+    }
+
+    public OptionsGUI openOptions() {
+        if (this.optionsGUI == null || this.optionsGUI.isClosed()) {
+            this.optionsGUI = new OptionsGUI();
+        } else {
+            this.optionsGUI.requestFocus();
+        }
+        return this.optionsGUI;
     }
 
     public OptionsGUI getOptionsGUI() {
