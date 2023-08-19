@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
@@ -22,6 +23,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class OptionsGUI extends JFrame {
     private boolean closed = false;
@@ -663,5 +666,10 @@ public class OptionsGUI extends JFrame {
             SleepBGUtil.disableLock();
             DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
         });
+        try {
+            Julti.isWallAHKOpen();
+        } catch (Exception e) {
+            Julti.log(Level.ERROR, "Failed to detect Wall Macro.");
+        }
     }
 }
