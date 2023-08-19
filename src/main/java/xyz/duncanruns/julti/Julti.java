@@ -122,6 +122,53 @@ public final class Julti {
         return !Paths.get("").toAbsolutePath().equals(getSourcePath().getParent());
     }
 
+    /**
+     * Uses https://stackoverflow.com/questions/35129457/how-to-check-if-a-process-is-running-on-windows
+     */
+    public static boolean isWallAHKOpen() throws IOException {
+        String findProcess = "autohotkey.exe";
+        String filenameFilter = "/fi \"Imagename eq "+findProcess+"\"";
+        String tasksCmd = System.getenv("windir") + "/system32/tasklist.exe "+filenameFilter+" /FO LIST";
+        Process p = Runtime.getRuntime().exec(tasksCmd);
+        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+        ArrayList<String> procs = new ArrayList<String>();
+        String line = null;
+        while ((line = input.readLine()) != null)
+            procs.add(line);
+        input.close();
+        if (procs.get(0).equals("INFO: No tasks are running which match the specified criteria.")) {
+            return false;
+        }
+        procs.remove(0);
+        procs.removeAll(Arrays.asList("", null));
+        procs.removeAll(Arrays.asList("Image Name:   AutoHotkey.exe"));
+        for (int proc = 0; proc < procs.size(); proc++) {
+            String item = procs.get(proc);
+            String pid = item.replaceAll("[^0-9]", "");
+            String wmicCmd = System.getenv("windir") + "/system32/wbem/wmic.exe path Win32_Process where handle='"+pid+"' " +
+                    "get Commandline /format:list";
+            Process wmicp = Runtime.getRuntime().exec(wmicCmd);
+            BufferedReader wmicinput = new BufferedReader(new InputStreamReader(wmicp.getInputStream()));
+
+            ArrayList<String> proccl = new ArrayList<String>();
+            String cline = null;
+            while ((cline = wmicinput.readLine()) != null)
+                proccl.add(cline);
+            proccl.removeAll(Arrays.asList("", null));
+            cline = proccl.get(0);
+            cline = cline.replace("\"", "");
+            cline = cline.trim();
+            wmicinput.close();
+            String ahkscript = cline.substring(cline.length() - 11);
+            if (ahkscript.equals("TheWall.ahk")) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     private void changeProfile(QMessage message) {
         this.changeProfile(((ProfileChangeQMessage) message).getProfileName());
     }
@@ -181,6 +228,9 @@ public final class Julti {
         log(Level.INFO, "You are running Julti v" + VERSION + " with java: " + usedJava);
         if (isRanFromAlternateLocation()) {
             log(Level.INFO, "Julti is being ran from another location");
+        }
+        if (isWallAHKOpen()) {
+            log(Level.WARN, "The Macro for Specnr's Wall is open. To prevent issues, please close the AHK script.");
         }
 
         // Schedule update checker after Julti startup processes
