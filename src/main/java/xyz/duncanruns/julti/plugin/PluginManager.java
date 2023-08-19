@@ -8,7 +8,6 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 @SuppressWarnings({"ConstantValue", "DataFlowIssue"})
 public final class PluginManager {
@@ -35,10 +37,28 @@ public final class PluginManager {
         return INSTANCE;
     }
 
-    private static void importJar(File file) throws Exception {
-        Method addURL = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-        addURL.setAccessible(true);
-        addURL.invoke(URLClassLoader.getSystemClassLoader(), file.toURI().toURL());
+    private static PluginInitializer importJar(File file, String initializer) throws Exception {
+        // https://stackoverflow.com/questions/11016092/how-to-load-classes-at-runtime-from-a-folder-or-jar
+        JarFile jarFile = new JarFile(file);
+        Enumeration<JarEntry> e = jarFile.entries();
+
+        URL[] urls = {new URL("jar:file:" + file + "!/")};
+        URLClassLoader cl = URLClassLoader.newInstance(urls);
+
+        while (e.hasMoreElements()) {
+            JarEntry je = e.nextElement();
+            if (je.isDirectory() || !je.getName().endsWith(".class")) {
+                continue;
+            }
+            // -6 because of .class
+            String className = je.getName().substring(0, je.getName().length() - 6);
+            className = className.replace('/', '.');
+            cl.loadClass(className);
+        }
+
+        PluginInitializer pi = (PluginInitializer) cl.loadClass(initializer).newInstance();
+        jarFile.close();
+        return pi;
     }
 
     @SuppressWarnings("all") //Suppress the redundant cast warning which resolves an ambiguous case
@@ -73,15 +93,11 @@ public final class PluginManager {
     private void checkPluginJar(Path path) throws Exception {
         JultiPluginData jultiPluginData = JultiPluginData.fromString(getJarJPJContents(path));
         if (this.canRegister(jultiPluginData)) {
-            importJar(path.toFile());
-            this.registerPlugin(jultiPluginData);
+            PluginInitializer pluginInitializer = importJar(path.toFile(), jultiPluginData.initializer);
+            this.registerPlugin(jultiPluginData, pluginInitializer);
         } else {
             Julti.log(Level.WARN, "Failed to load plugin " + path + ", because there is another plugin with the same id already loaded.");
         }
-    }
-
-    private void registerPlugin(JultiPluginData jultiPluginData) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        this.registerPlugin(jultiPluginData, (PluginInitializer) (Class.forName(jultiPluginData.initializer).newInstance()));
     }
 
     /**
