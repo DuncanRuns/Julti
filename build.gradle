@@ -13,6 +13,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
 }
 
 dependencies {
@@ -39,6 +40,8 @@ dependencies {
     implementation 'org.kohsuke:github-api:1.314'
 
     implementation 'org.json:json:20230227'
+
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
 }
 
 jar {
