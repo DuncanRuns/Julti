@@ -488,11 +488,11 @@ public class MinecraftInstance {
         try {
             String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
             if (!multiMCPath.isEmpty()) {
-                String cmd;
+                String[] cmd;
                 if (offlineName == null) {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getMMCInstanceFolderName() + "\"";
+                    cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName()};
                 } else {
-                    cmd = multiMCPath.trim() + " --launch \"" + this.getMMCInstanceFolderName() + "\" -o -n " + offlineName;
+                    cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName(), "-o", "-n", offlineName};
                 }
                 Runtime.getRuntime().exec(cmd);
 
