@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '0.20.1'
+version '0.21.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -40,6 +40,9 @@ dependencies {
     implementation 'org.kohsuke:github-api:1.314'
 
     implementation 'org.json:json:20230227'
+
+    implementation 'org.reflections:reflections:0.9.10'
+
 
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
 }
