@@ -224,8 +224,8 @@ public class DynamicWallResetManager extends WallResetManager {
         int totalRows = 2;
         int totalColumns = 2;
         if (!options.autoCalcWallSize) {
-            totalRows = options.overrideRowsAmount;
-            totalColumns = options.overrideColumnsAmount;
+            totalRows = Math.max(1, options.overrideRowsAmount);
+            totalColumns = Math.max(1, options.overrideColumnsAmount);
         }
 
         int instanceInd = displayInstances.indexOf(instance);
