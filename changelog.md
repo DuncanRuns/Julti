@@ -1,3 +1,45 @@
+Changes in v0.21.1:
++ Updated Standard Manager
+    + Fixed reversed naming on render distance values
+
+Changes in v0.21.0:
++ Added plugins menu
++ Added more plugin API
++ Added Standard Manager as a default plugin
+
+Changes in v0.20.1:
++ Made the "Play Next Lock" and "Reset All" wall keys more compatible
++ Added Plug-in API and Plug-in loading (Plug-in menu still needed)
+
+Changes in v0.20.0:
+Eventually there were too many changes to even keep track of, this list is certainly not complete.
+
+Julti Functionality Changes in v0.20.0:
+- Added Smart Switch: When enabled, attempts to switch to instances that are not yet loaded will be redirected to already locked and loaded instances if any exist.
+- When suggesting to update, you can now automatically download and restart Julti without visiting the github page.
+
+Option changes in v0.20.0:
+- Dirt cover release % has been removed, world preview state output is reliable in v4.0.0, so there is only a checkbox for dirt covers now
+- Wide Reset Squish has been replaced by multiple window size options (playing vs resetting window size)
+- Pause on load option removed, worlds will pause on load by default now
+- No cope mode removed
+- "Clean wall" has been removed, clutters code and is problematic for too many people for not much benefit
+
+OBS Script changes in v0.20.0:
+- New verification scene generation for a single loading square due to world preview updates, and will also support multiple window sizes during resetting to improve verifiability of the "Unsquish on lock setting" (You will need to press generate scenes again to get this)
+- Ability to have single instance scenes (`Playing 1`, `Playing 2`, etc...) (There are no scene generators for this yet)
+- Checkbox to generate window captures on the Julti scene instead of game cap
+- Checkbox to let verification scene share captures with Julti scene
+- Checkbox to make dirt covers turn the instance invisible / tp it away to show a background image
+- Checkbox to center active instances and show their actual size for a better viewing experience when using eye zoom macro
+- A couple crash and error message fixes
+
+Technical Changes in v0.20.0:
+- Rewrote the core of Julti and copied most of the old code on top of it and then adjusted it to work with the new core (this was basically all of the work)
+  - This means Julti should be more stable and consistent, including the bugs, so hopefully they are way more consistent and fixable.
+  - Now uses the new world preview state output feature, meaning Julti can very easily determine what state an instance is in, leading to more stability and consistency
+- Added affinity "jumping", which boosts the affinity of an instance that is about to be switched to, or boosts the affinity of instances that have been sent a reset input, making switching and resetting smoother. This is just a consistent optimization so there is no option for this.
+
 Changes in v0.18.0:
 - Added experimental features tab, which you can enable in the other options tab
   - This will let you access some hidden features from the GUI which you previously could only enable through the command line.
