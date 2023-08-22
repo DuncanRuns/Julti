@@ -58,7 +58,7 @@ public final class JultiAppLaunch {
         });
 
         // Load Plugins
-        PluginManager.getPluginManager().loadPluginsFromFolder();
+        PluginManager.getPluginManager().loadPlugins();
 
         // Initialize Plugins
         PluginManager.getPluginManager().initializePlugins();

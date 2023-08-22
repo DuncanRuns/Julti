@@ -2,25 +2,29 @@ package xyz.duncanruns.julti.plugin;
 
 import com.google.gson.Gson;
 import org.apache.logging.log4j.Level;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.ExceptionUtil;
+import xyz.duncanruns.julti.util.ResourceUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"ConstantValue", "DataFlowIssue"})
 public final class PluginManager {
@@ -82,13 +86,50 @@ public final class PluginManager {
         if (!Files.exists(PLUGINS_PATH)) {
             return;
         }
-        Files.list(PLUGINS_PATH).filter(path -> path.getFileName().toString().endsWith(".jar")).forEach(path -> {
+        try (Stream<Path> list = Files.list(PLUGINS_PATH)) {
+            list.filter(path -> path.getFileName().toString().endsWith(".jar")).forEach(path -> {
+                try {
+                    this.checkPluginJar(path);
+                } catch (Exception e) {
+                    Julti.log(Level.WARN, "Failed to load plugin " + path + "!\n" + ExceptionUtil.toDetailedString(e));
+                }
+            });
+        }
+    }
+
+    private void loadDefaultPlugins() throws IOException, URISyntaxException {
+
+        Reflections reflections = new Reflections("", new ResourcesScanner());
+        Pattern pattern = Pattern.compile("defaultplugins/.+\\.jar");
+        List<String> fileNames = reflections.getResources(s -> s.endsWith(".jar")).stream().filter(s -> pattern.matcher(s).matches()).collect(Collectors.toList());
+
+        Julti.log(Level.DEBUG, "Default Plugins:" + fileNames);
+
+        for (String fileName : fileNames) {
+            Path path = Paths.get(File.createTempFile(fileName, null).getPath());
+            if (!fileName.startsWith("/")) {
+                fileName = "/" + fileName;
+            }
+            ResourceUtil.copyResourceToFile(fileName, path);
             try {
                 this.checkPluginJar(path);
             } catch (Exception e) {
-                Julti.log(Level.WARN, "Failed to load plugin " + path + "!\n" + ExceptionUtil.toDetailedString(e));
+                Julti.log(Level.ERROR, "Failed to load default plugin: " + fileName);
             }
-        });
+        }
+    }
+
+    public void loadPlugins() {
+        try {
+            this.loadPluginsFromFolder();
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to load plugins from folder: " + ExceptionUtil.toDetailedString(e));
+        }
+        try {
+            this.loadDefaultPlugins();
+        } catch (IOException | URISyntaxException e) {
+            Julti.log(Level.ERROR, "Failed to load default plugins: " + ExceptionUtil.toDetailedString(e));
+        }
     }
 
     /**
