@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class FabricJarUtil {
     private static final Gson GSON = new Gson();
@@ -22,14 +23,16 @@ public final class FabricJarUtil {
 
     public static List<FabricJarInfo> getAllJarInfos(Path instancePath) throws IOException {
         // List files in mod folder -> filter for .jar -> map to jar infos -> return
-        return Files.list(instancePath.resolve("mods").toAbsolutePath()).filter(path -> path.getFileName().toString().endsWith(".jar")).map(path -> {
-            try {
-                return getJarInfo(path);
-            } catch (IOException e) {
-                Julti.log(Level.WARN, "Invalid jar " + path.getFileName() + " found in " + instancePath + ". Exception below:\n" + ExceptionUtil.toDetailedString(e));
-                return null;
-            }
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        try (Stream<Path> list = Files.list(instancePath.resolve("mods").toAbsolutePath())) {
+            return list.filter(path -> path.getFileName().toString().endsWith(".jar")).map(path -> {
+                try {
+                    return getJarInfo(path);
+                } catch (IOException e) {
+                    Julti.log(Level.WARN, "Invalid jar " + path.getFileName() + " found in " + instancePath + ". Exception below:\n" + ExceptionUtil.toDetailedString(e));
+                    return null;
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
     }
 
     public static FabricJarInfo getJarInfo(List<FabricJarInfo> infos, String id) {
