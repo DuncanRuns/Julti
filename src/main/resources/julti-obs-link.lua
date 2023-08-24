@@ -108,9 +108,10 @@ function set_instance_data(num, lock_visible, dirt_cover, x, y, width, height, c
         return
     end
 
-    -- Lock Display: visibility and crop
+    -- Lock Display: visibility, position and crop
     local item = obs.obs_scene_find_source(group, "Lock Display")
     obs.obs_sceneitem_set_visible(item, lock_visible)
+    set_position(item, 0, 0)
     set_crop(item, 0, 0, total_width - width, total_height - height)
 
     -- Dirt Cover: visibility and bounds
