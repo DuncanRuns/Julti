@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -265,6 +266,7 @@ public final class Julti {
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.requestCancel();
         } else {
+            PluginEvents.MiscEventType.HOTKEY_PRESS.runAll(Pair.of(hotkeyCode, mousePosition));
             ResetHelper.run(hotkeyCode, mousePosition);
         }
     }

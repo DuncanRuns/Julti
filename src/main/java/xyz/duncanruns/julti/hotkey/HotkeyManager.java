@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.util.MouseUtil;
 
@@ -49,9 +50,11 @@ public final class HotkeyManager {
             }
             this.addHotkey(Hotkey.of(data.keys, data.ignoreModifiers), "script:" + data.scriptName);
         });
+
+        PluginEvents.RunnableEventType.HOTKEY_MANAGER_RELOAD.runAll();
     }
 
-    private void addHotkey(Hotkey hotkey, String action) {
+    public void addHotkey(Hotkey hotkey, String action) {
         if (hotkey.isEmpty()) {
             return;
         }

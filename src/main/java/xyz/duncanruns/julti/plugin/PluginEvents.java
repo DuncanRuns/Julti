@@ -20,7 +20,9 @@ public final class PluginEvents {
         // Runs every time the wall is activated
         WALL_ACTIVATE,
         // Runs when all instances are found
-        ALL_INSTANCES_FOUND;
+        ALL_INSTANCES_FOUND,
+        // Runs when the hotkey manager reloads
+        HOTKEY_MANAGER_RELOAD;
 
         private final List<Runnable> runnables = new LinkedList<>();
 
@@ -49,6 +51,21 @@ public final class PluginEvents {
         }
 
         public void runAll(MinecraftInstance instance) {
+            this.consumers.forEach(c -> c.accept(instance));
+        }
+    }
+
+    public enum MiscEventType{
+        // Runs for every hotkey press: object is a Pair<String, Point> representing the hotkey code and the mouse position
+        HOTKEY_PRESS;
+
+        private final List<Consumer<Object>> consumers = new LinkedList<>();
+
+        public void register(Consumer<Object> consumer) {
+            this.consumers.add(consumer);
+        }
+
+        public void runAll(Object instance) {
             this.consumers.forEach(c -> c.accept(instance));
         }
     }
