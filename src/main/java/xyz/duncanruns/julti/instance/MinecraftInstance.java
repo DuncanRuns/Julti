@@ -304,10 +304,9 @@ public class MinecraftInstance {
                 }
             }
         }
-        if (!options.autoFullscreen && doingSetup) {
+        if (doingSetup) {
             Julti.doLater(() -> this.ensureResettingWindowState(false));
-        }
-        if (!doingSetup) {
+        } else {
             PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
     }
