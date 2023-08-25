@@ -90,7 +90,7 @@ public final class PluginManager {
             list.filter(path -> path.getFileName().toString().endsWith(".jar")).forEach(path -> {
                 try {
                     this.checkPluginJar(path);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     Julti.log(Level.WARN, "Failed to load plugin " + path + "!\n" + ExceptionUtil.toDetailedString(e));
                 }
             });
