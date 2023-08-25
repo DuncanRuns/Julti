@@ -17,8 +17,6 @@ import java.util.List;
 
 public abstract class ResetManager {
 
-    private long lastActionTaken = 0L;
-
     public List<ActionResult> doReset() {
         String toCopy = JultiOptions.getJultiOptions().clipboardOnReset;
         if (!toCopy.isEmpty()) {
@@ -152,19 +150,7 @@ public abstract class ResetManager {
         return this.getInstancePosition(instance, null);
     }
 
-    public void updateLastActionTaken() {
-        this.lastActionTaken = System.currentTimeMillis();
-    }
-
     public void tick(long cycles) {
-        if (cycles % 1000 != 0) {
-            return;
-        }
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - this.lastActionTaken > 5000 && InstanceManager.getInstanceManager().getSelectedInstance() == null) {
-            this.updateLastActionTaken();
-            InstanceManager.getInstanceManager().renameWindows();
-        }
     }
 
     public void onMissingInstancesUpdate() {

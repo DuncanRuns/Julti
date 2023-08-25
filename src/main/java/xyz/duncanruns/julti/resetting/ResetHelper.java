@@ -74,8 +74,6 @@ public class ResetHelper {
 
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        getManager().updateLastActionTaken();
-
         // Reset Sounds
         int instancesReset = (int) actionResults.stream().filter(actionResult -> actionResult.equals(ActionResult.INSTANCE_RESET)).count();
         if (instancesReset > 1) {
