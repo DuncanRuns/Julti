@@ -104,7 +104,7 @@ public final class InstanceManager {
 
     public void tick(long cycles) {
         this.instances.forEach(MinecraftInstance::checkWindowMissing);
-        if (cycles % 1000 == 0) {
+        if (cycles % 5000 == 0) {
             if (this.checkInstancesMarkedMissing()) {
                 this.checkOpenedInstances();
                 return;
