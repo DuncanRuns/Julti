@@ -55,7 +55,7 @@ public final class PluginEvents {
         }
     }
 
-    public enum MiscEventType{
+    public enum MiscEventType {
         // Runs for every hotkey press: object is a Pair<String, Point> representing the hotkey code and the mouse position
         HOTKEY_PRESS;
 
