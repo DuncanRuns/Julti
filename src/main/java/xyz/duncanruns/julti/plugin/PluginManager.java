@@ -98,8 +98,7 @@ public final class PluginManager {
     }
 
     private void loadDefaultPlugins() throws IOException, URISyntaxException {
-
-        Reflections reflections = new Reflections("", new ResourcesScanner());
+        Reflections reflections = new Reflections("", new ResourcesScanner(), this.getClass().getClassLoader());
         Pattern pattern = Pattern.compile("defaultplugins/.+\\.jar");
         List<String> fileNames = reflections.getResources(s -> s.endsWith(".jar")).stream().filter(s -> pattern.matcher(s).matches()).collect(Collectors.toList());
 
