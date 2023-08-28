@@ -14,7 +14,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -92,7 +95,7 @@ public final class PluginManager {
     }
 
     private void loadDefaultPlugins() throws IOException, URISyntaxException {
-        List<String> fileNames = Arrays.stream(new File(PluginManager.class.getResource("/defaultplugins").getPath()).list()).map(s -> "/defaultplugins/" + s).collect(Collectors.toList());
+        List<String> fileNames = ResourceUtil.getResourcesFromFolder("defaultplugins").stream().map(s -> "/defaultplugins/" + s).collect(Collectors.toList());
 
         Julti.log(Level.DEBUG, "Default Plugins:" + fileNames);
 

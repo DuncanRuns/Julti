@@ -5,13 +5,18 @@ import xyz.duncanruns.julti.JultiOptions;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static xyz.duncanruns.julti.Julti.log;
 
@@ -85,5 +90,48 @@ public final class ResourceUtil {
                 log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e);
             }
         }
+    }
+
+    public static List<String> getResourcesFromFolder(String folder)
+            throws URISyntaxException, IOException {
+
+        List<String> result;
+
+        try {
+            result = getResourcesFromFolderJAR(folder);
+        } catch (Exception ignored) {
+            result = getResourcesFromFolderDev(folder);
+        }
+
+        return result;
+
+    }
+
+    private static List<String> getResourcesFromFolderDev(String folder) {
+        if (!folder.startsWith("/")) {
+            folder = "/" + folder;
+        }
+        return Arrays.stream(new File(ResourceUtil.class.getResource(folder).getPath()).list()).collect(Collectors.toList());
+    }
+
+    private static List<String> getResourcesFromFolderJAR(String folder) throws URISyntaxException, IOException {
+        List<String> result;
+        // get path of the current running JAR
+        String jarPath = ResourceUtil.class.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .toURI()
+                .getPath();
+        System.out.println("JAR Path :" + jarPath);
+
+        // file walks JAR
+        URI uri = URI.create("jar:file:" + jarPath);
+        try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+            result = Files.walk(fs.getPath(folder))
+                    .filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .collect(Collectors.toList());
+        }
+        return result;
     }
 }
