@@ -41,9 +41,6 @@ dependencies {
 
     implementation 'org.json:json:20230227'
 
-    implementation 'org.reflections:reflections:0.9.10'
-
-
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
 }
 

@@ -2,8 +2,6 @@ package xyz.duncanruns.julti.plugin;
 
 import com.google.gson.Gson;
 import org.apache.logging.log4j.Level;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.util.ExceptionUtil;
@@ -16,13 +14,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,9 +92,7 @@ public final class PluginManager {
     }
 
     private void loadDefaultPlugins() throws IOException, URISyntaxException {
-        Reflections reflections = new Reflections("", new ResourcesScanner(), this.getClass().getClassLoader());
-        Pattern pattern = Pattern.compile("defaultplugins/.+\\.jar");
-        List<String> fileNames = reflections.getResources(s -> s.endsWith(".jar")).stream().filter(s -> pattern.matcher(s).matches()).collect(Collectors.toList());
+        List<String> fileNames = Arrays.stream(new File(PluginManager.class.getResource("/defaultplugins").getPath()).list()).map(s -> "/defaultplugins/" + s).collect(Collectors.toList());
 
         Julti.log(Level.DEBUG, "Default Plugins:" + fileNames);
 
