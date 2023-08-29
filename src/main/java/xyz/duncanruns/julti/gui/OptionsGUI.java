@@ -8,10 +8,7 @@ import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
-import xyz.duncanruns.julti.util.DoAllFastUtil;
-import xyz.duncanruns.julti.util.GUIUtil;
-import xyz.duncanruns.julti.util.MonitorUtil;
-import xyz.duncanruns.julti.util.SleepBGUtil;
+import xyz.duncanruns.julti.util.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -661,6 +658,7 @@ public class OptionsGUI extends JFrame {
         Julti.doLater(() -> {
             OBSStateManager.getOBSStateManager().tryOutputLSInfo();
             SleepBGUtil.disableLock();
+            MistakesUtil.checkStartupMistakes();
             DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
         });
     }
