@@ -122,7 +122,6 @@ public final class ResourceUtil {
                 .getLocation()
                 .toURI()
                 .getPath();
-        System.out.println("JAR Path :" + jarPath);
 
         // file walks JAR
         URI uri = URI.create("jar:file:" + jarPath);
