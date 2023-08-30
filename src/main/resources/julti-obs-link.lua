@@ -39,6 +39,9 @@ timers_activated = false
 last_state_text = ""
 last_scene_name = ""
 
+gen_scenes_requested = false
+gen_stream_scenes_requested = false
+
 total_width = 0
 total_height = 0
 
@@ -266,7 +269,19 @@ function bring_to_bottom(item)
     obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_BOTTOM)
 end
 
+function delete_source(name)
+    local source = get_source(name)
+    if (source ~= nil) then
+        obs.obs_source_remove(source)
+        release_source(source)
+    end
+end
+
 ---- Scene Generator ----
+
+function request_generate_stream_scenes()
+    gen_stream_scenes_requested = true
+end
 
 function generate_stream_scenes()
     local julti_source = get_source("Julti")
@@ -299,6 +314,10 @@ function generate_stream_scenes()
     release_source(julti_source)
 end
 
+function request_generate_scenes()
+    gen_scenes_requested = true
+end
+
 function generate_scenes()
     local already_existing = {}
     local found_ae = false
@@ -309,12 +328,23 @@ function generate_scenes()
         obs.script_log(100, "Julti has not yet been set up! Please setup Julti first!")
         return
     end
+    local instance_count = (#(split_string(out, ";"))) - 1
 
     if not scene_exists("Lock Display") then
         _setup_lock_scene()
     else
         table.insert(already_existing, "Lock Display")
         found_ae = true
+    end
+
+    -- Check if current scene is on Julti, which messes things up
+    local current_scene_source = obs.obs_frontend_get_current_scene()
+    local current_scene_name = obs.obs_source_get_name(current_scene_source)
+    release_source(current_scene_source)
+    if current_scene_name == "Julti" then
+        switch_to_scene("Lock Display")
+        gen_scenes_requested = true
+        return
     end
 
     if not scene_exists("Dirt Cover Display") then
@@ -357,43 +387,50 @@ function generate_scenes()
     end
 end
 
+function _fix_bad_names(instance_count)
+    for i = 1, instance_count, 1 do
+        local source = get_source("Minecraft Capture " .. i)
+        if source == nil then
+            obs.script_log(200, "Fixing " .. i)
+            source = get_source("Minecraft Capture " .. i .. " 2")
+            local data = obs.obs_source_get_settings(source)
+            local a = obs.obs_data_get_json(data)
+            obs.script_log(200, "stuff " .. a)
+            obs.obs_data_set_string(data, "name", "Minecraft Capture " .. i)
+            obs.obs_data_release(data)
+        end
+        release_source(source)
+    end
+end
+
 function _ensure_empty_important_scenes()
     for instance_num = 1, 100 do
-        -- Delete sources
-        local source = get_source("Minecraft Capture " .. instance_num)
-        obs.obs_source_remove(source)
-        release_source(source)
-
-        local source = get_source("Verification Capture " .. instance_num)
-        obs.obs_source_remove(source)
-        release_source(source)
-
-        local source = get_source("Minecraft Audio " .. instance_num)
-        obs.obs_source_remove(source)
-        release_source(source)
-
         -- Empty square groups
         local group_scene = get_group_as_scene("Square " .. instance_num)
-        if (group_scene == nil) then
-            goto continue
+        if (group_scene ~= nil) then
+            local items = obs.obs_scene_enum_items(group_scene)
+            for _, item in ipairs(items) do
+                obs.obs_sceneitem_remove(item)
+            end
+            obs.sceneitem_list_release(items)
         end
-        local items = obs.obs_scene_enum_items(group_scene)
-        for _, item in ipairs(items) do
-            obs.obs_sceneitem_remove(item)
-        end
-        obs.sceneitem_list_release(items)
 
         -- Empty instance groups
         local group_scene = get_group_as_scene("Instance " .. instance_num)
-        if (group_scene == nil) then
-            goto continue
+        if (group_scene ~= nil) then
+            local items = obs.obs_scene_enum_items(group_scene)
+            for _, item in ipairs(items) do
+                obs.obs_sceneitem_remove(item)
+            end
+            obs.sceneitem_list_release(items)
         end
-        local items = obs.obs_scene_enum_items(group_scene)
-        for _, item in ipairs(items) do
-            obs.obs_sceneitem_remove(item)
-        end
-        obs.sceneitem_list_release(items)
-        ::continue::
+
+        -- Delete sources
+        delete_source("Minecraft Capture " .. instance_num)
+        delete_source("Verification Capture " .. instance_num)
+        delete_source("Minecraft Audio " .. instance_num)
+        delete_source("Instance " .. instance_num)
+        delete_source("Square " .. instance_num)
     end
     -- Empty sound group
     local group_scene = get_group_as_scene("Minecraft Audio")
@@ -718,9 +755,9 @@ function script_properties()
         "Reuse Julti Scene Sources for Verification Scene\n(Better for source record or window cap)")
 
     obs.obs_properties_add_button(
-        props, "generate_scenes_button", "Generate Scenes", generate_scenes)
+        props, "generate_scenes_button", "Generate Scenes", request_generate_scenes)
     obs.obs_properties_add_button(
-        props, "generate_stream_scenes_button", "Generate Stream Scenes", generate_stream_scenes)
+        props, "generate_stream_scenes_button", "Generate Stream Scenes", request_generate_stream_scenes)
 
     obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
     obs.obs_properties_add_bool(props, "center_align_instances",
@@ -753,6 +790,16 @@ function script_update(settings)
 end
 
 function loop()
+    -- Check Gen Requests
+    if gen_scenes_requested then
+        gen_scenes_requested = false
+        generate_scenes()
+    end
+    if gen_stream_scenes_requested then
+        gen_stream_scenes_requested = false
+        generate_stream_scenes()
+    end
+
     -- Scene Change Check
 
     local current_scene_source = obs.obs_frontend_get_current_scene()
