@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '0.21.2'
+version '0.21.3'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
