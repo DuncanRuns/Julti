@@ -52,7 +52,6 @@ public final class MistakesUtil {
                 firstFound = true;
                 continue;
             }
-            System.out.println(pid);
             String message = "MultiResetWall is open. To prevent issues, please close the ahk script.";
             Julti.log(Level.WARN, message);
             notifyMistake("Julti: The Wall is open", message);
