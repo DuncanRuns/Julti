@@ -20,10 +20,7 @@ import xyz.duncanruns.julti.messages.*;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
-import xyz.duncanruns.julti.util.MistakesUtil;
-import xyz.duncanruns.julti.util.ResourceUtil;
-import xyz.duncanruns.julti.util.SleepBGUtil;
-import xyz.duncanruns.julti.util.UpdateUtil;
+import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -142,6 +139,7 @@ public final class Julti {
         InstanceManager.getInstanceManager().onOptionsLoad();
         HotkeyManager.getHotkeyManager().reloadHotkeys();
         ResetHelper.getManager().reload();
+        ResetCounter.updateFiles();
         PluginEvents.RunnableEventType.RELOAD.runAll();
 
     }

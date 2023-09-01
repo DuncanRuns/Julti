@@ -52,6 +52,10 @@ public final class GUIUtil {
     }
 
     public static JButton createValueChangerButton(final String optionName, final String displayName, final Component parent, final String valueSuffix) {
+        return createValueChangerButton(optionName, displayName, parent, valueSuffix, null);
+    }
+
+    public static JButton createValueChangerButton(final String optionName, final String displayName, final Component parent, final String valueSuffix, final Runnable afterSet) {
         final Supplier<String> buttonTextGetter = () -> {
             Object val = JultiOptions.getJultiOptions().getValue(optionName);
             return (displayName.isEmpty() ? "" : (displayName + ": ")) + val + valueSuffix;
@@ -68,10 +72,14 @@ public final class GUIUtil {
                 // Shorten the answer by the length of the answer
                 ans = ans.substring(0, ans.length() - valueSuffix.length());
             }
-            if (!queueOptionChangeAndWait(optionName, ans)) {
+            boolean success = queueOptionChangeAndWait(optionName, ans);
+            if (!success) {
                 JOptionPane.showMessageDialog(parent, "Failed to set value! Perhaps you formatted it incorrectly.", "Julti: Set Option Failure", JOptionPane.ERROR_MESSAGE);
             }
             button.setText(buttonTextGetter.get());
+            if (success && afterSet != null) {
+                afterSet.run();
+            }
         });
     }
 

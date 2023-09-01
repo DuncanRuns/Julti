@@ -27,7 +27,9 @@ public class CommandManager {
             new WaitCommand(),
             new LogCommand(),
             new PlaysoundCommand(),
-            new OpenFileCommand())));
+            new OpenFileCommand(),
+            new SessionResetCommand()
+    )));
 
     static {
         if (Julti.VERSION.equals("DEV")) {
