@@ -1,3 +1,6 @@
+Changes in v0.21.4:
+- Fixed a crash when Julti is placed in a path with spaces
+
 Changes in v0.21.3:
 - Fix some plugin loading stuff
 - Check if `TheWall.ahk` is running and warn the user of the conflict
