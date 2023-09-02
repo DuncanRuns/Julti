@@ -123,8 +123,11 @@ public final class ResourceUtil {
                 .toURI()
                 .getPath();
 
+        // Encode the jarPath to handle spaces
+        jarPath = new File(jarPath).toURI().toString();
+
         // file walks JAR
-        URI uri = URI.create("jar:file:" + jarPath);
+        URI uri = URI.create("jar:" + jarPath);
         try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
             result = Files.walk(fs.getPath(folder))
                     .filter(Files::isRegularFile)
