@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public final class InstanceInfoUtil {
     // Version Patterns
-    private static final Pattern VANILLA_VERSION_PATTERN = Pattern.compile(" --version (.+?) ");
+    private static final Pattern VANILLA_VERSION_PATTERN = Pattern.compile(" --version (fabric-loader-\\d\\.\\d+(\\.\\d+)?-)?(.+?) ");
     private static final Pattern MULTIMC_VERSION_PATTERN = Pattern.compile("minecraft-(.+)-client.jar");
     // Vanilla Path Patterns
     private static final Pattern VANILLA_PATH_PATTERN = Pattern.compile("--gameDir (.+?) ");
@@ -59,7 +59,7 @@ public final class InstanceInfoUtil {
                 return getMultiMCInfo(commandLine);
             }
         } catch (Exception e) {
-            Julti.log(Level.ERROR, "An exception occured while obtaining instance information: " + e);
+            Julti.log(Level.ERROR, "An exception occured while obtaining instance information: " + ExceptionUtil.toDetailedString(e));
         }
         // If the command line does not match MultiMC or Vanilla, or if there was an exception, return null
         Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla, or there was an exception, returning null");
@@ -111,7 +111,7 @@ public final class InstanceInfoUtil {
         }
 
         // Get the version out of the group
-        String versionString = matcher.group(1);
+        String versionString = matcher.group(3);
 
         return new FoundInstanceInfo(versionString, Paths.get(pathString));
     }
