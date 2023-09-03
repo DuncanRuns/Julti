@@ -39,6 +39,9 @@ public final class JultiAppLaunch {
         // Setup GUI theme
         FlatDarkLaf.setup();
 
+        // Ensure Julti Dir
+        JultiOptions.ensureJultiDir();
+
         // Load Options
         JultiOptions.getJultiOptions();
         ScriptManager.reload();
