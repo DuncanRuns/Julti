@@ -220,6 +220,9 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.createSpacer());
         }
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchDelay", "Delay Between Instance Launches", this, "ms")));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 

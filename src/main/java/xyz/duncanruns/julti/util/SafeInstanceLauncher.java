@@ -155,7 +155,7 @@ public final class SafeInstanceLauncher {
             if (instance.hasWindow()) {
                 continue;
             }
-            sleep(500);
+            sleep(JultiOptions.getJultiOptions().launchDelay);
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
