@@ -101,13 +101,13 @@ public final class JultiOptions {
     // Affinity
     public boolean useAffinity = true;
     public int threadsPlaying = Math.max(1, MAX_THREADS);
-    public int threadsPrePreview = Math.max(1, MAX_THREADS);
-    public int threadsStartPreview = Math.max(1, MAX_THREADS * 28 / 32);
-    public int threadsPreview = Math.max(1, MAX_THREADS * 11 / 32);
-    public int threadsWorldLoaded = Math.max(1, MAX_THREADS * 8 / 32);
-    public int threadsLocked = Math.max(1, MAX_THREADS);
-    public int threadsBackground = Math.max(1, MAX_THREADS * 8 / 32);
-    public int affinityBurst = 300;
+    public int threadsPrePreview = this.threadsPlaying;
+    public int threadsStartPreview = this.threadsPlaying;
+    public int threadsPreview = (int) Math.floor(Math.min(MAX_THREADS, Math.max(4, 0.25f * MAX_THREADS)));
+    public int threadsWorldLoaded = this.threadsPreview;
+    public int threadsLocked = this.threadsPlaying;
+    public int threadsBackground = (int) Math.floor(Math.min(MAX_THREADS, Math.max(4, 0.25f * MAX_THREADS)));;
+    public int affinityBurst = 1000;
 
     // Sounds
     public String singleResetSound = JultiOptions.getJultiDir().resolve("sounds").resolve("click.wav").toAbsolutePath().toString();
