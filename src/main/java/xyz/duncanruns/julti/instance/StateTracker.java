@@ -183,7 +183,8 @@ public class StateTracker {
 
         if (!options.useFreezeFilter ||
         this.isCurrentState(InstanceState.TITLE) ||
-        this.isCurrentState(InstanceState.WAITING)) {
+        this.isCurrentState(InstanceState.WAITING) ||
+        this.isCurrentState(InstanceState.GENERATING)) {
             return false;
         }
 

@@ -49,8 +49,7 @@ public class OBSStateManager {
                         // 3 = locked & dirt cover
                         // 4 = freeze filter
                         // 5 = locked & freeze filter
-                        // TODO: probably shouldn't happen, 6 = cover & freeze filter
-                        .append((lockedInstances.contains(instance) ? 1 : 0) + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : 0) + (options.useFreezeFilter && instance.shouldFreeze() ? 4 : 0))
+                        .append((lockedInstances.contains(instance) ? 1 : 0) + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : (options.useFreezeFilter && instance.shouldFreeze() ? 4 : 0)))
                         .append(",")
                         .append(instancePos.x)
                         .append(",")
