@@ -423,6 +423,10 @@ public class MinecraftInstance {
         return this.resetPressed || this.stateTracker.shouldCoverWithDirt();
     }
 
+    public boolean shouldFreeze() {
+        return this.stateTracker.shouldFreeze();
+    }
+
     public boolean isResetPressed() {
         return this.resetPressed;
     }

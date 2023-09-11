@@ -43,7 +43,14 @@ public class OBSStateManager {
                 Rectangle instancePos = ResetHelper.getManager().getInstancePosition(instance, size);
                 instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
-                        .append((lockedInstances.contains(instance) ? 1 : 0) + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : 0))
+                        // 0 = default
+                        // 1 = locked
+                        // 2 = dirt cover
+                        // 3 = locked & dirt cover
+                        // 4 = freeze filter
+                        // 5 = locked & freeze filter
+                        // TODO: probably shouldn't happen, 6 = cover & freeze filter
+                        .append((lockedInstances.contains(instance) ? 1 : 0) + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : 0) + (options.useFreezeFilter && instance.shouldFreeze() ? 4 : 0))
                         .append(",")
                         .append(instancePos.x)
                         .append(",")

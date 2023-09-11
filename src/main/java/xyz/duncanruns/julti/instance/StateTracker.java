@@ -173,6 +173,23 @@ public class StateTracker {
         return (this.isCurrentState(InstanceState.WAITING) || this.isCurrentState(InstanceState.GENERATING));
     }
 
+    /**
+     * This method should only be used by MinecraftInstance, please refer to {@link MinecraftInstance#shouldFreeze()}.
+     *
+     * @return
+     */
+    public boolean shouldFreeze() {
+        JultiOptions options = JultiOptions.getJultiOptions();
+
+        if (!options.useFreezeFilter ||
+        this.isCurrentState(InstanceState.TITLE) ||
+        this.isCurrentState(InstanceState.WAITING)) {
+            return false;
+        }
+
+        return (int)this.getLoadingPercent() >= options.freezePercent;
+    }
+
     public boolean isResettable() {
         long currentTime = System.currentTimeMillis();
         // Must be in preview or in the world, and the cooldown must have passed
