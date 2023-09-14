@@ -108,7 +108,7 @@ public final class JultiOptions {
     public int threadsPreview = (int) Math.floor(Math.min(MAX_THREADS, Math.max(4, 0.25f * MAX_THREADS)));
     public int threadsWorldLoaded = this.threadsPreview;
     public int threadsLocked = this.threadsPlaying;
-    public int threadsBackground = (int) Math.floor(Math.min(MAX_THREADS, Math.max(4, 0.25f * MAX_THREADS)));;
+    public int threadsBackground = (int) Math.floor(Math.min(MAX_THREADS, Math.max(4, 0.25f * MAX_THREADS)));
     public int affinityBurst = 1000;
 
     // Sounds
