@@ -27,6 +27,7 @@ public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
     private final static Gson GSON_OBJECT_MAKER = new Gson();
     private static JultiOptions INSTANCE = null;
+    public static final JultiOptions DEFAULTS = new JultiOptions(null);
 
     private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
 
@@ -141,7 +142,7 @@ public final class JultiOptions {
 
     public JultiOptions(Path location) {
         this.location = location;
-        this.profileName = FilenameUtils.removeExtension(location.getFileName().toString());
+        this.profileName = location == null ? null : FilenameUtils.removeExtension(location.getFileName().toString());
     }
 
     public static JultiOptions getJultiOptions() {
