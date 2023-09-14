@@ -125,7 +125,8 @@ public final class JultiOptions {
     public boolean enableExperimentalOptions = false;
     public boolean showDebug = false;
     public boolean autoFullscreen = false;
-    public boolean usePlayingSizeWithFullscreen = false;
+    public boolean fullscreenBeforeUnpause = true;
+    public boolean usePlayingSizeWithFullscreen = true;
     public boolean useMaximizeWithFullscreen = false;
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;

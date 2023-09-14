@@ -291,6 +291,10 @@ public class MinecraftInstance {
 
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
+                if (options.autoFullscreen && options.fullscreenBeforeUnpause) {
+                    this.presser.pressKey(this.gameOptions.fullscreenKey);
+                    this.waitForFullscreen();
+                }
                 if ((options.unpauseOnSwitch || options.coopMode)) {
                     this.presser.pressEsc();
                     this.presser.pressEsc();
@@ -299,7 +303,7 @@ public class MinecraftInstance {
                 if (options.coopMode) {
                     this.openToLan(true);
                 }
-                if (options.autoFullscreen) {
+                if (options.autoFullscreen && !options.fullscreenBeforeUnpause) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
                 }
             }
@@ -654,6 +658,13 @@ public class MinecraftInstance {
             if (!this.getStateTracker().tryUpdate()) {
                 Julti.log(Level.ERROR, "Failed to update state for instance " + this.getName() + "!");
             }
+        }
+    }
+
+    public void waitForFullscreen() {
+        int i = 0;
+        while (!WindowStateUtil.isHwndBorderless(this.hwnd) && (i++ < 50)) {
+            sleep(5);
         }
     }
 

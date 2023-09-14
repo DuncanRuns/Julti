@@ -75,23 +75,32 @@ public class OptionsGUI extends JFrame {
     private void addComponentsExperimental() {
         JPanel panel = this.createNewOptionsPanel("Experimental");
 
+        JultiOptions options = JultiOptions.getJultiOptions();
+
         panel.add(GUIUtil.leftJustify(new JLabel("Experimental Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Debug Messages", "showDebug")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen", b -> this.reload())));
 
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen")));
-
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
-
-        if (JultiOptions.getJultiOptions().usePlayingSizeWithFullscreen) {
+        if (options.autoFullscreen) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize w/ Fullscreen", "useMaximizeWithFullscreen")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Fullscreen Before Unpause (Could fix mouse issues)", "fullscreenBeforeUnpause")));
+
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
+
+            if (options.usePlayingSizeWithFullscreen) {
+                panel.add(GUIUtil.createSpacer());
+                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize w/ Fullscreen", "useMaximizeWithFullscreen")));
+            }
         }
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Debug Messages", "showDebug")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Pie Chart On Load (Illegal for normal runs)", "pieChartOnLoad")));
@@ -231,8 +240,6 @@ public class OptionsGUI extends JFrame {
             if (!b) {
                 Julti.waitForExecute(() -> {
                     options.autoFullscreen = false;
-                    options.usePlayingSizeWithFullscreen = false;
-                    options.useMaximizeWithFullscreen = false;
                     options.showDebug = false;
                     options.pieChartOnLoad = false;
                     options.preventWindowNaming = false;
@@ -348,9 +355,9 @@ public class OptionsGUI extends JFrame {
     }
 
     private void addComponentsHotkey() {
-        JultiOptions options = JultiOptions.getJultiOptions();
-
         JPanel panel = this.createNewOptionsPanel("Hotkeys");
+
+        JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Hotkeys")));
         panel.add(GUIUtil.createSpacer());
