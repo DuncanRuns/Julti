@@ -182,6 +182,19 @@ public class OptionsGUI extends JFrame {
             return;
         }
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Set Defaults"), e -> {
+            JultiOptions defaults = JultiOptions.getDefaults();
+            options.threadsPlaying = defaults.threadsPlaying;
+            options.threadsPrePreview = defaults.threadsPrePreview;
+            options.threadsStartPreview = defaults.threadsStartPreview;
+            options.threadsPreview = defaults.threadsPreview;
+            options.threadsWorldLoaded = defaults.threadsWorldLoaded;
+            options.threadsLocked = defaults.threadsLocked;
+            options.threadsBackground = defaults.threadsBackground;
+            options.affinityBurst = defaults.affinityBurst;
+            this.reload();
+        })));
+        panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(new JLabel("Affinity Threads:")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Currently Playing", "threadsPlaying")));
