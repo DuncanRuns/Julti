@@ -1,3 +1,11 @@
+Changes in v0.22.0:
+- Added customizable delay between instance launches
+- Changed default affinity values
+- Added a new button to set affinity values to defaults (recommended)
+- Added a new fullscreen option: Fullscreen Before Unpause
+  - This can fix issues with the mouse issues when opening inventory
+- Reorganized some GUI stuff
+
 Changes in v0.21.4:
 - Fixed a crash when Julti is placed in a path with spaces
 
