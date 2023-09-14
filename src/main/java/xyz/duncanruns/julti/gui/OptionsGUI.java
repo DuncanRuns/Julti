@@ -75,6 +75,7 @@ public class OptionsGUI extends JFrame {
     private void addComponentsExperimental() {
         JPanel panel = this.createNewOptionsPanel("Experimental");
 
+        panel.add(GUIUtil.leftJustify(new JLabel("Experimental Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
