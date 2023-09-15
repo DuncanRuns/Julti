@@ -54,7 +54,7 @@ public final class JultiOptions {
     public boolean dwReplaceLocked = true;
     public boolean doDirtCovers = false;
     public boolean useFreezeFilter = false;
-    public int freezePercent = 0;
+    public int freezePercent = 80;
 
     // Window
     public boolean letJultiMoveWindows = true;
