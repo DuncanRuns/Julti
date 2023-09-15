@@ -87,4 +87,8 @@ public final class WindowStateUtil {
     public static void setHwndRectangle(HWND hwnd, Rectangle rectangle) {
         User32.INSTANCE.MoveWindow(hwnd, rectangle.x, rectangle.y, rectangle.width, rectangle.height, true);
     }
+
+    public static Rectangle withTopLeftToCenter(Rectangle bounds) {
+        return new Rectangle(bounds.x - bounds.width / 2, bounds.y - bounds.height / 2, bounds.width, bounds.height);
+    }
 }

@@ -24,6 +24,7 @@ public final class MonitorUtil {
     public static class Monitor {
         public final boolean isPrimary;
         public final int[] position;
+        public final int[] centerPosition;
         public final int[] size;
         public final int x;
         public final int y;
@@ -43,6 +44,7 @@ public final class MonitorUtil {
             this.height = height;
 
             this.position = new int[]{x, y};
+            this.centerPosition = new int[]{x + (width / 2), y + (height / 2)};
             this.size = new int[]{width, height};
             this.bounds = new Rectangle(x, y, width, height);
         }

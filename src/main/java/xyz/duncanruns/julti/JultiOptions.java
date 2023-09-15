@@ -56,11 +56,15 @@ public final class JultiOptions {
 
     // Window
     public boolean letJultiMoveWindows = true;
-    public boolean useBorderless = true;
+    public boolean useBorderless = false;
+    public boolean maximizeWhenPlaying = true;
+    public boolean maximizeWhenResetting = true;
 
-    public int[] windowPos = new int[]{0, 0};
     public int[] playingWindowSize = MonitorUtil.getPrimaryMonitor().size;
-    public int[] resettingWindowSize = MonitorUtil.getPrimaryMonitor().size;
+    public int[] resettingWindowSize = this.playingWindowSize;
+    public int[] windowPos = MonitorUtil.getPrimaryMonitor().centerPosition;
+    public boolean windowPosIsCenter = true;
+
     public boolean prepareWindowOnLock = false;
 
     // Hotkeys
@@ -126,7 +130,6 @@ public final class JultiOptions {
     public boolean autoFullscreen = false;
     public boolean fullscreenBeforeUnpause = true;
     public boolean usePlayingSizeWithFullscreen = true;
-    public boolean useMaximizeWithFullscreen = false;
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;
     public boolean alwaysOnTopProjector = false;
@@ -292,6 +295,18 @@ public final class JultiOptions {
         if (oldOptions.obsWindowNameFormat != null) {
             changes.add("The obsWindowNameFormat has been removed and replaced by a better detection system. If you were not using OBS to run your wall, you can enable the new custom wall option in Julti options.");
             this.customWallNameFormat = oldOptions.obsWindowNameFormat;
+        }
+
+        if (oldOptions.useMaximizeWithFullscreen != null) {
+            changes.add("Window management options have had major changes, please ensure things are still working correctly.");
+
+            // Update old window options to new ones
+            this.maximizeWhenResetting = false;
+            this.windowPosIsCenter = false;
+
+            if (this.autoFullscreen) {
+                this.maximizeWhenPlaying = oldOptions.useMaximizeWithFullscreen;
+            }
         }
 
         if (oldOptions.resetMode != null) {
@@ -491,5 +506,6 @@ public final class JultiOptions {
         public Boolean cleanWall = null;
         public String obsWindowNameFormat = null;
         public Integer resetMode = null;
+        public Boolean useMaximizeWithFullscreen = null;
     }
 }

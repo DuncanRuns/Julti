@@ -90,11 +90,6 @@ public class OptionsGUI extends JFrame {
 
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
-
-            if (options.usePlayingSizeWithFullscreen) {
-                panel.add(GUIUtil.createSpacer());
-                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Maximize w/ Fullscreen", "useMaximizeWithFullscreen")));
-            }
         }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -624,8 +619,16 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless", b -> this.reload())));
         panel.add(GUIUtil.createSpacer());
+
+        if (!options.useBorderless) {
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Playing", "maximizeWhenPlaying", b -> this.reload())));
+            panel.add(GUIUtil.createSpacer());
+
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
+            panel.add(GUIUtil.createSpacer());
+        }
 
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
@@ -660,7 +663,8 @@ public class OptionsGUI extends JFrame {
             }
             MonitorUtil.Monitor monitor = sortedMonitors.get(ans);
             Julti.waitForExecute(() -> {
-                options.windowPos = monitor.position;
+                options.windowPos = monitor.centerPosition;
+                options.windowPosIsCenter = true;
                 options.playingWindowSize = monitor.size;
             });
             windowOptions.reload();

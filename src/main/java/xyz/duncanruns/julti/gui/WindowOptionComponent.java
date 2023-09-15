@@ -139,8 +139,10 @@ public class WindowOptionComponent extends JPanel {
 
     public void reload() {
         this.removeAll();
-        this.add(GUIUtil.leftJustify(new JLabel("Window Position")));
+        String wpLabelString = JultiOptions.getJultiOptions().windowPosIsCenter ? "Window Position (Center)" : "Window Position (Top-Left)";
+        this.add(GUIUtil.leftJustify(new JLabel(wpLabelString)));
         this.add(GUIUtil.leftJustify(getPositionPanel()));
+        this.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Window Position is Center", "windowPosIsCenter", b -> this.reload())));
         this.add(GUIUtil.leftJustify(new JLabel("Playing Window Size")));
         this.add(GUIUtil.leftJustify(getSizePanel()));
         this.add(GUIUtil.leftJustify(new JLabel("Resetting Window Size")));
