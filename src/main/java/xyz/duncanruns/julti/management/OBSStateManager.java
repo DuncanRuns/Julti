@@ -28,6 +28,15 @@ public class OBSStateManager {
         return INSTANCE;
     }
 
+    private static int instanceToStateInt(List<MinecraftInstance> lockedInstances, MinecraftInstance instance) {
+        JultiOptions options = JultiOptions.getJultiOptions();
+
+        // Instance state flags starting from the least significant bit
+        return (lockedInstances.contains(instance) ? 1 : 0)                         // Locked
+                + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : 0)  // Dirt Cover
+                + ((options.useFreezeFilter && instance.shouldFreeze()) ? 4 : 0);   // Freeze Filter
+    }
+
     public void tryOutputState() {
         JultiOptions options = JultiOptions.getJultiOptions();
         // Lazy try except (I sorry)
@@ -43,13 +52,7 @@ public class OBSStateManager {
                 Rectangle instancePos = ResetHelper.getManager().getInstancePosition(instance, size);
                 instancePos = new Rectangle(instancePos.x + options.instanceSpacing, instancePos.y + options.instanceSpacing, instancePos.width - (2 * options.instanceSpacing), instancePos.height - (2 * options.instanceSpacing));
                 out.append(";")
-                        // 0 = default
-                        // 1 = locked
-                        // 2 = dirt cover
-                        // 3 = locked & dirt cover
-                        // 4 = freeze filter
-                        // 5 = locked & freeze filter
-                        .append((lockedInstances.contains(instance) ? 1 : 0) + (options.doDirtCovers && instance.shouldCoverWithDirt() ? 2 : (options.useFreezeFilter && instance.shouldFreeze() ? 4 : 0)))
+                        .append(instanceToStateInt(lockedInstances, instance))
                         .append(",")
                         .append(instancePos.x)
                         .append(",")
