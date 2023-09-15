@@ -182,13 +182,13 @@ public class StateTracker {
         JultiOptions options = JultiOptions.getJultiOptions();
 
         if (!options.useFreezeFilter ||
-        this.isCurrentState(InstanceState.TITLE) ||
-        this.isCurrentState(InstanceState.WAITING) ||
-        this.isCurrentState(InstanceState.GENERATING)) {
+                this.isCurrentState(InstanceState.TITLE) ||
+                this.isCurrentState(InstanceState.WAITING) ||
+                this.isCurrentState(InstanceState.GENERATING)) {
             return false;
         }
 
-        return (int)this.getLoadingPercent() >= options.freezePercent;
+        return (int) this.getLoadingPercent() >= options.freezePercent;
     }
 
     public boolean isResettable() {
