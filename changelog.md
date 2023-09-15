@@ -2,8 +2,12 @@ Changes in v0.22.0:
 - Added customizable delay between instance launches
 - Changed default affinity values
 - Added a new button to set affinity values to defaults (recommended)
-- Added a new fullscreen option: Fullscreen Before Unpause
-  - This can fix issues with the mouse issues when opening inventory
+- Added freeze filter support (in experimental) (#75 by @draconix6)
+- Overhauled window management settings to give the user more power of the window behaviour
+  - Window maximizing is now explicitly set by the user
+  - Window position can now reference the center of the window
+  - "Choose Monitor" will now use the new center position
+  - Added "Fullscreen before Unpause" option to fix mouse issues when working with weird window sizes
 - Reorganized some GUI stuff
 
 Changes in v0.21.4:
