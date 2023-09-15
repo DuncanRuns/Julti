@@ -528,6 +528,14 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Dirt Covers", "doDirtCovers")));
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Freeze Filter", "useFreezeFilter", b -> this.reload())));
+        if (options.useFreezeFilter) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("freezePercent", "Freeze Filter activation percent", this)));
+        }
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("This option requires the OBS Freeze Filter plugin.")));
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("The reset cooldown starts as soon as you can see the instance,")));

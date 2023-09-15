@@ -53,6 +53,8 @@ public final class JultiOptions {
     public float lockedInstanceSpace = 16.666668f;
     public boolean dwReplaceLocked = true;
     public boolean doDirtCovers = false;
+    public boolean useFreezeFilter = false;
+    public int freezePercent = 0;
 
     // Window
     public boolean letJultiMoveWindows = true;
