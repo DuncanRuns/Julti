@@ -111,6 +111,18 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Freeze Filter", "useFreezeFilter", b -> this.reload())));
+        if (options.useFreezeFilter) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("freezePercent", "Freeze Filter Activation Percent", this, "%")));
+        }
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("This option requires the OBS Freeze Filter plugin.")));
     }
 
     private void addComponentsSound() {
@@ -527,14 +539,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Dirt Covers", "doDirtCovers")));
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Freeze Filter", "useFreezeFilter", b -> this.reload())));
-        if (options.useFreezeFilter) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("freezePercent", "Freeze Filter activation percent", this)));
-        }
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(new JLabel("This option requires the OBS Freeze Filter plugin.")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
         panel.add(GUIUtil.createSpacer());
