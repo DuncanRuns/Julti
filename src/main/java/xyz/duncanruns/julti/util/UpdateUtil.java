@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.util;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import org.apache.logging.log4j.Level;
 import org.kohsuke.github.GHAsset;
@@ -31,15 +30,16 @@ public final class UpdateUtil {
     private UpdateUtil() {
     }
 
-    public static void main(String[] args) {
-        FlatDarkLaf.setup();
-        checkForUpdates(null);
-        System.exit(0);
+    public static void checkForUpdates(JultiGUI gui) {
+        checkForUpdates(gui, null);
     }
 
-    public static void checkForUpdates(JultiGUI gui) {
+    public static void checkForUpdates(JultiGUI gui, String currentVersion) {
         try {
-            if (Julti.VERSION.equals("DEV")) {
+            if (currentVersion == null) {
+                currentVersion = Julti.VERSION;
+            }
+            if (currentVersion.equals("DEV")) {
                 log(Level.INFO, "No updates because Julti is in DEV version.");
                 return;
             }
@@ -63,20 +63,23 @@ public final class UpdateUtil {
 
             // Convert the latest version and current version to ints
             int[] latestVersionNums = getVersionNums(latestVersion);
-            int[] currentVersionNums = getVersionNums(Julti.VERSION);
+            int[] currentVersionNums = getVersionNums(currentVersion);
 
             // latestVersion usually starts with "v", Julti.VERSION does not, so using endswith basically checks equals ignoring the v
-            boolean isAlreadyExactlyLatest = latestVersion.endsWith(Julti.VERSION);
-            boolean canBeEqual = Julti.VERSION.contains("-") || Julti.VERSION.contains("+");
+            boolean isAlreadyExactlyLatest = latestVersion.endsWith(currentVersion);
+            boolean currentVersionIsSpecial = currentVersion.contains("-") || currentVersion.contains("+");
+            boolean latestVersionIsSpecial = latestVersion.contains("-") || latestVersion.contains("+");
 
             boolean shouldSuggestUpdate = true;
-            if (!Arrays.asList(JultiAppLaunch.args).contains("--suggestUpdate")) {
-                shouldSuggestUpdate = (!isAlreadyExactlyLatest) && isVersionGreater(latestVersionNums, currentVersionNums, canBeEqual) && isVersionGreater(latestVersionNums, getVersionNums(options.lastCheckedVersion), canBeEqual);
+            if (!currentVersionIsSpecial && latestVersionIsSpecial) {
+                shouldSuggestUpdate = false;
+            } else if (!Arrays.asList(JultiAppLaunch.args).contains("--suggestUpdate")) {
+                shouldSuggestUpdate = (!isAlreadyExactlyLatest) && isVersionGreater(latestVersionNums, currentVersionNums, currentVersionIsSpecial) && !options.lastCheckedVersion.equals(latestVersion);
             }
 
             if (shouldSuggestUpdate) {
                 options.lastCheckedVersion = latestVersion;
-                if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + Julti.VERSION + ", and the latest version is " + latestVersion + ".\nWould you like to update now?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
+                if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + currentVersion + ", and the latest version is " + latestVersion + ".\nWould you like to update now?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
                     if (Julti.isRanFromAlternateLocation()) {
                         JOptionPane.showMessageDialog(gui, "Julti has detected that it is being ran from an alternate location. If you are using a shortcut, you will likely need to recreate it once the update has finished.", "Julti: Ran from Alternate Location", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -89,7 +92,7 @@ public final class UpdateUtil {
 
         } catch (Exception e) {
             log(Level.WARN, "Update check failed! Maybe you are not connected to the internet.");
-            log(Level.WARN, "Update exception: " + e);
+            log(Level.WARN, "Update exception: " + ExceptionUtil.toDetailedString(e));
         }
     }
 
