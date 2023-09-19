@@ -9,6 +9,7 @@ Changes in v0.22.0:
   - "Choose Monitor" will now use the new center position
   - Added "Fullscreen before Unpause" option to fix mouse issues when working with weird window sizes
 - Reorganized some GUI stuff
+- Various fixes
 
 Changes in v0.21.4:
 - Fixed a crash when Julti is placed in a path with spaces
