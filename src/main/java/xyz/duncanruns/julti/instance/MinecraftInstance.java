@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -136,6 +137,7 @@ public class MinecraftInstance {
         this.gameOptions.chatKey = GameOptionsUtil.getKey(this.getPath(), "key_key.chat", pre113);
 
         this.gameOptions.pauseOnLostFocus = GameOptionsUtil.tryGetBoolOption(this.getPath(), "pauseOnLostFocus", true);
+        this.gameOptions.f1SS = Objects.equals(GameOptionsUtil.getStandardOption(this.getPath(), "f1"), "true");
 
         this.checkFabricMods();
 
@@ -300,6 +302,9 @@ public class MinecraftInstance {
                     this.presser.pressEsc();
                     this.presser.pressEsc();
                     this.presser.pressEsc();
+                    if (this.gameOptions.f1SS) {
+                        this.presser.pressF1();
+                    }
                 }
                 if (options.coopMode) {
                     this.openToLan(true);
@@ -384,6 +389,9 @@ public class MinecraftInstance {
 
             if (options.autoFullscreen) {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
+            }
+            if (this.gameOptions.f1SS) {
+                this.presser.pressF1();
             }
         }
 

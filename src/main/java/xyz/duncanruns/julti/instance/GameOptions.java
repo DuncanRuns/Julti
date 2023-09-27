@@ -11,6 +11,7 @@ public class GameOptions {
     public Integer fullscreenKey = null;
     public Integer chatKey = null;
     public Boolean pauseOnLostFocus = null;
+    public Boolean f1SS = null;
 
     public List<FabricJarInfo> jars;
 

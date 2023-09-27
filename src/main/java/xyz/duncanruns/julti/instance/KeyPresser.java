@@ -21,6 +21,11 @@ public class KeyPresser {
         KeyboardUtil.sendKeyUpToHwnd(this.hwnd, Win32VK.VK_F3);
     }
 
+    public void pressF1() {
+        KeyboardUtil.sendKeyDownToHwnd(this.hwnd, Win32VK.VK_F1);
+        KeyboardUtil.sendKeyUpToHwnd(this.hwnd, Win32VK.VK_F1);
+    }
+
     public void pressEsc() {
         KeyboardUtil.sendKeyToHwnd(this.hwnd, Win32VK.VK_ESCAPE);
     }
