@@ -1,5 +1,8 @@
 package xyz.duncanruns.julti.util;
 
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
@@ -166,20 +169,13 @@ public final class GUIUtil {
             button.setText(scriptName + ": ...");
         });
 
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         JCheckBox checkBox = createCheckBox("", data.ignoreModifiers, aBoolean -> {
             data.ignoreModifiers = !data.ignoreModifiers;
             Julti.waitForExecute(() -> JultiOptions.getJultiOptions().setScriptHotkey(data));
             reloadFunction.run();
             HotkeyManager.getHotkeyManager().reloadHotkeys();
         });
-        checkBox.setToolTipText("Ignore Extra Keys");
-        panel.add(checkBox);
-        panel.add(button);
-
-        return panel;
+        return asHotkeyPanel(button, checkBox);
     }
 
     public static JCheckBox createCheckBox(String label, boolean defaultValue, Consumer<Boolean> onValueChange) {
@@ -228,13 +224,28 @@ public final class GUIUtil {
             return button;
         }
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         JCheckBox checkBox = createCheckBoxFromOption("", optionName + "IM", b -> HotkeyManager.getHotkeyManager().reloadHotkeys());
-        checkBox.setToolTipText("Ignore Extra Keys");
-        panel.add(checkBox);
-        panel.add(button);
 
+        return asHotkeyPanel(button, checkBox);
+    }
+
+    private static JPanel asHotkeyPanel(JButton button, JCheckBox checkBox) {
+        checkBox.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                checkBox.setText("Allow Extra Keys (Ignore Ctrl/Shift/Alt)");
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                checkBox.setText("");
+            }
+        });
+        final JPanel panel = new JPanel();
+        panel.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panel.add(button, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel.add(checkBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel.add(new Spacer(), new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         return panel;
     }
 
