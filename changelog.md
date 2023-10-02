@@ -3,6 +3,7 @@ Changes in v0.22.0:
 - Changed default affinity values
 - Added a new button to set affinity values to defaults (recommended)
 - Added freeze filter support (in experimental) (#75 by @draconix6)
+- Added f1 support (f1:true in SS can make the wall look "cleaner")
 - Overhauled window management settings to give the user more power of the window behaviour
   - Window maximizing is now explicitly set by the user
   - Window position can now reference the center of the window
