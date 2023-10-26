@@ -23,8 +23,6 @@ public final class MouseUtil {
     }
 
     public static void clickTopLeft(HWND hwnd) {
-        WinDef.RECT rect = new WinDef.RECT();
-        User32.INSTANCE.GetClientRect(hwnd, rect);
         User32.INSTANCE.PostMessageA(hwnd, new WinDef.UINT(0x0201), new WinDef.WPARAM(1), new WinDef.LPARAM(0L));
     }
 
