@@ -107,6 +107,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Always On Top Projector", "alwaysOnTopProjector")));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Projector When Playing", "minimizeProjectorWhenPlaying")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
 
         panel.add(GUIUtil.createSpacer());
@@ -264,6 +267,7 @@ public class OptionsGUI extends JFrame {
                     options.pieChartOnLoad = false;
                     options.preventWindowNaming = false;
                     options.alwaysOnTopProjector = false;
+                    options.minimizeProjectorWhenPlaying = false;
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                 });
