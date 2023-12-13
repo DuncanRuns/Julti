@@ -9,9 +9,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public final class BopperUtil {
     private static boolean clearing = false;
@@ -59,17 +61,19 @@ public final class BopperUtil {
 
     private static void clearWorlds(MinecraftInstance instance) throws IOException {
         Path savesPath = instance.getPath().resolve("saves");
-        List<Path> worldsToRemove = new ArrayList<>();
-        for (String string : savesPath.toFile().list()) {
-            if (!string.startsWith("_")) {
-                worldsToRemove.add(savesPath.resolve(string));
-            }
+        // Check if saves folder exists first
+        if (!Files.isDirectory(savesPath)) {
+            return;
         }
-        worldsToRemove.removeIf(path -> (!path.toFile().isDirectory()) || (path.resolve("Reset Safe.txt").toFile().isFile()));
-        worldsToRemove.sort((o1, o2) -> (int) (o2.toFile().lastModified() - o1.toFile().lastModified()));
-        for (int i = 0; i < 6 && !worldsToRemove.isEmpty(); i++) {
-            worldsToRemove.remove(0);
-        }
+        // Get all worlds that are allowed to be deleted
+        List<Path> worldsToRemove = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list())) // Get all world names
+                .map(savesPath::resolve) // Map to world paths
+                .filter(BopperUtil::shouldDelete) // Filter for only ones that should be deleted
+                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
+                .collect(Collectors.toList());
+        // Remove the first 6 (or less) worlds
+        worldsToRemove.subList(0, Math.min(6, worldsToRemove.size())).clear();
+        // Actually delete stuff
         int i = 0;
         int total = worldsToRemove.size();
         for (Path path : worldsToRemove) {
@@ -81,5 +85,16 @@ public final class BopperUtil {
                     .map(Path::toFile)
                     .forEach(File::delete);
         }
+    }
+
+    private static boolean shouldDelete(Path path) {
+        if ((!path.toFile().isDirectory()) || (path.resolve("Reset Safe.txt").toFile().isFile()) || !Files.isRegularFile(path.resolve("level.dat"))) {
+            return false;
+        }
+        String name = path.getFileName().toString();
+        if (name.startsWith("_")) {
+            return false;
+        }
+        return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
     }
 }
