@@ -288,7 +288,7 @@ public class WallResetManager extends ResetManager {
     public List<ActionResult> leaveInstance(MinecraftInstance selectedInstance, List<MinecraftInstance> instances) {
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        boolean resetFirst = options.coopMode;
+        boolean resetFirst = options.coopMode && options.wallBypass;
 
         selectedInstance.ensureNotFullscreen();
 
