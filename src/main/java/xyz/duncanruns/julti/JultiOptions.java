@@ -96,6 +96,8 @@ public final class JultiOptions {
     public int instanceSpacing = 0;
     public boolean useCustomWallWindow = false;
     public String customWallNameFormat = "* projector (scene) - *";
+    public boolean invisibleDirtCovers = false;
+    public boolean centerAlignActiveInstance = false;
 
     // Other
     public String multiMCPath = "";

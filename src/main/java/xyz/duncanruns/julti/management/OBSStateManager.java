@@ -28,6 +28,12 @@ public class OBSStateManager {
         return INSTANCE;
     }
 
+    private static int obsOptionsToStateInt() {
+        JultiOptions options = JultiOptions.getJultiOptions();
+        return (options.centerAlignActiveInstance ? 2 : 0)
+                + (options.invisibleDirtCovers ? 1 : 0);
+    }
+
     private static int instanceToStateInt(List<MinecraftInstance> lockedInstances, MinecraftInstance instance) {
         JultiOptions options = JultiOptions.getJultiOptions();
 
@@ -39,9 +45,9 @@ public class OBSStateManager {
 
     public void tryOutputState() {
         JultiOptions options = JultiOptions.getJultiOptions();
-        // Lazy try except (I sorry)
         try {
-            StringBuilder out = new StringBuilder(this.currentLocation);
+            // State format: location;[options int];[instance data];[instance data];[instance data];...
+            StringBuilder out = new StringBuilder(this.currentLocation+";"+obsOptionsToStateInt());
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
             Dimension size = this.getOBSSceneSize();
             if (size == null) {
