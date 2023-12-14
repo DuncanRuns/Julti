@@ -189,6 +189,94 @@ function split_string(input_string, split_char)
     return out
 end
 
+---- Multi Scene Generator ----
+
+function generate_multi_scenes()
+    local instance_count = 0
+    ::go_again::
+    local temp_source = get_source("Minecraft Capture " .. (instance_count + 1))
+    if temp_source ~= nil then
+        instance_count = instance_count + 1
+        release_source(temp_source)
+        goto go_again
+    end
+
+
+    if instance_count == 0 then
+        obs.script_log(100, "You have not generated regular scenes yet!")
+        return
+    end
+
+    remove_individual_multi_captures()
+
+    gen_overlay_scene()
+
+    for i = 1, instance_count, 1 do
+        generate_multi_playing_scene(i)
+    end
+end
+
+function gen_overlay_scene()
+    local scene = get_scene("Playing Overlay")
+    if (scene ~= nil) then
+        return
+    end
+    create_scene("Playing Overlay")
+end
+
+function generate_multi_playing_scene(i)
+    local scene = get_scene("Playing " .. i)
+
+    if (scene == nil) then
+        create_scene("Playing " .. i)
+        scene = get_scene("Playing " .. i)
+
+        local source = get_source("Sound")
+        obs.obs_scene_add(scene, source)
+        release_source(source)
+
+        local source = get_source("Playing Overlay")
+        obs.obs_scene_add(scene, source)
+        release_source(source)
+    end
+
+    local source = get_source("Minecraft Capture " .. i)
+    local si = obs.obs_scene_add(scene, source)
+    bring_to_bottom(si)
+    release_source(source)
+end
+
+function remove_individual_multi_captures()
+    local i = 0
+    local scene = nil
+
+    ::go_again::
+    i = i + 1
+    scene = get_scene("Playing " .. i)
+
+    if scene == nil then
+        return
+    end
+
+    local si = obs.obs_scene_find_source(scene, "Minecraft Capture " .. i)
+    if (si == nil) then
+        goto go_again
+    end
+
+    obs.obs_sceneitem_remove(si)
+
+    goto go_again
+end
+
+function regenerate_multi_scenes()
+    local scene = get_scene("Playing 1")
+    if scene == nil then
+        return
+    end
+    remove_individual_multi_captures()
+    generate_multi_scenes()
+end
+
 ---- Obs Functions ----
 
 function get_scene(name)
@@ -393,11 +481,15 @@ function generate_scenes()
         found_ae = true
     end
 
+    remove_individual_multi_captures()
+
     _ensure_empty_important_scenes()
 
     _setup_julti_scene()
 
     _setup_verification_scene()
+
+    regenerate_multi_scenes()
 
 
     -- Reset variables to have loop update stuff automatically
@@ -784,18 +876,22 @@ end
 function script_properties()
     local props = obs.obs_properties_create()
 
-    obs.obs_properties_add_bool(props, "win_cap_instead", "Use Window Capture for Julti Scene Sources")
+    obs.obs_properties_add_bool(props, "win_cap_instead",
+        "[Generation Option]\nUse Window Capture for Julti Scene Sources")
     obs.obs_properties_add_bool(props, "reuse_for_verification",
-        "Reuse Julti Scene Sources for Verification Scene\n(Better for source record or window cap)")
+        "[Generation Option]\nReuse Julti Scene Sources for Verification Scene\n(Better for source record or window cap)")
 
     obs.obs_properties_add_button(
         props, "generate_scenes_button", "Generate Scenes", request_generate_scenes)
     obs.obs_properties_add_button(
         props, "generate_stream_scenes_button", "Generate Stream Scenes", request_generate_stream_scenes)
+    obs.obs_properties_add_button(
+        props, "generate_multi_scenes_button", "Generate Multi Scenes (1 scene per instance)", generate_multi_scenes)
 
-    obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
-    obs.obs_properties_add_bool(props, "center_align_instances",
-        "Align Active Instance to Center\n(for EyeZoom/stretched window users)")
+    -- Moved into Julti options
+    -- obs.obs_properties_add_bool(props, "invisible_dirt_covers", "Invisible Dirt Covers")
+    -- obs.obs_properties_add_bool(props, "center_align_instances",
+    --     "Align Active Instance to Center\n(for EyeZoom/stretched window users)")
 
     return props
 end
@@ -872,14 +968,20 @@ function loop()
 
     local data_strings = split_string(out, ";")
     local user_location = nil
+    local option_bits_unset = true
     local instance_num = 0
     for k, data_string in pairs(data_strings) do
         if user_location == nil then
+            -- Should take first item from data_strings
             user_location = data_string
             -- Prevent wall updates if switching to a single instance scene to allow transitions to work
             if user_location ~= "W" and switch_to_scene("Playing " .. user_location) then
                 return
             end
+        elseif option_bits_unset then
+            -- Should take second item from data_strings
+            option_bits_unset = false
+            set_globals_from_bits(tonumber(data_string))
         else
             instance_num = instance_num + 1
             set_instance_data_from_string(instance_num, data_string)
@@ -903,7 +1005,8 @@ function loop()
     if user_location ~= "W" then
         local scene = get_scene("Julti")
         bring_to_top(obs.obs_scene_find_source(scene, "Instance " .. user_location))
-        set_instance_data(tonumber(user_location), false, false, false, 0, 0, total_width, total_height, center_align_instances)
+        set_instance_data(tonumber(user_location), false, false, false, 0, 0, total_width, total_height,
+            center_align_instances)
 
         -- hide bordering instances
         if not center_align_instances then
@@ -916,6 +1019,17 @@ function loop()
             teleport_off_canvas(k)
             ::continue::
         end
+    end
+end
+
+function set_globals_from_bits(flag_int)
+    center_align_instances = flag_int >= 2
+    if center_align_instances then
+        flag_int = flag_int - 2
+    end
+    invisible_dirt_covers = flag_int >= 1
+    if invisible_dirt_covers then
+        flag_int = flag_int - 1
     end
 end
 
