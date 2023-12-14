@@ -51,6 +51,7 @@ win_cap_instead = false
 reuse_for_verification = false
 invisible_dirt_covers = false
 center_align_instances = false
+show_indicators = false
 
 
 -- Constants
@@ -178,6 +179,47 @@ function set_instance_data_from_string(instance_num, data_string)
     )
 end
 
+---- Instance Indicators ----
+
+function disable_all_indicators()
+    num = 0
+    while true do
+        num = num + 1
+        local group = get_group_as_scene("Instance " .. num)
+        if group == nil then
+            return
+        end
+        local si = obs.obs_scene_find_source(group, "Instance " .. num .. " Indicator")
+        if si ~= nil then
+            obs.obs_sceneitem_set_visible(si, false)
+        end
+    end
+end
+
+function enable_indicators(instance_count)
+    for num = 1, instance_count, 1 do
+        local group = get_group_as_scene("Instance " .. num)
+        if group == nil then
+            return
+        end
+        local si = obs.obs_scene_find_source(group, "Instance " .. num .. " Indicator")
+        if si ~= nil then
+            obs.obs_sceneitem_set_visible(si, true)
+        end
+    end
+end
+
+function enable_indicator(num)
+    local group = get_group_as_scene("Instance " .. num)
+    if group == nil then
+        return
+    end
+    local si = obs.obs_scene_find_source(group, "Instance " .. num .. " Indicator")
+    if si ~= nil then
+        obs.obs_sceneitem_set_visible(si, true)
+    end
+end
+
 ---- Misc Functions ----
 
 function split_string(input_string, split_char)
@@ -222,6 +264,16 @@ function gen_overlay_scene()
         return
     end
     create_scene("Playing Overlay")
+    local num_over = get_source("Current Location")
+    if num_over == nil then
+        local settings = obs.obs_data_create_from_json(
+            '{"file":"' .. julti_dir ..
+            'currentlocation.txt","font":{"face":"Arial","flags":0,"size":48,"style":"Regular"},"opacity":15,"read_from_file":true}'
+        )
+        num_over = obs.obs_source_create("text_gdiplus", "Current Location", settings, nil)
+    end
+    obs.obs_scene_add(get_scene("Playing Overlay"), num_over)
+    release_source(num_over)
 end
 
 function generate_multi_playing_scene(i)
@@ -448,7 +500,7 @@ function generate_scenes()
         obs.script_log(100, "Julti has not yet been set up! Please setup Julti first!")
         return
     end
-    local instance_count = (#(split_string(out, ";"))) - 1
+    local instance_count = (#(split_string(out, ";"))) - 2
 
     if not scene_exists("Lock Display") then
         _setup_lock_scene()
@@ -490,6 +542,8 @@ function generate_scenes()
     _setup_verification_scene()
 
     regenerate_multi_scenes()
+
+    disable_all_indicators()
 
 
     -- Reset variables to have loop update stuff automatically
@@ -633,7 +687,7 @@ function _setup_verification_scene()
         obs.script_log(200, "Warning: Could not a loading square size, defaulting to 90x90.")
     end
 
-    local instance_count = (#(split_string(out, ";"))) - 1
+    local instance_count = (#(split_string(out, ";"))) - 2
 
     if instance_count == 0 then
         return
@@ -787,7 +841,7 @@ end
 function _setup_julti_scene()
     local out = get_state_file_string()
 
-    local instance_count = (#(split_string(out, ";"))) - 1
+    local instance_count = (#(split_string(out, ";"))) - 2
 
     if instance_count == 0 then
         obs.script_log(100, "Julti has not yet been set up (No instances found)! Please setup Julti first!")
@@ -835,8 +889,20 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     local group_si = obs.obs_scene_add_group(scene, "Instance " .. num)
 
     local source = get_source("Lock Display")
-    local ldsi = obs.obs_scene_add(scene, source)
-    obs.obs_sceneitem_group_add_item(group_si, ldsi)
+    obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
+    release_source(source)
+
+    local num_overlay_name = "Instance " .. num .. " Indicator"
+    local source = get_source(num_overlay_name)
+    if source == nil then
+        local settings = obs.obs_data_create_from_json(
+            '{"text": "' .. num .. '","font": {"face": "Arial","flags": 0,"size": 48,"style": "Regular"},"opacity": 15}'
+        )
+        source = obs.obs_source_create("text_gdiplus", num_overlay_name, settings, nil)
+    end
+    local indicator_item = obs.obs_scene_add(scene, source)
+    obs.obs_sceneitem_group_add_item(group_si, indicator_item)
+    set_position(indicator_item, 5, 0)
     release_source(source)
 
     local source = get_source("Dirt Cover Display")
@@ -967,6 +1033,7 @@ function loop()
     -- Process state data
 
     local data_strings = split_string(out, ";")
+    local instance_count = (#data_strings) - 2
     local user_location = nil
     local option_bits_unset = true
     local instance_num = 0
@@ -988,7 +1055,10 @@ function loop()
         end
     end
 
+    disable_all_indicators()
+
     if user_location == "W" then
+        if show_indicators then enable_indicators(instance_count) end
         if (scene_exists("Walling")) then
             switch_to_scene("Walling")
         else
@@ -1004,6 +1074,7 @@ function loop()
 
     if user_location ~= "W" then
         local scene = get_scene("Julti")
+        if show_indicators then enable_indicator(user_location) end
         bring_to_top(obs.obs_scene_find_source(scene, "Instance " .. user_location))
         set_instance_data(tonumber(user_location), false, false, false, 0, 0, total_width, total_height,
             center_align_instances)
@@ -1023,6 +1094,10 @@ function loop()
 end
 
 function set_globals_from_bits(flag_int)
+    show_indicators = flag_int >= 4
+    if show_indicators then
+        flag_int = flag_int - 4
+    end
     center_align_instances = flag_int >= 2
     if center_align_instances then
         flag_int = flag_int - 2
