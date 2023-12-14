@@ -95,7 +95,7 @@ Changes in v0.17.1:
 - It turns out that for the past however many versions, julti has been using every reset method, meaning it has pressed the create new world key, leave preview key, and esc-shift-tab-enter to reset every instance every single time, so this has been fixed
 - When instances are detected, they will now quickly activate and receive a click input, which fixes mouse teleports and not being able to reset from title screen
 
-v0.17.0:
+Changes in v0.17.0:
 - Added Sounds (#5)
     - Settings are in the new Sound tab
     - Also added a playsound command
@@ -103,7 +103,7 @@ v0.17.0:
 - A fix for blazes and caves fix
 - Several refactors and nerd stuff
 
-v0.16.0:
+Changes in v0.16.0:
 - Completely rewritten OBS script and functionality (#45)
     - The lua script is now saved by Julti to your Documents folder and the .Julti folder
     - Only set names can be used, however everything can be set up with "Generate Scenes"
@@ -134,18 +134,18 @@ v0.16.0:
 - Fixed world load issues (#57)
 - Fixed unpause on switch issues
 
-v0.15.2:
+Changes in v0.15.2:
 - Various code refactors and optimizations
 - Julti now checks for a MultiMC instance config to get the instance name, helping to launch instances
 - Fix log reading for other languages (#47)
 - Now multi-threading log reading
 - Added fullscreen hotkey warning when the "Go Fullscreen" key is set to the same as the in-game key
 
-v0.15.1:
+Changes in v0.15.1:
 - Added a delay to world pause when pie chart is enabled
 - Added some more dirt cover checks to make it more stable
 
-v0.15.0:
+Changes in v0.15.0:
 - **Removed fullscreen mode** due to it being too slow and jank. Fullscreen can still be used during runs by using Julti's fullscreen hotkey. Refer to v0.14.0 patch notes.
 - Added support for instances that do not use the World Preview mod (will perhaps allow for stuff like pre-1.9 in the future) (#43)
 - Added Pie Chart On Load option, which is illegal for normal runs and is meant for superflat runs (apparently) (#42)
@@ -154,10 +154,10 @@ v0.15.0:
 - Fixed instances failing to reset sometimes (#41)
 - Fixed a bug where windows would lose their borderless-ness when resetting from a fullscreened window sometimes
 
-v0.14.1:
+Changes in v0.14.1:
 - Made a work-around for #41, but still not solved. You shouldn't have to restart instances or Julti to continue using an instance which is stuck.
 
-v0.14.0:
+Changes in v0.14.0:
 - Added some guide text to hotkey settings
 - Added fullscreen hotkey
     - Should not be the same as the actual fullscreen hotkey
@@ -166,11 +166,11 @@ v0.14.0:
 - Added option for Unpause on Switch (#40)
 - Removed brine
 
-v0.13.1:
+Changes in v0.13.1:
 - Now asking Windows where the mouse is because sometimes java doesn't have a good answer
 - Made resetting a fullscreened instance potentially less jank as frick
 
-v0.13.0:
+Changes in v0.13.0:
 - Added fullscreen mode (experimental)
 - Cleaned up a some built in wall code and options
 
@@ -181,16 +181,16 @@ v0.12.0:
 - Refactor dirt cover logic and potentially fix a dirt cover issue (#36)
 - Removed Hero
 
-v0.11.5:
+Changes in v0.11.5:
 - Removed auto clear worlds option, replacing with a clear worlds button on the main GUI
 - Sorted main menu buttons
 - Addeded Herobrine
 
-v0.11.4:
+Changes in v0.11.4:
 - Removed maximize option, now on by default for non-borderless
 - Added Herobrine
 
-v0.11.3:
+Changes in v0.11.3:
 - Overhauled the options GUI visuals
 - Julti GUI will now remember the location it was in when re-opened
 - Added more locations for auto-detecting MultiMC/Prism Launcher.
