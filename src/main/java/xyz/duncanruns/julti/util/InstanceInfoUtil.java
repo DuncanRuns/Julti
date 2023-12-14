@@ -1,11 +1,13 @@
 package xyz.duncanruns.julti.util;
 
+import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.win32.User32;
 
+import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +72,7 @@ public final class InstanceInfoUtil {
         Julti.log(Level.DEBUG, "InstanceInfoUtil: Getting command line from " + pid);
         try {
             return PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
-        } catch (Exception e) {
+        } catch (PowerShellExecutionException | IOException e) {
             Julti.log(Level.ERROR, "Error getting PowerShell output, please send this log in the Julti discord: " + e.getMessage());
             return null;
         }
