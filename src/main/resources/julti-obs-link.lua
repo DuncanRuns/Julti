@@ -1021,6 +1021,12 @@ function loop()
         return
     end
 
+    -- Ensure hidden lock example
+
+    if current_scene_name ~= "Lock Display" then
+        hide_example_instances()
+    end
+
     -- Get state output
 
     local out = get_state_file_string()
@@ -1125,9 +1131,13 @@ function on_scene_change(last_scene_name, new_scene_name)
         obs.obs_sceneitem_set_visible(item, true)
         set_position_with_bounds(item, 0, 0, tonumber(nums[4]), tonumber(nums[5]))
     elseif last_scene_name == "Lock Display" then
-        local scene = get_scene("Lock Display")
-        local item = obs.obs_scene_find_source(scene, "Example Instances")
-        obs.obs_sceneitem_set_visible(item, false)
+        hide_example_instances()
     end
+end
+
+function hide_example_instances()
+    local scene = get_scene("Lock Display")
+    local item = obs.obs_scene_find_source(scene, "Example Instances")
+    obs.obs_sceneitem_set_visible(item, false)
 end
 
