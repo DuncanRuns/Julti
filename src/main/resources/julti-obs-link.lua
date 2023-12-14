@@ -888,10 +888,6 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     -- intuitively the scene item returned from add group would need to be released, but it does not
     local group_si = obs.obs_scene_add_group(scene, "Instance " .. num)
 
-    local source = get_source("Lock Display")
-    obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
-    release_source(source)
-
     local num_overlay_name = "Instance " .. num .. " Indicator"
     local source = get_source(num_overlay_name)
     if source == nil then
@@ -903,6 +899,10 @@ function make_minecraft_group(num, total_width, total_height, y, i_height)
     local indicator_item = obs.obs_scene_add(scene, source)
     obs.obs_sceneitem_group_add_item(group_si, indicator_item)
     set_position(indicator_item, 5, 0)
+    release_source(source)
+
+    local source = get_source("Lock Display")
+    obs.obs_sceneitem_group_add_item(group_si, obs.obs_scene_add(scene, source))
     release_source(source)
 
     local source = get_source("Dirt Cover Display")
