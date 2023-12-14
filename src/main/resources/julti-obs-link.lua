@@ -1118,7 +1118,7 @@ function on_scene_change(last_scene_name, new_scene_name)
         if #data_strings == 1 then
             return
         end
-        local nums = split_string(data_strings[2], ",")
+        local nums = split_string(data_strings[3], ",")
 
         local scene = get_scene("Lock Display")
         local item = obs.obs_scene_find_source(scene, "Example Instances")
