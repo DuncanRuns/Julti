@@ -98,6 +98,7 @@ public final class JultiOptions {
     public String customWallNameFormat = "* projector (scene) - *";
     public boolean invisibleDirtCovers = false;
     public boolean centerAlignActiveInstance = false;
+    public boolean showInstanceIndicators = true;
 
     // Other
     public String multiMCPath = "";
@@ -327,6 +328,10 @@ public final class JultiOptions {
             }
         }
 
+        if (oldOptions.showInstanceIndicators == null) {
+            this.showInstanceIndicators = false;
+        }
+
         if (changes.isEmpty()) {
             return;
         }
@@ -511,5 +516,6 @@ public final class JultiOptions {
         public String obsWindowNameFormat = null;
         public Integer resetMode = null;
         public Boolean useMaximizeWithFullscreen = null;
+        public Boolean showInstanceIndicators = null;
     }
 }
