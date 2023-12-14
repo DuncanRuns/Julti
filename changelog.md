@@ -1,3 +1,18 @@
+Changes in v0.23.0: 
+- Changes to the OBS script:
+  - Options that don't affect scene generation have been moved into Julti's options (see the OBS section)
+  - Added Multi scene generator into the main script (previously existed as a separate script). This generates a scene per instance so you can do silly transitions and stuff.
+  - Added `[Generation Option]` to the start of all generation options in the script, to make it obvious that they only take effect when pressing `Generate Scenes` again.
+  - Each instance in the Julti scene will generate with an instance number indicator at 15% opacity.
+- Added a "Show Instance Number Indicators" option (found in OBS section). This is added along with all the options moved from the OBS script
+- Julti will now output a `currentlocation.txt` file in the `.Julti` folder, which is purely for the current instance number overlay in multi scenes.  
+- Standard Manager will now tell Julti to reload instance options whenever you change an option. This means changing Julti-related Minecraft keybinds using Standard Manager will work immediately.
+- Updated world clearing. The new conditions for a world to be deleted are:
+  - The world name must not start with "_" and must not contain a "Reset Safe.txt" file
+  - The world name match a common speedrun world name (`New World...`, `Random/Set Speedrun #...`, `Practice Seed...`)
+  - The world must not be within the last 6 most recently played worlds (6 deletable worlds will be kept).
+
+
 Changes in v0.22.0:
 - Added customizable delay between instance launches
 - Changed default affinity values
