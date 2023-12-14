@@ -17,7 +17,8 @@ import java.util.Objects;
 
 public class OBSStateManager {
     private static final OBSStateManager INSTANCE = new OBSStateManager();
-    private static final Path OUT_PATH = JultiOptions.getJultiDir().resolve("state");
+    private static final Path STATE_OUT_PATH = JultiOptions.getJultiDir().resolve("state");
+    private static final Path CURRENT_LOCATION_OUT_PATH = JultiOptions.getJultiDir().resolve("currentlocation.txt");
 
     private Dimension obsSceneSize = null;
     private String currentLocation = "W";
@@ -47,7 +48,7 @@ public class OBSStateManager {
         JultiOptions options = JultiOptions.getJultiOptions();
         try {
             // State format: location;[options int];[instance data];[instance data];[instance data];...
-            StringBuilder out = new StringBuilder(this.currentLocation+";"+obsOptionsToStateInt());
+            StringBuilder out = new StringBuilder(this.currentLocation + ";" + obsOptionsToStateInt());
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
             Dimension size = this.getOBSSceneSize();
             if (size == null) {
@@ -71,7 +72,8 @@ public class OBSStateManager {
             String outString = out.toString();
             if (!outString.equals(this.lastOut)) {
                 this.lastOut = outString;
-                FileUtil.writeString(OUT_PATH, outString);
+                FileUtil.writeString(STATE_OUT_PATH, outString);
+                FileUtil.writeString(CURRENT_LOCATION_OUT_PATH, this.currentLocation);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
