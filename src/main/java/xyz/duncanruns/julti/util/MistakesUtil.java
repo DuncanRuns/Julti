@@ -89,7 +89,7 @@ public final class MistakesUtil {
                 // window title contains julti - can probably stop there, however we check the running process just in case
                 try {
                     String out = PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
-                    if (out.contains("javaw.exe")) {
+                    if (out.contains("javaw.exe") || out.contains("java.exe")) {
                         String message = "Another instance of Julti is open. To prevent issues, please close one of them.";
                         Julti.log(Level.WARN, message);
                         notifyMistake("Julti: Warning", message);
