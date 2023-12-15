@@ -71,7 +71,7 @@ public class InstancesPanel extends JPanel {
             SingleInstancePanel panel = this.instancePanels.get(i++);
             panel.setInfo(instance);
             if (i == this.lastActive && instance.hasWindow()) {
-                panel.setActive();
+                panel.setActive(selectedInstance != null);
             }
         }
     }

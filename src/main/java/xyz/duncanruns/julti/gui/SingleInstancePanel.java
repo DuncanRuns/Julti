@@ -45,8 +45,8 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         this.panel.setBackground(this.idlePanelColor);
     }
 
-    public void setActive() {
-        this.statusLabel.setText("Playing");
+    public void setActive(boolean currentlyPlaying) {
+        this.statusLabel.setText(currentlyPlaying ? "Playing" : "Last Played");
         this.setBackground(this.activePanelColor);
         this.panel.setBackground(this.activePanelColor);
     }
