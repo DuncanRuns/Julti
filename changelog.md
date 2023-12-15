@@ -1,16 +1,25 @@
-Changes in v0.23.0: 
-- Changes to the OBS script:
-  - Options that don't affect scene generation have been moved into Julti's options (see the OBS section)
+Changes in v1.0.0:
+- Big changes to the OBS script (restart OBS after updating Julti!):
+  - Options that don't affect scene generation have been moved into Julti's options (see the OBS section).
   - Added Multi scene generator into the main script (previously existed as a separate script). This generates a scene per instance so you can do silly transitions and stuff.
   - Added `[Generation Option]` to the start of all generation options in the script, to make it obvious that they only take effect when pressing `Generate Scenes` again.
   - Each instance in the Julti scene will generate with an instance number indicator at 15% opacity.
-- Added a "Show Instance Number Indicators" option (found in OBS section). This is added along with all the options moved from the OBS script
+  - Lock Display being stuck with example instances on should no longer happen.
+- Added a "Show Instance Number Indicators" option (found in OBS section). This is added along with all the options moved from the OBS script.
+- Added "Active Instance Scaling" for the align active instance option. This is mainly used for when the OBS canvas size does not match the monitor resolution.
 - Julti will now output a `currentlocation.txt` file in the `.Julti` folder, which is purely for the current instance number overlay in multi scenes.  
 - Standard Manager will now tell Julti to reload instance options whenever you change an option. This means changing Julti-related Minecraft keybinds using Standard Manager will work immediately.
 - Updated world clearing. The new conditions for a world to be deleted are:
-  - The world name must not start with "_" and must not contain a "Reset Safe.txt" file
-  - The world name match a common speedrun world name (`New World...`, `Random/Set Speedrun #...`, `Practice Seed...`)
+  - The world name must not start with "_" and must not contain a "Reset Safe.txt" file.
+  - The world name match a common speedrun world name (`New World...`, `Random/Set Speedrun #...`, `Practice Seed...`).
   - The world must not be within the last 6 most recently played worlds (6 deletable worlds will be kept).
+- The Julti GUI will now show which instance is being played or was last played (@draconix6 #78)
+- Added minimize projector experimental option (@draconix6 #78)
+- Added detection for multiple Julti's to be open (@draconix6 #78)
+- Various fixes and tweaks (@draconix6 #77)
+  - Julti GUI is now forced back in bounds when it launches out of bounds
+  - Coop mode will work a little better when not using bypass
+- Added a "doaction" command which can replicate the exact functionality of hotkeys (the `reset all` command isn't exactly the same as full reset hotkey)
 
 
 Changes in v0.22.0:
