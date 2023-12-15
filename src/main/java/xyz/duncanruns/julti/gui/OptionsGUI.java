@@ -356,6 +356,8 @@ public class OptionsGUI extends JFrame {
     private void addComponentsOBS() {
         JPanel panel = this.createNewOptionsPanel("OBS");
 
+        JultiOptions options = JultiOptions.getJultiOptions();
+
         panel.add(GUIUtil.leftJustify(new JLabel("OBS Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -363,7 +365,12 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Invisible Dirt Covers", "invisibleDirtCovers")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Align Active Instance to Center (for EyeZoom/stretched window users)", "centerAlignActiveInstance")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Align Active Instance to Center (for EyeZoom/stretched window users)", "centerAlignActiveInstance", b -> this.reload())));
+        if (options.centerAlignActiveInstance) {
+            panel.add(GUIUtil.createSpacer());
+            JPanel scalePanel = GUIUtil.createActiveInstanceScalePanel();
+            panel.add(GUIUtil.leftJustify(scalePanel));
+        }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Show Instance Number Indicators", "showInstanceIndicators")));
         panel.add(GUIUtil.createSpacer());
@@ -372,7 +379,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Custom Wall Window", "useCustomWallWindow", b -> this.reload())));
 
-        if (JultiOptions.getJultiOptions().useCustomWallWindow) {
+        if (options.useCustomWallWindow) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("customWallNameFormat", "Custom Wall Name Format", this)));
         }

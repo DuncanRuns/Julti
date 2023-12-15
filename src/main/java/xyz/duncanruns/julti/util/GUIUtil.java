@@ -340,4 +340,13 @@ public final class GUIUtil {
 
         return panel;
     }
+
+    public static JPanel createActiveInstanceScalePanel() {
+        JPanel scalePanel = new JPanel();
+        scalePanel.setLayout(new BoxLayout(scalePanel, BoxLayout.X_AXIS));
+        scalePanel.add(new JLabel("Active Instance Scaling: "));
+        scalePanel.add(createValueChangerButton("centerAlignScaleX", "X", scalePanel));
+        scalePanel.add(createValueChangerButton("centerAlignScaleY", "Y", scalePanel));
+        return scalePanel;
+    }
 }

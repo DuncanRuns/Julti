@@ -29,11 +29,18 @@ public class OBSStateManager {
         return INSTANCE;
     }
 
-    private static int obsOptionsToStateInt() {
+    private static String obsOptionsToStateSection() {
         JultiOptions options = JultiOptions.getJultiOptions();
-        return (options.showInstanceIndicators ? 4 : 0)
+        int flags = (options.showInstanceIndicators ? 4 : 0)
                 + (options.centerAlignActiveInstance ? 2 : 0)
                 + (options.invisibleDirtCovers ? 1 : 0);
+
+        return String.format("%d,%s,%s", flags, formatAlignScale(options.centerAlignScaleX), formatAlignScale(options.centerAlignScaleY));
+    }
+
+    public static String formatAlignScale(float f) {
+        // Allow up to 3 decimal places, then trim off useless 0's
+        return String.format("%.3f", f).replaceAll("(\\.\\d+?)(0+$)", "$1");
     }
 
     private static int instanceToStateInt(List<MinecraftInstance> lockedInstances, MinecraftInstance instance) {
@@ -49,7 +56,7 @@ public class OBSStateManager {
         JultiOptions options = JultiOptions.getJultiOptions();
         try {
             // State format: location;[options int];[instance data];[instance data];[instance data];...
-            StringBuilder out = new StringBuilder(this.currentLocation + ";" + obsOptionsToStateInt());
+            StringBuilder out = new StringBuilder(this.currentLocation + ";" + obsOptionsToStateSection());
             //(lockedInstances.contains(instance) ? 1 : 0) + (resetManager.shouldDirtCover(instance) ? 2 : 0)
             Dimension size = this.getOBSSceneSize();
             if (size == null) {

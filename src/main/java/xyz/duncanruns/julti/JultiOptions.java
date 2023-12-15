@@ -98,6 +98,8 @@ public final class JultiOptions {
     public String customWallNameFormat = "* projector (scene) - *";
     public boolean invisibleDirtCovers = false;
     public boolean centerAlignActiveInstance = false;
+    public float centerAlignScaleX = 1f;
+    public float centerAlignScaleY = 1f;
     public boolean showInstanceIndicators = true;
 
     // Other
