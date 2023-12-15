@@ -19,6 +19,10 @@ public final class PidUtil {
         return pidPointer.getValue();
     }
 
+    public static int getPidForSelf() {
+        return Kernel32.INSTANCE.GetCurrentProcessId();
+    }
+
     public static String getProcessExecutable(int processId) {
         //Help from https://stackoverflow.com/questions/15693210/getmodulefilename-for-window-in-focus-jna-windows-os
         WinNT.HANDLE process = Kernel32.INSTANCE.OpenProcess(0x0400 | 0x0010, false, processId);
