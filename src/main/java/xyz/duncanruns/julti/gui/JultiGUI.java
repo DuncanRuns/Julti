@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.gui;
 
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
+import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.messages.ShutdownQMessage;
 import xyz.duncanruns.julti.util.MonitorUtil;
@@ -73,7 +74,7 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        this.add(new InstancesPanel(() -> this.isActive() || this.isOptionsActive(), this::isClosed), new GridBagConstraints(
+        this.add(new InstancesPanel(() -> this.isActive() || this.isOptionsActive() || InstanceManager.getInstanceManager().getSelectedInstance() != null, this::isClosed), new GridBagConstraints(
                 0,
                 1,
                 1,

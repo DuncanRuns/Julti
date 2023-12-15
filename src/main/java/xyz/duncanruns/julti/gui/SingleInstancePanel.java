@@ -15,6 +15,10 @@ import java.awt.event.MouseListener;
 
 public class SingleInstancePanel extends JPanel implements MouseListener {
 
+    private final JPanel panel = new JPanel();
+    private final Color idlePanelColor = this.getBackground();
+    private final Color activePanelColor = idlePanelColor.brighter();
+
     private final JLabel nameLabel = new JLabel("Unknown");
     private final JLabel statusLabel = new JLabel("Unknown");
     private MinecraftInstance instance;
@@ -22,7 +26,6 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
     public SingleInstancePanel() {
         this.setBorder(new FlatBorder());
         this.setLayout(new FlowLayout());
-        JPanel panel = new JPanel();
 
         panel.setLayout(new GridLayout(2, 1));
 
@@ -38,6 +41,14 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         this.nameLabel.setText(instance.getName());
         this.statusLabel.setText(instance.hasWindow() ? "Open" : "Closed");
         this.instance = instance;
+        this.setBackground(idlePanelColor);
+        panel.setBackground(idlePanelColor);
+    }
+
+    public void setActive() {
+        this.statusLabel.setText("Playing");
+        this.setBackground(activePanelColor);
+        panel.setBackground(activePanelColor);
     }
 
     @Override
