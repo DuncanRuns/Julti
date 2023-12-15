@@ -70,7 +70,7 @@ public class InstancesPanel extends JPanel {
         for (MinecraftInstance instance : instances) {
             SingleInstancePanel panel = this.instancePanels.get(i++);
             panel.setInfo(instance);
-            if (i == this.lastActive) {
+            if (i == this.lastActive && instance.hasWindow()) {
                 panel.setActive();
             }
         }
