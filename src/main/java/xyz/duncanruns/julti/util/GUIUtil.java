@@ -169,7 +169,7 @@ public final class GUIUtil {
             button.setText(scriptName + ": ...");
         });
 
-        JCheckBox checkBox = createCheckBox("", "", data.ignoreModifiers, aBoolean -> {
+        JCheckBox checkBox = createCheckBox("", "Allow Extra Keys (Ignore Ctrl/Shift/Alt)", data.ignoreModifiers, aBoolean -> {
             data.ignoreModifiers = !data.ignoreModifiers;
             Julti.waitForExecute(() -> JultiOptions.getJultiOptions().setScriptHotkey(data));
             reloadFunction.run();
@@ -237,7 +237,7 @@ public final class GUIUtil {
             return button;
         }
 
-        JCheckBox checkBox = createCheckBoxFromOption("", "", optionName + "IM", b -> HotkeyManager.getHotkeyManager().reloadHotkeys());
+        JCheckBox checkBox = createCheckBoxFromOption("", "Allow Extra Keys (Ignore Ctrl/Shift/Alt)", optionName + "IM", b -> HotkeyManager.getHotkeyManager().reloadHotkeys());
 
         return asHotkeyPanel(button, checkBox);
     }
@@ -261,12 +261,7 @@ public final class GUIUtil {
     }
 
     public static JCheckBox createCheckBoxFromOption(String label, String optionName, Consumer<Boolean> afterSet) {
-        return createCheckBox(label, "", (Boolean) JultiOptions.getJultiOptions().getValue(optionName), val -> {
-            queueOptionChangeAndWait(optionName, val);
-            if (afterSet != null) {
-                afterSet.accept(val);
-            }
-        });
+        return createCheckBoxFromOption(label, "", optionName, afterSet);
     }
 
     public static JCheckBox createCheckBoxFromOption(String label, String desc, String optionName) {
