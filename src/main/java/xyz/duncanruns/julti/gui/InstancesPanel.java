@@ -3,6 +3,8 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatMarginBorder;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
+import xyz.duncanruns.julti.Julti;
+import org.apache.logging.log4j.Level;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +21,8 @@ public class InstancesPanel extends JPanel {
     private final Supplier<Boolean> shouldShutdownSupplier;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ArrayList<SingleInstancePanel> instancePanels = new ArrayList<>();
+
+    private int lastActive = 0;
 
     public InstancesPanel(Supplier<Boolean> shouldUpdateSupplier, Supplier<Boolean> shouldShutdownSupplier) {
         this.shouldUpdateSupplier = shouldUpdateSupplier;
@@ -60,9 +64,17 @@ public class InstancesPanel extends JPanel {
             this.mainPanel.setLayout(new GridLayout(0, Math.max(1, Math.min(instances.size(), 5))));
             this.revalidate();
         }
+
+        MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
+        lastActive = selectedInstance != null ? InstanceManager.getInstanceManager().getInstanceNum(selectedInstance) : lastActive;
+
         int i = 0;
         for (MinecraftInstance instance : instances) {
-            this.instancePanels.get(i++).setInfo(instance);
+            SingleInstancePanel panel = this.instancePanels.get(i++);
+            panel.setInfo(instance);
+            if (i == lastActive) {
+                panel.setActive();
+            }
         }
     }
 }
