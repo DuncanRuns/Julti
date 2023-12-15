@@ -139,12 +139,12 @@ public final class GameOptionsUtil {
         if (!out.contains("\n")) {
             if (out.endsWith(".txt")) {
                 if (out.contains(path.toString())) {
-                    Julti.log(Level.ERROR, path.toString() + " contains a path to itself! StandardSettings will not work.\r\n" +
-                        "To fix this:\r\n" +
-                        "- Press Instance Utilities > Close All Instances\r\n" +
-                        "- Delete standardoptions.txt on your desktop AND in instance 1's .minecraft/config folder\r\n" +
-                        "- Launch and close instance 1\r\n" +
-                        "- In Julti, press Plugins > Open > Yes > OK > Yes > Apply to All Instances"
+                    Julti.log(Level.ERROR, path + " contains a path to itself! StandardSettings will not work.\r\n" +
+                            "To fix this:\r\n" +
+                            "- Press Instance Utilities > Close All Instances\r\n" +
+                            "- Delete standardoptions.txt on your desktop AND in instance 1's .minecraft/config folder\r\n" +
+                            "- Launch and close instance 1\r\n" +
+                            "- In Julti, press Plugins > Open > Yes > OK > Yes > Apply to All Instances"
                     );
                     return null;
                 }

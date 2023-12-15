@@ -32,7 +32,7 @@ public class OBSStateManager {
     private static int obsOptionsToStateInt() {
         JultiOptions options = JultiOptions.getJultiOptions();
         return (options.showInstanceIndicators ? 4 : 0)
-                +(options.centerAlignActiveInstance ? 2 : 0)
+                + (options.centerAlignActiveInstance ? 2 : 0)
                 + (options.invisibleDirtCovers ? 1 : 0);
     }
 

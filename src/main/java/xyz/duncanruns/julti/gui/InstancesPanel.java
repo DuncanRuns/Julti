@@ -3,8 +3,6 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatMarginBorder;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
-import xyz.duncanruns.julti.Julti;
-import org.apache.logging.log4j.Level;
 
 import javax.swing.*;
 import java.awt.*;
@@ -66,13 +64,13 @@ public class InstancesPanel extends JPanel {
         }
 
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
-        lastActive = selectedInstance != null ? InstanceManager.getInstanceManager().getInstanceNum(selectedInstance) : lastActive;
+        this.lastActive = selectedInstance != null ? InstanceManager.getInstanceManager().getInstanceNum(selectedInstance) : this.lastActive;
 
         int i = 0;
         for (MinecraftInstance instance : instances) {
             SingleInstancePanel panel = this.instancePanels.get(i++);
             panel.setInfo(instance);
-            if (i == lastActive) {
+            if (i == this.lastActive) {
                 panel.setActive();
             }
         }

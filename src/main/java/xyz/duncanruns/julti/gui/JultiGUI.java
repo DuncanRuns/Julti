@@ -105,7 +105,7 @@ public class JultiGUI extends JFrame {
             lastGUIPos = MonitorUtil.getPrimaryMonitor().position;
         }
         this.setLocation(lastGUIPos[0], lastGUIPos[1]);
-        
+
         this.setSize(800, 420);
         this.setTitle("Julti");
         this.addWindowListener(new WindowAdapter() {

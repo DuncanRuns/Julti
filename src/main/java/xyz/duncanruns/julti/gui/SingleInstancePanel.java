@@ -17,7 +17,7 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
 
     private final JPanel panel = new JPanel();
     private final Color idlePanelColor = this.getBackground();
-    private final Color activePanelColor = idlePanelColor.brighter();
+    private final Color activePanelColor = this.idlePanelColor.brighter();
 
     private final JLabel nameLabel = new JLabel("Unknown");
     private final JLabel statusLabel = new JLabel("Unknown");
@@ -27,13 +27,13 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         this.setBorder(new FlatBorder());
         this.setLayout(new FlowLayout());
 
-        panel.setLayout(new GridLayout(2, 1));
+        this.panel.setLayout(new GridLayout(2, 1));
 
         this.nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         this.statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        panel.add(this.nameLabel);
-        panel.add(this.statusLabel);
-        this.add(panel);
+        this.panel.add(this.nameLabel);
+        this.panel.add(this.statusLabel);
+        this.add(this.panel);
         this.addMouseListener(this);
     }
 
@@ -41,14 +41,14 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         this.nameLabel.setText(instance.getName());
         this.statusLabel.setText(instance.hasWindow() ? "Open" : "Closed");
         this.instance = instance;
-        this.setBackground(idlePanelColor);
-        panel.setBackground(idlePanelColor);
+        this.setBackground(this.idlePanelColor);
+        this.panel.setBackground(this.idlePanelColor);
     }
 
     public void setActive() {
         this.statusLabel.setText("Playing");
-        this.setBackground(activePanelColor);
-        panel.setBackground(activePanelColor);
+        this.setBackground(this.activePanelColor);
+        this.panel.setBackground(this.activePanelColor);
     }
 
     @Override
