@@ -5,6 +5,8 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.messages.ShutdownQMessage;
+import xyz.duncanruns.julti.util.MonitorUtil;
+import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,9 +90,23 @@ public class JultiGUI extends JFrame {
     }
 
     private void setupWindow() {
-        this.setSize(800, 420);
+        // ensure window is inbounds
         int[] lastGUIPos = JultiOptions.getJultiOptions().lastGUIPos;
+        Monitor[] monitors = MonitorUtil.getAllMonitors();
+        Boolean inbounds = false;
+        for (Monitor monitor : monitors) {
+            if (monitor.bounds.contains(lastGUIPos[0], lastGUIPos[1])) {
+                inbounds = true;
+                break;
+            }
+        }
+        // if no monitors contain the last GUI position, reset the position to the primary monitor
+        if (!inbounds) {
+            lastGUIPos = MonitorUtil.getPrimaryMonitor().position;
+        }
         this.setLocation(lastGUIPos[0], lastGUIPos[1]);
+        
+        this.setSize(800, 420);
         this.setTitle("Julti");
         this.addWindowListener(new WindowAdapter() {
             @Override
