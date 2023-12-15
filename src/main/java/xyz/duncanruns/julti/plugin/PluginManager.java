@@ -160,10 +160,10 @@ public final class PluginManager {
     }
 
     public static class JultiPluginData {
-        public final String name = null;
-        public final String id = null;
-        public final String version = null;
-        public final String initializer = null;
+        public String name = null;
+        public String id = null;
+        public String version = null;
+        public String initializer = null;
 
         public static JultiPluginData fromString(String string) {
             return GSON.fromJson(string, JultiPluginData.class);
