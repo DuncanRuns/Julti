@@ -14,10 +14,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -30,6 +27,7 @@ public final class PluginManager {
     private static final Path PLUGINS_PATH = JultiOptions.getJultiDir().resolve("plugins").toAbsolutePath();
 
     private final List<LoadedJultiPlugin> loadedPlugins = new ArrayList<>();
+    private final Set<String> pluginCollisions = new HashSet<>();
 
     private PluginManager() {
     }
@@ -73,6 +71,10 @@ public final class PluginManager {
             byte[] jsonData = Files.readAllBytes(jsonFilePath);
             return new String(jsonData, StandardCharsets.UTF_8);
         }
+    }
+
+    public Set<String> getPluginCollisions() {
+        return Collections.unmodifiableSet(this.pluginCollisions);
     }
 
     public List<LoadedJultiPlugin> getLoadedPlugins() {
@@ -136,6 +138,7 @@ public final class PluginManager {
             this.registerPlugin(jultiPluginData, pluginInitializer);
         } else {
             Julti.log(Level.WARN, "Failed to load plugin " + path + ", because there is another plugin with the same id already loaded.");
+            this.pluginCollisions.add(jultiPluginData.id);
         }
     }
 
