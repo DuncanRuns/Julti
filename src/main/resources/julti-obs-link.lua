@@ -51,6 +51,8 @@ win_cap_instead = false
 reuse_for_verification = false
 invisible_dirt_covers = false
 center_align_instances = false
+center_align_scale_x = 1.0
+center_align_scale_y = 1.0
 show_indicators = false
 
 
@@ -402,6 +404,10 @@ function set_position_with_bounds(scene_item, x, y, width, height, center_align)
 
     if center_align then
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_NONE)
+        local scale = obs.vec2()
+        scale.x = center_align_scale_x
+        scale.y = center_align_scale_y
+        obs.obs_sceneitem_set_scale(scene_item, scale)
     else
         obs.obs_sceneitem_set_bounds_type(scene_item, obs.OBS_BOUNDS_STRETCH)
         obs.obs_sceneitem_set_bounds(scene_item, bounds)
@@ -434,7 +440,9 @@ function get_sceneitem_name(sceneitem)
 end
 
 function bring_to_top(item)
-    obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_TOP)
+    if item ~= nil then
+        obs.obs_sceneitem_set_order(item, obs.OBS_ORDER_MOVE_TOP)
+    end
 end
 
 function bring_to_bottom(item)
@@ -1041,7 +1049,7 @@ function loop()
     local data_strings = split_string(out, ";")
     local instance_count = (#data_strings) - 2
     local user_location = nil
-    local option_bits_unset = true
+    local global_options_unset = true
     local instance_num = 0
     for k, data_string in pairs(data_strings) do
         if user_location == nil then
@@ -1051,10 +1059,10 @@ function loop()
             if user_location ~= "W" and switch_to_scene("Playing " .. user_location) then
                 return
             end
-        elseif option_bits_unset then
+        elseif global_options_unset then
             -- Should take second item from data_strings
-            option_bits_unset = false
-            set_globals_from_bits(tonumber(data_string))
+            global_options_unset = false
+            set_globals_from_state(data_string)
         else
             instance_num = instance_num + 1
             set_instance_data_from_string(instance_num, data_string)
@@ -1064,6 +1072,7 @@ function loop()
     disable_all_indicators()
 
     if user_location == "W" then
+        bring_to_top(obs.obs_scene_find_source(get_scene("Julti"), "Wall On Top"))
         if show_indicators then enable_indicators(instance_count) end
         if (scene_exists("Walling")) then
             switch_to_scene("Walling")
@@ -1097,6 +1106,13 @@ function loop()
             ::continue::
         end
     end
+end
+
+function set_globals_from_state(options_section)
+    local args = split_string(options_section, ",")
+    set_globals_from_bits(tonumber(args[1]))
+    center_align_scale_x = tonumber(args[2]) or 1.0
+    center_align_scale_y = tonumber(args[3]) or 1.0
 end
 
 function set_globals_from_bits(flag_int)
