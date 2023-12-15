@@ -28,7 +28,8 @@ public class CommandManager {
             new LogCommand(),
             new PlaysoundCommand(),
             new OpenFileCommand(),
-            new SessionResetCommand()
+            new SessionResetCommand(),
+            new DoActionCommand()
     )));
 
     static {
