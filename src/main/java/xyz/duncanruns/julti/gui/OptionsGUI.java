@@ -111,6 +111,8 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Activate Projector On Reset", "Recommended for use with Bypass Wall in conjunction with thin BT", "activateProjectorOnReset")));
+
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));

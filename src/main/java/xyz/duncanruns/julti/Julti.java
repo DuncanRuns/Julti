@@ -318,7 +318,13 @@ public final class Julti {
     }
 
     public void focusWall() {
-        SleepBGUtil.disableLock();
+        this.focusWall(true);
+    }
+
+    public void focusWall(boolean disableLock) {
+        if (disableLock) {
+            SleepBGUtil.disableLock();
+        }
         AtomicReference<HWND> wallHwnd = new AtomicReference<>(ActiveWindowManager.getLastWallHwnd());
         if (wallHwnd.get() == null) {
             User32.INSTANCE.EnumWindows((hwnd, data) -> {

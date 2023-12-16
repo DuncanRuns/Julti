@@ -382,6 +382,10 @@ public class WallResetManager extends ResetManager {
             return false;
         } else {
             this.unlockInstance(nextInstance);
+            // activate projector - avoid previous instances behind selected instance when using thin BT, etc.
+            if (options.activateProjectorOnReset) {
+                Julti.getJulti().focusWall(false);
+            }
             Julti.getJulti().activateInstance(nextInstance);
             return true;
         }
