@@ -74,7 +74,7 @@ public final class UpdateUtil {
         latestVersion = latestVersion.replaceAll("^v", "");
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        boolean shouldSuggestUpdate = shouldUpdate(currentVersion, latestVersion);
+        boolean shouldSuggestUpdate = !options.lastCheckedVersion.equals(latestVersion) && shouldUpdate(currentVersion, latestVersion);
 
         if (shouldSuggestUpdate) {
             options.lastCheckedVersion = latestVersion;
