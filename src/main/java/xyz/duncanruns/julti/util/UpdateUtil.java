@@ -60,7 +60,7 @@ public final class UpdateUtil {
                 break;
             }
         }
-        String latestVersion = release.getTagName().replace("^v", "");
+        String latestVersion = release.getTagName();
 
         if (asset == null || asset.getBrowserDownloadUrl() == null) {
             Julti.log(Level.WARN, "Latest github release does not have a .jar asset! Please report this to the developer.");
@@ -70,7 +70,8 @@ public final class UpdateUtil {
     }
 
     private static void checkForUpdates(JultiGUI gui, String currentVersion, String latestVersion, GHAsset asset) {
-
+        currentVersion = currentVersion.replaceAll("^v", "");
+        latestVersion = latestVersion.replaceAll("^v", "");
         JultiOptions options = JultiOptions.getJultiOptions();
 
         boolean shouldSuggestUpdate = shouldUpdate(currentVersion, latestVersion);
