@@ -315,7 +315,7 @@ public class MinecraftInstance {
             }
         }
         if (doingSetup) {
-            Julti.doLater(() -> this.ensureResettingWindowState(false));
+            this.ensureInitialWindowState();
         } else {
             PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
@@ -613,6 +613,13 @@ public class MinecraftInstance {
                 (options.maximizeWhenResetting && !options.useBorderless),
                 options.windowPosIsCenter ? WindowStateUtil.withTopLeftToCenter(bounds) : bounds,
                 offload);
+    }
+
+    public void ensureInitialWindowState() {
+        // ensure instance is unfullscreened and unminimized
+        this.ensureNotFullscreen();
+        User32.INSTANCE.ShowWindow(this.hwnd, User32.SW_NORMAL);
+        Julti.doLater(() -> this.ensureResettingWindowState(false));
     }
 
     public void ensurePlayingWindowState(boolean offload) {
