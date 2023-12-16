@@ -711,6 +711,10 @@ public class MinecraftInstance {
         Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
     }
 
+    public KeyPresser getKeyPresser() {
+        return this.presser;
+    }
+
     public void logAndCopyInfo() {
 
         final StringBuilder toCopy = new StringBuilder();
