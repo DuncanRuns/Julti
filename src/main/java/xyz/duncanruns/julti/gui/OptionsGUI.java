@@ -86,10 +86,13 @@ public class OptionsGUI extends JFrame {
 
         if (options.autoFullscreen) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Fullscreen Before Unpause (Could fix mouse issues)", "fullscreenBeforeUnpause")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Fullscreen Before Unpause", "May reduce cursor issues, especially for thin BT users.", "fullscreenBeforeUnpause")));
 
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "If unchecked, ignores using the Playing Window Size set in Window settings.", "usePlayingSizeWithFullscreen", b -> this.reload())));
+            
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("fullscreenDelay", "Added Fullscreen Delay", this, "ms")));
         }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -110,9 +113,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Projector When Playing", "minimizeProjectorWhenPlaying")));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "useAltSwitching")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Activate Projector On Reset", "Recommended for use with Bypass Wall in conjunction with thin BT", "activateProjectorOnReset")));
 
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Alt Switching", "Presses LAlt when switching windows - recommended for those with LAlt unbound", "useAltSwitching")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));
@@ -270,6 +274,7 @@ public class OptionsGUI extends JFrame {
                     options.preventWindowNaming = false;
                     options.alwaysOnTopProjector = false;
                     options.minimizeProjectorWhenPlaying = false;
+                    options.activateProjectorOnReset = false;
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                 });
