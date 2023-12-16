@@ -4,6 +4,14 @@ public final class VersionUtil {
     private VersionUtil() {
     }
 
+    public static int tryCompare(String versionA, String versionB, int onFailure) {
+        try {
+            return Version.of(versionA).compareTo(Version.of(versionB));
+        } catch (Exception e) {
+            return onFailure;
+        }
+    }
+
     public static int compare(String versionA, String versionB) {
         return Version.of(versionA).compareTo(Version.of(versionB));
     }
