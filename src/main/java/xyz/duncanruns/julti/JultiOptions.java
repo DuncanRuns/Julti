@@ -137,6 +137,7 @@ public final class JultiOptions {
     public boolean autoFullscreen = false;
     public boolean fullscreenBeforeUnpause = true;
     public boolean usePlayingSizeWithFullscreen = true;
+    public int fullscreenDelay = 50;
     public boolean pieChartOnLoad = false;
     public boolean preventWindowNaming = false;
     public boolean alwaysOnTopProjector = false;

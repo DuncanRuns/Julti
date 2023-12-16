@@ -89,7 +89,7 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Fullscreen Before Unpause", "May reduce cursor issues, especially for thin BT users.", "fullscreenBeforeUnpause")));
 
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "If unchecked, ignores using the Playing Window Size set in Window settings.", "usePlayingSizeWithFullscreen", b -> this.reload())));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
             
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("fullscreenDelay", "Added Fullscreen Delay", this, "ms")));
