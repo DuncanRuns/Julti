@@ -186,7 +186,7 @@ public final class Julti {
         // Schedule stuff for after Julti startup processes
         Julti.doLater(() -> {
             MistakesUtil.checkStartupMistakes();
-            new Thread(() -> UpdateUtil.checkForUpdates(JultiGUI.getJultiGUI()), "update-checker").start();
+            new Thread(() -> UpdateUtil.tryCheckForUpdates(JultiGUI.getJultiGUI()), "update-checker").start();
         });
 
         while (this.running) {

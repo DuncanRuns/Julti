@@ -1,5 +1,7 @@
 package xyz.duncanruns.julti.util;
 
+import xyz.duncanruns.julti.util.VersionUtil.Version;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,12 +10,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class MCVersionUtil {
-    // A map to help convert snapshots to a comparable version string
+    // SNAP_MAP is a map to help convert snapshots to a comparable version string
     // The integer arrays will always contain 3 integers, the first being the year the snapshot should be from, then the minimum and maximum week number
     // Snapshots for major version updates should be converted to a .99 of the former major version
     // Snapshots for minor version updates should be rounded to the latter minor version
     private static final Map<int[], String> SNAP_MAP = getSnapMap();
-    private static final Pattern VERSION_PATTERN = Pattern.compile("^1\\.\\d+(\\.\\d+)?");
     private static final Pattern SNAPSHOT_VERSION_PATTERN = Pattern.compile("^(\\d\\d)w0?(\\d+).+"); // Does not exactly match, but is useful for matching groups
 
     private MCVersionUtil() {
@@ -38,27 +39,24 @@ public final class MCVersionUtil {
         return Collections.unmodifiableMap(map);
     }
 
-    private static int[] getVersionInts(String versionString) {
-        Matcher m;
-
-        // Check for stable releases, pre releases, and release candidates
-        m = VERSION_PATTERN.matcher(versionString);
-        if (m.matches()) {
-            String[] sInts = m.group().split("\\.");
-            int[] ints = new int[sInts.length];
-            Arrays.setAll(ints, i -> Integer.parseInt(sInts[i]));
-            return ints.length == 3 ? ints : new int[]{ints[0], ints[1], 0};
+    private static Version findVersion(String versionString) {
+        try {
+            return Version.of(versionString);
+        } catch (IllegalArgumentException e) {
+            // Check for snapshots
+            return getSnapshotVersion(versionString);
         }
+    }
 
-        // Check for snapshots
-        m = SNAPSHOT_VERSION_PATTERN.matcher(versionString);
+    private static Version getSnapshotVersion(String snapshotVersion) {
+        Matcher m = SNAPSHOT_VERSION_PATTERN.matcher(snapshotVersion);
         if (m.matches()) {
             int year = Integer.parseInt(m.group(1));
             int week = Integer.parseInt(m.group(2));
             for (Map.Entry<int[], String> entry : SNAP_MAP.entrySet()) {
                 int[] searchInts = entry.getKey();
                 if (year == searchInts[0] && week >= searchInts[1] && week <= searchInts[2]) {
-                    return getVersionInts(entry.getValue());
+                    return Version.of(entry.getValue());
                 }
             }
         }
@@ -71,7 +69,7 @@ public final class MCVersionUtil {
      * @return true if versionX is older than versionY, otherwise false
      */
     public static boolean isOlderThan(String versionX, String versionY) {
-        return (!isLooselyEqual(versionX, versionY)) && (!isNewerThan(versionX, versionY));
+        return findVersion(versionX).compareTo(findVersion(versionY)) < 0;
     }
 
     /**
@@ -80,17 +78,7 @@ public final class MCVersionUtil {
      * @return true if versionX is newer than versionY, otherwise false
      */
     public static boolean isNewerThan(String versionX, String versionY) {
-        int[] intsX = getVersionInts(versionX);
-        int[] intsY = getVersionInts(versionY);
-
-        for (int i = 0; i < 3; i++) {
-            if (intsX[i] > intsY[i]) {
-                return true;
-            } else if (intsX[i] < intsY[i]) {
-                return false;
-            }
-        }
-        return false;
+        return findVersion(versionX).compareTo(findVersion(versionY)) > 0;
     }
 
     /**
@@ -103,7 +91,7 @@ public final class MCVersionUtil {
      *
      * @return true if versionX is the same version as versionY, otherwise false
      */
-    private static boolean isLooselyEqual(String versionX, String versionY) {
-        return Arrays.equals(getVersionInts(versionX), getVersionInts(versionY));
+    public static boolean isLooselyEqual(String versionX, String versionY) {
+        return findVersion(versionX).compareTo(findVersion(versionY)) == 0;
     }
 }
