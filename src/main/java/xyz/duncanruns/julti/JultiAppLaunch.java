@@ -11,9 +11,7 @@ import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public final class JultiAppLaunch {

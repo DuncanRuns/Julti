@@ -2,7 +2,6 @@ package xyz.duncanruns.julti.util;
 
 import xyz.duncanruns.julti.util.VersionUtil.Version;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

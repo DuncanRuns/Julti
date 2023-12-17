@@ -24,11 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -152,10 +149,9 @@ public class MinecraftInstance {
         this.discoverName();
 
         // check if fullscreen is true in standardoptions (bad)
-        if (GameOptionsUtil.tryGetStandardOption(this.getPath(), "fullscreen") == "true")
-        {
+        if (GameOptionsUtil.tryGetStandardOption(this.getPath(), "fullscreen") == "true") {
             Julti.log(Level.WARN, this.getName() + " has fullscreen set to true in standardsettings!\r\n" +
-            "To prevent any issues, please press Plugins > Open Standard Manager > Yes, to optimize your standardoptions.");
+                    "To prevent any issues, please press Plugins > Open Standard Manager > Yes, to optimize your standardoptions.");
         }
     }
 
@@ -561,7 +557,7 @@ public class MinecraftInstance {
     /**
      * @author DuncanRuns
      * @author draconix6
-    */
+     */
     public void prepareSubmission() throws IOException, SecurityException {
         Path savesPath = this.getPath().resolve("saves");
         if (!Files.isDirectory(savesPath)) {
@@ -576,22 +572,22 @@ public class MinecraftInstance {
         }
 
         // save submission to folder on desktop
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         Path submissionPath = Paths.get(System.getProperty("user.home"))
-            .resolve("Desktop")
-            .resolve((this.getName() + " submission (" + dtf.format(now) + ")")
-            .replace(":", "-")
-            .replace("/", "-")
-        );
+                .resolve("Desktop")
+                .resolve((this.getName() + " submission (" + dtf.format(now) + ")")
+                        .replace(":", "-")
+                        .replace("/", "-")
+                );
         submissionPath.toFile().mkdirs();
         Julti.log(Level.INFO, "Created folder on desktop for submission.");
 
         // latest world + 5 previous saves
         List<Path> worldsToCopy = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list())) // Get all world names
-            .map(savesPath::resolve) // Map to world paths
-            .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-            .collect(Collectors.toList());
+                .map(savesPath::resolve) // Map to world paths
+                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
+                .collect(Collectors.toList());
         File savesDest = submissionPath.resolve("Worlds").toFile();
         savesDest.mkdirs();
         try {
@@ -600,13 +596,14 @@ public class MinecraftInstance {
                 Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to Desktop...");
                 FileUtils.copyDirectoryToDirectory(currentSave, savesDest);
             }
-        } catch (IndexOutOfBoundsException ignored) {} // not enough saves to copy
+        } catch (IndexOutOfBoundsException ignored) {
+        } // not enough saves to copy
 
         // last 3 logs
         List<Path> logsToCopy = Arrays.stream(Objects.requireNonNull(logsPath.toFile().list())) // Get all log names
-            .map(logsPath::resolve) // Map to paths
-            .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-            .collect(Collectors.toList());
+                .map(logsPath::resolve) // Map to paths
+                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
+                .collect(Collectors.toList());
         File logsDest = submissionPath.resolve("Logs").toFile();
         logsDest.mkdirs();
         try {
@@ -615,8 +612,9 @@ public class MinecraftInstance {
                 Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to Desktop...");
                 FileUtils.copyFileToDirectory(currentLog, logsDest);
             }
-        } catch (IndexOutOfBoundsException ignored) {} // not enough logs to copy
-        
+        } catch (IndexOutOfBoundsException ignored) {
+        } // not enough logs to copy
+
         Julti.log(Level.INFO, "Saved submission files for " + this.getName() + " to your desktop.\r\nPlease submit a link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
     }
 

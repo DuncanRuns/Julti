@@ -5,7 +5,7 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.util.MouseUtil;
 
-public class DoActionCommand extends Command{
+public class DoActionCommand extends Command {
     // Julti.getJulti().queueMessage(new HotkeyPressQMessage(hotkeyAction.getRight(), MouseUtil.getMousePos()));
     @Override
     public String helpDescription() {
