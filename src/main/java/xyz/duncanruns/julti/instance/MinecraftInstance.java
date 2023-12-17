@@ -147,7 +147,7 @@ public class MinecraftInstance {
         if (GameOptionsUtil.tryGetStandardOption(this.getPath(), "fullscreen") == "true")
         {
             Julti.log(Level.WARN, this.getName() + " has fullscreen set to true in standardsettings!\r\n" +
-            "To prevent any issues, please press Plugins > Open > Yes.");
+            "To prevent any issues, please press Plugins > Open Standard Manager > Yes, to optimize your standardoptions.");
         }
     }
 
