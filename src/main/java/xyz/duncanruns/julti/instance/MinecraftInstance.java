@@ -610,7 +610,7 @@ public class MinecraftInstance {
             }
         } catch (IndexOutOfBoundsException ignored) {} // not enough logs to copy
         
-        Julti.log(Level.INFO, "Preparing submission files for " + this.getName() + " complete.");
+        Julti.log(Level.INFO, "Saved submission files for " + this.getName() + " to your desktop.\r\nPlease submit a link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
     }
 
     /**
