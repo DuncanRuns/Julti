@@ -10,7 +10,10 @@ import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public final class JultiAppLaunch {
@@ -36,8 +39,8 @@ public final class JultiAppLaunch {
     }
 
     private static void runJultiApp() throws IOException {
-        // Setup GUI theme
-        FlatDarkLaf.setup();
+        // Set Swing Settings
+        setSwingSettings();
 
         // Ensure Julti Dir
         JultiOptions.ensureJultiDir();
@@ -68,5 +71,13 @@ public final class JultiAppLaunch {
 
         // Run main loop
         Julti.getJulti().run();
+    }
+
+    private static void setSwingSettings() {
+        // Setup GUI theme
+        FlatDarkLaf.setup();
+
+        // Set tooltip delay
+        ToolTipManager.sharedInstance().setInitialDelay(0);
     }
 }

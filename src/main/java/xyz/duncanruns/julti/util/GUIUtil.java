@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -179,7 +180,14 @@ public final class GUIUtil {
     }
 
     public static JCheckBox createCheckBox(String label, String desc, boolean defaultValue, Consumer<Boolean> onValueChange) {
-        JCheckBox jCheckBox = new JCheckBox();
+        AtomicInteger toolTipYOff = new AtomicInteger();
+        JCheckBox jCheckBox = new JCheckBox() {
+            @Override
+            public Point getToolTipLocation(MouseEvent event) {
+                Point point = event.getPoint();
+                return new Point(point.x + 10, point.y + toolTipYOff.get());
+            }
+        };
         jCheckBox.setSelected(defaultValue);
         jCheckBox.setAction(new AbstractAction() {
             @Override
@@ -188,25 +196,25 @@ public final class GUIUtil {
             }
         });
 
-        // on hover, set option label to more detailed description (if it was given)
-        jCheckBox.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                jCheckBox.setText(desc != "" ? desc : label);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                jCheckBox.setText(label);
-            }
-        });
+        // Set tooltips if description is specified
+        if (!desc.isEmpty()) {
+            String text = label.isEmpty() ? "" : label + ": ";
+            text += desc;
+            FontMetrics fontMetrics = jCheckBox.getFontMetrics(jCheckBox.getFont());
+            int textPixLength = fontMetrics.stringWidth(text);
+            int maxWidth = 400;
+            int textHeight = fontMetrics.getHeight() * (textPixLength / maxWidth);
+            toolTipYOff.set(-textHeight - 25);
+            int width = Math.min(textPixLength, maxWidth);
+            jCheckBox.setToolTipText("<html><p width=\"" + width + "\">" + text + "</p></html>");
+        }
         jCheckBox.setText(label);
         return jCheckBox;
     }
 
     public static JComponent createHotkeyChangeButton(final String optionName, String hotkeyName, boolean includeIMOption) {
         JButton button = new JButton();
-        final String hotkeyPrefix = hotkeyName + (hotkeyName.equals("") ? "" : ": ");
+        final String hotkeyPrefix = hotkeyName + (hotkeyName.isEmpty() ? "" : ": ");
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
