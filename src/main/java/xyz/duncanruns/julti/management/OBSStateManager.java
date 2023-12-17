@@ -40,7 +40,7 @@ public class OBSStateManager {
 
     public static String formatAlignScale(float f) {
         // Allow up to 3 decimal places, then trim off useless 0's
-        return String.format("%.3f", f).replaceAll("(\\.\\d+?)(0+$)", "$1");
+        return String.format("%.3f", f).replace(",", ".").replaceAll("(\\.\\d+?)(0+$)", "$1");
     }
 
     private static int instanceToStateInt(List<MinecraftInstance> lockedInstances, MinecraftInstance instance) {
