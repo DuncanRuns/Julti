@@ -20,7 +20,11 @@ Changes in v1.0.0:
   - Julti GUI is now forced back in bounds when it launches out of bounds
   - Coop mode will work a little better when not using bypass
 - Added a "doaction" command which can replicate the exact functionality of hotkeys (the `reset all` command isn't exactly the same as full reset hotkey)
-
+- Added experimental option "Activate Projector On Reset" for bypass + thin BT users (@draconix6 #79)
+- Added some option descriptions (@draconix6 #79) 
+- Added various standard options warnings  (@draconix6 #79)
+- Added fullscreen delay experimental option  (@draconix6 #79)
+- Updated default scripts to contain 
 
 Changes in v0.22.0:
 - Added customizable delay between instance launches
