@@ -1,4 +1,5 @@
 Changes in v1.0.0:
+- **Added PaceMan.gg support! Access the tracker through the plugins menu.**
 - Big changes to the OBS script (restart OBS after updating Julti!):
   - Options that don't affect scene generation have been moved into Julti's options (see the OBS section).
   - Added Multi scene generator into the main script (previously existed as a separate script). This generates a scene per instance so you can do silly transitions and stuff.
