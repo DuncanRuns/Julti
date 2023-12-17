@@ -337,6 +337,10 @@ public final class JultiOptions {
             this.showInstanceIndicators = false;
         }
 
+        if (oldOptions.fullscreenDelay == null) {
+            this.fullscreenDelay = 0;
+        }
+
         if (changes.isEmpty()) {
             return;
         }
@@ -522,5 +526,6 @@ public final class JultiOptions {
         public Integer resetMode = null;
         public Boolean useMaximizeWithFullscreen = null;
         public Boolean showInstanceIndicators = null;
+        public Boolean fullscreenDelay = null;
     }
 }
