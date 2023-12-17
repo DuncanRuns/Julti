@@ -526,6 +526,6 @@ public final class JultiOptions {
         public Integer resetMode = null;
         public Boolean useMaximizeWithFullscreen = null;
         public Boolean showInstanceIndicators = null;
-        public Boolean fullscreenDelay = null;
+        public Integer fullscreenDelay = null;
     }
 }
