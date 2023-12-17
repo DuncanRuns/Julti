@@ -13,18 +13,20 @@ Changes in v1.0.0:
   - The world name must not start with "_" and must not contain a "Reset Safe.txt" file.
   - The world name match a common speedrun world name (`New World...`, `Random/Set Speedrun #...`, `Practice Seed...`).
   - The world must not be within the last 6 most recently played worlds (6 deletable worlds will be kept).
-- The Julti GUI will now show which instance is being played or was last played (@draconix6 #78)
-- Added minimize projector experimental option (@draconix6 #78)
-- Added detection for multiple Julti's to be open (@draconix6 #78)
-- Various fixes and tweaks (@draconix6 #77)
-  - Julti GUI is now forced back in bounds when it launches out of bounds
-  - Coop mode will work a little better when not using bypass
-- Added a "doaction" command which can replicate the exact functionality of hotkeys (the `reset all` command isn't exactly the same as full reset hotkey)
-- Added experimental option "Activate Projector On Reset" for bypass + thin BT users (@draconix6 #79)
-- Added some option descriptions (@draconix6 #79) 
-- Added various standard options warnings  (@draconix6 #79)
-- Added fullscreen delay experimental option  (@draconix6 #79)
-- Updated default scripts to contain 
+- The Julti GUI will now show which instance is being played or was last played. (@draconix6 #78)
+- Added minimize projector experimental option. (@draconix6 #78)
+- Added detection for multiple Julti's to be open. (@draconix6 #78)
+- Various fixes and tweaks. (@draconix6 #77)
+  - Julti GUI is now forced back in bounds when it launches out of bounds.
+  - Coop mode will work a little better when not using bypass.
+- Added a "doaction" command which can replicate the exact functionality of hotkeys (the `reset all` command isn't exactly the same as full reset hotkey).
+- Added experimental option "Activate Projector On Reset" for bypass + thin BT users. (@draconix6 #79)
+- Added some option descriptions.(@draconix6 #79) 
+- Added various standard options warnings. (@draconix6 #79)
+- Added fullscreen delay experimental option. (@draconix6 #79)
+- Updated default scripts to contain a new launch + mega warmup script, and remove the old warmup script and the dragon fight script.
+- Added benchmark plugin as a default plugin.
+- Updated plugin loading to choose the newest version out of the default plugins and folder plugins.
 
 Changes in v0.22.0:
 - Added customizable delay between instance launches
