@@ -1,3 +1,6 @@
+Changes in v1.0.1:
+- Fix issue for computers using a comma for decimal formatting
+
 Changes in v1.0.0:
 - **Added PaceMan.gg support! Access the tracker through the plugins menu.**
 - Big changes to the OBS script (restart OBS after updating Julti!):
