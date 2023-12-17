@@ -107,7 +107,7 @@ public class JultiGUI extends JFrame {
         this.setLocation(lastGUIPos[0], lastGUIPos[1]);
 
         this.setSize(800, 420);
-        this.setTitle("Julti");
+        this.setTitle("Julti v" + Julti.VERSION);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
