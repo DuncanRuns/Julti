@@ -84,6 +84,20 @@ public final class SyncUtil {
                 log(Level.WARN, "Source instance has no config folder!");
             }
 
+            // speedrunigt/
+
+            Path sourceSpeedrunIGTPath = sourcePath.resolve("speedrunigt");
+            if (copyConfigs && Files.isDirectory(sourceSpeedrunIGTPath)) {
+                for (Path destinationPath : destinationPaths) {
+                    Path destinationSpeedrunIGTPath = destinationPath.resolve("speedrunigt");
+                    log(Level.INFO, "Syncing SpeedrunIGT config folder: " + sourcePath + " -> " + destinationPath);
+                    FileUtils.deleteQuietly(destinationSpeedrunIGTPath.toFile());
+                    FileUtils.copyDirectory(sourceSpeedrunIGTPath.toFile(), destinationSpeedrunIGTPath.toFile());
+                }
+            } else if (copyConfigs) {
+                log(Level.WARN, "Source instance has no SpeedrunIGT config folder!");
+            }
+
             log(Level.INFO, "Sync finished!");
         }
     }

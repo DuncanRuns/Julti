@@ -108,6 +108,12 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 SingleInstancePanel.this.instance.openFolder();
             }
         });
+        GUIUtil.addMenuItem(popupMenu, "Package Files for Submission", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SingleInstancePanel.this.instance.tryPrepareSubmission();
+            }
+        });
         GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
