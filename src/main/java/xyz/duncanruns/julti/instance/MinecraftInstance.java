@@ -2,7 +2,6 @@ package xyz.duncanruns.julti.instance;
 
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
@@ -17,22 +16,18 @@ import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
@@ -544,78 +539,6 @@ public class MinecraftInstance {
         } catch (IOException e) {
             Julti.log(Level.ERROR, "Failed to open instance folder:\n" + ExceptionUtil.toDetailedString(e));
         }
-    }
-
-    public void tryPrepareSubmission() {
-        try {
-            this.prepareSubmission();
-        } catch (IOException | SecurityException e) {
-            Julti.log(Level.ERROR, "Failed to prepare files for submission - please refer to the speedrun.com rules to submit files yourself.\nDetailed error:" + ExceptionUtil.toDetailedString(e));
-        }
-    }
-
-    /**
-     * @author DuncanRuns
-     * @author draconix6
-     */
-    public void prepareSubmission() throws IOException, SecurityException {
-        Path savesPath = this.getPath().resolve("saves");
-        if (!Files.isDirectory(savesPath)) {
-            Julti.log(Level.ERROR, "Saves path for " + this.getName() + " not found! Please refer to the speedrun.com rules to submit files yourself.");
-            return;
-        }
-
-        Path logsPath = this.getPath().resolve("logs");
-        if (!Files.isDirectory(logsPath)) {
-            Julti.log(Level.ERROR, "Logs path for " + this.getName() + " not found! Please refer to the speedrun.com rules to submit files yourself.");
-            return;
-        }
-
-        // save submission to folder on desktop
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        Path submissionPath = Paths.get(System.getProperty("user.home"))
-                .resolve("Desktop")
-                .resolve((this.getName() + " submission (" + dtf.format(now) + ")")
-                        .replace(":", "-")
-                        .replace("/", "-")
-                );
-        submissionPath.toFile().mkdirs();
-        Julti.log(Level.INFO, "Created folder on desktop for submission.");
-
-        // latest world + 5 previous saves
-        List<Path> worldsToCopy = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list())) // Get all world names
-                .map(savesPath::resolve) // Map to world paths
-                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-                .collect(Collectors.toList());
-        File savesDest = submissionPath.resolve("Worlds").toFile();
-        savesDest.mkdirs();
-        try {
-            for (int i = 0; i < 6; i++) {
-                File currentSave = worldsToCopy.get(i).toFile();
-                Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to Desktop...");
-                FileUtils.copyDirectoryToDirectory(currentSave, savesDest);
-            }
-        } catch (IndexOutOfBoundsException ignored) {
-        } // not enough saves to copy
-
-        // last 3 logs
-        List<Path> logsToCopy = Arrays.stream(Objects.requireNonNull(logsPath.toFile().list())) // Get all log names
-                .map(logsPath::resolve) // Map to paths
-                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-                .collect(Collectors.toList());
-        File logsDest = submissionPath.resolve("Logs").toFile();
-        logsDest.mkdirs();
-        try {
-            for (int i = 0; i < 3; i++) {
-                File currentLog = logsToCopy.get(i).toFile();
-                Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to Desktop...");
-                FileUtils.copyFileToDirectory(currentLog, logsDest);
-            }
-        } catch (IndexOutOfBoundsException ignored) {
-        } // not enough logs to copy
-
-        Julti.log(Level.INFO, "Saved submission files for " + this.getName() + " to your desktop.\r\nPlease submit a link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
     }
 
     /**

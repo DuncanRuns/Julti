@@ -6,12 +6,15 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.SafeInstanceLauncher;
+import xyz.duncanruns.julti.util.SubmissionUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class SingleInstancePanel extends JPanel implements MouseListener {
 
@@ -111,7 +114,13 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
         GUIUtil.addMenuItem(popupMenu, "Package Files for Submission", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SingleInstancePanel.this.instance.tryPrepareSubmission();
+                Path finalPath = SubmissionUtil.tryPrepareSubmission(SingleInstancePanel.this.instance);
+                if (finalPath != null) {
+                    try {
+                        Desktop.getDesktop().browse(finalPath.toUri());
+                    } catch (IOException ignored) {
+                    }
+                }
             }
         });
         GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
