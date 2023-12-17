@@ -7,16 +7,14 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public final class SubmissionUtil {
     private SubmissionUtil() {
@@ -51,31 +49,33 @@ public final class SubmissionUtil {
             return null;
         }
 
-        // save submission to folder on desktop
+        // save submission to folder
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
+        String submissionFolderName = (instance.getName() + " submission (" + dtf.format(now) + ")")
+                .replace(":", "-")
+                .replace("/", "-");
+
         Path submissionPath = Paths.get(System.getProperty("user.home"))
                 .resolve(".Julti")
                 .resolve("submissionpackages")
-                .resolve((instance.getName() + " submission (" + dtf.format(now) + ")")
-                        .replace(":", "-")
-                        .replace("/", "-")
+                .resolve(submissionFolderName
                 );
         submissionPath.toFile().mkdirs();
-        Julti.log(Level.INFO, "Created folder on desktop for submission.");
+        Julti.log(Level.INFO, "Created folder for submission.");
 
         // latest world + 5 previous saves
         List<Path> worldsToCopy = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list())) // Get all world names
                 .map(savesPath::resolve) // Map to world paths
                 .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
                 .collect(Collectors.toList());
-        File savesDest = submissionPath.resolve("Worlds").toFile();
-        savesDest.mkdirs();
+        Path savesDest = submissionPath.resolve("Worlds");
+        savesDest.toFile().mkdirs();
         try {
             for (int i = 0; i < 6; i++) {
                 File currentSave = worldsToCopy.get(i).toFile();
-                Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to Desktop...");
-                FileUtils.copyDirectoryToDirectory(currentSave, savesDest);
+                Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to submission folder...");
+                FileUtils.copyDirectoryToDirectory(currentSave, savesDest.toFile());
             }
         } catch (IndexOutOfBoundsException ignored) {
         } // not enough saves to copy
@@ -90,7 +90,7 @@ public final class SubmissionUtil {
         try {
             for (int i = 0; i < 3; i++) {
                 File currentLog = logsToCopy.get(i).toFile();
-                Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to Desktop...");
+                Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to submission folder...");
                 FileUtils.copyFileToDirectory(currentLog, logsDest);
             }
         } catch (IndexOutOfBoundsException ignored) {
@@ -98,6 +98,42 @@ public final class SubmissionUtil {
 
         Julti.log(Level.INFO, "Saved submission files for " + instance.getName() + " to .Julti/submissionpackages.\r\nPlease submit a link to your files through instance form: https://forms.gle/v7oPXfjfi7553jkp7");
 
+        copyFolderToZip(submissionPath.resolve("Worlds.zip"), submissionPath.resolve("Worlds"));
+        copyFolderToZip(submissionPath.resolve("Logs.zip"), submissionPath.resolve("Logs"));
+
         return submissionPath;
+    }
+
+    private static void copyFolderToZip(Path zipFile, Path sourceFolder) {
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            Files.walkFileTree(sourceFolder, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new ZipFileVisitor(zos, sourceFolder));
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Error while copying zip to folder: \n" + ExceptionUtil.toDetailedString(e));
+        }
+    }
+
+    private static class ZipFileVisitor extends java.nio.file.SimpleFileVisitor<Path> {
+
+        private final ZipOutputStream zos;
+        private final Path sourceFolder;
+
+        public ZipFileVisitor(ZipOutputStream zos, Path sourceFolder) {
+            this.zos = zos;
+            this.sourceFolder = sourceFolder;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            Path relativePath = this.sourceFolder.relativize(file);
+            this.zos.putNextEntry(new ZipEntry(relativePath.toString()));
+            Files.copy(file, this.zos);
+            this.zos.closeEntry();
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) {
+            return FileVisitResult.CONTINUE;
+        }
     }
 }
