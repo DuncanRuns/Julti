@@ -141,6 +141,7 @@ public final class JultiOptions {
     public boolean preventWindowNaming = false;
     public boolean alwaysOnTopProjector = false;
     public boolean minimizeProjectorWhenPlaying = false;
+    public boolean activateProjectorOnReset = false;
     public boolean useAltSwitching = false;
     public boolean allowResetDuringGenerating = false;
     // public boolean forceActivate = false;

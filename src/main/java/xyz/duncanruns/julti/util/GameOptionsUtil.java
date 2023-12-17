@@ -124,7 +124,7 @@ public final class GameOptionsUtil {
                 return null;
             }
         } catch (StackOverflowError e) {
-            Julti.log(Level.ERROR, "Error reading standardoptions.txt! Press Plugins > Open > Yes to try and fix.");
+            Julti.log(Level.ERROR, "Error reading standardoptions.txt! Press Plugins > Open Standard Manager > Yes to try and fix your standardoptions.txt.");
             return null;
         }
 
@@ -144,7 +144,7 @@ public final class GameOptionsUtil {
                             "- Press Instance Utilities > Close All Instances\r\n" +
                             "- Delete standardoptions.txt on your desktop AND in instance 1's .minecraft/config folder\r\n" +
                             "- Launch and close instance 1\r\n" +
-                            "- In Julti, press Plugins > Open > Yes > OK > Yes > Apply to All Instances"
+                            "- In Julti, press Plugins > Open Standard Manager > Yes > OK > Yes > Apply to All Instances, to fix your standardoptions.txt"
                     );
                     return null;
                 }

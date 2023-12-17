@@ -142,6 +142,13 @@ public class MinecraftInstance {
         this.checkFabricMods();
 
         this.discoverName();
+
+        // check if fullscreen is true in standardoptions (bad)
+        if (GameOptionsUtil.tryGetStandardOption(this.getPath(), "fullscreen") == "true")
+        {
+            Julti.log(Level.WARN, this.getName() + " has fullscreen set to true in standardsettings!\r\n" +
+            "To prevent any issues, please press Plugins > Open Standard Manager > Yes, to optimize your standardoptions.");
+        }
     }
 
     private void checkFabricMods() {
@@ -315,7 +322,7 @@ public class MinecraftInstance {
             }
         }
         if (doingSetup) {
-            Julti.doLater(() -> this.ensureResettingWindowState(false));
+            this.ensureInitialWindowState();
         } else {
             PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
@@ -613,6 +620,13 @@ public class MinecraftInstance {
                 (options.maximizeWhenResetting && !options.useBorderless),
                 options.windowPosIsCenter ? WindowStateUtil.withTopLeftToCenter(bounds) : bounds,
                 offload);
+    }
+
+    public void ensureInitialWindowState() {
+        // ensure instance is unfullscreened and unminimized
+        this.ensureNotFullscreen();
+        User32.INSTANCE.ShowWindow(this.hwnd, User32.SW_NORMAL);
+        Julti.doLater(() -> this.ensureResettingWindowState(false));
     }
 
     public void ensurePlayingWindowState(boolean offload) {
