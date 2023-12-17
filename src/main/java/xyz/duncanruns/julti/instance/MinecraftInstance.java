@@ -807,13 +807,11 @@ public class MinecraftInstance {
             delay += 5;
         }
 
-        int fullscreenDelay = options.fullscreenDelay;
-        if (fullscreenDelay < 0) fullscreenDelay = 0;
-        if (fullscreenDelay > 250) fullscreenDelay = 250;
-        sleep(options.fullscreenDelay);
+        int fullscreenDelay = Math.min(Math.max(0, options.fullscreenDelay), 250);
+        sleep(fullscreenDelay);
 
         Julti.log(Level.DEBUG, "ensureNotFullscreen complete (" + i + ")");
-        Julti.log(Level.DEBUG, "Estimated delay: " + delay + "ms + added delay of " + options.fullscreenDelay + "ms");
+        Julti.log(Level.DEBUG, "Estimated delay: " + delay + "ms + added delay of " + fullscreenDelay + "ms");
     }
 
     public KeyPresser getKeyPresser() {
