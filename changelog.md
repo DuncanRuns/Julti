@@ -27,6 +27,7 @@ Changes in v1.0.0:
 - Updated default scripts to contain a new launch + mega warmup script, and remove the old warmup script and the dragon fight script.
 - Added benchmark plugin as a default plugin.
 - Updated plugin loading to choose the newest version out of the default plugins and folder plugins.
+- Added "Package Files For Submission" option when right-clicking instances in the instances panel. This will collect necessary files for verification from that instance in one place. (@draconix6 #80)
 
 Changes in v0.22.0:
 - Added customizable delay between instance launches
