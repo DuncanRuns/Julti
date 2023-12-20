@@ -180,6 +180,17 @@ public class MinecraftInstance {
             Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have the standard settings mod!");
         }
 
+        FabricJarInfo igtInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "speedrunigt");
+
+        boolean trackableIGT = true;
+        Matcher igtMatcher = Pattern.compile("(?:1[4-9]|[2-9]\\d|\\d{3,})\\.\\d+\\+1\\.16\\.1").matcher(igtInfo.version);
+        if (!igtMatcher.find()) {
+            trackableIGT = false;
+        }
+
+        if (!trackableIGT) {
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + "\" does not have at least version 14 of SpeedrunIGT! If using PaceMan, runs will not be sent.");
+        }
     }
 
     private void discoverName() {
