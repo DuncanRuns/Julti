@@ -1,3 +1,6 @@
+Changes in v1.0.2:
+- Updated PaceMan Tracker (a few bug fixes)
+
 Changes in v1.0.1:
 - Fix issue for computers using a comma for decimal formatting
 
