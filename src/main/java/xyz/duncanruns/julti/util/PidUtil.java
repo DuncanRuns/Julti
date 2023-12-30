@@ -37,6 +37,7 @@ public final class PidUtil {
                 out.append((char) a);
             }
         }
+        Kernel32.INSTANCE.CloseHandle(process);
         return out.toString();
     }
 }
