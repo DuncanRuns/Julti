@@ -29,7 +29,8 @@ public class CommandManager {
             new PlaysoundCommand(),
             new OpenFileCommand(),
             new SessionResetCommand(),
-            new DoActionCommand()
+            new DoActionCommand(),
+            new ClearWorldsCommand()
     )));
 
     static {
