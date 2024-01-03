@@ -15,6 +15,7 @@ import java.util.Arrays;
 public class StateTracker {
     private final Path path;
     private final Runnable onStateChange;
+    private final Runnable onPercentageUpdate;
 
     private boolean fileExists = false;
     private long mTime = 0L;
@@ -27,9 +28,10 @@ public class StateTracker {
     private final long[] lastOccurrenceArr;
 
 
-    public StateTracker(Path path, Runnable onStateChange) {
+    public StateTracker(Path path, Runnable onStateChange, Runnable onPercentageUpdate) {
         this.path = path;
         this.onStateChange = onStateChange;
+        this.onPercentageUpdate = onPercentageUpdate;
 
         int totalStates = InstanceState.values().length;
         this.lastStartArr = new long[totalStates];
@@ -60,6 +62,7 @@ public class StateTracker {
 
         // Store previous state
         InstanceState previousState = this.instanceState;
+        byte previousPercentage = this.loadingPercent;
 
         if (!this.trySetStatesFromFile()) {
             return;
@@ -77,6 +80,9 @@ public class StateTracker {
             if (doOnStateChange) {
                 this.onStateChange.run();
             }
+        }
+        if (previousPercentage != this.loadingPercent && this.onPercentageUpdate != null && doOnStateChange) {
+            this.onPercentageUpdate.run();
         }
     }
 

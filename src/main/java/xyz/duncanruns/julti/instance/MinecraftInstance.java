@@ -59,7 +59,7 @@ public class MinecraftInstance {
         this.hwnd = hwnd;
         this.path = path;
         this.versionString = versionString;
-        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange);
+        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange, this::onPercentageUpdate);
         this.presser = new KeyPresser(hwnd);
         this.scheduler = new Scheduler();
     }
@@ -69,7 +69,7 @@ public class MinecraftInstance {
         this.versionString = null;
         this.presser = null;
         this.scheduler = null;
-        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null);
+        this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null, null);
 
         this.path = path;
         this.windowMissing = true;
@@ -339,6 +339,10 @@ public class MinecraftInstance {
                 break;
         }
         PluginEvents.InstanceEventType.STATE_CHANGE.runAll(this);
+    }
+
+    private void onPercentageUpdate() {
+        PluginEvents.InstanceEventType.PERCENTAGE_CHANGE.runAll(this);
     }
 
     public int getResetSortingNum() {
