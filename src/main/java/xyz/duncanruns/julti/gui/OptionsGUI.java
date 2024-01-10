@@ -12,6 +12,7 @@ import xyz.duncanruns.julti.util.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
@@ -707,6 +708,62 @@ public class OptionsGUI extends JFrame {
             this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for Clarity"), actionEvent -> {
+            // make resetting window size match wall source dimensions
+            Dimension wallSize = OBSStateManager.getOBSStateManager().getOBSSceneSize();
+            
+            int totalRows = 2;
+            int totalColumns = 2;
+            if (!options.autoCalcWallSize) {
+                totalRows = Math.max(1, options.overrideRowsAmount);
+                totalColumns = Math.max(1, options.overrideColumnsAmount);
+            }
+
+            if (options.resetStyle.equals("Dynamic Wall")) {
+                wallSize.height -= (int) ((options.lockedInstanceSpace / 100) * wallSize.height);
+            }
+
+            // Using floats here so there won't be any gaps in the wall after converting back to int
+            float iWidth = wallSize.width / (float) totalColumns;
+            float iHeight = wallSize.height / (float) totalRows;
+
+            if (!options.useBorderless) {
+                iWidth += 16;
+                iHeight += 39;
+            }
+
+            int[] iSize = {(int)iWidth - 2 * options.instanceSpacing, (int)iHeight - 2 * options.instanceSpacing};
+            Julti.waitForExecute(() -> {
+                options.resettingWindowSize = iSize;
+            });
+            windowOptions.reload();
+            this.revalidate();
+        })));
+        panel.add(GUIUtil.createSpacer());
+        
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for FOV"), actionEvent -> {
+            MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
+            MonitorUtil.Monitor playingMonitor = null;
+            for (MonitorUtil.Monitor monitor : monitors) {
+                if (monitors[0].bounds.contains(new Point(options.windowPos[0], options.windowPos[1]))) {
+                    playingMonitor = monitor;
+                    break;
+                }
+            }
+            if (playingMonitor == null) {
+                return;
+            }
+
+            int[] iSize = { playingMonitor.size[0], (int)(playingMonitor.size[1] / 2.5) };
+            Julti.waitForExecute(() -> {
+                options.resettingWindowSize = iSize;
+            });
+            windowOptions.reload();
+            this.revalidate();
+        })));
+        panel.add(GUIUtil.createSpacer());
+        
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "prepareWindowOnLock")));
