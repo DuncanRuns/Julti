@@ -1,3 +1,14 @@
+Changes in v1.1.0:
+- Updated PaceMan Tracker to v0.3.0
+  - Update SpeedRunIGT to v14.1! 
+- Some new window settings buttons to optimize for various playstyles (@draconix6 #84)
+- Added more option descriptions (@draconix6 #84)
+- Removed "Reset All After Playing", it was a verification feature for non wall recorders, which is now no longer needed. (@draconix6 #84)
+- Removed other verification warnings because wall recording is no longer required. (@draconix6 #84)
+- LAUNCH plugin event (devs might care, you surely don't) (@pants721 #83)
+- Added `clearworlds` command
+- Various tweaks and fixes
+
 Changes in v1.0.2:
 - Updated PaceMan Tracker (a few bug fixes)
 
