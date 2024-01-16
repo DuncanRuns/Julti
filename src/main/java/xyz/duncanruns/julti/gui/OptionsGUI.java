@@ -123,6 +123,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Resizeable Borderless", "Allows the window to be resized, restored and maximized when Use Borderless is checked.", "resizeableBorderless")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
@@ -278,6 +281,7 @@ public class OptionsGUI extends JFrame {
                     options.activateProjectorOnReset = false;
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
+                    options.resizeableBorderless = false;
                 });
             }
             this.reload();
