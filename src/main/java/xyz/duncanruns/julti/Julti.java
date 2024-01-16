@@ -172,6 +172,7 @@ public final class Julti {
         ResourceUtil.makeResources();
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         checkDeleteOldJar();
+        PluginEvents.RunnableEventType.LAUNCH.runAll();
 
         this.reload();
         long cycles = 0;

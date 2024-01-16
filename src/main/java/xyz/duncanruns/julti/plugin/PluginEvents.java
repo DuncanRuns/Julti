@@ -15,6 +15,8 @@ public final class PluginEvents {
         END_TICK,
         // Runs every reload, which is every profile change including the first load
         RELOAD,
+        // Runs when Julti is launched
+        LAUNCH,
         // Runs when Julti is shutting down
         STOP,
         // Runs every time the wall is activated
