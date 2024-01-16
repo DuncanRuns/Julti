@@ -183,7 +183,7 @@ public class MinecraftInstance {
         FabricJarInfo igtInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "speedrunigt");
 
         boolean trackableIGT = VersionUtil.tryCompare(igtInfo.version.split("\\+")[0], "14.0", -1) >= 0;
-        String igtMCVersion = igtInfo.version.split("\\+")[0];
+        String igtMCVersion = igtInfo.version.split("\\+")[1];
 
         if (!trackableIGT && igtMCVersion.equals("1.16.1")) {
             Julti.log(Level.WARN, "Warning: Instance \"" + this + "\" does not have at least version 14 of SpeedrunIGT! If using PaceMan, runs will not be sent.");
