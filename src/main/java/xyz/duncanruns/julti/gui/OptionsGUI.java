@@ -12,6 +12,7 @@ import xyz.duncanruns.julti.util.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
@@ -89,7 +90,7 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Fullscreen Before Unpause", "May reduce cursor issues, especially for thin BT users.", "fullscreenBeforeUnpause")));
 
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "usePlayingSizeWithFullscreen", b -> this.reload())));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Size w/ Fullscreen", "If turned off, the Playing Window Size is ignored.", "usePlayingSizeWithFullscreen", b -> this.reload())));
 
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("fullscreenDelay", "Added Fullscreen Delay", this, "ms")));
@@ -122,10 +123,13 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Reset During Generating", "allowResetDuringGenerating")));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Resizeable Borderless", "Allows the window to be resized, restored and maximized when Use Borderless is checked.", "resizeableBorderless")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Freeze Filter", "useFreezeFilter", b -> this.reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Freeze Filter", "Freezes the instance on the OBS preview - workaround for \"sky bug\"", "useFreezeFilter", b -> this.reload())));
         if (options.useFreezeFilter) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("freezePercent", "Freeze Filter Activation Percent", this, "%")));
@@ -277,6 +281,7 @@ public class OptionsGUI extends JFrame {
                     options.activateProjectorOnReset = false;
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
+                    options.resizeableBorderless = false;
                 });
             }
             this.reload();
@@ -372,7 +377,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Invisible Dirt Covers", "invisibleDirtCovers")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Align Active Instance to Center (for EyeZoom/stretched window users)", "centerAlignActiveInstance", b -> this.reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Align Active Instance to Center", "Mainly for EyeZoom/TallMacro/stretched window users", "centerAlignActiveInstance", b -> this.reload())));
         if (options.centerAlignActiveInstance) {
             panel.add(GUIUtil.createSpacer());
             JPanel scalePanel = GUIUtil.createActiveInstanceScalePanel();
@@ -384,7 +389,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("instanceSpacing", "Instance Spacing (Border)", this)));
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Custom Wall Window", "useCustomWallWindow", b -> this.reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Custom Wall Window", "Enable if a window other than the OBS Fullscreen Projector is being used", "useCustomWallWindow", b -> this.reload())));
 
         if (options.useCustomWallWindow) {
             panel.add(GUIUtil.createSpacer());
@@ -525,23 +530,21 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Reset All After Playing", "wallResetAllAfterPlaying", b -> this.reload())));
-
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Only Allow Focusing Loaded Instances", "wallLockInsteadOfPlay", b -> this.reload())));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Only Allow Focusing Loaded Instances", "If disabled, instances will be locked if you try to play them while they're still loading/previewing.", "wallLockInsteadOfPlay", b -> this.reload())));
 
         if (options.wallLockInsteadOfPlay) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Smart Switch", "wallSmartSwitch")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Smart Switch", "If you try to play a loading instance, Julti will instead look for another available instance to play.", "wallSmartSwitch")));
         }
 
 
         if (!options.wallResetAllAfterPlaying) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall (Skip to next Instance)", "wallBypass", b -> this.reload())));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall", "Instead of returning to the wall on reset, you will be moved to the next available locked instance.", "wallBypass", b -> this.reload())));
             if (options.wallBypass) {
                 panel.add(GUIUtil.createSpacer());
-                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "returnToWallIfNoneLoaded")));
+                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "If none of your locked instances are loaded, you will be returned to the wall on reset instead.", "returnToWallIfNoneLoaded")));
             }
         }
         panel.add(GUIUtil.createSpacer());
@@ -549,7 +552,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "autoCalcWallSize", b -> {
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Automatically Determine Wall Layout", "Disable to manually change rows & columns on the wall.", "autoCalcWallSize", b -> {
             this.reload();
             Julti.doLater(() -> ResetHelper.getManager().reload());
         })));
@@ -562,7 +565,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Dirt Covers", "doDirtCovers")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Dirt Covers", "OBS will cover loading instances with a clean dirt image.", "doDirtCovers")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("wallResetCooldown", "Reset Cooldown", this)));
         panel.add(GUIUtil.createSpacer());
@@ -582,7 +585,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Dynamic Wall Settings")));
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Replace Locked Instances", "dwReplaceLocked")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Replace Locked Instances", "If disabled, the wall will not be updated when an instance is locked.", "dwReplaceLocked")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("lockedInstanceSpace", "Locked Instance Space", this, "%")));
     }
@@ -707,10 +710,65 @@ public class OptionsGUI extends JFrame {
             this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for Clarity"), actionEvent -> {
+            // make resetting window size match wall source dimensions
+            Dimension wallSize = OBSStateManager.getOBSStateManager().getOBSSceneSize();
+            
+            int totalRows = 2;
+            int totalColumns = 2;
+            if (!options.autoCalcWallSize) {
+                totalRows = Math.max(1, options.overrideRowsAmount);
+                totalColumns = Math.max(1, options.overrideColumnsAmount);
+            }
+
+            if (options.resetStyle.equals("Dynamic Wall")) {
+                wallSize.height -= (int) ((options.lockedInstanceSpace / 100) * wallSize.height);
+            }
+
+            // Using floats here so there won't be any gaps in the wall after converting back to int
+            float iWidth = wallSize.width / (float) totalColumns;
+            float iHeight = wallSize.height / (float) totalRows;
+
+            if (!options.useBorderless) {
+                iWidth += 16;
+                iHeight += 39;
+            }
+
+            int[] iSize = {(int)iWidth - 2 * options.instanceSpacing, (int)iHeight - 2 * options.instanceSpacing};
+            Julti.waitForExecute(() -> {
+                options.resettingWindowSize = iSize;
+            });
+            windowOptions.reload();
+            this.revalidate();
+        })));
+        panel.add(GUIUtil.createSpacer());
+        
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for FOV"), actionEvent -> {
+            MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
+            MonitorUtil.Monitor playingMonitor = null;
+            for (MonitorUtil.Monitor monitor : monitors) {
+                if (monitors[0].bounds.contains(new Point(options.windowPos[0], options.windowPos[1]))) {
+                    playingMonitor = monitor;
+                    break;
+                }
+            }
+            if (playingMonitor == null) {
+                return;
+            }
+
+            int[] iSize = { playingMonitor.size[0], (int)(playingMonitor.size[1] / 2.5) };
+            Julti.waitForExecute(() -> {
+                options.resettingWindowSize = iSize;
+            });
+            windowOptions.reload();
+            this.revalidate();
+        })));
+        panel.add(GUIUtil.createSpacer());
+        
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "prepareWindowOnLock")));
-        panel.add(GUIUtil.leftJustify(new JLabel("(When locking, set the size of the instance to the \"Playing\" size, making switching quicker)")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "When locking, set the size of the instance to the \"Playing\" size, making switching quicker.", "prepareWindowOnLock")));
     }
 
     public boolean isClosed() {

@@ -158,10 +158,6 @@ public class OBSStateManager {
                 height -= 39;
             }
             int playingGuiScale = this.getActualGuiScale(instance, width, height);
-
-            if (playingGuiScale != resettingGuiScale) {
-                Julti.log(Level.WARN, "VERIFICATION WARNING: You have prepare window on lock enabled, and your guiScale options means that the loading square size will change! In standard settings, you should change your guiScale to " + Math.min(resettingGuiScale, playingGuiScale) + ", and guiScaleOnWorldJoin to " + playingGuiScale + ".");
-            }
         }
     }
 
