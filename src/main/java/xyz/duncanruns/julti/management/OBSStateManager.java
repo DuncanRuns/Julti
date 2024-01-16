@@ -146,19 +146,6 @@ public class OBSStateManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
-        if (JultiOptions.getJultiOptions().prepareWindowOnLock) {
-            // Check for alternate square size
-            width = options.playingWindowSize[0];
-            height = options.playingWindowSize[1];
-
-            if (!options.useBorderless) {
-                width -= 16;
-                height -= 39;
-            }
-            int playingGuiScale = this.getActualGuiScale(instance, width, height);
-        }
     }
 
     /**
