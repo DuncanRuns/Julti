@@ -60,7 +60,7 @@ public final class PluginManager {
             className = className.replace('/', '.');
             try {
                 cl.loadClass(className);
-            } catch (Exception nce) {
+            } catch (Error nce) {
                 // A fabric fail class is a class meant to crash loading with fabric. Useful to make sure players don't try to use Julti plugins as a fabric mod.
                 // Julti fails to load them since they refer to a class that doesn't exist, so we ignore it.
                 boolean isFabricFailClass = nce.getMessage().contains("net/fabricmc/api/ModInitializer");
