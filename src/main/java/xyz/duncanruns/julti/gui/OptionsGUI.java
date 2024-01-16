@@ -539,14 +539,13 @@ public class OptionsGUI extends JFrame {
         }
 
 
-        if (!options.wallResetAllAfterPlaying) {
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall", "Instead of returning to the wall on reset, you will be moved to the next available locked instance.", "wallBypass", b -> this.reload())));
+        if (options.wallBypass) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Bypass Wall", "Instead of returning to the wall on reset, you will be moved to the next available locked instance.", "wallBypass", b -> this.reload())));
-            if (options.wallBypass) {
-                panel.add(GUIUtil.createSpacer());
-                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "If none of your locked instances are loaded, you will be returned to the wall on reset instead.", "returnToWallIfNoneLoaded")));
-            }
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Return to Wall if None Loaded", "If none of your locked instances are loaded, you will be returned to the wall on reset instead.", "returnToWallIfNoneLoaded")));
         }
+
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -714,7 +713,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for Clarity"), actionEvent -> {
             // make resetting window size match wall source dimensions
             Dimension wallSize = OBSStateManager.getOBSStateManager().getOBSSceneSize();
-            
+
             int totalRows = 2;
             int totalColumns = 2;
             if (!options.autoCalcWallSize) {
@@ -735,7 +734,7 @@ public class OptionsGUI extends JFrame {
                 iHeight += 39;
             }
 
-            int[] iSize = {(int)iWidth - 2 * options.instanceSpacing, (int)iHeight - 2 * options.instanceSpacing};
+            int[] iSize = {(int) iWidth - 2 * options.instanceSpacing, (int) iHeight - 2 * options.instanceSpacing};
             Julti.waitForExecute(() -> {
                 options.resettingWindowSize = iSize;
             });
@@ -743,7 +742,7 @@ public class OptionsGUI extends JFrame {
             this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
-        
+
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Optimize Resetting for FOV"), actionEvent -> {
             MonitorUtil.Monitor[] monitors = MonitorUtil.getAllMonitors();
             MonitorUtil.Monitor playingMonitor = null;
@@ -757,7 +756,7 @@ public class OptionsGUI extends JFrame {
                 return;
             }
 
-            int[] iSize = { playingMonitor.size[0], (int)(playingMonitor.size[1] / 2.5) };
+            int[] iSize = {playingMonitor.size[0], (int) (playingMonitor.size[1] / 2.5)};
             Julti.waitForExecute(() -> {
                 options.resettingWindowSize = iSize;
             });
@@ -765,7 +764,7 @@ public class OptionsGUI extends JFrame {
             this.revalidate();
         })));
         panel.add(GUIUtil.createSpacer());
-        
+
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "When locking, set the size of the instance to the \"Playing\" size, making switching quicker.", "prepareWindowOnLock")));

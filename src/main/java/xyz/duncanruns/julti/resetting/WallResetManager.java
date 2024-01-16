@@ -295,11 +295,6 @@ public class WallResetManager extends ResetManager {
         // Unlock instance
         this.unlockInstance(selectedInstance);
 
-        // Reset all after playing mode
-        if (options.wallResetAllAfterPlaying) {
-            return this.leaveInstanceRAAPMode(instances, resetFirst);
-        }
-
         // Get next instance
         MinecraftInstance nextInstance = this.getNextPlayableLockedInstance(options.returnToWallIfNoneLoaded);
 
@@ -314,31 +309,6 @@ public class WallResetManager extends ResetManager {
 
         // We can confidently return that an instance was reset, but not necessarily that an instance was activated.
         return nextInstanceFound ? Arrays.asList(ActionResult.INSTANCE_RESET, ActionResult.INSTANCE_ACTIVATED) : Collections.singletonList(ActionResult.INSTANCE_RESET);
-    }
-
-    private List<ActionResult> leaveInstanceRAAPMode(List<MinecraftInstance> instances, boolean resetFirst) {
-        List<ActionResult> actionResults = new ArrayList<>();
-        if (resetFirst) {
-            DoAllFastUtil.doAllFast(instances, instance -> {
-                instance.reset();
-                synchronized (actionResults) {
-                    actionResults.add(ActionResult.INSTANCE_RESET);
-                }
-            });
-            sleep(100);
-        }
-        Julti.getJulti().focusWall();
-        if (!resetFirst) {
-            DoAllFastUtil.doAllFast(instances, instance -> {
-                instance.reset();
-                synchronized (actionResults) {
-                    actionResults.add(ActionResult.INSTANCE_RESET);
-                }
-            });
-        }
-        // Clear out locked instances since all instances reset.
-        this.lockedInstances.clear();
-        return actionResults;
     }
 
     @Nullable
