@@ -58,7 +58,17 @@ public final class PluginManager {
             // -6 because of .class
             String className = je.getName().substring(0, je.getName().length() - 6);
             className = className.replace('/', '.');
-            cl.loadClass(className);
+            try {
+                cl.loadClass(className);
+            } catch (Error nce) {
+                // A fabric fail class is a class meant to crash loading with fabric. Useful to make sure players don't try to use Julti plugins as a fabric mod.
+                // Julti fails to load them since they refer to a class that doesn't exist, so we ignore it.
+                boolean isFabricFailClass = nce.getMessage().contains("net/fabricmc/api/ModInitializer");
+                if (!isFabricFailClass) {
+                    // If it is not a fabric fail class, we do want to warn for this
+                    Julti.log(Level.WARN, "Failed to load class '" + className + "'! Julti may crash if this is needed by a plugin...");
+                }
+            }
         }
 
         PluginInitializer pi = (PluginInitializer) cl.loadClass(initializer).newInstance();

@@ -582,12 +582,18 @@ public class MinecraftInstance {
         }
 
         boolean currentlyBorderless = WindowStateUtil.isHwndBorderless(this.hwnd);
+        boolean currentlyResizeableBorderless = WindowStateUtil.isHwndResizeableBorderless(this.hwnd);
         boolean currentlyMaximized = WindowStateUtil.isHwndMaximized(this.hwnd);
         Rectangle currentBounds = WindowStateUtil.getHwndRectangle(this.hwnd);
 
-        if (useBorderless && !currentlyBorderless) {
-            WindowStateUtil.setHwndBorderless(this.hwnd);
-        } else if (currentlyBorderless && !useBorderless) {
+        if (useBorderless) {
+            if (options.resizeableBorderless && !currentlyResizeableBorderless) {
+                WindowStateUtil.setHwndResizeableBorderless(this.hwnd);
+            }
+            else if (!options.resizeableBorderless && !currentlyBorderless) {
+                WindowStateUtil.setHwndBorderless(this.hwnd);
+            }
+        } else if (currentlyBorderless || currentlyResizeableBorderless) {
             WindowStateUtil.undoHwndBorderless(this.hwnd);
         }
 
@@ -636,7 +642,7 @@ public class MinecraftInstance {
         String a = UnaryOperator.<String>identity().apply("Mario");
         JultiOptions options = JultiOptions.getJultiOptions();
         Rectangle bounds = new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]);
-        boolean maximize = (options.maximizeWhenPlaying && !options.useBorderless) && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen);
+        boolean maximize = ((options.maximizeWhenPlaying && !options.useBorderless) || options.resizeableBorderless) && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen);
         this.ensureWindowState(
                 options.useBorderless,
                 maximize,

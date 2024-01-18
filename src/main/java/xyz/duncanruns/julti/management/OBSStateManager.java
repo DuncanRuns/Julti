@@ -146,23 +146,6 @@ public class OBSStateManager {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
-        if (JultiOptions.getJultiOptions().prepareWindowOnLock) {
-            // Check for alternate square size
-            width = options.playingWindowSize[0];
-            height = options.playingWindowSize[1];
-
-            if (!options.useBorderless) {
-                width -= 16;
-                height -= 39;
-            }
-            int playingGuiScale = this.getActualGuiScale(instance, width, height);
-
-            if (playingGuiScale != resettingGuiScale) {
-                Julti.log(Level.WARN, "VERIFICATION WARNING: You have prepare window on lock enabled, and your guiScale options means that the loading square size will change! In standard settings, you should change your guiScale to " + Math.min(resettingGuiScale, playingGuiScale) + ", and guiScaleOnWorldJoin to " + playingGuiScale + ".");
-            }
-        }
     }
 
     /**

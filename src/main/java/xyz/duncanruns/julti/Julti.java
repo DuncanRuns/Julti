@@ -172,6 +172,7 @@ public final class Julti {
         ResourceUtil.makeResources();
         OBSStateManager.getOBSStateManager().tryOutputLSInfo();
         checkDeleteOldJar();
+        PluginEvents.RunnableEventType.LAUNCH.runAll();
 
         this.reload();
         long cycles = 0;
@@ -310,10 +311,10 @@ public final class Julti {
 
     public void activateInstance(MinecraftInstance instance, boolean doingSetup) {
         JultiOptions options = JultiOptions.getJultiOptions();
-        instance.activate(doingSetup);
         if ((options.alwaysOnTopProjector || options.minimizeProjectorWhenPlaying) && ActiveWindowManager.isWallActive()) {
             User32.INSTANCE.ShowWindow(ActiveWindowManager.getActiveHwnd(), User32.SW_MINIMIZE);
         }
+        instance.activate(doingSetup);
         OBSStateManager.getOBSStateManager().setLocation(InstanceManager.getInstanceManager().getInstanceNum(instance));
     }
 
