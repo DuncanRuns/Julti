@@ -147,6 +147,9 @@ public final class JultiOptions {
     public boolean allowResetDuringGenerating = false;
     // public boolean forceActivate = false;
 
+    // Launching
+    public List<Path> launchingProgramPaths = new ArrayList<Path>();
+
 
     // Hidden
     public List<String> instancePaths = new ArrayList<>();
