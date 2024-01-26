@@ -21,7 +21,7 @@ public class JultiGUI extends JFrame {
     private boolean updating = false;
 
     private Image logo;
-    private TrayIcon trayIcon;
+    private JultiIcon trayIcon;
 
     public JultiGUI() {
         this.closed = false;
@@ -41,6 +41,8 @@ public class JultiGUI extends JFrame {
     public ControlPanel getControlPanel() {
         return this.controlPanel;
     }
+
+    public JultiIcon getJultiIcon() { return this.trayIcon; }
 
     public void setVisible() {
         this.setVisible(true);
@@ -119,44 +121,8 @@ public class JultiGUI extends JFrame {
 
         logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
         this.setIconImage(logo);
-
-        this.setTrayIcon();
-    }
-
-    private void setTrayIcon() {
-        // https://stackoverflow.com/questions/7461477/how-to-hide-a-jframe-in-system-tray-of-taskbar?noredirect=1&lq=1
-        trayIcon = new TrayIcon(logo);
-        trayIcon.setImageAutoSize(true);
-
-        trayIcon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() != 1) return;
-                JultiGUI.this.setVisible(true);
-                JultiGUI.this.setExtendedState(JFrame.NORMAL);
-            }
-        });
-        try {
-            SystemTray.getSystemTray().add(trayIcon);
-        } catch (AWTException ignored) {}
-
-        this.setTrayIconListener(JultiOptions.getJultiOptions().minimizeToTray);
-    }
-
-    public void setTrayIconListener(boolean add) {
-        for (WindowStateListener listener : this.getWindowStateListeners()) {
-            this.removeWindowStateListener(listener);
-        }
-        if (!add) return;
-
-        this.addWindowStateListener(e -> {
-            if (e.getNewState() == ICONIFIED) {
-                this.setVisible(false);
-            }
-            if (e.getNewState() == MAXIMIZED_BOTH || e.getNewState() == NORMAL) {
-                this.setVisible(true);
-            }
-        });
+        this.trayIcon = new JultiIcon(logo);
+        this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
     }
 
     private boolean isOptionsActive() {

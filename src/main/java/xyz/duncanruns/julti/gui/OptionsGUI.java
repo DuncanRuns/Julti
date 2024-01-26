@@ -269,7 +269,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Julti To System Tray", "Minimizing Julti will move it to an icon in the system tray (bottom right).", "minimizeToTray", JultiGUI.getJultiGUI()::setTrayIconListener)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Julti To System Tray", "Minimizing Julti will move it to an icon in the system tray (bottom right).", "minimizeToTray", JultiGUI.getJultiGUI().getJultiIcon()::setTrayIconListener)));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Experimental Options", "enableExperimentalOptions", b -> {
