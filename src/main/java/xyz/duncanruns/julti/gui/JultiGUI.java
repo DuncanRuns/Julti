@@ -136,6 +136,7 @@ public class JultiGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
+        SystemTray.getSystemTray().remove(this.trayIcon);
         Julti.getJulti().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
         Julti.getJulti().queueMessageAndWait(new ShutdownQMessage());
         if (!this.updating) {
