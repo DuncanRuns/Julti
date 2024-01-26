@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.management.InstanceManager;
@@ -10,8 +11,7 @@ import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class JultiGUI extends JFrame {
     private static final JultiGUI INSTANCE = new JultiGUI();
@@ -20,6 +20,8 @@ public class JultiGUI extends JFrame {
     private ControlPanel controlPanel;
     private boolean updating = false;
 
+    private Image logo;
+    private TrayIcon trayIcon;
 
     public JultiGUI() {
         this.closed = false;
@@ -112,6 +114,47 @@ public class JultiGUI extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 JultiGUI.this.onClose();
+            }
+        });
+
+        logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
+        this.setIconImage(logo);
+
+        this.setTrayIcon();
+    }
+
+    private void setTrayIcon() {
+        // https://stackoverflow.com/questions/7461477/how-to-hide-a-jframe-in-system-tray-of-taskbar?noredirect=1&lq=1
+        trayIcon = new TrayIcon(logo);
+        trayIcon.setImageAutoSize(true);
+
+        trayIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 1) return;
+                JultiGUI.this.setVisible(true);
+                JultiGUI.this.setExtendedState(JFrame.NORMAL);
+            }
+        });
+        try {
+            SystemTray.getSystemTray().add(trayIcon);
+        } catch (AWTException ignored) {}
+
+        this.setTrayIconListener(JultiOptions.getJultiOptions().minimizeToTray);
+    }
+
+    public void setTrayIconListener(boolean add) {
+        for (WindowStateListener listener : this.getWindowStateListeners()) {
+            this.removeWindowStateListener(listener);
+        }
+        if (!add) return;
+
+        this.addWindowStateListener(e -> {
+            if (e.getNewState() == ICONIFIED) {
+                this.setVisible(false);
+            }
+            if (e.getNewState() == MAXIMIZED_BOTH || e.getNewState() == NORMAL) {
+                this.setVisible(true);
             }
         });
     }
