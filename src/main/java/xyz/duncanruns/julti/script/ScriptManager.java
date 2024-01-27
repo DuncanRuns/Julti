@@ -88,7 +88,7 @@ public class ScriptManager {
         }
 
         if (!getScriptNames().contains(scriptName)) {
-            log(Level.ERROR, "Could not run script " + scriptName + " because it does not exists.");
+            log(Level.ERROR, "Could not run script " + scriptName + " because it does not exist.");
             return false;
         }
 

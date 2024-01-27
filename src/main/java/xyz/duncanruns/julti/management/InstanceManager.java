@@ -181,7 +181,7 @@ public final class InstanceManager {
     }
 
     public void redetectInstances() {
-        Julti.log(Level.DEBUG, "Redect running...");
+        Julti.log(Level.DEBUG, "Redetect running...");
         this.instances.clear();
         Julti.log(Level.DEBUG, "Cleared instances");
         this.instances.addAll(InstanceChecker.getInstanceChecker().getAllOpenedInstances());
