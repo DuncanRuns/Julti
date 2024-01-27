@@ -120,7 +120,7 @@ public class ControlPanel extends JPanel {
                     if (ans == 0) {
                         new Thread(() -> {
                             try {
-                                SyncUtil.sync(instances, instances.get(0), true, true);
+                                SyncUtil.sync(instances, instances.get(0), true, true, true);
                             } catch (IOException er) {
                                 log(Level.ERROR, "Failed to copy files:\n" + er);
                             }

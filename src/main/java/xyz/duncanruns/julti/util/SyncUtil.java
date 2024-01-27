@@ -18,7 +18,7 @@ public final class SyncUtil {
     private SyncUtil() {
     }
 
-    public static void sync(List<MinecraftInstance> instances, MinecraftInstance sourceInstance, boolean copyMods, boolean copyConfigs) throws IOException {
+    public static void sync(List<MinecraftInstance> instances, MinecraftInstance sourceInstance, boolean copyMods, boolean copyConfigs, boolean copyResourcePacks) throws IOException {
         synchronized (LOCK) {
             if (!copyConfigs && !copyMods) {
                 return;
@@ -96,6 +96,17 @@ public final class SyncUtil {
                 }
             } else if (copyConfigs) {
                 log(Level.WARN, "Source instance has no SpeedrunIGT config folder!");
+            }
+
+            Path sourceResourcePacksPath = sourcePath.resolve("resourcepacks");
+            if (copyResourcePacks && Files.isDirectory(sourceResourcePacksPath)) {
+                for (Path destinationPath : destinationPaths) {
+                    Path destinationResourcePacksPath = destinationPath.resolve("resourcepacks");
+                    log(Level.INFO, "Syncing resource packs folder: " + sourcePath + " -> " + destinationPath);
+                    FileUtils.copyDirectory(sourceResourcePacksPath.toFile(), destinationResourcePacksPath.toFile());
+                }
+            } else if (copyResourcePacks) {
+                log(Level.WARN, "Source instance has no resource packs folder!");
             }
 
             log(Level.INFO, "Sync finished!");

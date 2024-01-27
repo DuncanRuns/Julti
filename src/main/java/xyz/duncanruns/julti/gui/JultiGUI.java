@@ -20,7 +20,6 @@ public class JultiGUI extends JFrame {
     private ControlPanel controlPanel;
     private boolean updating = false;
 
-    private Image logo;
     private JultiIcon trayIcon;
 
     public JultiGUI() {
@@ -119,7 +118,7 @@ public class JultiGUI extends JFrame {
             }
         });
 
-        logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
+        Image logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
         this.setIconImage(logo);
         this.trayIcon = new JultiIcon(logo);
         this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
