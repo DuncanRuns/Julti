@@ -240,7 +240,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         DefaultListModel<Path> model = new DefaultListModel<Path>();
-        options.launchingProgramPaths.forEach(path -> model.addElement(path));
+        options.launchingProgramPaths.forEach(path -> model.addElement(Paths.get(path)));
 
         JList<Path> programList = new JList<>(model);
         panel.add(GUIUtil.leftJustify(new JLabel("Programs")));
@@ -269,7 +269,7 @@ public class OptionsGUI extends JFrame {
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
-            JultiOptions.getJultiOptions().launchingProgramPaths.add(jfc.getSelectedFile().toPath());
+            JultiOptions.getJultiOptions().launchingProgramPaths.add(jfc.getSelectedFile().toPath().toString());
         }
     }
 

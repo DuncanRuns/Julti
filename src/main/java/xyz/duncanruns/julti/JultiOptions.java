@@ -148,7 +148,7 @@ public final class JultiOptions {
     // public boolean forceActivate = false;
 
     // Launching
-    public List<Path> launchingProgramPaths = new ArrayList<Path>();
+    public List<String> launchingProgramPaths = new ArrayList<>();
 
 
     // Hidden

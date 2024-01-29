@@ -1,13 +1,14 @@
 package xyz.duncanruns.julti.util;
 
-import static xyz.duncanruns.julti.Julti.log;
-
-import java.awt.Desktop;
-import java.io.IOException;
-
+import com.sun.jna.platform.win32.Shell32;
 import org.apache.logging.log4j.Level;
-
 import xyz.duncanruns.julti.JultiOptions;
+
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import static xyz.duncanruns.julti.Julti.log;
 
 public class LauncherUtil {
     private LauncherUtil() {
@@ -22,12 +23,7 @@ public class LauncherUtil {
         }
 
         options.launchingProgramPaths.forEach(path -> {
-            try {
-                // FIXME: This fails with programs like OBS because it opens them from directory julti is being ran, not their parent directory
-                Desktop.getDesktop().open(path.toFile());
-            } catch (IOException e) {
-                log(Level.ERROR, "Could not launch program \"" + path.toString() + "\": " + ExceptionUtil.toDetailedString(e));
-            }
+            Shell32.INSTANCE.ShellExecute(null, "open", path, null, Paths.get(path).getParent().toString(), 1);
         });
     }
 }
