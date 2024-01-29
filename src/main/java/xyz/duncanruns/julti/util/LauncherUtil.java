@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.JultiOptions;
 
 import java.awt.*;
-import java.io.IOException;
 import java.nio.file.Paths;
 
 import static xyz.duncanruns.julti.Julti.log;
