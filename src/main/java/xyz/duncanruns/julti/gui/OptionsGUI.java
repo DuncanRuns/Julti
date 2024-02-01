@@ -251,7 +251,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Add"), ActionEvent -> {
-            browseForLauncherProgram();
+            this.browseForLauncherProgram();
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());

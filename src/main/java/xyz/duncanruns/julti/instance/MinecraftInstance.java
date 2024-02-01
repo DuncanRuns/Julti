@@ -590,8 +590,7 @@ public class MinecraftInstance {
             if (options.resizeableBorderless && (!currentlyResizeableBorderless || currentlyBorderless)) {
                 WindowStateUtil.undoHwndBorderless(this.hwnd);
                 WindowStateUtil.setHwndResizeableBorderless(this.hwnd);
-            }
-            else if (!options.resizeableBorderless && !currentlyBorderless) {
+            } else if (!options.resizeableBorderless && !currentlyBorderless) {
                 WindowStateUtil.setHwndBorderless(this.hwnd);
             }
         } else if (currentlyBorderless || currentlyResizeableBorderless) {

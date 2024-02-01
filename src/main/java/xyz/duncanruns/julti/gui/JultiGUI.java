@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.gui;
 
-import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.management.InstanceManager;
@@ -11,7 +10,8 @@ import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class JultiGUI extends JFrame {
     private static final JultiGUI INSTANCE = new JultiGUI();
@@ -41,7 +41,9 @@ public class JultiGUI extends JFrame {
         return this.controlPanel;
     }
 
-    public JultiIcon getJultiIcon() { return this.trayIcon; }
+    public JultiIcon getJultiIcon() {
+        return this.trayIcon;
+    }
 
     public void setVisible() {
         this.setVisible(true);

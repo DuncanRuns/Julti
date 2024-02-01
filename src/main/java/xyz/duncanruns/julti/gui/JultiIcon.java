@@ -1,14 +1,9 @@
 package xyz.duncanruns.julti.gui;
 
-import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.JultiOptions;
-import xyz.duncanruns.julti.messages.ShutdownQMessage;
-import xyz.duncanruns.julti.util.MouseUtil;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowStateListener;
 
 import static java.awt.Frame.*;
 
@@ -31,7 +26,8 @@ public class JultiIcon extends TrayIcon {
         });
         try {
             SystemTray.getSystemTray().add(this);
-        } catch (AWTException ignored) {}
+        } catch (AWTException ignored) {
+        }
 
     }
 
@@ -39,7 +35,9 @@ public class JultiIcon extends TrayIcon {
         for (WindowStateListener listener : gui.getWindowStateListeners()) {
             gui.removeWindowStateListener(listener);
         }
-        if (!add) return;
+        if (!add) {
+            return;
+        }
 
         gui.addWindowStateListener(e -> {
             if (e.getNewState() == ICONIFIED) {
