@@ -40,7 +40,8 @@ public final class WindowStateUtil {
 
     public static boolean isHwndResizeableBorderless(HWND hwnd) {
         int style = getHwndStyle(hwnd);
-        return RESIZEABLE_BORDERLESS_STYLE == style;
+        int styleWithBorderless = style & RESIZEABLE_BORDERLESS_STYLE;
+        return styleWithBorderless == style;
     }
 
     /**

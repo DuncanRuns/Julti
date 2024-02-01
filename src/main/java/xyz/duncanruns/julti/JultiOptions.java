@@ -107,6 +107,7 @@ public final class JultiOptions {
     public String launchOfflineName = "Instance*";
     public long launchDelay = 500;
     public int resetCounter = 0;
+    public boolean minimizeToTray = false;
 
 
     // Affinity

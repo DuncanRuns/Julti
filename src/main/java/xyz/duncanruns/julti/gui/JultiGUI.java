@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.management.InstanceManager;
@@ -10,8 +11,7 @@ import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class JultiGUI extends JFrame {
     private static final JultiGUI INSTANCE = new JultiGUI();
@@ -20,6 +20,7 @@ public class JultiGUI extends JFrame {
     private ControlPanel controlPanel;
     private boolean updating = false;
 
+    private JultiIcon trayIcon;
 
     public JultiGUI() {
         this.closed = false;
@@ -39,6 +40,8 @@ public class JultiGUI extends JFrame {
     public ControlPanel getControlPanel() {
         return this.controlPanel;
     }
+
+    public JultiIcon getJultiIcon() { return this.trayIcon; }
 
     public void setVisible() {
         this.setVisible(true);
@@ -114,6 +117,11 @@ public class JultiGUI extends JFrame {
                 JultiGUI.this.onClose();
             }
         });
+
+        Image logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
+        this.setIconImage(logo);
+        this.trayIcon = new JultiIcon(logo);
+        this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
     }
 
     private boolean isOptionsActive() {
@@ -127,6 +135,7 @@ public class JultiGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
+        SystemTray.getSystemTray().remove(this.trayIcon);
         Julti.getJulti().queueMessage(new OptionChangeQMessage("lastGUIPos", new int[]{this.getLocation().x, this.getLocation().y}));
         Julti.getJulti().queueMessageAndWait(new ShutdownQMessage());
         if (!this.updating) {
