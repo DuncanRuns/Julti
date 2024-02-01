@@ -7,11 +7,13 @@ import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.messages.ShutdownQMessage;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
+import xyz.duncanruns.julti.util.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 public class JultiGUI extends JFrame {
     private static final JultiGUI INSTANCE = new JultiGUI();
@@ -120,7 +122,12 @@ public class JultiGUI extends JFrame {
             }
         });
 
-        Image logo = Toolkit.getDefaultToolkit().getImage(JultiOptions.getJultiDir().resolve("logo.png").toString());
+        Image logo;
+        try {
+            logo = ResourceUtil.getImageResource("/logo.png");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.setIconImage(logo);
         this.trayIcon = new JultiIcon(logo);
         this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
