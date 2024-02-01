@@ -40,9 +40,10 @@ public class OptionsGUI extends JFrame {
 
     private void setupWindow() {
         Point location = JultiGUI.getJultiGUI().getLocation();
-        this.setLocation(location.x -75, location.y + 75);
+        this.setLocation(location.x, location.y + 30);
         this.setLayout(null);
         this.setTitle("Julti Options");
+        this.setIconImage(JultiGUI.getLogo());
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -240,7 +241,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        DefaultListModel<Path> model = new DefaultListModel<Path>();
+        DefaultListModel<Path> model = new DefaultListModel<>();
         options.launchingProgramPaths.forEach(path -> model.addElement(Paths.get(path)));
 
         JList<Path> programList = new JList<>(model);

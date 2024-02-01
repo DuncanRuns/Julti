@@ -6,6 +6,7 @@ import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,7 +16,8 @@ public class ScriptsGUI extends JFrame {
     private JPanel panel;
 
     public ScriptsGUI() {
-        this.setLocation(JultiGUI.getJultiGUI().getLocation());
+        Point location = JultiGUI.getJultiGUI().getLocation();
+        this.setLocation(location.x, location.y + 30);
         this.setupWindow();
         this.reload();
     }
@@ -23,6 +25,7 @@ public class ScriptsGUI extends JFrame {
     private void setupWindow() {
         this.setLayout(null);
         this.setTitle("Julti Scripts");
+        this.setIconImage(JultiGUI.getLogo());
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {

@@ -31,6 +31,14 @@ public class JultiGUI extends JFrame {
         this.setupWindow();
     }
 
+    public static Image getLogo() {
+        try {
+            return ResourceUtil.getImageResource("/logo.png");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static JultiGUI getJultiGUI() {
         return INSTANCE;
     }
@@ -121,15 +129,8 @@ public class JultiGUI extends JFrame {
                 JultiGUI.this.onClose();
             }
         });
-
-        Image logo;
-        try {
-            logo = ResourceUtil.getImageResource("/logo.png");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        this.setIconImage(logo);
-        this.trayIcon = new JultiIcon(logo);
+        this.setIconImage(JultiGUI.getLogo());
+        this.trayIcon = new JultiIcon(JultiGUI.getLogo());
         this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
     }
 
