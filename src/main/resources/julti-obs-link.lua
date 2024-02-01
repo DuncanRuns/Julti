@@ -36,6 +36,7 @@ obs = obslua
 
 julti_dir = os.getenv("UserProfile"):gsub("\\", "/") .. "/.Julti/"
 timers_activated = false
+scenes_regenerated = true
 last_state_text = ""
 last_scene_name = ""
 
@@ -108,6 +109,11 @@ function set_instance_data(num, lock_visible, dirt_cover, freeze_active, x, y, w
     center_align = center_align or false
 
     local group = get_group_as_scene("Instance " .. num)
+    
+    if group == nil and scenes_regenerated then
+        scenes_regenerated = false
+        obs.script_log(200, "Detected newly added instances! Please go to Tools > Scripts > Generate Scenes to add them to OBS.")
+    end
 
     if invisible_dirt_covers and dirt_cover then
         teleport_off_canvas(num)
@@ -573,6 +579,8 @@ function generate_scenes()
         obs.script_log(200, "If you want to recreate these scenes,")
         obs.script_log(200, "delete them first before pressing Generate Scenes.")
     end
+    
+    scenes_regenerated = true
 end
 
 function _fix_bad_names(instance_count)
@@ -973,11 +981,7 @@ function script_properties()
 end
 
 function script_load(settings)
-    local video_info = get_video_info()
-    total_width = video_info.base_width
-    total_height = video_info.base_height
-
-    pcall(write_file, julti_dir .. "obsscenesize", total_width .. "," .. total_height)
+    update_scene_size(true)
 
     switch_to_scene("Julti")
 end
@@ -985,14 +989,28 @@ end
 function script_update(settings)
     win_cap_instead = obs.obs_data_get_bool(settings, "win_cap_instead")
     reuse_for_verification = obs.obs_data_get_bool(settings, "reuse_for_verification")
-    center_align_instances = obs.obs_data_get_bool(settings, "center_align_instances")
-    invisible_dirt_covers = obs.obs_data_get_bool(settings, "invisible_dirt_covers")
 
     if timers_activated then
         return
     end
     timers_activated = true
     obs.timer_add(loop, 20)
+    obs.timer_add(update_scene_size, 2000)
+end
+
+function update_scene_size(skipLog)
+    local video_info = get_video_info()
+
+    if total_width ~= video_info.base_width or total_height ~= video_info.base_height then
+        total_width = video_info.base_width
+        total_height = video_info.base_height
+
+        pcall(write_file, julti_dir .. "obsscenesize", total_width .. "," .. total_height)
+
+        if not skipLog then
+            obs.script_log(200, "Detected a change in OBS canvas resolution! If Julti is currently running, please restart it to fix scene sizes.")
+        end
+    end
 end
 
 function loop()
