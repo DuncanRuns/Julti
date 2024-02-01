@@ -147,6 +147,9 @@ public final class JultiOptions {
     public boolean resizeableBorderless = false;
     // public boolean forceActivate = false;
 
+    // Launching
+    public List<String> launchingProgramPaths = new ArrayList<>();
+
 
     // Hidden
     public List<String> instancePaths = new ArrayList<>();

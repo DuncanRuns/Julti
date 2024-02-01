@@ -65,6 +65,7 @@ public class OptionsGUI extends JFrame {
         this.addComponentsOBS();
         this.addComponentsSound();
         this.addComponentsAffinity();
+        this.addComponentsLaunching();
         this.addComponentsOther();
         if (JultiOptions.getJultiOptions().enableExperimentalOptions) {
             this.addComponentsExperimental();
@@ -225,6 +226,51 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Locked", "threadsLocked")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createThreadsSlider("Background", "threadsBackground")));
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("affinityBurst", "Affinity Burst", this, "ms")));
+    }
+
+    // TODO: Add right click menu 
+    private void addComponentsLaunching() {
+        JPanel panel = this.createNewOptionsPanel("Launching");
+
+        JultiOptions options = JultiOptions.getJultiOptions();
+
+        panel.add(GUIUtil.leftJustify(new JLabel("Program Launching")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        DefaultListModel<Path> model = new DefaultListModel<Path>();
+        options.launchingProgramPaths.forEach(path -> model.addElement(Paths.get(path)));
+
+        JList<Path> programList = new JList<>(model);
+        panel.add(GUIUtil.leftJustify(new JLabel("Programs")));
+
+        JScrollPane sp = new JScrollPane(programList);
+
+        panel.add(GUIUtil.leftJustify(sp));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Add"), ActionEvent -> {
+            browseForLauncherProgram();
+            this.reload();
+        })));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), ActionEvent -> {
+            List<Path> paths = programList.getSelectedValuesList();
+            paths.forEach(path -> options.launchingProgramPaths.remove(path));
+            this.reload();
+        })));
+    }
+
+    private void browseForLauncherProgram() {
+        JFileChooser jfc = new JFileChooser();
+        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        jfc.setDialogTitle("Julti: Choose Program");
+
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            JultiOptions.getJultiOptions().launchingProgramPaths.add(jfc.getSelectedFile().toPath().toString());
+        }
     }
 
     private void addComponentsOther() {
