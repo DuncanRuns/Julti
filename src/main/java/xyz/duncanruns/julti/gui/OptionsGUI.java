@@ -241,10 +241,10 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        DefaultListModel<Path> model = new DefaultListModel<>();
-        options.launchingProgramPaths.forEach(path -> model.addElement(Paths.get(path)));
+        DefaultListModel<String> model = new DefaultListModel<>();
+        options.launchingProgramPaths.forEach(model::addElement);
 
-        JList<Path> programList = new JList<>(model);
+        JList<String> programList = new JList<>(model);
         panel.add(GUIUtil.leftJustify(new JLabel("Programs")));
 
         JScrollPane sp = new JScrollPane(programList);
@@ -258,7 +258,7 @@ public class OptionsGUI extends JFrame {
         })));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), ActionEvent -> {
-            List<Path> paths = programList.getSelectedValuesList();
+            List<String> paths = programList.getSelectedValuesList();
             paths.forEach(path -> options.launchingProgramPaths.remove(path));
             this.reload();
         })));
