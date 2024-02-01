@@ -26,7 +26,6 @@ public class OptionsGUI extends JFrame {
     private JTabbedPane tabbedPane;
 
     public OptionsGUI() {
-        this.setLocation(JultiGUI.getJultiGUI().getLocation());
         this.setupWindow();
         this.reloadComponents();
     }
@@ -40,6 +39,8 @@ public class OptionsGUI extends JFrame {
     }
 
     private void setupWindow() {
+        Point location = JultiGUI.getJultiGUI().getLocation();
+        this.setLocation(location.x -75, location.y + 75);
         this.setLayout(null);
         this.setTitle("Julti Options");
         this.addWindowListener(new WindowAdapter() {
@@ -48,7 +49,7 @@ public class OptionsGUI extends JFrame {
                 OptionsGUI.this.onClose();
             }
         });
-        this.setSize(650, 400);
+        this.setSize(750, 400);
         this.setVisible(true);
     }
 
