@@ -34,7 +34,7 @@ public class WallResetManager extends ResetManager {
 
         List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
         // Return if no instances
-        if (instances.size() == 0) {
+        if (instances.isEmpty()) {
             return Collections.emptyList();
         }
 
