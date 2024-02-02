@@ -39,15 +39,14 @@ public class MultiResetManager extends ResetManager {
 
         boolean resetFirst = options.coopMode;
 
-        selectedInstance.ensureNotFullscreen();
-
-
         // if there is only a single instance, reset it and return.
         if (instanceCount == 1) {
             selectedInstance.reset();
             actionResults.add(ActionResult.INSTANCE_RESET);
             return actionResults;
         }
+
+        selectedInstance.ensureNotFullscreen();
 
         List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         instancePool.removeIf(instance -> instance.equals(selectedInstance));
