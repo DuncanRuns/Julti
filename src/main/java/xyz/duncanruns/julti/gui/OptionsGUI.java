@@ -12,11 +12,14 @@ import xyz.duncanruns.julti.util.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileView;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttributeView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -265,14 +268,16 @@ public class OptionsGUI extends JFrame {
     }
 
     private void browseForLauncherProgram() {
-        JFileChooser jfc = new JFileChooser();
-        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose Program");
-
-        int val = jfc.showOpenDialog(this);
-        if (val == JFileChooser.APPROVE_OPTION) {
-            JultiOptions.getJultiOptions().launchingProgramPaths.add(jfc.getSelectedFile().toPath().toString());
+        FileDialog dialog = new FileDialog((Frame)null, "Julti: Choose Program");
+        dialog.setMode(FileDialog.LOAD);
+        dialog.setMultipleMode(true);
+        dialog.setVisible(true);
+        if (dialog.getFiles() != null) {
+            for (File file : dialog.getFiles()) {
+                JultiOptions.getJultiOptions().launchingProgramPaths.add(file.getAbsolutePath());
+            }
         }
+        dialog.dispose();
     }
 
     private void addComponentsOther() {
