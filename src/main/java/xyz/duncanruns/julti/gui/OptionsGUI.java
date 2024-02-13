@@ -353,7 +353,9 @@ public class OptionsGUI extends JFrame {
         possibleLocations.add(userHome.resolve("AppData").resolve("Roaming"));
         possibleLocations.add(userHome.resolve("AppData").resolve("Local").resolve("Programs"));
         possibleLocations.add(userHome.resolve("Downloads"));
-        possibleLocations.add(Paths.get("C:\\"));
+        for (File drive : File.listRoots()) {
+            possibleLocations.add(Paths.get(drive.toString()));
+        }
 
         List<Path> candidates = new ArrayList<>();
         for (Path possibleLocation : possibleLocations) {
