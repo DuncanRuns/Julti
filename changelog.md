@@ -1,3 +1,13 @@
+Changes in v1.2.0:
+- Added a logo
+  - Kinda scuffed and temporary, but I don't imagine replacing it ever 
+- Updated PaceMan Tracker to v0.3.1
+- Add program launching (@pants721 #85)
+- Added tray icon and a minimize to tray icon option (@draconix6 #86)
+- Added "resizeable" borderless (weird version of borderless that you can manually resize) (@draconix6 #86)
+- Resource packs will now sync with "Sync Instances" button (@draconix6 #86)
+- Various tweaks and fixes
+
 Changes in v1.1.0:
 - Updated PaceMan Tracker to v0.3.0
   - Update SpeedRunIGT to v14.1! 
