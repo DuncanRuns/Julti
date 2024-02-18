@@ -55,6 +55,8 @@ public class MinecraftInstance {
     private long lastSetVisible = 0;
     private boolean openedToLan = false;
 
+    private long lastActivation = 0L;
+
     public MinecraftInstance(HWND hwnd, Path path, String versionString) {
         this.hwnd = hwnd;
         this.path = path;
@@ -285,6 +287,7 @@ public class MinecraftInstance {
         if (this.isWindowMarkedMissing()) {
             return;
         }
+        this.lastActivation = System.currentTimeMillis();
         this.scheduler.clear();
         this.activeSinceReset = true;
 
@@ -747,6 +750,10 @@ public class MinecraftInstance {
 
     public KeyPresser getKeyPresser() {
         return this.presser;
+    }
+
+    public long getLastActivation() {
+        return this.lastActivation;
     }
 
     public void logAndCopyInfo() {

@@ -30,7 +30,8 @@ public class CommandManager {
             new OpenFileCommand(),
             new SessionResetCommand(),
             new DoActionCommand(),
-            new ClearWorldsCommand()
+            new ClearWorldsCommand(),
+            new CancelIfCommand()
     )));
 
     static {
