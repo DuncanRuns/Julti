@@ -239,14 +239,14 @@ public final class Julti {
 
     private void processHotkeyMessages() {
         // Cancel all hotkeys if instances are missing
-        if (InstanceManager.getInstanceManager().areInstancesMissing()) {
-            this.hotkeyQueue.forEach(QMessage::markProcessed);
-            this.hotkeyQueue.clear();
-            return;
-        }
+        boolean instancesMissing = InstanceManager.getInstanceManager().areInstancesMissing();
 
         while (!this.hotkeyQueue.isEmpty()) {
             HotkeyPressQMessage message = this.hotkeyQueue.poll();
+            if (instancesMissing && !message.getHotkeyCode().startsWith("script:")) {
+                message.markProcessed();
+                continue;
+            }
             try {
                 this.runHotkeyAction(message.getHotkeyCode(), message.getMousePosition());
             } catch (Exception e) {
