@@ -12,6 +12,7 @@ public class GameOptions {
     public Integer chatKey = null;
     public Boolean pauseOnLostFocus = null;
     public Boolean f1SS = null;
+    public Boolean f3PauseOnWorldLoad = null;
 
     public List<FabricJarInfo> jars;
 
