@@ -12,7 +12,6 @@ import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.util.*;
-import xyz.duncanruns.julti.util.FabricJarUtil.FabricJarInfo;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -160,17 +159,14 @@ public class MinecraftInstance {
             throw new RuntimeException(e);
         }
 
-        FabricJarInfo wpInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview");
-        FabricJarInfo soInfo = FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output");
+        String wpVer = VersionUtil.extractVersion(FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview").version);
+        String soVer = VersionUtil.extractVersion(FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output").version);
 
-        boolean hasStateOutput = true;
-        if (wpInfo == null && soInfo == null) {
-            hasStateOutput = false;
-        } else if (soInfo == null) {
-            Matcher matcher = Pattern.compile("\\d+").matcher(wpInfo.version);
-            if (!matcher.find() || Integer.parseInt(matcher.group()) < 3) {
-                hasStateOutput = false;
-            }
+        boolean hasStateOutput = false;
+        if (VersionUtil.tryCompare(soVer, "0", 0) > 0) {
+            hasStateOutput = true;
+        } else if (VersionUtil.tryCompare(wpVer, "3.0.0", -1) >= 0 && VersionUtil.tryCompare(wpVer, "5.0.0", 0) < 0) {
+            hasStateOutput = true;
         }
 
         if (!hasStateOutput) {
