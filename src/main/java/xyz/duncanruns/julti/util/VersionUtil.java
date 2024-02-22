@@ -1,6 +1,11 @@
 package xyz.duncanruns.julti.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class VersionUtil {
+    private static final Pattern GENERAL_VERSION_PATTERN = Pattern.compile("\\d+(\\.\\d+)*");
+
     private VersionUtil() {
     }
 
@@ -14,6 +19,21 @@ public final class VersionUtil {
 
     public static int compare(String versionA, String versionB) {
         return Version.of(versionA).compareTo(Version.of(versionB));
+    }
+
+    /**
+     * Returns the first version-like substring of the input string. Version-like can be any number on its own, or with any amount of dot-separated numbers.
+     * Returns the string "0" if the input string is null or has no version-like substring.
+     */
+    public static String extractVersion(String string) {
+        if (string == null) {
+            return "0";
+        }
+        Matcher matcher = GENERAL_VERSION_PATTERN.matcher(string);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return "0";
     }
 
     /*
