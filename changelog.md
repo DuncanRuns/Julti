@@ -1,3 +1,11 @@
+Changes in v1.3.0:
+- Support for new StandardSettings option `f3PauseOnWorldLoad`
+- Fix/tweaks to various warning messages
+- Tweaks to the program launcher options (@pants721 #88)
+- Added a `cancelif` command which can cancel scripts during execution, allowing for things like a reset hotkey that only works in the first 20 seconds
+- Updated Standard Manager to be a little less annoying
+- Script hotkeys can now be used even if some/all instances are closed
+
 Changes in v1.2.0:
 - Added a logo
   - Kinda scuffed and temporary, but I don't imagine replacing it ever 
