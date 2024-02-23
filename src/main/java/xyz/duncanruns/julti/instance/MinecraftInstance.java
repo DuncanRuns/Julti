@@ -423,7 +423,7 @@ public class MinecraftInstance {
 
     private void onPreviewLoad() {
         this.scheduler.clear();
-        if (JultiOptions.getJultiOptions().useF3 && !this.gameOptions.f3PauseOnWorldLoad) {
+        if (JultiOptions.getJultiOptions().useF3 && (ActiveWindowManager.isWindowActive(this.hwnd) || !this.gameOptions.f3PauseOnWorldLoad)) {
             this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
