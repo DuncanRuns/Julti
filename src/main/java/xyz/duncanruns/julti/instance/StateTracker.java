@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class StateTracker {
+    private static final Pattern PROGRESS_PATTERN = Pattern.compile("^(?:previewing|generating),(?:0|[1-9]\\d?|100)$");
+
     private final Path path;
     private final Runnable onStateChange;
     private final Runnable onPercentageUpdate;
@@ -116,7 +119,12 @@ public class StateTracker {
                 this.inWorldState = InWorldState.GAMESCREENOPEN;
                 return true;
         }
+
         // Literal failed, should be generating/previewing
+        if (!PROGRESS_PATTERN.matcher(out).matches()) {
+            Julti.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
+            return false;
+        }
 
         String[] args = out.split(",");
 
@@ -128,15 +136,22 @@ public class StateTracker {
         } else if (args[0].equals("generating")) {
             this.setState(InstanceState.GENERATING);
         } else {
-            Julti.log(Level.ERROR, "Invalid state in " + this.path + ": \"" + out + "\"");
+            // This should never happen
+            Julti.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
             return false;
         }
 
         if (args.length > 1) {
             // Get loading percent
-            this.loadingPercent = Byte.parseByte(args[1]);
+            try {
+                this.loadingPercent = Byte.parseByte(args[1]);
+            } catch (NumberFormatException e) {
+                // This should never happen
+                Julti.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
+            }
         } else {
-            Julti.log(Level.ERROR, "Invalid state in " + this.path + ": \"" + out + "\"");
+            // This should never happen
+            Julti.log(Level.DEBUG, "Invalid state in " + this.path + ": \"" + out + "\"");
             return false;
         }
         return true;
