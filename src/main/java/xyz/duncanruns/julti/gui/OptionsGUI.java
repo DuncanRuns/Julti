@@ -263,8 +263,8 @@ public class OptionsGUI extends JFrame {
                     add.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            browseForLauncherProgram();
-                            reload();
+                            OptionsGUI.this.browseForLauncherProgram();
+                            OptionsGUI.this.reload();
                         }
                     });
 
@@ -274,7 +274,7 @@ public class OptionsGUI extends JFrame {
                         public void actionPerformed(ActionEvent e) {
                             List<String> paths = programList.getSelectedValuesList();
                             paths.forEach(path -> options.launchingProgramPaths.remove(path));
-                            reload();
+                            OptionsGUI.this.reload();
                         }
                     });
 
@@ -292,7 +292,7 @@ public class OptionsGUI extends JFrame {
     }
 
     private void browseForLauncherProgram() {
-        FileDialog dialog = new FileDialog((Frame)null, "Julti: Choose Program");
+        FileDialog dialog = new FileDialog((Frame) null, "Julti: Choose Program");
         dialog.setMode(FileDialog.LOAD);
         dialog.setMultipleMode(true);
         dialog.setVisible(true);
