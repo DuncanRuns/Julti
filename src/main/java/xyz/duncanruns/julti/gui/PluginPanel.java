@@ -10,7 +10,6 @@ import xyz.duncanruns.julti.util.GUIUtil;
 import javax.swing.*;
 import java.awt.*;
 
-@SuppressWarnings({"ConstantValue"})
 public class PluginPanel extends JPanel {
     public PluginPanel(LoadedJultiPlugin plugin) {
         this.setBorder(new FlatBorder());
