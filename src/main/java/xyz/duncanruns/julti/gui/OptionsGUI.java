@@ -13,8 +13,8 @@ import xyz.duncanruns.julti.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -230,13 +230,14 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("affinityBurst", "Affinity Burst", this, "ms")));
     }
 
-    // TODO: Add right click menu 
     private void addComponentsLaunching() {
         JPanel panel = this.createNewOptionsPanel("Launching");
 
         JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Program Launching")));
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("Right click for action menu")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
@@ -245,34 +246,62 @@ public class OptionsGUI extends JFrame {
         options.launchingProgramPaths.forEach(model::addElement);
 
         JList<String> programList = new JList<>(model);
-        panel.add(GUIUtil.leftJustify(new JLabel("Programs")));
+        programList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    // If right click is over already selected item(s) do nothing, but if right click on unselected
+                    // item, select it and unselect previous selected.
+                    int clickIndex = programList.locationToIndex(e.getPoint());
+                    if (!programList.isSelectedIndex(clickIndex)) {
+                        programList.setSelectedIndex(clickIndex);
+                    }
+
+                    JPopupMenu menu = new JPopupMenu();
+
+                    JMenuItem add = new JMenuItem("Add");
+                    add.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            browseForLauncherProgram();
+                            reload();
+                        }
+                    });
+
+                    JMenuItem remove = new JMenuItem("Remove");
+                    remove.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            List<String> paths = programList.getSelectedValuesList();
+                            paths.forEach(path -> options.launchingProgramPaths.remove(path));
+                            reload();
+                        }
+                    });
+
+                    menu.add(add);
+                    menu.add(remove);
+
+                    menu.show(programList, e.getX(), e.getY());
+                }
+            }
+        });
 
         JScrollPane sp = new JScrollPane(programList);
 
         panel.add(GUIUtil.leftJustify(sp));
-
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Add"), ActionEvent -> {
-            this.browseForLauncherProgram();
-            this.reload();
-        })));
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Remove"), ActionEvent -> {
-            List<String> paths = programList.getSelectedValuesList();
-            paths.forEach(path -> options.launchingProgramPaths.remove(path));
-            this.reload();
-        })));
     }
 
     private void browseForLauncherProgram() {
-        JFileChooser jfc = new JFileChooser();
-        jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose Program");
-
-        int val = jfc.showOpenDialog(this);
-        if (val == JFileChooser.APPROVE_OPTION) {
-            JultiOptions.getJultiOptions().launchingProgramPaths.add(jfc.getSelectedFile().toPath().toString());
+        FileDialog dialog = new FileDialog((Frame)null, "Julti: Choose Program");
+        dialog.setMode(FileDialog.LOAD);
+        dialog.setMultipleMode(true);
+        dialog.setVisible(true);
+        if (dialog.getFiles() != null) {
+            for (File file : dialog.getFiles()) {
+                JultiOptions.getJultiOptions().launchingProgramPaths.add(file.getAbsolutePath());
+            }
         }
+        dialog.dispose();
     }
 
     private void addComponentsOther() {
@@ -348,7 +377,9 @@ public class OptionsGUI extends JFrame {
         possibleLocations.add(userHome.resolve("AppData").resolve("Roaming"));
         possibleLocations.add(userHome.resolve("AppData").resolve("Local").resolve("Programs"));
         possibleLocations.add(userHome.resolve("Downloads"));
-        possibleLocations.add(Paths.get("C:\\"));
+        for (File drive : File.listRoots()) {
+            possibleLocations.add(Paths.get(drive.toString()));
+        }
 
         List<Path> candidates = new ArrayList<>();
         for (Path possibleLocation : possibleLocations) {
