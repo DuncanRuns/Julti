@@ -8,4 +8,12 @@ public interface PluginInitializer {
     }
 
     void onMenuButtonPress();
+
+    default boolean hasMenuButton() {
+        return true;
+    }
+
+    default boolean showsInPluginsMenu() {
+        return true;
+    }
 }

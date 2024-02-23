@@ -80,7 +80,9 @@ public class PluginsGUI extends JFrame {
 
         List<LoadedJultiPlugin> loadedPlugins = PluginManager.getPluginManager().getLoadedPlugins();
         for (LoadedJultiPlugin loadedPlugin : loadedPlugins) {
-            this.panel.add(GUIUtil.leftJustify(new PluginPanel(loadedPlugin)));
+            if (loadedPlugin.pluginInitializer.showsInPluginsMenu()) {
+                this.panel.add(GUIUtil.leftJustify(new PluginPanel(loadedPlugin)));
+            }
         }
 
         if (loadedPlugins.isEmpty()) {
