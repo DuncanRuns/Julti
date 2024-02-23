@@ -159,13 +159,13 @@ public class MinecraftInstance {
             throw new RuntimeException(e);
         }
 
-        String wpVer = VersionUtil.extractVersion(FabricJarUtil.getJarInfo(this.gameOptions.jars, "worldpreview").version);
-        String soVer = VersionUtil.extractVersion(FabricJarUtil.getJarInfo(this.gameOptions.jars, "state-output").version);
+        String wpVer = VersionUtil.extractVersion(FabricJarUtil.getVersionOf(this.gameOptions.jars, "worldpreview"));
+        String soVer = VersionUtil.extractVersion(FabricJarUtil.getVersionOf(this.gameOptions.jars, "state-output"));
 
         boolean hasStateOutput = false;
-        if (VersionUtil.tryCompare(soVer, "0", 0) > 0) {
+        if (soVer != null && VersionUtil.tryCompare(soVer, "0", 0) > 0) {
             hasStateOutput = true;
-        } else if (VersionUtil.tryCompare(wpVer, "3.0.0", -1) >= 0 && VersionUtil.tryCompare(wpVer, "5.0.0", 0) < 0) {
+        } else if (wpVer != null && VersionUtil.tryCompare(wpVer, "3.0.0", -1) >= 0 && VersionUtil.tryCompare(wpVer, "5.0.0", 0) < 0) {
             hasStateOutput = true;
         }
 

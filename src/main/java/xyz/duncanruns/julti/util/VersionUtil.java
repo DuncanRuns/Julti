@@ -27,7 +27,7 @@ public final class VersionUtil {
      */
     public static String extractVersion(String string) {
         if (string == null) {
-            return "0";
+            return null;
         }
         Matcher matcher = GENERAL_VERSION_PATTERN.matcher(string);
         if (matcher.find()) {

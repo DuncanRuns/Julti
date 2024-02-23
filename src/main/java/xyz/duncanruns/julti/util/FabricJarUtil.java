@@ -53,6 +53,14 @@ public final class FabricJarUtil {
         }
     }
 
+    public static String getVersionOf(List<FabricJarInfo> infos, String id) {
+        FabricJarInfo jarInfo = FabricJarUtil.getJarInfo(infos, id);
+        if (jarInfo == null) {
+            return null;
+        }
+        return jarInfo.version;
+    }
+
     public static class FabricJarInfo {
         public String name = null;
         public String id = null;

@@ -1,3 +1,6 @@
+Changes in v1.3.1:
+- Hotfix for Julti crashing when state output/world preview is not present
+
 Changes in v1.3.0:
 - Support for new StandardSettings option `f3PauseOnWorldLoad`
 - Fix/tweaks to various warning messages
