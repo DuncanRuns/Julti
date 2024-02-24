@@ -496,7 +496,7 @@ public class MinecraftInstance {
 
 
     public boolean isFullscreen() {
-        if (MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
+        if (MCVersionUtil.isOlderThan(this.versionString, "1.16") || MCVersionUtil.isNewerThan(this.versionString, "1.18.2")) {
             return this.activeSinceReset && JultiOptions.getJultiOptions().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
         } else {
             return GameOptionsUtil.tryGetBoolOption(this.getPath(), "fullscreen", false);
