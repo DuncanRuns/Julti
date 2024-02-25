@@ -183,16 +183,6 @@ public class ScriptManager {
         return true;
     }
 
-    public static boolean editScript(String name, String newCommands) {
-        Script script = ScriptManager.getScript(name);
-        if (script != null) {
-            script.setCommands(newCommands);
-            return true;
-        }
-
-        return false;
-    }
-
     public static List<String> getHotkeyableScriptNames() {
         return SCRIPTS.stream().filter(s -> s.getHotkeyContext() > 0).map(Script::getName).collect(Collectors.toList());
     }
