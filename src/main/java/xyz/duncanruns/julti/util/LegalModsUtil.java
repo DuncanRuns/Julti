@@ -11,10 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LegalModsUtil {
-    private static Set<String> legalMods = Arrays.stream(new String[]{
+    private static Set<String> legalMods = Arrays.stream(
             // Start with default legal mods in case updating fails
-            "anchiale", "antigone", "antiresourcereload", "atum", "biomethreadlocalfix", "chunkcacher", "chunkumulator", "dynamicfps", "extra-options", "fabricproxy-lite", "fastreset", "forceport", "krypton", "lazydfu", "lazystronghold", "lithium", "motiono", "no-paus", "optifabric", "phosphor", "setspawnmod", "sleepbackground", "sodium", "sodiummac", "speedrunigt", "standardsettings", "starlight", "state-output", "statsperworld", "tabfocus", "voyager", "worldpreview", "z-buffer-fog"
-    }).collect(Collectors.toSet());
+            "anchiale, antigone, antiresourcereload, atum, biomethreadlocalfix, chunkcacher, chunkumulator, dynamicfps, extraoptions, fabricproxylite, fastreset, forceport, krypton, lazydfu, lazystronghold, lithium, motiono, nopaus, optifabric, phosphor, setspawnmod, sleepbackground, sodium, sodiummac, speedrunigt, standardsettings, starlight, stateoutput, statsperworld, tabfocus, voyager, worldpreview, zbufferfog"
+                    .split(", ")
+    ).collect(Collectors.toSet());
     private static boolean updated = false;
 
     public static void updateLegalMods() {
@@ -30,12 +31,12 @@ public class LegalModsUtil {
         return updated;
     }
 
-    public static Set<String> getLegalMods() {
-        return legalMods;
+    public static boolean isLegalMod(String modid) {
+        return legalMods.contains(modid.toLowerCase().replaceAll("[-_]", ""));
     }
 
 
     private static Set<String> obtainLegalMods() throws IOException {
-        return GitHub.connectAnonymously().getRepository("Minecraft-Java-Edition-Speedrunning/legal-mods").getDirectoryContent("legal-mods").stream().map(GHContent::getName).map(String::trim).collect(Collectors.toSet());
+        return GitHub.connectAnonymously().getRepository("Minecraft-Java-Edition-Speedrunning/legal-mods").getDirectoryContent("legal-mods").stream().map(GHContent::getName).map(String::trim).map(s -> s.replaceAll("[-_]", "")).collect(Collectors.toSet());
     }
 }
