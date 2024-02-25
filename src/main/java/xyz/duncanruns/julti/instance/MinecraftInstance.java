@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -179,6 +180,21 @@ public class MinecraftInstance {
             Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have the standard settings mod!");
         }
 
+        this.checkModsAreLegal();
+    }
+
+    private void checkModsAreLegal() {
+        if (!LegalModsUtil.hasUpdated()) {
+            Julti.doLater(this::checkModsAreLegal);
+            return;
+        }
+        Set<String> legalMods = LegalModsUtil.getLegalMods();
+
+        for (FabricJarUtil.FabricJarInfo jar : this.gameOptions.jars) {
+            if (!legalMods.contains(jar.id.toLowerCase())) {
+                Julti.log(Level.WARN, "Warning: Mod " + jar.name + " is not a legal mod!");
+            }
+        }
     }
 
     private void discoverName() {
