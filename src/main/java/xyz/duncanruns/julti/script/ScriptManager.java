@@ -128,7 +128,7 @@ public class ScriptManager {
         return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
     }
 
-    private static Script getScript(String scriptName) {
+    public static Script getScript(String scriptName) {
         for (Script script : SCRIPTS) {
             if (script.getName().equalsIgnoreCase(scriptName.trim())) {
                 return script;
@@ -181,6 +181,16 @@ public class ScriptManager {
         SCRIPTS.add(newScript);
         save();
         return true;
+    }
+
+    public static boolean editScript(String name, String newCommands) {
+        Script script = ScriptManager.getScript(name);
+        if (script != null) {
+            script.setCommands(newCommands);
+            return true;
+        }
+
+        return false;
     }
 
     public static List<String> getHotkeyableScriptNames() {

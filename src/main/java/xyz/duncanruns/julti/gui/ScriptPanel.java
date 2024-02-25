@@ -40,6 +40,12 @@ public class ScriptPanel extends JPanel {
         panel.add(contextLabel);
 
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> Julti.doLater(() -> ScriptManager.runScript(name))));
+        panel.add(GUIUtil.getButtonWithMethod(new JButton("Edit"), a -> {
+            String newCommands = JOptionPane.showInputDialog(this, ScriptManager.getScript(name).getName(), ScriptManager.getScript(name).getCommands());
+            if (newCommands != null && !newCommands.isEmpty()) {
+                ScriptManager.editScript(name, newCommands);
+            }
+        }));
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Delete"), a -> {
             if (JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the script \"" + name + "\"?", "Julti: Delete Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0) {
                 return;
@@ -50,6 +56,6 @@ public class ScriptPanel extends JPanel {
 
         this.add(panel);
 
-        GUIUtil.setActualSize(this, 450, 42);
+        GUIUtil.setActualSize(this, 530, 42);
     }
 }

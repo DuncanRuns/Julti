@@ -32,7 +32,7 @@ public class ScriptsGUI extends JFrame {
                 ScriptsGUI.this.onClose();
             }
         });
-        this.setSize(490, 500);
+        this.setSize(570, 500);
         this.setVisible(true);
         this.panel = new JPanel();
         this.panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
