@@ -513,6 +513,7 @@ public class MinecraftInstance {
     }
 
     public void launch(String offlineName) {
+        this.ensureLaunchable();
         try {
             String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
             if (!multiMCPath.isEmpty()) {
@@ -527,6 +528,23 @@ public class MinecraftInstance {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void ensureLaunchable() {
+        this.ensureFullscreenOptionFalse();
+    }
+
+    private void ensureFullscreenOptionFalse() {
+        try {
+            Path optionsPath = this.path.resolve("options.txt");
+            String options = FileUtil.readString(optionsPath);
+            if(options.contains("fullscreen:true")){
+                FileUtil.writeString(optionsPath,options.replace("fullscreen:true","fullscreen:false"));
+                Julti.log(Level.DEBUG,"Instance "+this+" had fullscreen:true and was fixed by replacing it with fullscreen:false.");
+            }
+        }catch (IOException e){
+            Julti.log(Level.ERROR, "Failed to ensure instance is launchable:\n" + ExceptionUtil.toDetailedString(e));
         }
     }
 
