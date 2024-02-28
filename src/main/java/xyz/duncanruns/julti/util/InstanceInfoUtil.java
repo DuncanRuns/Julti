@@ -22,6 +22,7 @@ public final class InstanceInfoUtil {
     // Version Patterns
     private static final Pattern VANILLA_VERSION_PATTERN = Pattern.compile(" --version (fabric-loader-\\d\\.\\d+(\\.\\d+)?-)?(.+?) ");
     private static final Pattern MULTIMC_VERSION_PATTERN = Pattern.compile("minecraft-(.+)-client.jar");
+    private static final Pattern MULTIMC_VERSION_PATTERN_2 = Pattern.compile("intermediary/(.+)/intermediary");
     // Vanilla Path Patterns
     private static final Pattern VANILLA_PATH_PATTERN = Pattern.compile("--gameDir (.+?) ");
     private static final Pattern VANILLA_PATH_PATTERN_SPACES = Pattern.compile("--gameDir \"(.+?)\"");
@@ -120,26 +121,37 @@ public final class InstanceInfoUtil {
     }
 
     private static FoundInstanceInfo getMultiMCInfo(String commandLine) throws InvalidPathException {
-        // Declare reusable matcher variable
-        Matcher matcher;
+        Matcher pathFindMatcher;
 
         // Check for quotation mark to determine matcher
         if (commandLine.contains("\"-Djava.library.path=")) {
-            matcher = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
+            pathFindMatcher = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
         } else {
-            matcher = MULTIMC_PATH_PATTERN.matcher(commandLine);
+            pathFindMatcher = MULTIMC_PATH_PATTERN.matcher(commandLine);
         }
 
         // If no matches are found for the path, return null
-        if (!matcher.find()) {
+        if (!pathFindMatcher.find()) {
             return null;
         }
 
         // Get the natives path out of the group
-        String nativesPathString = matcher.group(1);
+        String nativesPathString = pathFindMatcher.group(1);
 
+        String versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN);
+        if (versionString == null) {
+            versionString = getVersionWithPattern(commandLine, MULTIMC_VERSION_PATTERN_2);
+            if (versionString == null) {
+                return null;
+            }
+        }
+
+        return new FoundInstanceInfo(versionString, Paths.get(nativesPathString).resolveSibling(".minecraft"));
+    }
+
+    private static String getVersionWithPattern(String commandLine, Pattern multimcVersionPattern) {
         // Assign the version matcher
-        matcher = MULTIMC_VERSION_PATTERN.matcher(commandLine);
+        Matcher matcher = multimcVersionPattern.matcher(commandLine);
 
         // If no matches are found for the version, return null
         if (!matcher.find()) {
@@ -147,9 +159,7 @@ public final class InstanceInfoUtil {
         }
 
         // Get the version out of the group
-        String versionString = matcher.group(1);
-
-        return new FoundInstanceInfo(versionString, Paths.get(nativesPathString).resolveSibling(".minecraft"));
+        return matcher.group(1);
     }
 
     public static class FoundInstanceInfo {
