@@ -8,6 +8,7 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.util.KeyboardUtil;
 
 import javax.annotation.Nullable;
@@ -171,6 +172,7 @@ public abstract class ResetManager {
             // We use doLater because this is a laggy method that isn't incredibly important.
             Julti.doLater(() -> instance.ensurePlayingWindowState(true));
         }
+        PluginEvents.InstanceEventType.LOCK.runAll(instance);
         return false;
     }
 

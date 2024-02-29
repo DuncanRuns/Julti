@@ -45,7 +45,9 @@ public final class PluginEvents {
         // Runs every time the instance's state changes
         STATE_CHANGE,
         // Runs every time the instance's world generation percentage changes
-        PERCENTAGE_CHANGE;
+        PERCENTAGE_CHANGE,
+        // Runs every time the instance is locked
+        LOCK;
 
 
         private final List<Consumer<MinecraftInstance>> consumers = new LinkedList<>();
