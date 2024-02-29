@@ -14,14 +14,25 @@ import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class ActiveWindowManager {
     private static HWND activeHwnd;
     private static String activeTitle;
 
     private static HWND lastWallHwnd;
+    private static HWND wallOverride = null;
 
     private ActiveWindowManager() {
+    }
+
+    public static void setWallOverride(HWND hwnd) {
+        wallOverride = hwnd;
+        lastWallHwnd = hwnd;
+    }
+
+    public static void clearWallOverride() {
+        wallOverride = null;
     }
 
     public static HWND getActiveHwnd() {
@@ -60,6 +71,9 @@ public final class ActiveWindowManager {
     }
 
     public static boolean isWallHwnd(HWND hwnd) {
+        if (Objects.equals(wallOverride, hwnd)) {
+            return true;
+        }
         if (JultiOptions.getJultiOptions().useCustomWallWindow) {
             return WindowTitleUtil.isWallTitle(hwnd == activeHwnd ? activeTitle : WindowTitleUtil.getHwndTitle(hwnd));
         } else {
@@ -68,7 +82,7 @@ public final class ActiveWindowManager {
     }
 
     public static HWND getLastWallHwnd() {
-        return lastWallHwnd;
+        return Optional.ofNullable(wallOverride).orElse(lastWallHwnd);
     }
 
     public static void activateHwnd(HWND hwnd) {
