@@ -13,18 +13,24 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public final class AffinityManager {
+    private static final List<Supplier<Boolean>> LOCK_CONDITIONS = new CopyOnWriteArrayList<>();
     private static final Object LOCK = new Object();
     public static final int AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors();
     private static ScheduledExecutorService EXECUTOR = null;
     private static boolean paused = false;
 
-
     private AffinityManager() {
+    }
+
+    public static void registerLockCondition(Supplier<Boolean> lockCondition) {
+        LOCK_CONDITIONS.add(lockCondition);
     }
 
     public static void start() {
@@ -50,7 +56,7 @@ public final class AffinityManager {
 
     public static void tick() {
         synchronized (LOCK) {
-            if (paused) {
+            if (paused || LOCK_CONDITIONS.stream().anyMatch(Supplier::get)) {
                 return;
             }
             setAffinityForAllInstances();
@@ -109,7 +115,6 @@ public final class AffinityManager {
 
     public static void ping() {
         getExecutor().execute(AffinityManager::tick);
-
     }
 
     public static void ping(int delay) {
@@ -121,11 +126,15 @@ public final class AffinityManager {
     }
 
     public static void jumpPlayingAffinity(MinecraftInstance instance) {
-        setAffinity(instance, JultiOptions.getJultiOptions().threadsPlaying);
+        if (!paused && LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+            setAffinity(instance, JultiOptions.getJultiOptions().threadsPlaying);
+        }
     }
 
     public static void jumpPrePreviewAffinity(MinecraftInstance instance) {
-        setAffinity(instance, JultiOptions.getJultiOptions().threadsPrePreview);
+        if (!paused && LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+            setAffinity(instance, JultiOptions.getJultiOptions().threadsPrePreview);
+        }
     }
 
     /**
