@@ -5,15 +5,26 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 
 public final class ResetCounter {
     private final static Object LOCK = new Object();
+    private final static List<Supplier<Boolean>> LOCK_CONDITIONS = new CopyOnWriteArrayList<>();
     public static int sessionCounter = 0;
 
     private ResetCounter() {
     }
 
+    public static void registerLockCondition(Supplier<Boolean> lockCondition) {
+        LOCK_CONDITIONS.add(lockCondition);
+    }
+
     public static void increment() {
+        if (LOCK_CONDITIONS.stream().anyMatch(Supplier::get)) {
+            return;
+        }
         new Thread(ResetCounter::incrementInternal, "reset-counter-updater").start();
     }
 
