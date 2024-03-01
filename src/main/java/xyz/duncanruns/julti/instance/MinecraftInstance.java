@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -767,6 +766,10 @@ public class MinecraftInstance {
 
     public KeyPresser getKeyPresser() {
         return this.presser;
+    }
+
+    public GameOptions getGameOptions() {
+        return this.gameOptions;
     }
 
     public long getLastActivation() {
