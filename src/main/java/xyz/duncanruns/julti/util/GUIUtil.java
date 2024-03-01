@@ -219,10 +219,11 @@ public final class GUIUtil {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() == 3) {
+                    // Clear hotkey on right click
                     Hotkey hotkey = Hotkey.empty();
                     queueOptionChangeAndWait(optionName, hotkey.getKeys());
-
                     button.setText(hotkeyPrefix + Hotkey.formatKeys(hotkey.getKeys()));
+                    HotkeyManager.getHotkeyManager().reloadHotkeys();
                 }
             }
         });
