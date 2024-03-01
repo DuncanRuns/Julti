@@ -660,7 +660,6 @@ public class MinecraftInstance {
     }
 
     public void ensurePlayingWindowState(boolean offload) {
-        String a = UnaryOperator.<String>identity().apply("Mario");
         JultiOptions options = JultiOptions.getJultiOptions();
         Rectangle bounds = new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]);
         boolean maximize = (options.maximizeWhenPlaying && (!options.useBorderless || options.resizeableBorderless)) && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen);
