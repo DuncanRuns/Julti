@@ -649,6 +649,7 @@ public class MinecraftInstance {
                 (options.maximizeWhenResetting && (!options.useBorderless || options.resizeableBorderless)),
                 options.windowPosIsCenter ? WindowStateUtil.withTopLeftToCenter(bounds) : bounds,
                 offload);
+        this.windowStateChangedToPlaying = false;
     }
 
     public void ensureInitialWindowState() {
