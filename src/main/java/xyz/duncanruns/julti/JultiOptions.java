@@ -3,6 +3,7 @@ package xyz.duncanruns.julti;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.Level;
@@ -21,11 +22,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class JultiOptions {
     private final static Gson GSON_WRITER = new GsonBuilder().setPrettyPrinting().create();
     private final static Gson GSON_OBJECT_MAKER = new Gson();
+    private final static Map<String, Consumer<JsonObject>> PLUGIN_DATA_LOADER = new HashMap<>();
+    private final static Map<String, Supplier<JsonObject>> PLUGIN_DATA_SAVER = new HashMap<>();
     private static JultiOptions INSTANCE = null;
 
     private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
@@ -151,6 +156,8 @@ public final class JultiOptions {
     // Launching
     public List<String> launchingProgramPaths = new ArrayList<>();
 
+    // Plugins
+    public Map<String, JsonObject> pluginData = new HashMap<>();
 
     // Hidden
     public List<String> instancePaths = new ArrayList<>();
@@ -160,6 +167,14 @@ public final class JultiOptions {
     public JultiOptions(Path location) {
         this.location = location;
         this.profileName = location == null ? null : FilenameUtils.removeExtension(location.getFileName().toString());
+    }
+
+    public static void registerPluginDataLoader(String pluginId, Consumer<JsonObject> dataConsumer) {
+        PLUGIN_DATA_LOADER.put(pluginId, dataConsumer);
+    }
+
+    public static void registerPluginDataSaver(String pluginId, Supplier<JsonObject> dataProvider) {
+        PLUGIN_DATA_SAVER.put(pluginId, dataProvider);
     }
 
     public static JultiOptions getJultiOptions() {
@@ -271,6 +286,8 @@ public final class JultiOptions {
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
                 gson.fromJson(jsonString, JultiOptions.class);
                 this.processOldOptions(oldOptions);
+                // Trigger plugin data loaders
+                this.pluginData.forEach((pluginId, data) -> Optional.ofNullable(PLUGIN_DATA_LOADER.get(pluginId)).ifPresent(c -> c.accept(data)));
                 return true;
             } catch (Exception e) {
                 Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e));
@@ -361,6 +378,8 @@ public final class JultiOptions {
 
     public boolean trySave() {
         try {
+            // Trigger plugin data savers
+            PLUGIN_DATA_SAVER.forEach((string, jsonObjectSupplier) -> this.pluginData.put(string, jsonObjectSupplier.get()));
             ensureJultiDir();
             Files.createDirectories(this.location.getParent());
             FileUtil.writeString(this.location, GSON_WRITER.toJson(this));
