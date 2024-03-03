@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
 
     implementation 'com.google.code.gson:gson:2.10'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:33.0.0-jre'
 
     implementation 'com.github.tuupertunut:powershell-lib-java:2.0.0'
 
@@ -38,7 +38,7 @@ dependencies {
 
     implementation 'org.kohsuke:github-api:1.318'
 
-    implementation 'org.json:json:20230227'
+    implementation 'org.json:json:20231013'
 
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:203.7148.30'
 }
