@@ -287,7 +287,7 @@ public final class JultiOptions {
                 gson.fromJson(jsonString, JultiOptions.class);
                 this.processOldOptions(oldOptions);
                 // Trigger plugin data loaders
-                this.pluginData.forEach((pluginId, data) -> Optional.ofNullable(PLUGIN_DATA_LOADER.get(pluginId)).ifPresent(c -> c.accept(data)));
+                PLUGIN_DATA_LOADER.forEach((pluginId, dataConsumer) -> dataConsumer.accept(this.pluginData.getOrDefault(pluginId, new JsonObject())));
                 return true;
             } catch (Exception e) {
                 Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e));
