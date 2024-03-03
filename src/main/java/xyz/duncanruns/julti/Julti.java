@@ -141,7 +141,8 @@ public final class Julti {
         ResetHelper.getManager().reload();
         ResetCounter.updateFiles();
         PluginEvents.RunnableEventType.RELOAD.runAll();
-
+        // Trigger plugin data loaders
+        JultiOptions.getJultiOptions().triggerPluginDataLoaders();
     }
 
     private void changeOption(QMessage message) {

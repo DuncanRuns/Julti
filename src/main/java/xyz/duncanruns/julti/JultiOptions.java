@@ -286,14 +286,16 @@ public final class JultiOptions {
                 Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
                 gson.fromJson(jsonString, JultiOptions.class);
                 this.processOldOptions(oldOptions);
-                // Trigger plugin data loaders
-                PLUGIN_DATA_LOADER.forEach((pluginId, dataConsumer) -> dataConsumer.accept(this.pluginData.getOrDefault(pluginId, new JsonObject())));
                 return true;
             } catch (Exception e) {
                 Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e));
             }
         }
         return false;
+    }
+
+    public void triggerPluginDataLoaders() {
+        PLUGIN_DATA_LOADER.forEach((pluginId, dataConsumer) -> dataConsumer.accept(this.pluginData.getOrDefault(pluginId, new JsonObject())));
     }
 
     private void processOldOptions(OldOptions oldOptions) {
