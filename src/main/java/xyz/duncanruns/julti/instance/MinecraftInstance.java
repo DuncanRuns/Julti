@@ -693,7 +693,7 @@ public class MinecraftInstance {
             this.presser.pressTab(2);
         }
         this.presser.pressEnter();
-        this.presser.pressTab();
+        this.presser.pressTab(MCVersionUtil.isNewerThan(this.versionString, "1.19.2") ? 2 : 1);
         this.presser.pressEnter();
         this.openedToLan = true;
     }
