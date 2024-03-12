@@ -61,6 +61,7 @@ public class ScriptsGUI extends JFrame {
 
         this.panel.add(GUIUtil.createSpacer(15));
 
+        this.panel.add(GUIUtil.leftJustify(new JLabel("(Right click for action menu)")));
         for (String name : ScriptManager.getScriptNames()) {
             this.panel.add(GUIUtil.leftJustify(new ScriptPanel(name, ScriptManager.getHotkeyContext(name), this::reload)));
         }
