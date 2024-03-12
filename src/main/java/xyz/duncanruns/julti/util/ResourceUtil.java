@@ -52,29 +52,31 @@ public final class ResourceUtil {
 
     public static void makeResources() {
         JultiOptions.ensureJultiDir();
-        JultiOptions.getJultiDir().resolve("sounds").toFile().mkdirs();
 
         String[] filesToCopy = {
                 "dirtcover.png",
                 "lock.png",
                 "blacksmith_example.png",
                 "beach_example.png",
-                "sounds/click.wav",
-                "sounds/clickclickclick.wav",
-                "sounds/clickclickclickclickclickclick.wav",
-                "sounds/plop.wav"
+                "sounds/"
         };
 
         for (String name : filesToCopy) {
-            try {
-                Path dest = JultiOptions.getJultiDir().resolve(name);
-                if (dest.toFile().exists()) {
-                    continue;
+            if (name.endsWith("/")) {
+                try {
+                    JultiOptions.getJultiDir().resolve(name).toFile().mkdirs();
+                    List<String> resources = getResourcesFromFolder(name.replace("/", ""));
+                    for (String innerName : resources) {
+                        generateInJultiFolder(name + innerName);
+                    }
+                } catch (URISyntaxException | IOException e) {
+                    log(Level.ERROR, "Failed to copy resource: " + ExceptionUtil.toDetailedString(e));
                 }
-                ResourceUtil.copyResourceToFile("/" + name, dest);
-                log(Level.INFO, "Generated .Julti file " + name);
+            }
+            try {
+                generateInJultiFolder(name);
             } catch (Exception e) {
-                log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e);
+                log(Level.ERROR, "Failed to copy resource: " + ExceptionUtil.toDetailedString(e));
             }
         }
 
@@ -92,6 +94,15 @@ public final class ResourceUtil {
                 log(Level.ERROR, "Failed to copy resource (" + e.getClass().getSimpleName() + "):\n" + e);
             }
         }
+    }
+
+    private static void generateInJultiFolder(String name) throws IOException {
+        Path dest = JultiOptions.getJultiDir().resolve(name);
+        if (dest.toFile().exists()) {
+            return;
+        }
+        ResourceUtil.copyResourceToFile("/" + name, dest);
+        log(Level.INFO, "Generated .Julti file " + name);
     }
 
     public static List<String> getResourcesFromFolder(String folder)
