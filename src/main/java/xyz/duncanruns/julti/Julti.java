@@ -184,6 +184,7 @@ public final class Julti {
         if (isRanFromAlternateLocation()) {
             log(Level.INFO, "Julti is being ran from another location");
         }
+        new Thread(LegalModsUtil::updateLegalMods, "legal-mods-updater").start();
 
         // Schedule stuff for after Julti startup processes
         Julti.doLater(() -> {

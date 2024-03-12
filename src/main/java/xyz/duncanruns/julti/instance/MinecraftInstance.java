@@ -178,6 +178,20 @@ public class MinecraftInstance {
             Julti.log(Level.WARN, "Warning: Instance \"" + this + " does not have the standard settings mod!");
         }
 
+        this.checkModsAreLegal();
+    }
+
+    private void checkModsAreLegal() {
+        if (!LegalModsUtil.hasUpdated()) {
+            Julti.doLater(this::checkModsAreLegal);
+            return;
+        }
+
+        for (FabricJarUtil.FabricJarInfo jar : this.gameOptions.jars) {
+            if (!LegalModsUtil.isLegalMod(jar.id)) {
+                Julti.log(Level.WARN, "Warning: Mod " + jar.name + " is not a legal mod!");
+            }
+        }
     }
 
     private void discoverName() {
