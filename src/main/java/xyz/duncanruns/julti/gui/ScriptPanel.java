@@ -43,14 +43,15 @@ public class ScriptPanel extends JPanel {
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> Julti.doLater(() -> ScriptManager.runScript(name))));
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Edit"), a -> {
             String newSavableString = JOptionPane.showInputDialog(this, ScriptManager.getScript(name).getName(), ScriptManager.getScript(name).toSavableString());
-            if (newSavableString != null && !newSavableString.isEmpty()) {
-                if (!ScriptManager.forceAddScript(newSavableString)) {
-                    JOptionPane.showMessageDialog(this, "Could not edit script. The entered string was not a script string.", "Julti: Edit Script Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    if (!Script.fromSavableString(newSavableString).getName().equals(name)) { // If name changes in edit
-                        ScriptManager.removeScript(name); // Remove old script
-                        onDelete.run();
-                    }
+            if (newSavableString == null || newSavableString.isEmpty()) {
+                return;
+            }
+            if (!ScriptManager.forceAddScript(newSavableString)) {
+                JOptionPane.showMessageDialog(this, "Could not edit script. The entered string was not a script string.", "Julti: Edit Script Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                if (!Script.fromSavableString(newSavableString).getName().equals(name)) { // If name changes in edit
+                    ScriptManager.removeScript(name); // Remove old script
+                    onDelete.run();
                 }
             }
         }));
