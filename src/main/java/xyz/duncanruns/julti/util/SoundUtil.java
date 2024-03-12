@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public final class SoundUtil {
-    private static Random RANDOM = new Random();
+    private static final Random RANDOM = new Random();
 
     private SoundUtil() {
     }
