@@ -107,6 +107,9 @@ public final class ResourceUtil {
     }
 
     public static boolean isResourceFolder(String path) {
+        if (path.contains(".")) {
+            return false;
+        }
         try {
             List<String> resources = getResourcesFromFolder(path);
             return resources != null;
@@ -148,11 +151,10 @@ public final class ResourceUtil {
         // Encode the jarPath to handle spaces
         jarPath = new File(jarPath).toURI().toString();
 
-        // file walks JAR
+        // file list JAR
         URI uri = URI.create("jar:" + jarPath);
         try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-            result = Files.walk(fs.getPath(folder))
-                    .filter(Files::isRegularFile)
+            result = Files.list(fs.getPath(folder))
                     .map(path -> path.getFileName().toString())
                     .collect(Collectors.toList());
         }
