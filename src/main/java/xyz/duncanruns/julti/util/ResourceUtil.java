@@ -60,6 +60,8 @@ public final class ResourceUtil {
                 "blacksmith_example.png",
                 "beach_example.png",
                 "sounds/click.wav",
+                "sounds/clickclickclick.wav",
+                "sounds/clickclickclickclickclickclick.wav",
                 "sounds/plop.wav"
         };
 
