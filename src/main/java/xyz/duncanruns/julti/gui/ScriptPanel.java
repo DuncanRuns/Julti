@@ -8,6 +8,9 @@ import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ScriptPanel extends JPanel {
 
@@ -40,13 +43,56 @@ public class ScriptPanel extends JPanel {
         GUIUtil.setActualSize(contextLabel, 130, 20);
         panel.add(contextLabel);
 
-        panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> Julti.doLater(() -> ScriptManager.runScript(name))));
-        panel.add(GUIUtil.getButtonWithMethod(new JButton("Edit"), a -> this.suggestEdit(name, onDelete)));
-        panel.add(GUIUtil.getButtonWithMethod(new JButton("Delete"), a -> this.suggestDelete(name, onDelete)));
+        panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> runScript(name)));
+
+        this.addPopupMenu(name, onDelete);
 
         this.add(panel);
 
-        GUIUtil.setActualSize(this, 530, 42);
+        GUIUtil.setActualSize(this, 370, 42);
+    }
+
+    private static void runScript(String name) {
+        Julti.doLater(() -> ScriptManager.runScript(name));
+    }
+
+    private void addPopupMenu(String name, Runnable onDelete) {
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    JPopupMenu menu = new JPopupMenu("Script: " + name);
+
+                    JMenuItem runItem = new JMenuItem(new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            runScript(name);
+                        }
+                    });
+                    runItem.setText("Run");
+                    JMenuItem editItem = new JMenuItem(new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            ScriptPanel.this.suggestEdit(name, onDelete);
+                        }
+                    });
+                    editItem.setText("Edit");
+                    JMenuItem deleteItem = new JMenuItem(new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            ScriptPanel.this.suggestDelete(name, onDelete);
+                        }
+                    });
+                    deleteItem.setText("Delete");
+
+                    menu.add(runItem);
+                    menu.add(editItem);
+                    menu.add(deleteItem);
+
+                    menu.show(ScriptPanel.this, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private void suggestDelete(String name, Runnable onDelete) {
