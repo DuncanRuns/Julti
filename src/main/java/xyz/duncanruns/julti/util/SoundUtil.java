@@ -5,8 +5,14 @@ import xyz.duncanruns.julti.Julti;
 
 import javax.sound.sampled.*;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public final class SoundUtil {
+    private static Random RANDOM = new Random();
+
     private SoundUtil() {
     }
 
@@ -21,7 +27,17 @@ public final class SoundUtil {
         if (soundPath.isEmpty()) {
             return;
         }
-        playSound(new File(soundPath), volume);
+        File soundFile = new File(soundPath);
+        File[] innerFiles;
+        if (soundFile.isDirectory() && (innerFiles = soundFile.listFiles()) != null) {
+            List<File> innerSoundFiles = Arrays.stream(innerFiles).filter(file -> file.getName().endsWith(".wav")).collect(Collectors.toList());
+            if (innerSoundFiles.isEmpty()) {
+                return;
+            }
+            playSound(innerSoundFiles.get(RANDOM.nextInt(innerSoundFiles.size())), volume);
+        } else {
+            playSound(soundFile, volume);
+        }
     }
 
     /**

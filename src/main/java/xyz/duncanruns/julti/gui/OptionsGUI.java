@@ -155,28 +155,28 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("Single Reset Sound:")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "singleResetSound", "wav", jultiDir)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "singleResetSound", "wav", jultiDir, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("singleResetVolume")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("Multi Reset Sound:")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "multiResetSound", "wav", jultiDir)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "multiResetSound", "wav", jultiDir, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("multiResetVolume")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("Lock Sound:")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "lockSound", "wav", jultiDir)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "lockSound", "wav", jultiDir, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("lockVolume")));
 
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(new JLabel("Play Sound:")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "playSound", "wav", jultiDir)));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createFileSelectButton(panel, "playSound", "wav", jultiDir, true)));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createVolumeSlider("playVolume")));
     }
