@@ -128,7 +128,7 @@ public class ScriptManager {
         return SCRIPTS.stream().map(Script::getName).collect(Collectors.toList());
     }
 
-    private static Script getScript(String scriptName) {
+    public static Script getScript(String scriptName) {
         for (Script script : SCRIPTS) {
             if (script.getName().equalsIgnoreCase(scriptName.trim())) {
                 return script;
