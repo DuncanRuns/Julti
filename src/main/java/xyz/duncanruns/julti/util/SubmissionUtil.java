@@ -3,8 +3,10 @@ package xyz.duncanruns.julti.util;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -77,7 +79,12 @@ public final class SubmissionUtil {
                 Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to submission folder...");
                 FileUtils.copyDirectoryToDirectory(currentSave, savesDest.toFile());
             }
-        } catch (IndexOutOfBoundsException ignored) {
+        } catch (IndexOutOfBoundsException ignored) { // not enough saves to copy
+        } catch (FileSystemException e) {
+            String message = "Cannot package files - a world appears to be open! Please press Options > Stop Resets & Quit in your instance.";
+            JOptionPane.showMessageDialog(JultiGUI.getJultiGUI(), message, "Julti: Package Files Error", JOptionPane.ERROR_MESSAGE);
+            Julti.log(Level.ERROR, message);
+            return null;
         } // not enough saves to copy
 
         // last 3 logs
@@ -96,7 +103,7 @@ public final class SubmissionUtil {
         } catch (IndexOutOfBoundsException ignored) {
         } // not enough logs to copy
 
-        Julti.log(Level.INFO, "Saved submission files for " + instance.getName() + " to .Julti/submissionpackages.\r\nPlease submit a link to your files through instance form: https://forms.gle/v7oPXfjfi7553jkp7");
+        Julti.log(Level.INFO, "Saved submission files for " + instance.getName() + " to .Julti/submissionpackages.\r\nPlease submit a download link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
 
         copyFolderToZip(submissionPath.resolve("Worlds.zip"), submissionPath.resolve("Worlds"));
         copyFolderToZip(submissionPath.resolve("Logs.zip"), submissionPath.resolve("Logs"));
