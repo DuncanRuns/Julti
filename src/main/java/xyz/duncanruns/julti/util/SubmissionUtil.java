@@ -74,18 +74,17 @@ public final class SubmissionUtil {
         Path savesDest = submissionPath.resolve("Worlds");
         savesDest.toFile().mkdirs();
         try {
-            for (int i = 0; i < 6; i++) {
-                File currentSave = worldsToCopy.get(i).toFile();
+            for (Path currentPath : worldsToCopy.subList(0, Math.min(worldsToCopy.size(), 6))) {
+                File currentSave = currentPath.toFile();
                 Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to submission folder...");
                 FileUtils.copyDirectoryToDirectory(currentSave, savesDest.toFile());
             }
-        } catch (IndexOutOfBoundsException ignored) { // not enough saves to copy
         } catch (FileSystemException e) {
             String message = "Cannot package files - a world appears to be open! Please press Options > Stop Resets & Quit in your instance.";
             JOptionPane.showMessageDialog(JultiGUI.getJultiGUI(), message, "Julti: Package Files Error", JOptionPane.ERROR_MESSAGE);
             Julti.log(Level.ERROR, message);
             return null;
-        } // not enough saves to copy
+        }
 
         // last 3 logs
         List<Path> logsToCopy = Arrays.stream(Objects.requireNonNull(logsPath.toFile().list())) // Get all log names
@@ -94,14 +93,11 @@ public final class SubmissionUtil {
                 .collect(Collectors.toList());
         File logsDest = submissionPath.resolve("Logs").toFile();
         logsDest.mkdirs();
-        try {
-            for (int i = 0; i < 3; i++) {
-                File currentLog = logsToCopy.get(i).toFile();
-                Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to submission folder...");
-                FileUtils.copyFileToDirectory(currentLog, logsDest);
-            }
-        } catch (IndexOutOfBoundsException ignored) {
-        } // not enough logs to copy
+        for (Path currentPath : logsToCopy.subList(0, Math.min(logsToCopy.size(), 6))) {
+            File currentLog = currentPath.toFile();
+            Julti.log(Level.INFO, "Copying " + currentLog.getName() + " to submission folder...");
+            FileUtils.copyFileToDirectory(currentLog, logsDest);
+        }
 
         Julti.log(Level.INFO, "Saved submission files for " + instance.getName() + " to .Julti/submissionpackages.\r\nPlease submit a download link to your files through this form: https://forms.gle/v7oPXfjfi7553jkp7");
 
