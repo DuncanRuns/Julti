@@ -3,6 +3,8 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.resetting.DynamicWallResetManager;
 import xyz.duncanruns.julti.resetting.MultiResetManager;
@@ -798,7 +800,13 @@ public class OptionsGUI extends JFrame {
 
             int totalRows = 2;
             int totalColumns = 2;
-            if (!options.autoCalcWallSize) {
+            if (options.autoCalcWallSize && JultiOptions.getJultiOptions().resetStyle.equals("Wall")) {
+                // auto calc for normal wall
+                List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
+                totalRows = (int) Math.max(1, Math.ceil(Math.sqrt(instances.size())));
+                totalColumns = (int) Math.max(1, Math.ceil(instances.size() / (float) totalRows));
+            } else if (!options.autoCalcWallSize) {
+                // dynamic wall
                 totalRows = Math.max(1, options.overrideRowsAmount);
                 totalColumns = Math.max(1, options.overrideColumnsAmount);
             }
