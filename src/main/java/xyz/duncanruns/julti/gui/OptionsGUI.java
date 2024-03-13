@@ -800,13 +800,12 @@ public class OptionsGUI extends JFrame {
 
             int totalRows = 2;
             int totalColumns = 2;
-            if (options.autoCalcWallSize && JultiOptions.getJultiOptions().resetStyle.equals("Wall")) {
+            if (options.autoCalcWallSize && options.resetStyle.equals("Wall")) {
                 // auto calc for normal wall
                 List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
                 totalRows = (int) Math.max(1, Math.ceil(Math.sqrt(instances.size())));
                 totalColumns = (int) Math.max(1, Math.ceil(instances.size() / (float) totalRows));
             } else if (!options.autoCalcWallSize) {
-                // dynamic wall
                 totalRows = Math.max(1, options.overrideRowsAmount);
                 totalColumns = Math.max(1, options.overrideColumnsAmount);
             }
