@@ -45,7 +45,6 @@ public final class JultiAppLaunch {
 
         // Load Options
         JultiOptions.getJultiOptions();
-        ScriptManager.reload();
 
         // Start Affinity Manager
         AffinityManager.start();
