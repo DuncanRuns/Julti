@@ -1,7 +1,5 @@
 package xyz.duncanruns.julti.gui;
 
-import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.script.LegacyScript;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 
@@ -9,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ScriptsGUI extends JFrame {
     private boolean closed = false;
@@ -53,7 +50,8 @@ public class ScriptsGUI extends JFrame {
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("..."), a -> {}));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("..."), a -> {
+        }));
         buttonsPanel.add(GUIUtil.createSpacer(0));
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Scripts"), a -> ScriptManager.cancelAllScripts()));
 

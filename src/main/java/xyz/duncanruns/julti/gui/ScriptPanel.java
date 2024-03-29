@@ -1,8 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
-import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.script.LegacyScript;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 

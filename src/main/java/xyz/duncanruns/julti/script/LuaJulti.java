@@ -48,7 +48,7 @@ public class LuaJulti {
             return LuaValue.NIL;
         }
 
-        public static LuaValue runcommand(LuaValue arg){
+        public static LuaValue runcommand(LuaValue arg) {
             CommandManager.getMainManager().runCommand(arg.checkjstring()); //TODO: get a cancel requester somehow (probably have a global cancel requester for lua calls?)
             return LuaValue.NIL;
         }
