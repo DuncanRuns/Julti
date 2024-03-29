@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.script;
 
+import org.apache.logging.log4j.Level;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -8,26 +9,36 @@ import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.command.CommandManager;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
+import xyz.duncanruns.julti.util.DoAllFastUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public class LuaJulti {
-    private static final String JULTI_REQUIRE = "require(\"" + JultiLib.class.getName() + "\")\n";
+    private static final Map<String, LuaValue> GLOBALS_MAP = Collections.synchronizedMap(new HashMap<>());
 
     public static void runLuaScript(String luaScript, CancelRequester cancelRequester) {
         Globals globals = JsePlatform.standardGlobals();
         globals.load(new InterruptibleDebugLib(cancelRequester));
-        LuaValue chunk = JsePlatform.standardGlobals().load(JULTI_REQUIRE + luaScript);
-        chunk.call();
+        globals.load(new JultiLib(cancelRequester));
+        LuaValue chunk = globals.load(luaScript);
+        try {
+            chunk.call();
+        } catch (LuaScriptCancelledException ignored) {
+        }
     }
 
-    private static LibFunction convertToArgFunctionObj(Method method) {
+    private static LibFunction convertToArgFunctionObj(JultiLib obj, Method method) {
         return new VarArgFunction() {
             @Override
             public Varargs invoke(Varargs args) {
@@ -36,12 +47,15 @@ public class LuaJulti {
                     argVals.add(args.arg(i));
                 }
                 try {
-                    return (LuaValue) method.invoke(null, argVals.toArray());
+                    return (LuaValue) method.invoke(obj, argVals.toArray());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             }
         };
+    }
+
+    public static class LuaScriptCancelledException extends RuntimeException {
     }
 
     private static class InterruptibleDebugLib extends DebugLib {
@@ -55,7 +69,7 @@ public class LuaJulti {
         @Override
         public void onInstruction(int pc, Varargs v, int top) {
             if (this.cancelRequester.isCancelRequested()) {
-                throw new RuntimeException("Cancel Requested");
+                throw new LuaScriptCancelledException();
             }
             super.onInstruction(pc, v, top);
         }
@@ -63,14 +77,38 @@ public class LuaJulti {
     }
 
     public static class JultiLib extends TwoArgFunction {
+        private final CancelRequester cancelRequester;
 
-        public static LuaValue reset(LuaValue arg) {
-            InstanceManager.getInstanceManager().getInstances().get(arg.checkint() - 1).reset();
+        public JultiLib(CancelRequester cancelRequester) {
+            this.cancelRequester = cancelRequester;
+        }
+
+        public LuaValue reset(LuaValue arg) {
+            Julti.waitForExecute(() -> InstanceManager.getInstanceManager().getInstances().get(arg.checkint() - 1).reset());
             return LuaValue.NIL;
         }
 
-        public static LuaValue runcommand(LuaValue arg) {
-            CommandManager.getMainManager().runCommand(arg.checkjstring()); //TODO: get a cancel requester somehow (probably have a global cancel requester for lua calls?)
+        public LuaValue resetAll() {
+            Julti.waitForExecute(() -> DoAllFastUtil.doAllFast(MinecraftInstance::reset));
+            return LuaValue.NIL;
+        }
+
+        public LuaValue runCommand(LuaValue arg) {
+            CommandManager.getMainManager().runCommand(arg.checkjstring(), this.cancelRequester);
+            return LuaValue.NIL;
+        }
+
+        public LuaValue setGlobal(LuaValue key, LuaValue val) {
+            GLOBALS_MAP.put(key.checkjstring(), val);
+            return LuaValue.NIL;
+        }
+
+        public LuaValue getGlobal(LuaValue key, LuaValue def) {
+            return GLOBALS_MAP.getOrDefault(key.checkjstring(), def);
+        }
+
+        public LuaValue log(LuaValue message) {
+            Julti.log(Level.INFO, message.checkjstring());
             return LuaValue.NIL;
         }
 
@@ -81,7 +119,7 @@ public class LuaJulti {
                 if (method.getName().equals("call")) {
                     continue;
                 }
-                library.set(method.getName(), convertToArgFunctionObj(method));
+                library.set(method.getName(), convertToArgFunctionObj(this, method));
             }
             env.set("julti", library);
             return library;

@@ -7,6 +7,7 @@ import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
+import xyz.duncanruns.julti.script.LuaJulti;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
@@ -60,7 +61,9 @@ public final class JultiAppLaunch {
 
         // Redirect uncaught exceptions to Julti logging
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            Julti.log(Level.ERROR, "Uncaught exception in thread " + t + ":\n" + ExceptionUtil.toDetailedString(e));
+            if (!(e instanceof LuaJulti.LuaScriptCancelledException)) { // TODO: figure out how to not need this
+                Julti.log(Level.ERROR, "Uncaught exception in thread " + t + ":\n" + ExceptionUtil.toDetailedString(e));
+            }
         });
 
         // Load Plugins
