@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.script;
 
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.Globals;
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.DebugLib;
@@ -15,6 +16,7 @@ import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,7 +36,10 @@ public class LuaJulti {
         LuaValue chunk = globals.load(luaScript);
         try {
             chunk.call();
-        } catch (LuaScriptCancelledException ignored) {
+        } catch (LuaError e) {
+            if (!(e.getCause() instanceof LuaScriptCancelledException)) {
+                Julti.log(Level.ERROR, "Error while executing script: " + ExceptionUtil.toDetailedString(e.getCause()));
+            }
         }
     }
 
@@ -55,7 +60,7 @@ public class LuaJulti {
         };
     }
 
-    public static class LuaScriptCancelledException extends RuntimeException {
+    private static class LuaScriptCancelledException extends RuntimeException {
     }
 
     private static class InterruptibleDebugLib extends DebugLib {
