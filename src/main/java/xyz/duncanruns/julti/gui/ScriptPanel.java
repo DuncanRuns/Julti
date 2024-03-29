@@ -51,7 +51,7 @@ public class ScriptPanel extends JPanel {
     }
 
     private static void runScript(String name) {
-//        Julti.doLater(() -> ScriptManager.runScript(name)); TODO
+        ScriptManager.runScript(name);
     }
 
     private void addPopupMenu(String name, Runnable onDelete) {
@@ -97,7 +97,7 @@ public class ScriptPanel extends JPanel {
         if (JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the script \"" + name + "\"?", "Julti: Delete Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != 0) {
             return;
         }
-        ScriptManager.removeScript(name);
+        ScriptManager.deleteScript(name);
         onDelete.run();
     }
 

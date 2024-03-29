@@ -267,7 +267,7 @@ public final class Julti {
             if ((!instanceActive) && (!wallActive)) {
                 return;
             }
-//            ScriptManager.runScript(scriptName, true, (byte) (instanceActive ? 1 : 2)); TODO
+            ScriptManager.getHotkeyContext(scriptName);
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.cancelAllScripts();
         } else {

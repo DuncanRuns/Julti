@@ -51,6 +51,7 @@ public class ScriptsGUI extends JFrame {
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
 
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("..."), a -> {
+            // TODO: importing scripts
         }));
         buttonsPanel.add(GUIUtil.createSpacer(0));
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Scripts"), a -> ScriptManager.cancelAllScripts()));

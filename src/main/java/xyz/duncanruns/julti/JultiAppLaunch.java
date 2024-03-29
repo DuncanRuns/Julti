@@ -7,6 +7,7 @@ import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
+import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import javax.swing.*;
@@ -44,6 +45,9 @@ public final class JultiAppLaunch {
 
         // Load Options
         JultiOptions.getJultiOptions();
+
+        // Reload Scripts
+        ScriptManager.reload();
 
         // Start Affinity Manager
         AffinityManager.start();

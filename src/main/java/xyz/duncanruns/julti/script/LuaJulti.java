@@ -3,10 +3,12 @@ package xyz.duncanruns.julti.script;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
+import org.luaj.vm2.lib.DebugLib;
 import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.jse.JsePlatform;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 
@@ -16,11 +18,12 @@ import java.util.ArrayList;
 
 @SuppressWarnings("unused")
 public class LuaJulti {
-    private static final Globals GLOBALS = JsePlatform.standardGlobals();
     private static final String JULTI_REQUIRE = "require(\"" + JultiLib.class.getName() + "\")\n";
 
-    public static void runLuaScript(String luaScript) {
-        LuaValue chunk = GLOBALS.load(JULTI_REQUIRE + luaScript);
+    public static void runLuaScript(String luaScript, CancelRequester cancelRequester) {
+        Globals globals = JsePlatform.standardGlobals();
+        globals.load(new InterruptibleDebugLib(cancelRequester));
+        LuaValue chunk = JsePlatform.standardGlobals().load(JULTI_REQUIRE + luaScript);
         chunk.call();
     }
 
@@ -39,6 +42,24 @@ public class LuaJulti {
                 }
             }
         };
+    }
+
+    private static class InterruptibleDebugLib extends DebugLib {
+        private final CancelRequester cancelRequester;
+
+        public InterruptibleDebugLib(CancelRequester cancelRequester) {
+            super();
+            this.cancelRequester = cancelRequester;
+        }
+
+        @Override
+        public void onInstruction(int pc, Varargs v, int top) {
+            if (this.cancelRequester.isCancelRequested()) {
+                throw new RuntimeException("Cancel Requested");
+            }
+            super.onInstruction(pc, v, top);
+        }
+
     }
 
     public static class JultiLib extends TwoArgFunction {
