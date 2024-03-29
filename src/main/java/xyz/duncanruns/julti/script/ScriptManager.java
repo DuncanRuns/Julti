@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.script;
 
-import com.google.common.io.Resources;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -11,7 +10,6 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,27 +26,16 @@ public class ScriptManager {
     private static Thread runningScriptThread = null;
     private static final Object LOCK = new Object();
 
-
-    private static String getDefaultScripts() {
-        String defaultScripts;
-        try {
-            defaultScripts = Resources.toString(Resources.getResource("defaultscripts.txt"), Charset.defaultCharset());
-        } catch (IOException e) {
-            defaultScripts = "";
-        }
-        return defaultScripts;
-    }
-
     public static void reload() {
         String scriptsFileContents = "";
         if (Files.exists(SCRIPTS_PATH)) {
             try {
                 scriptsFileContents = FileUtil.readString(SCRIPTS_PATH);
             } catch (IOException e) {
-                scriptsFileContents = getDefaultScripts();
+                scriptsFileContents = "";
             }
         } else {
-            scriptsFileContents = getDefaultScripts();
+            scriptsFileContents = "";
         }
 
         SCRIPTS.clear();
