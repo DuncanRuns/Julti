@@ -143,6 +143,16 @@ public class ScriptManager {
         ).start());
     }
 
+    public static void runScriptAndWait(String name) {
+        findScript(name).ifPresent(script -> {
+            try {
+                script.run(ScriptManager.cancelRequester);
+            } catch (Throwable t) {
+                Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
+            }
+        });
+    }
+
     private static Optional<Script> findScript(String name) {
         return SCRIPTS.stream().filter(script -> script.getName().equals(name)).findAny();
     }

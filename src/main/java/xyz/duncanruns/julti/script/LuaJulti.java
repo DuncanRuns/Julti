@@ -301,6 +301,11 @@ public class LuaJulti {
             return NIL;
         }
 
+        public LuaValue runScript(LuaValue /*String*/ scriptName) {
+            ScriptManager.runScriptAndWait(scriptName.checkjstring());
+            return NIL;
+        }
+
         public LuaValue setGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ val) {
             GLOBALS_MAP.put(key.checkjstring(), val);
             return NIL;
