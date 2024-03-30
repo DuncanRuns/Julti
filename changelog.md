@@ -9,6 +9,17 @@ Changes in v1.4.0:
     - No custom images for locks or background, just basic shapes and solid colors only
 - Added scripts action menu (right click scripts for more stuff)
   - Added script editing (@pants721 #91)
+- Scripts system entirely reworked:
+  - Scripts moved to a scripts folder rather than all being in scripts.txt
+    - Any legacy scripts from scripts.txt will be converted to script files
+  - Added lua scripting
+    - Should be way more powerful than legacy scripts
+    - .txt script files will be legacy scripts, .lua script files will be lua scripts
+    - Added lua functions equivalents for all the Julti commands and a few more
+  - Greatly improved script importing
+    - You can now put a github gist link or id and download scripts
+      - The gist must contain a .lua file for a lua script or .txt file for a legacy script
+    - You can still use the old legacy script codes to import
 - Added illegal mod checker (will appear as warnings in log, you can ignore them if playing something like icarus)
 - Added more sounds (bone sounds, specnr sounds)
 - Added basic sound randomization (selecting a folder will pick a random sound from the folder)
