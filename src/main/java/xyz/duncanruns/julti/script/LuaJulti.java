@@ -153,6 +153,11 @@ public class LuaJulti {
             return NIL;
         }
 
+        public LuaValue lockAllInstances() {
+            Julti.waitForExecute(() -> InstanceManager.getInstanceManager().getInstances().forEach(instance -> ResetHelper.getManager().lockInstance(instance)));
+            return NIL;
+        }
+
         public LuaValue log(LuaValue /*String*/ message) {
             Julti.log(Level.INFO, message.checkjstring());
             return NIL;
@@ -270,7 +275,7 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue pressEscOnInstance(LuaValue /*int*/ instanceNum){
+        public LuaValue pressEscOnInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> {
                 getInstanceFromInt(instanceNum).getKeyPresser().pressEsc();
             });
@@ -291,7 +296,7 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue focusWall(){
+        public LuaValue focusWall() {
             Julti.waitForExecute(() -> Julti.getJulti().focusWall());
             return NIL;
         }
