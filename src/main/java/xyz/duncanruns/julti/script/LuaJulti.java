@@ -291,6 +291,11 @@ public class LuaJulti {
             return NIL;
         }
 
+        public LuaValue focusWall(){
+            Julti.waitForExecute(() -> Julti.getJulti().focusWall());
+            return NIL;
+        }
+
         public LuaValue setGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ val) {
             GLOBALS_MAP.put(key.checkjstring(), val);
             return NIL;
