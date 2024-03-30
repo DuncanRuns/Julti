@@ -317,6 +317,16 @@ public class LuaJulti {
             return GLOBALS_MAP.getOrDefault(key.checkjstring(), def);
         }
 
+        public LuaValue getInstanceState(LuaValue /*int*/ instanceNum){
+            MinecraftInstance instance = getInstanceFromInt(instanceNum);
+            return valueOf(instance.getStateTracker().getInstanceState().name());
+        }
+
+        public LuaValue getInstanceInWorldState(LuaValue /*int*/ instanceNum){
+            MinecraftInstance instance = getInstanceFromInt(instanceNum);
+            return valueOf(instance.getStateTracker().getInWorldType().name());
+        }
+
         // Julti Lua Library Functions End Here //
 
         @Override
