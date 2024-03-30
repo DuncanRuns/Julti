@@ -9,17 +9,20 @@ import java.util.Optional;
 public abstract class Script {
     public static Optional<Script> tryLoad(Path path) {
         try {
-            return Optional.of(load(path));
+            return Optional.ofNullable(load(path));
         } catch (IOException e) {
             return Optional.empty();
         }
     }
 
     private static Script load(Path path) throws IOException {
-        if (path.getFileName().toString().endsWith(".lua")) {
+        String fileName = path.getFileName().toString();
+        if (fileName.endsWith(".lua")) {
             return LuaScript.load(path);
+        }else if(fileName.endsWith(".txt")) {
+            return LegacyScript.load(path);
         }
-        return LegacyScript.load(path);
+        return null;
     }
 
     public abstract byte getHotkeyContext();
