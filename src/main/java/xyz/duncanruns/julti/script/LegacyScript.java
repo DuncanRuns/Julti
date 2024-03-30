@@ -22,6 +22,9 @@ public class LegacyScript extends Script {
 
         for (String s : contents.split("\n")) {
             s = s.trim();
+            if (s.isEmpty()) {
+                continue;
+            }
             if (s.startsWith("#")) {
                 if (this.hotkeyContext == 0) {
                     this.tryExtractHotkeyContext(s);
