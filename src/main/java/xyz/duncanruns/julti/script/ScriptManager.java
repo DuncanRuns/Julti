@@ -15,12 +15,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ScriptManager {
     public static Path SCRIPTS_FOLDER = JultiOptions.getJultiDir().resolve("scripts");
     public static Set<Script> SCRIPTS = new HashSet<>();
+    public static final Pattern GIST_PATTERN = Pattern.compile("^(https://gist\\.github\\.com/\\w+/)\\w+$");
+    public static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("^.+; ?\\d ?;.+$");
 
     public static CancelRequester cancelRequester = new CancelRequester();
 
@@ -70,8 +73,8 @@ public class ScriptManager {
         }
     }
 
-    public static void writeLegacyScript(String s) throws IOException {
-        String[] parts = s.split(";");
+    public static void writeLegacyScript(String legacyCode) throws IOException {
+        String[] parts = legacyCode.split(";");
         String name = parts[0];
         StringBuilder contents = new StringBuilder();
         switch (Byte.parseByte(parts[1])) {
@@ -104,7 +107,25 @@ public class ScriptManager {
                 options.trySave();
             });
         }
-        FileUtil.writeString(SCRIPTS_FOLDER.resolve(newName + ".txt"), contents.toString());
+        writeLegacyScript(newName, contents.toString());
+    }
+
+    public static void writeLegacyScript(String name, String contents) throws IOException {
+        name = name.replaceAll("[\\\\/:*?\"<>|]", "");
+        FileUtil.writeString(SCRIPTS_FOLDER.resolve(name + ".txt"), contents);
+    }
+
+    public static void writeLuaScript(String name, String contents) throws IOException {
+        name = name.replaceAll("[\\\\/:*?\"<>|]", "");
+        FileUtil.writeString(SCRIPTS_FOLDER.resolve(name + ".lua"), contents);
+    }
+
+    public static void writeScript(String name, String contents, boolean isLegacy) throws IOException {
+        if (isLegacy) {
+            writeLegacyScript(name, contents);
+        } else {
+            writeLuaScript(name, contents);
+        }
     }
 
     private static void ensureScriptsDir() {
@@ -170,5 +191,13 @@ public class ScriptManager {
             LauncherUtil.openFile(script.getPath().toString());
             return true;
         }).orElse(false);
+    }
+
+    public static boolean isLegacyImportCode(String string) {
+        return LEGACY_CODE_PATTERN.matcher(string).matches();
+    }
+
+    public static boolean isGist(String string) {
+        return GIST_PATTERN.matcher(string).matches();
     }
 }
