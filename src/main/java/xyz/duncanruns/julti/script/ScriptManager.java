@@ -6,6 +6,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
+import xyz.duncanruns.julti.util.LauncherUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,11 +25,18 @@ public class ScriptManager {
     public static CancelRequester cancelRequester = new CancelRequester();
 
     public static void reload() {
+        SCRIPTS.clear();
         ensureScriptsDir();
         convertOldScripts();
 
         try (Stream<Path> files = Files.list(SCRIPTS_FOLDER)) {
-            files.forEach(path -> Script.tryLoad(path).ifPresent(SCRIPTS::add));
+            files.forEach(path -> Script.tryLoad(path).ifPresent(script -> {
+                if (findScript(script.getName()).isPresent()) {
+                    Julti.log(Level.WARN, "You have multiple scripts with the same name (" + script.getName() + "), only one will be loaded!");
+                } else {
+                    SCRIPTS.add(script);
+                }
+            }));
         } catch (IOException e) {
             Julti.log(Level.ERROR, "Failed to load scripts: " + ExceptionUtil.toDetailedString(e));
         }
@@ -49,7 +57,7 @@ public class ScriptManager {
 
         for (String s : out.split("\n")) {
             try {
-                convertOldScript(s);
+                writeLegacyScript(s);
             } catch (NumberFormatException | IOException ignored) {
             }
         }
@@ -62,7 +70,7 @@ public class ScriptManager {
         }
     }
 
-    private static void convertOldScript(String s) throws IOException {
+    public static void writeLegacyScript(String s) throws IOException {
         String[] parts = s.split(";");
         String name = parts[0];
         StringBuilder contents = new StringBuilder();
@@ -122,7 +130,7 @@ public class ScriptManager {
         findScript(name).ifPresent(script -> {
             try {
                 Files.deleteIfExists(script.getPath());
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
             SCRIPTS.remove(script);
         });
@@ -155,5 +163,12 @@ public class ScriptManager {
 
     private static Optional<Script> findScript(String name) {
         return SCRIPTS.stream().filter(script -> script.getName().equals(name)).findAny();
+    }
+
+    public static boolean openScriptForEditing(String name) {
+        return findScript(name).map(script -> {
+            LauncherUtil.openFile(script.getPath().toString());
+            return true;
+        }).orElse(false);
     }
 }

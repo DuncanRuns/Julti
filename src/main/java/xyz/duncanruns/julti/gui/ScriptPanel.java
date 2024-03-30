@@ -1,6 +1,8 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.GUIUtil;
 
@@ -12,7 +14,7 @@ import java.awt.event.MouseEvent;
 
 public class ScriptPanel extends JPanel {
 
-    public ScriptPanel(String name, byte hotkeyContext, Runnable onDelete) {
+    public ScriptPanel(String name, byte hotkeyContext, Runnable onChange) {
         this.setBorder(new FlatBorder());
         this.setLayout(new FlowLayout());
         JPanel panel = new JPanel();
@@ -43,7 +45,7 @@ public class ScriptPanel extends JPanel {
 
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> runScript(name)));
 
-        this.addPopupMenu(name, onDelete);
+        this.addPopupMenu(name, onChange);
 
         this.add(panel);
 
@@ -54,7 +56,7 @@ public class ScriptPanel extends JPanel {
         ScriptManager.runScript(name);
     }
 
-    private void addPopupMenu(String name, Runnable onDelete) {
+    private void addPopupMenu(String name, Runnable onChange) {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -71,14 +73,14 @@ public class ScriptPanel extends JPanel {
                     JMenuItem editItem = new JMenuItem(new AbstractAction() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            ScriptPanel.this.suggestEdit(name, onDelete);
+                            ScriptPanel.this.suggestEdit(name, onChange);
                         }
                     });
                     editItem.setText("Edit");
                     JMenuItem deleteItem = new JMenuItem(new AbstractAction() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            ScriptPanel.this.suggestDelete(name, onDelete);
+                            ScriptPanel.this.suggestDelete(name, onChange);
                         }
                     });
                     deleteItem.setText("Delete");
@@ -102,18 +104,8 @@ public class ScriptPanel extends JPanel {
     }
 
     private void suggestEdit(String name, Runnable onDelete) {
-        // TODO
-//        String newSavableString = JOptionPane.showInputDialog(this, ScriptManager.getScript(name).getName(), ScriptManager.getScript(name).toSavableString());
-//        if (newSavableString == null || newSavableString.isEmpty()) {
-//            return;
-//        }
-//        if (!ScriptManager.forceAddScript(newSavableString)) {
-//            JOptionPane.showMessageDialog(this, "Could not edit script. The entered string was not a script string.", "Julti: Edit Script Error", JOptionPane.ERROR_MESSAGE);
-//        } else {
-//            if (!LegacyScript.fromSavableString(newSavableString).getName().equals(name)) { // If name changes in edit
-//                ScriptManager.removeScript(name); // Remove old script
-//                onDelete.run();
-//            }
-//        }
+        if (!ScriptManager.openScriptForEditing(name)) {
+            Julti.log(Level.ERROR, "Failed to open script file for " + name + ".");
+        }
     }
 }
