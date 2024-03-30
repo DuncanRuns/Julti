@@ -1,15 +1,21 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
+import org.kohsuke.github.GHGist;
+import org.kohsuke.github.GHGistFile;
+import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.script.Script;
 import xyz.duncanruns.julti.script.ScriptManager;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 
 public class ScriptsGUI extends JFrame {
     private boolean closed = false;
@@ -51,13 +57,24 @@ public class ScriptsGUI extends JFrame {
         this.panel.removeAll();
 
         JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
+        buttonsPanel.setLayout(new GridLayout(2, 2, 5, 5));
 
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Import Script"), a -> this.startImportScriptDialog()));
-        buttonsPanel.add(GUIUtil.createSpacer(0));
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Script"), a -> ScriptManager.requestCancel()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Import Script"), a -> this.startImportDialog()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Scripts"), a -> ScriptManager.cancelAllScripts()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Open Scripts Folder"), a -> {
+            try {
+                Desktop.getDesktop().browse(ScriptManager.SCRIPTS_FOLDER.toUri());
+            } catch (IOException ignored) {
+            }
+        }));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Reload"), a -> {
+            ScriptManager.reload();
+            this.reload();
+        }));
 
+        GUIUtil.setActualSize(buttonsPanel, 355, 55);
         this.panel.add(GUIUtil.leftJustify(buttonsPanel));
+        this.panel.add(GUIUtil.createSpacer());
 
         this.panel.add(GUIUtil.createSpacer(15));
 
@@ -71,44 +88,100 @@ public class ScriptsGUI extends JFrame {
         this.repaint();
     }
 
-    private void onClose() {
-        this.closed = true;
+    private void startImportDialog() {
+        String out = JOptionPane.showInputDialog(this, "Input a gist link/id or a legacy import code:", "Julti: Import Legacy Script", JOptionPane.PLAIN_MESSAGE);
+
+        if (out == null || out.trim().isEmpty()) {
+            return;
+        }
+        out = out.trim();
+
+        if (ScriptManager.isLegacyImportCode(out)) {
+            this.importLegacyScriptDialog(out);
+            return;
+        }
+
+        if (!ScriptManager.isGist(out)) {
+            out = "https://gist.github.com/DoesntMatter/" + out;
+            if (!ScriptManager.isGist(out)) {
+                JOptionPane.showMessageDialog(this, "Invalid import code! Please enter a gist link/id or a legacy import code to import a script!", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+        // Must be a gist now
+
+        this.importGist(out);
     }
 
-    private void startImportScriptDialog() {
-        // Single element array as a reference holder
-        final String[] ans = {JOptionPane.showInputDialog(this, "Enter the script string here:", "Julti: Import Script", JOptionPane.QUESTION_MESSAGE)};
-        final AtomicReference<Runnable> outputFromProcessing = new AtomicReference<>(() -> {
-        });
-        Julti.waitForExecute(() -> {
-            if (ans[0] == null) {
-                return;
-            }
-            ans[0] = ans[0].replace("\n", ";");
+    private void importGist(String out) {
+        String[] split = out.split("/");
+        String gistId = split[split.length - 1];
+        GHGist gist;
+        try {
+            gist = GitHub.connectAnonymously().getGist(gistId);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Failed to retrieve github gist of id " + gistId + "! Maybe you didn't enter a real gist id/link?", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
+            Julti.log(Level.ERROR, "Failed to retrieve github gist: " + ExceptionUtil.toDetailedString(e));
+            return;
+        }
+        Optional<Map.Entry<String, GHGistFile>> ghFileOpt = gist.getFiles().entrySet().stream().filter(entry -> entry.getKey().endsWith(".txt") || entry.getKey().endsWith(".lua")).findAny();
+        if (!ghFileOpt.isPresent()) {
+            JOptionPane.showMessageDialog(this, "Github gist does not contain a Julti script!", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String scriptName = ghFileOpt.get().getKey();
+        boolean isLegacy = scriptName.endsWith(".txt");
+        scriptName = scriptName.split("\\.")[0];
+        if (!this.checkCanWriteScript(scriptName)) {
+            return;
+        }
+        try {
+            ScriptManager.deleteScript(scriptName);
+            ScriptManager.writeScript(scriptName, ghFileOpt.get().getValue().getContent(), isLegacy);
+            ScriptManager.reload();
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to write script: " + ExceptionUtil.toDetailedString(e));
+            JOptionPane.showMessageDialog(this, "Failed to write script!", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
+        }
+        this.reload();
+    }
 
-            if (ScriptManager.addScript(ans[0])) {
-                this.reload();
-                return;
-            }
-            if (Script.isSavableString(ans[0])) {
-                if (ScriptManager.isDuplicateImport(ans[0])) {
-                    outputFromProcessing.set(() -> {
-                        int replaceAns = JOptionPane.showConfirmDialog(this, "A script by the same name already exists, replace it?", "Julti: Import Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (replaceAns != 0) {
-                            return;
-                        }
-                        Julti.doLater(() -> ScriptManager.forceAddScript(ans[0]));
-                    });
-                } else {
-                    outputFromProcessing.set(() -> JOptionPane.showMessageDialog(this, "Could not import script. An unknown error occurred.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE));
+    private void importLegacyScriptDialog(String out) {
+        Runnable showInvalid = () -> JOptionPane.showMessageDialog(this, "Invalid legacy script code!", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
 
-                }
-            } else {
-                outputFromProcessing.set(() -> JOptionPane.showMessageDialog(this, "Could not import script. The entered string was not a script string.", "Julti: Import Script Error", JOptionPane.ERROR_MESSAGE));
-            }
-            this.reload();
-        });
-        outputFromProcessing.get().run();
+        String[] parts = out.split(";");
+        if (parts.length < 2) {
+            showInvalid.run();
+            return;
+        }
+        String scriptName = parts[0];
+        try {
+            Byte.parseByte(parts[1]);
+        } catch (NumberFormatException e) {
+            showInvalid.run();
+            return;
+        }
+
+        if (!this.checkCanWriteScript(scriptName)) {
+            return;
+        }
+        try {
+            ScriptManager.reload();
+            ScriptManager.deleteScript(scriptName);
+            ScriptManager.writeLegacyScript(out);
+            ScriptManager.reload();
+        } catch (IOException e) {
+            Julti.log(Level.ERROR, "Failed to write script: " + ExceptionUtil.toDetailedString(e));
+        }
+        this.reload();
+    }
+
+    private boolean checkCanWriteScript(String scriptName) {
+        return !ScriptManager.getScriptNames().contains(scriptName) || 0 == JOptionPane.showConfirmDialog(this, "Overwrite existing script (" + scriptName + ")?", "Julti: Overwrite Legacy Script", JOptionPane.YES_NO_OPTION);
+    }
+
+    private void onClose() {
+        this.closed = true;
     }
 
     public boolean isClosed() {

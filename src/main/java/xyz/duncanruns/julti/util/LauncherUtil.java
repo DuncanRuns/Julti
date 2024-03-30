@@ -21,8 +21,10 @@ public class LauncherUtil {
             return;
         }
 
-        options.launchingProgramPaths.forEach(path -> {
-            Shell32.INSTANCE.ShellExecute(null, "open", path, null, Paths.get(path).getParent().toString(), 1);
-        });
+        options.launchingProgramPaths.forEach(LauncherUtil::openFile);
+    }
+
+    public static void openFile(String path) {
+        Shell32.INSTANCE.ShellExecute(null, "open", path, null, Paths.get(path).getParent().toString(), 1);
     }
 }

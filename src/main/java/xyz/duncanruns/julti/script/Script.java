@@ -1,63 +1,40 @@
 package xyz.duncanruns.julti.script;
 
-import java.util.regex.Pattern;
+import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
-public class Script {
-    private static final Pattern SAVABLE_STRING_PATTERN = Pattern.compile("^[^;]+;[0-4];.+$");
-    private String name;
-    private byte hotkeyContext;
-    private String commands; // ; separated commands
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 
-    public Script(String name, byte hotkeyContext, String commands) {
-        this.name = name.trim();
-        this.hotkeyContext = hotkeyContext;
-        this.commands = commands.trim();
+public abstract class Script {
+    public static Optional<Script> tryLoad(Path path) {
+        try {
+            return Optional.ofNullable(load(path));
+        } catch (IOException e) {
+            return Optional.empty();
+        }
     }
 
-    public static boolean isSavableString(String string) {
-        return SAVABLE_STRING_PATTERN.matcher(string).matches();
+    private static Script load(Path path) throws IOException {
+        String fileName = path.getFileName().toString();
+        if (fileName.endsWith(".lua")) {
+            return LuaScript.load(path);
+        } else if (fileName.endsWith(".txt")) {
+            return LegacyScript.load(path);
+        }
+        return null;
     }
 
-    public static Script fromSavableString(String string) {
-        String name = string.substring(0, string.indexOf(';'));
-        string = string.substring(string.indexOf(';') + 1);
-        byte hotkeyContext = Byte.parseByte(string.substring(0, string.indexOf(';')));
-        String commands = string.substring(string.indexOf(';') + 1);
-        return new Script(name, hotkeyContext, commands);
-    }
+    public abstract byte getHotkeyContext();
 
-    public byte getHotkeyContext() {
-        return this.hotkeyContext;
-    }
+    public abstract void run(CancelRequester cancelRequester);
 
-    public void setHotkeyContext(byte hotkeyContext) {
-        this.hotkeyContext = hotkeyContext;
-    }
+    public abstract Path getPath();
 
-    public String getCommands() {
-        return this.commands;
-    }
-
-    public void setCommands(String commands) {
-        this.commands = commands.trim();
-    }
-
-    public String toSavableString() {
-        return this.name + ";" + this.hotkeyContext + ";" + this.commands;
-    }
+    public abstract String getName();
 
     @Override
-    public String toString() {
-        return "Script{" +
-                "name='" + this.getName() + '\'' +
-                '}';
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name.trim();
+    public int hashCode() {
+        return this.getName().hashCode();
     }
 }

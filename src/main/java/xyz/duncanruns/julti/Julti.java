@@ -267,9 +267,9 @@ public final class Julti {
             if ((!instanceActive) && (!wallActive)) {
                 return;
             }
-            ScriptManager.runScript(scriptName, true, (byte) (instanceActive ? 1 : 2));
+            ScriptManager.getHotkeyContext(scriptName);
         } else if (hotkeyCode.equals("cancelScript")) {
-            ScriptManager.requestCancel();
+            ScriptManager.cancelAllScripts();
         } else {
             PluginEvents.MiscEventType.HOTKEY_PRESS.runAll(Pair.of(hotkeyCode, mousePosition));
             ResetHelper.run(hotkeyCode, mousePosition);
