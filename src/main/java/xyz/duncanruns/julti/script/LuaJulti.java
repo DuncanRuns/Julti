@@ -101,6 +101,8 @@ public class LuaJulti {
             this.cancelRequester = cancelRequester;
         }
 
+        // Julti Lua Library Functions Start Here //
+
         public LuaValue activateInstance(LuaValue /*int*/ instanceNum, LuaValue /*boolean*/ doSetupStyle) {
             Julti.waitForExecute(() -> Julti.getJulti().activateInstance(getInstanceFromInt(instanceNum), !doSetupStyle.isnil() && doSetupStyle.checkboolean()));
             return NIL;
@@ -314,6 +316,8 @@ public class LuaJulti {
         public LuaValue getGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ def) {
             return GLOBALS_MAP.getOrDefault(key.checkjstring(), def);
         }
+
+        // Julti Lua Library Functions End Here //
 
         @Override
         public LuaValue call(LuaValue modname, LuaValue env) {
