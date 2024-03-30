@@ -19,7 +19,7 @@ public abstract class Script {
         String fileName = path.getFileName().toString();
         if (fileName.endsWith(".lua")) {
             return LuaScript.load(path);
-        }else if(fileName.endsWith(".txt")) {
+        } else if (fileName.endsWith(".txt")) {
             return LegacyScript.load(path);
         }
         return null;
