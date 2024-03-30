@@ -267,7 +267,11 @@ public final class Julti {
             if ((!instanceActive) && (!wallActive)) {
                 return;
             }
-            ScriptManager.getHotkeyContext(scriptName);
+            byte hotkeyContext = ScriptManager.getHotkeyContext(scriptName);
+            if (hotkeyContext == 0 || (hotkeyContext == 1 && wallActive) || (hotkeyContext == 2 && instanceActive)) {
+                return;
+            }
+            ScriptManager.runScript(scriptName);
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.cancelAllScripts();
         } else {
