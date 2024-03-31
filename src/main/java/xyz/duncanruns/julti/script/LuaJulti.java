@@ -384,7 +384,7 @@ public class LuaJulti {
 
         public LuaValue /*boolean*/ isWallActive() {
             AtomicBoolean out = new AtomicBoolean();
-            Julti.waitForExecute(() -> out.set(InstanceManager.getInstanceManager().getSelectedInstance() != null));
+            Julti.waitForExecute(() -> out.set(ActiveWindowManager.isWallActive()));
             return valueOf(out.get());
         }
 
