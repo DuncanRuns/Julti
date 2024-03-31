@@ -166,6 +166,9 @@ public class ScriptManager {
     }
 
     public static void runScript(String name) {
+        if (cancelRequester.isCancelRequested()) {
+            cancelRequester = new CancelRequester();
+        }
         findScript(name).ifPresent(script -> new Thread(
                 () -> script.run(ScriptManager.cancelRequester),
                 "script-thread-" + name
