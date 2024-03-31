@@ -15,6 +15,7 @@ It can be imported by using the gist link or the gist id:
 ## Script Attributes
 
 A few settings for scripts can be specified in comments anywhere in the lua script.
+These attributes can also be set in legacy scripts (except comments in legacy scripts start with `#`).
 
 ### Hotkey Context
 
@@ -102,6 +103,7 @@ void holdKey(String key, int millis)
 boolean isInstanceActive()
 boolean isWallActive()
 ```
+(Generated with [this python script](https://gist.github.com/DuncanRuns/764867339c17e713b28796a2cbb29e10))
 
 A few notes on some of the parameters and return values:
 - `keyDown`, `keyUp`, `pressKey`, and `holdKey`, can take a single character (`'a'`, `'b'`, `'c'`, `'1'`, `'2'`, `'3'`), or a VK constant (`'VK_TAB'`, `'VK_RETURN'`). Microsoft documentation has a [list for virtual key code constants](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
