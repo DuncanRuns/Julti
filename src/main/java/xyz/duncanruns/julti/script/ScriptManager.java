@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesterManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LauncherUtil;
@@ -25,7 +26,7 @@ public class ScriptManager {
     public static final Pattern GIST_PATTERN = Pattern.compile("^(https://gist\\.github\\.com/\\w+/)\\w+$");
     public static final Pattern LEGACY_CODE_PATTERN = Pattern.compile("^.+; ?\\d ?;.+$");
 
-    public static CancelRequester cancelRequester = new CancelRequester();
+    public static CancelRequesterManager requesterManager = new CancelRequesterManager();
 
     public static void reload() {
         SCRIPTS.clear();
@@ -142,9 +143,7 @@ public class ScriptManager {
     }
 
     public static void cancelAllScripts() {
-        CancelRequester oldCR = cancelRequester;
-        cancelRequester = new CancelRequester();
-        oldCR.cancel();
+        requesterManager.cancelAll();
     }
 
     public static void deleteScript(String name) {
@@ -166,19 +165,24 @@ public class ScriptManager {
     }
 
     public static void runScript(String name) {
-        if (cancelRequester.isCancelRequested()) {
-            cancelRequester = new CancelRequester();
+        if (requesterManager.isActive(name)) {
+            return; // TODO add ability to define scripts as able to run multiple
         }
+        CancelRequester cancelRequester = requesterManager.createNew(name);
         findScript(name).ifPresent(script -> new Thread(
-                () -> script.run(ScriptManager.cancelRequester),
+                () -> script.run(cancelRequester),
                 "script-thread-" + name
         ).start());
     }
 
     public static void runScriptAndWait(String name) {
+        if (requesterManager.isActive(name)) {
+            return; // TODO add ability to define scripts as able to run multiple
+        }
+        CancelRequester cancelRequester = requesterManager.createNew(name);
         findScript(name).ifPresent(script -> {
             try {
-                script.run(ScriptManager.cancelRequester);
+                script.run(cancelRequester);
             } catch (Throwable t) {
                 Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
             }
@@ -203,4 +207,5 @@ public class ScriptManager {
     public static boolean isGist(String string) {
         return GIST_PATTERN.matcher(string).matches();
     }
+
 }
