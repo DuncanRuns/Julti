@@ -105,12 +105,12 @@ public class LuaJulti {
 
         // Julti Lua Library Functions Start Here //
 
-        public LuaValue activateInstance(LuaValue /*int*/ instanceNum, LuaValue /*boolean*/ doSetupStyle) {
+        public LuaValue /*void*/ activateInstance(LuaValue /*int*/ instanceNum, LuaValue /*boolean*/ doSetupStyle) {
             Julti.waitForExecute(() -> Julti.getJulti().activateInstance(getInstanceFromInt(instanceNum), !doSetupStyle.isnil() && doSetupStyle.checkboolean()));
             return NIL;
         }
 
-        public LuaValue sendChatMessage(LuaValue /*String*/ message) {
+        public LuaValue /*void*/ sendChatMessage(LuaValue /*String*/ message) {
             Julti.waitForExecute(() -> {
                 MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
                 if (selectedInstance == null) {
@@ -121,58 +121,58 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue clearWorlds() {
+        public LuaValue /*void*/ clearWorlds() {
             Julti.waitForExecute(BopperUtil::clearWorlds);
             return NIL;
         }
 
-        public LuaValue closeInstance(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ closeInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> getInstanceFromInt(instanceNum).reset());
             return NIL;
         }
 
-        public LuaValue closeAllInstances() {
+        public LuaValue /*void*/ closeAllInstances() {
             Julti.waitForExecute(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
             return NIL;
         }
 
-        public LuaValue replicateHotkey(LuaValue /*String*/ hotkeyCode, LuaValue /*int*/ mouseX, LuaValue /*int*/ mouseY) {
+        public LuaValue /*void*/ replicateHotkey(LuaValue /*String*/ hotkeyCode, LuaValue /*int*/ mouseX, LuaValue /*int*/ mouseY) {
             Point mousePos = mouseX.isnil() ? MouseUtil.getMousePos() : new Point(mouseX.checkint(), mouseY.checkint());
             Julti.getJulti().queueMessageAndWait(new HotkeyPressQMessage(hotkeyCode.checkjstring(), mousePos));
             return NIL;
         }
 
-        public LuaValue launchInstance(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ launchInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> SafeInstanceLauncher.launchInstance(getInstanceFromInt(instanceNum)));
             return NIL;
         }
 
-        public LuaValue launchAllInstances() {
+        public LuaValue /*void*/ launchAllInstances() {
             Julti.waitForExecute(() -> SafeInstanceLauncher.launchInstances(InstanceManager.getInstanceManager().getInstances()));
             return NIL;
         }
 
-        public LuaValue lockInstance(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ lockInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> ResetHelper.getManager().lockInstance(getInstanceFromInt(instanceNum)));
             return NIL;
         }
 
-        public LuaValue lockAllInstances() {
+        public LuaValue /*void*/ lockAllInstances() {
             Julti.waitForExecute(() -> InstanceManager.getInstanceManager().getInstances().forEach(instance -> ResetHelper.getManager().lockInstance(instance)));
             return NIL;
         }
 
-        public LuaValue log(LuaValue /*String*/ message) {
+        public LuaValue /*void*/ log(LuaValue /*String*/ message) {
             Julti.log(Level.INFO, message.checkjstring());
             return NIL;
         }
 
-        public LuaValue openFile(LuaValue /*String*/ filePath) {
+        public LuaValue /*void*/ openFile(LuaValue /*String*/ filePath) {
             LauncherUtil.openFile(filePath.checkjstring());
             return NIL;
         }
 
-        public LuaValue openInstanceToLan() {
+        public LuaValue /*void*/ openInstanceToLan() {
             Julti.waitForExecute(() -> {
                 MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
                 if (selectedInstance != null) {
@@ -182,13 +182,13 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue trySetOption(LuaValue /*String*/ optionName, LuaValue /*anything*/ optionValue) {
+        public LuaValue /*boolean*/ trySetOption(LuaValue /*String*/ optionName, LuaValue /*anything*/ optionValue) {
             AtomicBoolean out = new AtomicBoolean(false);
             Julti.waitForExecute(() -> out.set(JultiOptions.getJultiOptions().trySetValue(optionName.checkjstring(), optionValue.checkjstring())));
             return valueOf(out.get());
         }
 
-        public LuaValue getOptionAsString(LuaValue /*String*/ optionName) {
+        public LuaValue /*String*/ getOptionAsString(LuaValue /*String*/ optionName) {
             AtomicReference<String> out = new AtomicReference<>("");
             Julti.waitForExecute(() -> {
                 String val = JultiOptions.getJultiOptions().getValueString(optionName.checkjstring());
@@ -199,7 +199,7 @@ public class LuaJulti {
             return valueOf(out.get());
         }
 
-        public LuaValue tryPlaySound(LuaValue /*String*/ soundLocation, LuaValue /*float*/ volume) {
+        public LuaValue /*boolean*/ tryPlaySound(LuaValue /*String*/ soundLocation, LuaValue /*float*/ volume) {
             float volumeFloat = volume.tofloat();
 
             String soundLocationString = soundLocation.checkjstring();
@@ -216,17 +216,17 @@ public class LuaJulti {
             return FALSE;
         }
 
-        public LuaValue resetInstance(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ resetInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> getInstanceFromInt(instanceNum).reset());
             return NIL;
         }
 
-        public LuaValue resetAllInstances() {
+        public LuaValue /*void*/ resetAllInstances() {
             Julti.waitForExecute(() -> DoAllFastUtil.doAllFast(MinecraftInstance::reset));
             return NIL;
         }
 
-        public LuaValue setSessionResets(LuaValue /*int*/ sessionResets) {
+        public LuaValue /*void*/ setSessionResets(LuaValue /*int*/ sessionResets) {
             Julti.waitForExecute(() -> {
                 ResetCounter.sessionCounter = sessionResets.checkint();
                 ResetCounter.updateFiles();
@@ -235,12 +235,12 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue sleep(LuaValue /*long*/ millis) {
+        public LuaValue /*void*/ sleep(LuaValue /*long*/ millis) {
             SleepUtil.sleep(millis.checklong());
             return NIL;
         }
 
-        public LuaValue waitForInstanceLaunch(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ waitForInstanceLaunch(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             while ((!this.cancelRequester.isCancelRequested())) {
                 AtomicBoolean b = new AtomicBoolean(false);
@@ -253,7 +253,7 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue waitForInstancePreviewLoad(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ waitForInstancePreviewLoad(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             while ((!this.cancelRequester.isCancelRequested())) {
                 AtomicBoolean b = new AtomicBoolean(false);
@@ -266,7 +266,7 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue waitForInstanceLoad(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ waitForInstanceLoad(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             while ((!this.cancelRequester.isCancelRequested())) {
                 AtomicBoolean b = new AtomicBoolean(false);
@@ -279,63 +279,63 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue pressEscOnInstance(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*void*/ pressEscOnInstance(LuaValue /*int*/ instanceNum) {
             Julti.waitForExecute(() -> {
                 getInstanceFromInt(instanceNum).getKeyPresser().pressEsc();
             });
             return NIL;
         }
 
-        public LuaValue getInstanceCount() {
+        public LuaValue /*int*/ getInstanceCount() {
             return valueOf(InstanceManager.getInstanceManager().getSize());
         }
 
-        public LuaValue getSelectedInstanceNum() {
+        public LuaValue /*int*/ getSelectedInstanceNum() {
             InstanceManager instanceManager = InstanceManager.getInstanceManager();
             return valueOf(instanceManager.getInstanceNum(instanceManager.getSelectedInstance()));
         }
 
-        public LuaValue runCommand(LuaValue /*String*/ command) {
+        public LuaValue /*void*/ runCommand(LuaValue /*String*/ command) {
             CommandManager.getMainManager().runCommand(command.checkjstring(), this.cancelRequester);
             return NIL;
         }
 
-        public LuaValue focusWall() {
+        public LuaValue /*void*/ focusWall() {
             Julti.waitForExecute(() -> Julti.getJulti().focusWall());
             return NIL;
         }
 
-        public LuaValue runScript(LuaValue /*String*/ scriptName) {
+        public LuaValue /*void*/ runScript(LuaValue /*String*/ scriptName) {
             ScriptManager.runScriptAndWait(scriptName.checkjstring());
             return NIL;
         }
 
-        public LuaValue setGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ val) {
+        public LuaValue /*void*/ setGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ val) {
             GLOBALS_MAP.put(key.checkjstring(), val);
             return NIL;
         }
 
-        public LuaValue getGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ def) {
+        public LuaValue /*anything*/ getGlobal(LuaValue /*String*/ key, LuaValue /*anything*/ def) {
             return GLOBALS_MAP.getOrDefault(key.checkjstring(), def);
         }
 
-        public LuaValue getInstanceState(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*String*/ getInstanceState(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             return valueOf(instance.getStateTracker().getInstanceState().name());
         }
 
-        public LuaValue getInstanceInWorldState(LuaValue /*int*/ instanceNum) {
+        public LuaValue /*String*/ getInstanceInWorldState(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             return valueOf(instance.getStateTracker().getInWorldType().name());
         }
 
-        public LuaValue isOnMinecraftWindow() {
+        public LuaValue /*boolean*/ isOnMinecraftWindow() {
             AtomicBoolean out = new AtomicBoolean();
             Julti.waitForExecute(() -> out.set(ActiveWindowManager.isMinecraftActive()));
             return valueOf(out.get());
         }
 
-        public LuaValue keyDown(LuaValue /*String*/ key) {
+        public LuaValue /*void*/ keyDown(LuaValue /*String*/ key) {
             String keyString = key.checkjstring();
             if (keyString.startsWith("VK_")) {
                 KeyboardUtil.keyDown(Win32VK.valueOf(keyString));
@@ -350,7 +350,7 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue keyUp(LuaValue /*String*/ key) {
+        public LuaValue /*void*/ keyUp(LuaValue /*String*/ key) {
             String keyString = key.checkjstring();
             if (keyString.startsWith("VK_")) {
                 KeyboardUtil.keyUp(Win32VK.valueOf(keyString));
@@ -365,12 +365,12 @@ public class LuaJulti {
             return NIL;
         }
 
-        public LuaValue pressKey(LuaValue /*String*/ key) {
+        public LuaValue /*void*/ pressKey(LuaValue /*String*/ key) {
             this.keyDown(key);
             return this.keyUp(key);
         }
 
-        public LuaValue holdKey(LuaValue /*String*/ key, LuaValue /*int*/ millis) {
+        public LuaValue /*void*/ holdKey(LuaValue /*String*/ key, LuaValue /*int*/ millis) {
             this.keyDown(key);
             this.sleep(millis);
             return this.keyUp(key);
