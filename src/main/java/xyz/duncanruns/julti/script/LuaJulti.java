@@ -376,6 +376,18 @@ public class LuaJulti {
             return this.keyUp(key);
         }
 
+        public LuaValue /*boolean*/ isInstanceActive() {
+            AtomicBoolean out = new AtomicBoolean();
+            Julti.waitForExecute(() -> out.set(InstanceManager.getInstanceManager().getSelectedInstance() != null));
+            return valueOf(out.get());
+        }
+
+        public LuaValue /*boolean*/ isWallActive() {
+            AtomicBoolean out = new AtomicBoolean();
+            Julti.waitForExecute(() -> out.set(InstanceManager.getInstanceManager().getSelectedInstance() != null));
+            return valueOf(out.get());
+        }
+
         // Julti Lua Library Functions End Here //
 
         @Override
