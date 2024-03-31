@@ -104,4 +104,11 @@ public final class ActiveWindowManager {
             User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), false);
         }
     }
+
+    /**
+     * Returns if any minecraft window is active, even ones not in the instances lists.
+     */
+    public static boolean isMinecraftActive() {
+        return WindowTitleUtil.matchesMinecraft(activeTitle);
+    }
 }

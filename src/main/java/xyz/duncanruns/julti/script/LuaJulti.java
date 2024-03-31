@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.script;
 
+import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaError;
@@ -16,6 +17,7 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
@@ -325,6 +327,53 @@ public class LuaJulti {
         public LuaValue getInstanceInWorldState(LuaValue /*int*/ instanceNum) {
             MinecraftInstance instance = getInstanceFromInt(instanceNum);
             return valueOf(instance.getStateTracker().getInWorldType().name());
+        }
+
+        public LuaValue isOnMinecraftWindow() {
+            AtomicBoolean out = new AtomicBoolean();
+            Julti.waitForExecute(() -> out.set(ActiveWindowManager.isMinecraftActive()));
+            return valueOf(out.get());
+        }
+
+        public LuaValue keyDown(LuaValue /*String*/ key) {
+            String keyString = key.checkjstring();
+            if (keyString.startsWith("VK_")) {
+                KeyboardUtil.keyDown(Win32VK.valueOf(keyString));
+                return NIL;
+            }
+            byte[] bytes = keyString.getBytes();
+            if (bytes.length != 1) {
+                return NIL;
+            }
+            KeyboardUtil.keyDown(bytes[0]);
+
+            return NIL;
+        }
+
+        public LuaValue keyUp(LuaValue /*String*/ key) {
+            String keyString = key.checkjstring();
+            if (keyString.startsWith("VK_")) {
+                KeyboardUtil.keyUp(Win32VK.valueOf(keyString));
+                return NIL;
+            }
+            byte[] bytes = keyString.getBytes();
+            if (bytes.length != 1) {
+                return NIL;
+            }
+            KeyboardUtil.keyUp(bytes[0]);
+
+            return NIL;
+        }
+
+        public LuaValue pressKey(LuaValue /*String*/ key) {
+            this.keyDown(key);
+            return this.keyUp(key);
+        }
+
+        public LuaValue holdKey(LuaValue /*String*/ key, LuaValue /*int*/ millis) {
+            this.keyDown(key);
+            this.sleep(millis);
+            return this.keyUp(key);
         }
 
         // Julti Lua Library Functions End Here //
