@@ -14,6 +14,7 @@ public class LegacyScript extends Script {
     private final String name;
     private final Path path;
     private byte hotkeyContext = 0;
+    private boolean allowParallel = false;
 
     public LegacyScript(Path path, String contents) {
         this.path = path;
@@ -28,6 +29,9 @@ public class LegacyScript extends Script {
             if (s.startsWith("#")) {
                 if (this.hotkeyContext == 0) {
                     this.tryExtractHotkeyContext(s);
+                }
+                if (!this.allowParallel) {
+                    this.tryExtractAllowParallel(s);
                 }
                 continue;
             }
@@ -57,6 +61,20 @@ public class LegacyScript extends Script {
         }
     }
 
+    private void tryExtractAllowParallel(String s) {
+        s = s.replace("# ", "#");
+        if (s.startsWith("#allow-parallel=")) {
+            switch (s.substring(16)) {
+                case "true":
+                    this.allowParallel = true;
+                    break;
+                case "false":
+                    this.allowParallel = false;
+                    break;
+            }
+        }
+    }
+
     @Override
     public byte getHotkeyContext() {
         return this.hotkeyContext;
@@ -80,5 +98,10 @@ public class LegacyScript extends Script {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public boolean allowsParallelRunning() {
+        return this.allowParallel;
     }
 }

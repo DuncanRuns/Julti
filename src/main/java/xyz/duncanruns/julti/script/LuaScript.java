@@ -11,12 +11,14 @@ public class LuaScript extends Script {
     private final Path path;
     private final String contents;
     private final byte hotkeyContext;
+    private final boolean allowParallel;
 
     private LuaScript(Path path, String contents) {
         this.path = path;
         this.contents = contents;
         this.name = this.path.getFileName().toString().split("\\.")[0];
         this.hotkeyContext = extractHotkeyContext(contents);
+        this.allowParallel = extractAllowParallel(contents);
     }
 
     private static byte extractHotkeyContext(String contents) {
@@ -34,6 +36,21 @@ public class LuaScript extends Script {
             }
         }
         return 0;
+    }
+
+    private static boolean extractAllowParallel(String contents) {
+        for (String s : contents.split("\n")) {
+            s = s.trim().replace("-- ", "--");
+            if (s.startsWith("--allow-parallel=")) {
+                switch (s.substring(17)) {
+                    case "true":
+                        return true;
+                    case "false":
+                        return false;
+                }
+            }
+        }
+        return false;
     }
 
     public static LuaScript load(Path path) throws IOException {
@@ -59,5 +76,10 @@ public class LuaScript extends Script {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public boolean allowsParallelRunning() {
+        return this.allowParallel;
     }
 }

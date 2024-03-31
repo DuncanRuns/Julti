@@ -165,28 +165,24 @@ public class ScriptManager {
     }
 
     public static void runScript(String name) {
-        if (requesterManager.isActive(name)) {
-            return; // TODO add ability to define scripts as able to run multiple
-        }
-        CancelRequester cancelRequester = requesterManager.createNew(name);
-        findScript(name).ifPresent(script -> new Thread(
-                () -> script.run(cancelRequester),
-                "script-thread-" + name
-        ).start());
+        new Thread(() -> runScriptAndWait(name), "script-thread-" + name.toLowerCase().replace(" ", "")).start();
     }
 
     public static void runScriptAndWait(String name) {
-        if (requesterManager.isActive(name)) {
-            return; // TODO add ability to define scripts as able to run multiple
+        Optional<Script> scriptOpt = findScript(name);
+        if (!scriptOpt.isPresent()) {
+            return;
+        }
+        Script script = scriptOpt.get();
+        if (!script.allowsParallelRunning() && requesterManager.isActive(name)) {
+            return;
         }
         CancelRequester cancelRequester = requesterManager.createNew(name);
-        findScript(name).ifPresent(script -> {
-            try {
-                script.run(cancelRequester);
-            } catch (Throwable t) {
-                Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
-            }
-        });
+        try {
+            script.run(cancelRequester);
+        } catch (Throwable t) {
+            Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
+        }
     }
 
     private static Optional<Script> findScript(String name) {

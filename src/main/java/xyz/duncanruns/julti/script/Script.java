@@ -33,6 +33,8 @@ public abstract class Script {
 
     public abstract String getName();
 
+    public abstract boolean allowsParallelRunning();
+
     @Override
     public int hashCode() {
         return this.getName().hashCode();
