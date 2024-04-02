@@ -183,6 +183,7 @@ public class ScriptManager {
         } catch (Throwable t) {
             Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
         }
+        requesterManager.remove(name);
     }
 
     private static Optional<Script> findScript(String name) {
