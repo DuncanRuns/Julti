@@ -131,6 +131,10 @@ public final class JultiAppLaunch {
         lock = file.getChannel().tryLock();
         file.write('0'); // throws IOException when already locked
 
+        if (lock == null) {
+            throw new IOException("LOCK file is locked!");
+        }
+
         // Schedule lock release
         Runtime.getRuntime().addShutdownHook(new Thread(JultiAppLaunch::releaseLock));
     }
