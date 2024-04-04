@@ -6,6 +6,7 @@ import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.gui.DownloadProgressFrame;
 import xyz.duncanruns.julti.gui.JultiGUI;
@@ -131,6 +132,9 @@ public final class UpdateUtil {
         }
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
+
+        // Release LOCK so updating can go smoothly
+        JultiAppLaunch.releaseLock();
 
         // Use powershell's start-process to start it detached
         String powerCommand = String.format("start-process '%s' '-jar \"%s\" -deleteOldJar \"%s\"'", javaExe, newJarPath, Julti.getSourcePath());

@@ -12,10 +12,15 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 public final class JultiAppLaunch {
     public static String[] args;
+    private static RandomAccessFile file;
+    private static FileLock lock;
 
     private JultiAppLaunch() {
     }
@@ -42,6 +47,9 @@ public final class JultiAppLaunch {
 
         // Ensure Julti Dir
         JultiOptions.ensureJultiDir();
+
+        // Check lock
+        tryCheckLock();
 
         // Load Options
         JultiOptions.getJultiOptions();
@@ -79,5 +87,39 @@ public final class JultiAppLaunch {
 
         // Set tooltip delay
         ToolTipManager.sharedInstance().setInitialDelay(0);
+    }
+
+    private static void tryCheckLock() {
+        try {
+            checkLock();
+        } catch (IOException e) {
+            showMultiJultiWarning();
+        }
+    }
+
+    private static void checkLock() throws IOException {
+        Path lockPath = JultiOptions.getJultiDir().resolve("LOCK").toAbsolutePath();
+
+        // Create random access file and file lock and store in fields to not get gc'd.
+        file = new RandomAccessFile(lockPath.toFile(), "rw");
+        lock = file.getChannel().tryLock();
+        file.write('0'); // throws IOException when already locked
+
+        // Schedule lock release
+        Runtime.getRuntime().addShutdownHook(new Thread(JultiAppLaunch::releaseLock));
+    }
+
+    private static void showMultiJultiWarning() {
+        if (0 != JOptionPane.showConfirmDialog(null, "Julti is already running? Are you sure you want to open Julti again?", "Julti: Already opened", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+            System.exit(0);
+        }
+    }
+
+    public static void releaseLock() {
+        try {
+            lock.release();
+            file.close();
+        } catch (IOException ignored) {
+        }
     }
 }
