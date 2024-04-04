@@ -69,43 +69,8 @@ public final class MistakesUtil {
             return;
         }
     }
-
-    /**
-     * @author itsdxrk
-     * @author jojoe77777
-     * @author DuncanRuns
-     * @author draconix6
-     */
-    private static void checkOtherJultiOpen() throws PowerShellExecutionException, IOException {
-        User32.INSTANCE.EnumWindows((hWnd, arg) -> {
-            int pid = PidUtil.getPidFromHwnd(hWnd);
-            // keep checking windows if current window is self
-            if (pid == PidUtil.getPidForSelf()) {
-                return true;
-            }
-
-            String title = WindowTitleUtil.getHwndTitle(hWnd);
-            if (title.contains("Julti")) {
-                // window title contains julti - can probably stop there, however we check the running process just in case
-                try {
-                    String out = PowerShellUtil.execute("$proc = Get-CimInstance Win32_Process -Filter \"ProcessId = PIDHERE\";$proc.CommandLine".replace("PIDHERE", String.valueOf(pid)));
-                    if (out.contains("javaw.exe") || out.contains("java.exe")) {
-                        String message = "Another instance of Julti is open. To prevent issues, please close one of them.";
-                        Julti.log(Level.WARN, message);
-                        notifyMistake("Julti: Warning", message);
-                        return false;
-                    }
-                } catch (PowerShellExecutionException | IOException e) {
-                    Julti.log(Level.WARN, "Another instance of Julti may be open. To prevent issues, ensure only one Julti is running.");
-                    return false;
-                }
-            }
-            return true;
-        }, null);
-    }
-
+    
     public static void checkStartupMistakes() {
         tryCheckWallMacroOpen();
-        tryCheckOtherJultiOpen();
     }
 }
