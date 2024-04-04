@@ -4,7 +4,6 @@ import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.gui.JultiGUI;
-import xyz.duncanruns.julti.win32.User32;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -69,7 +68,7 @@ public final class MistakesUtil {
             return;
         }
     }
-    
+
     public static void checkStartupMistakes() {
         tryCheckWallMacroOpen();
     }
