@@ -140,7 +140,7 @@ public final class JultiAppLaunch {
     }
 
     private static void showMultiJultiWarning() {
-        if (0 != JOptionPane.showConfirmDialog(null, "Julti is already running? Are you sure you want to open Julti again?", "Julti: Already opened", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
+        if (0 != JOptionPane.showConfirmDialog(null, "Julti is already running! Are you sure you want to open Julti again?", "Julti: Already Opened", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE)) {
             System.exit(0);
         }
     }
