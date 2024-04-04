@@ -29,14 +29,6 @@ public final class MistakesUtil {
         }
     }
 
-    public static void tryCheckOtherJultiOpen() {
-        try {
-            checkOtherJultiOpen();
-        } catch (PowerShellExecutionException | IOException e) {
-            Julti.log(Level.ERROR, "Failed to check if another instance of Julti is opened: " + ExceptionUtil.toDetailedString(e));
-        }
-    }
-
     /**
      * <a href="https://stackoverflow.com/questions/35129457/how-to-check-if-a-process-is-running-on-windows">Source</a>
      *
