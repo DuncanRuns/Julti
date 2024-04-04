@@ -16,6 +16,9 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class JultiAppLaunch {
     public static String[] args;
@@ -89,14 +92,37 @@ public final class JultiAppLaunch {
         ToolTipManager.sharedInstance().setInitialDelay(0);
     }
 
+    /**
+     * Tries to get the file lock on the .Julti/LOCK file, and if an IOException is thrown, asks the user if they would like to continue.
+     */
     private static void tryCheckLock() {
         try {
             checkLock();
         } catch (IOException e) {
             showMultiJultiWarning();
+            scheduleRegainLock();
         }
     }
 
+    /**
+     * Tries to obtain the lock every few seconds so that when an old Julti closes, this Julti can obtain the lock.
+     */
+    private static void scheduleRegainLock() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> {
+            try {
+                checkLock();
+            } catch (IOException e) {
+                scheduleRegainLock();
+            }
+        }, 2, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Tries to get the file lock on the .Julti/LOCK file.
+     *
+     * @throws IOException if the lock could not be obtained.
+     */
     private static void checkLock() throws IOException {
         Path lockPath = JultiOptions.getJultiDir().resolve("LOCK").toAbsolutePath();
 
