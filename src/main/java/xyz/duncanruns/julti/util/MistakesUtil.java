@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.util;
 
-import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.gui.JultiGUI;
