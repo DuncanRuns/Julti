@@ -13,10 +13,12 @@ import xyz.duncanruns.julti.util.KeyboardUtil;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public abstract class ResetManager {
+    private List<Integer> defaultInstanceZOrder = null;
 
     public List<ActionResult> doReset() {
         String toCopy = JultiOptions.getJultiOptions().clipboardOnReset;
@@ -94,12 +96,31 @@ public abstract class ResetManager {
             posOnScene.y = posOnScene.y * sceneSize.height / bounds.height;
         }
 
-        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
+        List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
+        for (int i : this.getInstanceZOrder()) {
+            MinecraftInstance instance = instances.get(i);
             if (this.getInstancePosition(instance, sceneSize).contains(posOnScene)) {
                 return instance;
             }
         }
         return null;
+    }
+
+    /**
+     * Returns indexes (not nums) of the top-most instance to bottom-most instance to be implemented in OBS order. This will also be used to determine which instance is interacted with if the mouse is hovering above more than 1 instance.
+     * E.g. an instance order of [3,0,1,2] implies the instance at index 3 (instance #4) should be shown above everything else.
+     */
+    public List<Integer> getInstanceZOrder() {
+        // Get total instances
+        int totalInstances = InstanceManager.getInstanceManager().getSize();
+        // Check if default order doesn't exist or doesn't match instances count
+        if (this.defaultInstanceZOrder == null || this.defaultInstanceZOrder.size() != totalInstances) {
+            this.defaultInstanceZOrder = new ArrayList<>(totalInstances);
+            for (int i = 0; i < totalInstances; i++) {
+                this.defaultInstanceZOrder.add(i);
+            }
+        }
+        return this.defaultInstanceZOrder;
     }
 
     /**
