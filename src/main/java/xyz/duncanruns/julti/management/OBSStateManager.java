@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class OBSStateManager {
     private static final OBSStateManager INSTANCE = new OBSStateManager();
@@ -35,7 +36,12 @@ public class OBSStateManager {
                 + (options.centerAlignActiveInstance ? 2 : 0)
                 + (options.invisibleDirtCovers ? 1 : 0);
 
-        return String.format("%d,%s,%s", flags, formatAlignScale(options.centerAlignScaleX), formatAlignScale(options.centerAlignScaleY));
+        return String.format("%d,%s,%s,%s", flags, formatAlignScale(options.centerAlignScaleX), formatAlignScale(options.centerAlignScaleY), getInstanceZOrderString());
+    }
+
+    private static String getInstanceZOrderString() {
+        // Convert to instance numbers because lua lol
+        return ResetHelper.getManager().getInstanceZOrder().stream().map(i -> ""+(i + 1)).collect(Collectors.joining("-"));
     }
 
     public static String formatAlignScale(float f) {

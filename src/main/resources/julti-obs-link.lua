@@ -39,6 +39,7 @@ timers_activated = false
 scenes_regenerated = true
 last_state_text = ""
 last_scene_name = ""
+instance_order = ""
 
 gen_scenes_requested = false
 gen_stream_scenes_requested = false
@@ -109,10 +110,11 @@ function set_instance_data(num, lock_visible, dirt_cover, freeze_active, x, y, w
     center_align = center_align or false
 
     local group = get_group_as_scene("Instance " .. num)
-    
+
     if group == nil and scenes_regenerated then
         scenes_regenerated = false
-        obs.script_log(200, "Detected newly added instances! Please go to Tools > Scripts > Generate Scenes to add them to OBS.")
+        obs.script_log(200,
+            "Detected newly added instances! Please go to Tools > Scripts > Generate Scenes to add them to OBS.")
     end
 
     if invisible_dirt_covers and dirt_cover then
@@ -579,7 +581,7 @@ function generate_scenes()
         obs.script_log(200, "If you want to recreate these scenes,")
         obs.script_log(200, "delete them first before pressing Generate Scenes.")
     end
-    
+
     scenes_regenerated = true
 end
 
@@ -1008,7 +1010,8 @@ function update_scene_size(skipLog)
         pcall(write_file, julti_dir .. "obsscenesize", total_width .. "," .. total_height)
 
         if not skipLog then
-            obs.script_log(200, "Detected a change in OBS canvas resolution! If Julti is currently running, please restart it to fix scene sizes.")
+            obs.script_log(200,
+                "Detected a change in OBS canvas resolution! If Julti is currently running, please restart it to fix scene sizes.")
         end
     end
 end
@@ -1092,6 +1095,7 @@ function loop()
     disable_all_indicators()
 
     if user_location == "W" then
+        rearrange_instances()
         bring_to_top(obs.obs_scene_find_source(get_scene("Julti"), "Wall On Top"))
         if show_indicators then enable_indicators(instance_count) end
         if (scene_exists("Walling")) then
@@ -1133,6 +1137,9 @@ function set_globals_from_state(options_section)
     set_globals_from_bits(tonumber(args[1]))
     center_align_scale_x = tonumber(args[2]) or 1.0
     center_align_scale_y = tonumber(args[3]) or 1.0
+    if #args > 3 then
+        instance_order = args[4]
+    end
 end
 
 function set_globals_from_bits(flag_int)
@@ -1175,5 +1182,12 @@ function hide_example_instances()
     local scene = get_scene("Lock Display")
     local item = obs.obs_scene_find_source(scene, "Example Instances")
     obs.obs_sceneitem_set_visible(item, false)
+end
+
+function rearrange_instances()
+    local order = split_string(instance_order, "-")
+    for i = #order, 1, -1 do
+        bring_to_top(obs.obs_scene_find_source(get_scene("Julti"), "Instance " .. order[i]))
+    end
 end
 
