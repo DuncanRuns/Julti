@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.script;
 
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.script.lua.LuaRunner;
 import xyz.duncanruns.julti.util.FileUtil;
 
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class LuaScript extends Script {
 
     @Override
     public void run(CancelRequester cancelRequester) {
-        LuaJulti.runLuaScript(this.contents, cancelRequester);
+        LuaRunner.runLuaScript(this.contents, cancelRequester);
     }
 
     @Override
