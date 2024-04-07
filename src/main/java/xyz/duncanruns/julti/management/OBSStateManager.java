@@ -41,7 +41,7 @@ public class OBSStateManager {
 
     private static String getInstanceZOrderString() {
         // Convert to instance numbers because lua lol
-        return ResetHelper.getManager().getInstanceZOrder().stream().map(i -> ""+(i + 1)).collect(Collectors.joining("-"));
+        return ResetHelper.getManager().getInstanceZOrder().stream().map(i -> "" + (i + 1)).collect(Collectors.joining("-"));
     }
 
     public static String formatAlignScale(float f) {
