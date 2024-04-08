@@ -16,6 +16,7 @@ Changes in v1.4.0:
     - Should be way more powerful than legacy scripts
     - .txt script files will be legacy scripts, .lua script files will be lua scripts
     - Added lua functions equivalents for all the Julti commands and a few more
+    - Plugins are be able to register libraries for lua scripts to have access to
   - Greatly improved script importing
     - You can now put a github gist link or id and download scripts
       - The gist must contain a .lua file for a lua script or .txt file for a legacy script
@@ -25,6 +26,7 @@ Changes in v1.4.0:
 - Added basic sound randomization (selecting a folder will pick a random sound from the folder)
 - Move warnings for invalid states to debug messages
 - Fullscreen fix for 1.19+ (@draconix6 #90)
+- Added Z ordering support for reset styles. Custom reset styles (notably custom wall) can now specify the order that instances should overlap.
 - Prevent instances from launching in fullscreen (sets `fullscreen:false` in options.txt before launch)
 - Fix instance detection for weird legacy versions
 - Update benchmark plugin
