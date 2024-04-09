@@ -10,6 +10,7 @@ import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.gui.DownloadProgressFrame;
 import xyz.duncanruns.julti.gui.JultiGUI;
+import xyz.duncanruns.julti.plugin.PluginEvents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -133,6 +134,7 @@ public final class UpdateUtil {
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
 
+        PluginEvents.RunnableEventType.PRE_UPDATE.runAll();
         // Release LOCK so updating can go smoothly
         JultiAppLaunch.releaseLock();
 

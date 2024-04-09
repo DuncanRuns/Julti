@@ -24,7 +24,9 @@ public final class PluginEvents {
         // Runs when all instances are found
         ALL_INSTANCES_FOUND,
         // Runs when the hotkey manager reloads
-        HOTKEY_MANAGER_RELOAD;
+        HOTKEY_MANAGER_RELOAD,
+        // Runs just before closing to change to an updated version of Julti
+        PRE_UPDATE;
 
         private final List<Runnable> runnables = new LinkedList<>();
 
