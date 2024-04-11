@@ -275,7 +275,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return out.get();
     }
 
-    public boolean booleanisWallActive() {
+    public boolean isWallActive() {
         AtomicBoolean out = new AtomicBoolean();
         Julti.waitForExecute(() -> out.set(ActiveWindowManager.isWallActive()));
         return out.get();
