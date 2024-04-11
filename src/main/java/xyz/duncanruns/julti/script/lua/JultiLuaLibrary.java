@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("unused")
@@ -279,5 +280,64 @@ class JultiLuaLibrary extends LuaLibrary {
         AtomicBoolean out = new AtomicBoolean();
         Julti.waitForExecute(() -> out.set(ActiveWindowManager.isWallActive()));
         return out.get();
+    }
+
+    public long getLastActivation(int instanceNum) {
+        AtomicLong out = new AtomicLong();
+        Julti.waitForExecute(() -> {
+            out.set(getInstanceFromInt(instanceNum).getLastActivation());
+        });
+        return out.get();
+    }
+
+    public long getCurrentTime() {
+        return System.currentTimeMillis();
+    }
+
+    public void cancelScript() {
+        this.cancelRequester.cancel();
+    }
+
+    public void cancelAllScripts() {
+        ScriptManager.cancelAllScripts();
+    }
+
+    public void waitForAllInstancesLaunch() {
+        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
+            while ((!this.cancelRequester.isCancelRequested())) {
+                AtomicBoolean b = new AtomicBoolean(false);
+                Julti.waitForExecute(() -> b.set(InstanceManager.getInstanceManager().getMatchingInstance(instance).hasWindow()));
+                if (b.get()) {
+                    break;
+                }
+                SleepUtil.sleep(50);
+            }
+        }
+    }
+
+    public void waitForAllInstanceSPreviewLoad() {
+        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
+            while ((!this.cancelRequester.isCancelRequested())) {
+                AtomicBoolean b = new AtomicBoolean(false);
+                Julti.waitForExecute(() -> b.set(instance.getStateTracker().isCurrentState(InstanceState.PREVIEWING)));
+                if (b.get()) {
+                    break;
+                }
+                SleepUtil.sleep(50);
+            }
+        }
+    }
+
+    public void waitForAllInstancesLoad() {
+        for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
+            while ((!this.cancelRequester.isCancelRequested())) {
+                AtomicBoolean b = new AtomicBoolean(false);
+                Julti.waitForExecute(() -> b.set(instance.getStateTracker().isCurrentState(InstanceState.INWORLD)));
+                if (b.get()) {
+                    break;
+                }
+                SleepUtil.sleep(50);
+            }
+        }
     }
 }

@@ -102,6 +102,13 @@ void pressKey(String key)
 void holdKey(String key, int millis)
 boolean isInstanceActive()
 boolean isWallActive()
+long getLastActivation(int instanceNum)
+long getCurrentTime()
+void cancelScript()
+void cancelAllScripts()
+void waitForAllInstancesLaunch()
+void waitForAllInstanceSPreviewLoad()
+void waitForAllInstancesLoad()
 ```
 (Generated with [this python script](https://gist.github.com/DuncanRuns/764867339c17e713b28796a2cbb29e10))
 
