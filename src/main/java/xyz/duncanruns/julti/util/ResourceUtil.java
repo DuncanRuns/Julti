@@ -90,7 +90,7 @@ public final class ResourceUtil {
             JultiOptions.getJultiDir().resolve(path).toFile().mkdirs();
             List<String> resources = getResourcesFromFolder(path);
             for (String innerName : resources) {
-                genInJultiFolder(path + "/" + innerName);
+                genInJultiFolder((path + "/" + innerName).replace("\\", "/").replace("//", "/"));
             }
         } catch (Exception e) {
             log(Level.ERROR, "Failed to copy resource: " + ExceptionUtil.toDetailedString(e));
