@@ -126,3 +126,17 @@ A few notes on some of the parameters and return values:
 - `isInstanceActive()` and `isOnMinecraftWindow()` differ in the following way: 
   - `isInstanceActive()` will return `true` only if a minecraft instance from Julti's instances list is active.
   - `isOnMinecraftWindow()` will return `true` if any minecraft window is active.
+
+# Making a Lua Library for Julti
+Sample code here:
+https://github.com/DuncanRuns/Julti-Benchmark/commit/884d853a0d34bfe537b99cd424379bae55c03fa6
+
+1. Make a class that `extends LuaLibrary`
+2. Use `@SuppressWarnings("unused")` on the class so that you don't get unused warnings
+3. Make a constructor: `public YourLibraryClass(CancelRequester requester) {super(requester,"namethatluauseshere")}` replacing "namethatluauseshere" with the library name you want to use in lua scripts
+4. Make some regular java methods to be magically turned into lua functions.
+  - Supported parameter types:
+    - Basic java types: primitives (`int`, `double`), primitive wrappers (`Integer`, `Double`),  and `String`
+    - `LuaValue` which directly takes what is given by lua with no conversion to java types
+- Supported return types include all supported parameter types as well as `void`
+5. Register the library with `LuaLibraries.registerLuaLibrary(YourLibraryClass::new)`
