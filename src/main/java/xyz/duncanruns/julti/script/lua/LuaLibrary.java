@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class LuaLibrary extends TwoArgFunction {
-    public static final Map<Class<?>, Function<LuaValue, Object>> luaToJavaMap = generateLuaToJavaMap();
-    public static final Map<Class<?>, Function<Object, LuaValue>> javaToLuaMap = generateJavaToLuaMap();
+    public static final Map<Class<?>, Function<Varargs, Object>> luaToJavaMap = generateLuaToJavaMap();
+    public static final Map<Class<?>, Function<Object, Varargs>> javaToLuaMap = generateJavaToLuaMap();
 
     protected final CancelRequester cancelRequester;
     private final String libraryName;
@@ -27,24 +27,25 @@ public abstract class LuaLibrary extends TwoArgFunction {
         this.libraryName = libraryName;
     }
 
-    private static Map<Class<?>, Function<LuaValue, Object>> generateLuaToJavaMap() {
-        Map<Class<?>, Function<LuaValue, Object>> map = new HashMap<>();
-        map.put(int.class, luaValue -> luaValue.checknumber().toint());
-        map.put(float.class, luaValue -> luaValue.checknumber().tofloat());
-        map.put(long.class, luaValue -> luaValue.checknumber().tolong());
-        map.put(double.class, luaValue -> luaValue.checknumber().todouble());
-        map.put(char.class, luaValue -> luaValue.checknumber().tochar());
-        map.put(short.class, luaValue -> luaValue.checknumber().toshort());
-        map.put(byte.class, luaValue -> luaValue.checknumber().tobyte());
-        map.put(boolean.class, LuaValue::checkboolean);
-        map.put(String.class, luaValue -> luaValue.isnil() ? null : luaValue.checkjstring());
-        map.put(LuaValue.class, luaValue -> luaValue);
-        Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, luaValue -> luaValue.isnil() ? null : map.get(Primitives.unwrap(clazz)).apply(luaValue)));
+    private static Map<Class<?>, Function<Varargs, Object>> generateLuaToJavaMap() {
+        Map<Class<?>, Function<Varargs, Object>> map = new HashMap<>();
+        map.put(int.class, varargs -> ((LuaValue) varargs).checknumber().toint());
+        map.put(float.class, varargs -> ((LuaValue) varargs).checknumber().tofloat());
+        map.put(long.class, varargs -> ((LuaValue) varargs).checknumber().tolong());
+        map.put(double.class, varargs -> ((LuaValue) varargs).checknumber().todouble());
+        map.put(char.class, varargs -> ((LuaValue) varargs).checknumber().tochar());
+        map.put(short.class, varargs -> ((LuaValue) varargs).checknumber().toshort());
+        map.put(byte.class, varargs -> ((LuaValue) varargs).checknumber().tobyte());
+        map.put(boolean.class, varargs -> ((LuaValue) varargs).checknumber().checkboolean());
+        map.put(String.class, varargs -> ((LuaValue) varargs).isnil() ? null : ((LuaValue) varargs).checkjstring());
+        map.put(LuaValue.class, varargs -> varargs);
+        map.put(Varargs.class, varargs -> varargs);
+        Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, varargs -> varargs == NIL ? null : map.get(Primitives.unwrap(clazz)).apply(varargs)));
         return map;
     }
 
-    private static Map<Class<?>, Function<Object, LuaValue>> generateJavaToLuaMap() {
-        Map<Class<?>, Function<Object, LuaValue>> map = new HashMap<>();
+    private static Map<Class<?>, Function<Object, Varargs>> generateJavaToLuaMap() {
+        Map<Class<?>, Function<Object, Varargs>> map = new HashMap<>();
         map.put(int.class, o -> valueOf((int) o));
         map.put(float.class, o -> valueOf((float) o));
         map.put(long.class, o -> valueOf((long) o));
@@ -56,6 +57,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
         map.put(void.class, o -> NIL);
         map.put(String.class, o -> valueOf((String) o));
         map.put(LuaValue.class, o -> (LuaValue) o);
+        map.put(Varargs.class, o -> (Varargs) o);
         Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, o -> o == null ? NIL : map.get(Primitives.unwrap(clazz)).apply(o)));
         return map;
     }
