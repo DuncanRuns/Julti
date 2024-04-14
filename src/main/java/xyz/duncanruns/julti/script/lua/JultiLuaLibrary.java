@@ -216,7 +216,7 @@ class JultiLuaLibrary extends LuaLibrary {
     }
 
     public LuaValue getGlobal(String key, LuaValue def) {
-        return LuaRunner.GLOBALS_MAP.getOrDefault(key, def);
+        return LuaRunner.GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
     }
 
     public String getInstanceState(int instanceNum) {
