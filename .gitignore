@@ -71,6 +71,9 @@ hs_err_pid*
 *.iml
 *.ipr
 
+# Visual Studio Code
+.vscode/
+
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 
