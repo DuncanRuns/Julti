@@ -3,10 +3,10 @@ package xyz.duncanruns.julti.command;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.script.ScriptManager;
 
-public class RunScriptCommand extends Command {
+public class ScriptCommand extends Command {
     @Override
     public String helpDescription() {
-        return "runscript [script name] - Runs a script of the specified name";
+        return "script [script name] - Runs a script of the specified name";
     }
 
     @Override
@@ -21,7 +21,7 @@ public class RunScriptCommand extends Command {
 
     @Override
     public String getName() {
-        return "runscript";
+        return "script";
     }
 
     @Override
