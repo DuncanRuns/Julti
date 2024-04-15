@@ -43,15 +43,16 @@ public class LogPanel extends JPanel {
     private void createCommandLine() {
         JTextField commandLine = new JTextField("Enter commands here...");
         commandLine.addActionListener(e -> {
-            Thread.currentThread().setName("julti-gui");
             String command = e.getActionCommand();
             if (command.startsWith("/")) {
                 command = command.substring(1);
             }
             String finalCommand = command;
-            for (String s : finalCommand.split(";")) {
-                CommandManager.getMainManager().runCommand(s);
-            }
+            new Thread(() -> {
+                for (String s : finalCommand.split(";")) {
+                    CommandManager.getMainManager().runCommand(s);
+                }
+            }, "julti-command-line").start();
             commandLine.setText("");
         });
         commandLine.addFocusListener(new FocusListener() {
