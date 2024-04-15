@@ -39,7 +39,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
         map.put(char.class, varargs -> ((LuaValue) varargs).checknumber().tochar());
         map.put(short.class, varargs -> ((LuaValue) varargs).checknumber().toshort());
         map.put(byte.class, varargs -> ((LuaValue) varargs).checknumber().tobyte());
-        map.put(boolean.class, varargs -> ((LuaValue) varargs).checknumber().checkboolean());
+        map.put(boolean.class, varargs -> ((LuaValue) varargs).checkboolean());
         map.put(String.class, varargs -> ((LuaValue) varargs).isnil() ? null : ((LuaValue) varargs).checkjstring());
         map.put(LuaValue.class, varargs -> varargs);
         map.put(Varargs.class, varargs -> varargs);
