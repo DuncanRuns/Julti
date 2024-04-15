@@ -12,9 +12,12 @@ public class CancelRequesterManager {
         this.requesters.removeIf(CancelRequester::isCancelRequested);
     }
 
-    public synchronized void cancelAll() {
+    public synchronized int cancelAll() {
+        this.update();
+        int out = this.requesters.size();
         this.requesters.forEach(CancelRequester::cancel);
         this.requesters = new LinkedList<>();
+        return out;
     }
 
     public synchronized CancelRequester createNew(String name) {

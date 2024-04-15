@@ -143,7 +143,10 @@ public class ScriptManager {
     }
 
     public static void cancelAllScripts() {
-        requesterManager.cancelAll();
+        int cancelled = requesterManager.cancelAll();
+        if(cancelled > 0) {
+            Julti.log(Level.INFO, "Cancelled " + cancelled + " scripts.");
+        }
     }
 
     public static void deleteScript(String name) {
