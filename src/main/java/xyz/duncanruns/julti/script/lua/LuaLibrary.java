@@ -1,12 +1,15 @@
 package xyz.duncanruns.julti.script.lua;
 
 import com.google.common.primitives.Primitives;
+import org.apache.logging.log4j.Level;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,7 +73,12 @@ public abstract class LuaLibrary extends TwoArgFunction {
                 Class<?>[] parameterTypes = method.getParameterTypes();
 
                 for (int i = 0; i < method.getParameterCount(); i++) {
-                    params[i] = luaToJavaMap.get(parameterTypes[i]).apply(args.arg(i + 1));
+                    try {
+                        params[i] = luaToJavaMap.get(parameterTypes[i]).apply(args.arg(i + 1));
+                    } catch (Throwable t) {
+                        Julti.log(Level.ERROR, "Failed to convert parameter " + i + " (" + parameterTypes[i].getSimpleName() + ") for method \"" + method.getName() + "\": " + ExceptionUtil.toDetailedString(t));
+                        throw t;
+                    }
                 }
 
                 try {

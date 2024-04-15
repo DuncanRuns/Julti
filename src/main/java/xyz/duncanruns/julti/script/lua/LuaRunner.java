@@ -28,7 +28,7 @@ public class LuaRunner {
             chunk.call();
         } catch (LuaError e) {
             if (!(e.getCause() instanceof LuaScriptCancelledException)) {
-                Julti.log(Level.ERROR, "Error while executing script: " + ExceptionUtil.toDetailedString(e.getCause()));
+                Julti.log(Level.ERROR, "Error while executing script: " + ExceptionUtil.toDetailedString(e.getCause() != null ? e.getCause() : e));
             }
         }
     }
