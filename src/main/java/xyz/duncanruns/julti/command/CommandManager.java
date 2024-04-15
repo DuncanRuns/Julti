@@ -31,7 +31,8 @@ public class CommandManager {
             new SessionResetCommand(),
             new DoActionCommand(),
             new ClearWorldsCommand(),
-            new CancelIfCommand()
+            new CancelIfCommand(),
+            new ScriptCommand()
     )));
 
     static {
