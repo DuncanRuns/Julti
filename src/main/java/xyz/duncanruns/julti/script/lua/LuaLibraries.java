@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class LuaLibraries {
-    private static final List<Function<CancelRequester, LuaLibrary>> LIBRARY_PROVIDERS = new ArrayList<>(Collections.singletonList(JultiLuaLibrary::new));
+    private static final List<Function<CancelRequester, LuaLibrary>> LIBRARY_PROVIDERS = new ArrayList<>();
 
     public static void registerLuaLibrary(Function<CancelRequester, LuaLibrary> libraryProvider) {
         LIBRARY_PROVIDERS.add(libraryProvider);

@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.script.lua;
 
 import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
+import org.luaj.vm2.Lua;
 import org.luaj.vm2.LuaValue;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -14,6 +15,8 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.script.LuaScript;
+import xyz.duncanruns.julti.script.Script;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 
@@ -27,8 +30,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("unused")
 class JultiLuaLibrary extends LuaLibrary {
-    public JultiLuaLibrary(CancelRequester requester) {
+    private final LuaScript script;
+
+    public JultiLuaLibrary(CancelRequester requester, LuaScript script) {
         super(requester, "julti");
+        this.script = script;
+    }
+
+    public String getScriptName() {
+        return this.script.getName();
     }
 
     private static MinecraftInstance getInstanceFromInt(int instanceNum) {

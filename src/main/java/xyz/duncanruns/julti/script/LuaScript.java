@@ -66,7 +66,7 @@ public class LuaScript extends Script {
 
     @Override
     public void run(CancelRequester cancelRequester) {
-        LuaRunner.runLuaScript(this.contents, cancelRequester);
+        LuaRunner.runLuaScript(this, cancelRequester);
     }
 
     @Override
@@ -82,5 +82,9 @@ public class LuaScript extends Script {
     @Override
     public boolean allowsParallelRunning() {
         return this.allowParallel;
+    }
+
+    public String getContents() {
+        return this.contents;
     }
 }

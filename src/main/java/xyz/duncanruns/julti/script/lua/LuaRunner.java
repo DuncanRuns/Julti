@@ -8,6 +8,7 @@ import org.luaj.vm2.lib.jse.JseBaseLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import java.util.Collections;
@@ -18,11 +19,12 @@ import java.util.Map;
 public class LuaRunner {
     public static final Map<String, LuaValue> GLOBALS_MAP = Collections.synchronizedMap(new HashMap<>());
 
-    public static void runLuaScript(String luaScript, CancelRequester cancelRequester) {
+    public static void runLuaScript(LuaScript script, CancelRequester cancelRequester) {
         Globals globals = getSafeGlobals();
         globals.load(new InterruptibleDebugLib(cancelRequester));
+        globals.load(new JultiLuaLibrary(cancelRequester, script));
         LuaLibraries.addLibraries(globals, cancelRequester);
-        LuaValue chunk = globals.load(luaScript);
+        LuaValue chunk = globals.load(script.getContents());
         try {
             chunk.call();
         } catch (LuaError e) {
