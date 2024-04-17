@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.script.lua;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.*;
 import org.luaj.vm2.ast.Chunk;
@@ -19,9 +18,7 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.SleepUtil;
 
 import java.io.StringReader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class LuaRunner {
@@ -55,11 +52,12 @@ public class LuaRunner {
         return globals;
     }
 
-    public static Map<String, Pair<String, String>> extractCustomizables(String script) throws ParseException {
+    public static List<String> extractCustomizables(String script) throws ParseException {
         LuaParser p = new LuaParser(new StringReader(script));
         Chunk chunk = p.Chunk();
 
-        Map<String, Pair<String, String>> map = new HashMap<>(); // Customizable name -> <Type, Description>
+        Set<String> varNames = new HashSet<>();
+        List<String> out = new ArrayList<>();
 
         chunk.accept(new Visitor() {
             @Override
@@ -68,9 +66,14 @@ public class LuaRunner {
                 if (extracted.replaceAll("\\s", "").contains("julti.customizable(")) {
                     try {
                         CancelRequester requester = new CancelRequester();
-                        Globals globals = makeCustomizableExtractorGlobals(map, requester);
-                        String executableExtract = extracted.substring(extracted.indexOf("julti.customizable"));
-                        Thread thread = new Thread(() -> globals.load(executableExtract).call());
+                        Globals globals = makeCustomizableExtractorGlobals(out, varNames, requester);
+                        LuaValue executableChunk = globals.load(extracted.substring(extracted.indexOf("julti.customizable")));
+                        Thread thread = new Thread(() -> {
+                            try {
+                                executableChunk.call();
+                            } catch (Exception ignored) {
+                            }
+                        });
                         thread.start();
                         long start = System.currentTimeMillis();
                         while (thread.isAlive()) {
@@ -85,19 +88,25 @@ public class LuaRunner {
                 super.visit(exp);
             }
         });
-        return map;
+        return out;
     }
 
-    private static Globals makeCustomizableExtractorGlobals(Map<String, Pair<String, String>> map, CancelRequester requester) {
+    private static Globals makeCustomizableExtractorGlobals(List<String> strings, Set<String> varNames, CancelRequester requester) {
         Globals globals = getSafeGlobals();
         globals.load(new TwoArgFunction() {
             @Override
             public LuaValue call(LuaValue modname, LuaValue env) {
                 LuaValue library = tableOf();
-                library.set("customizable", new ThreeArgFunction() {
+                library.set("customizable", new VarArgFunction() {
                     @Override
-                    public LuaValue call(LuaValue arg1, LuaValue arg2, LuaValue arg3) {
-                        map.put(arg1.checkjstring(), Pair.of(arg2.checkjstring(), arg3.checkjstring()));
+                    public Varargs invoke(Varargs args) {
+                        if (!varNames.contains(args.arg1().checkjstring()) && args.narg() == 4) {
+                            varNames.add(args.arg1().checkjstring());
+                            strings.add(args.arg(1).tojstring());
+                            strings.add(args.arg(2).tojstring());
+                            strings.add(args.arg(3).tojstring());
+                            strings.add(args.arg(4).tojstring());
+                        }
                         return NIL;
                     }
                 });

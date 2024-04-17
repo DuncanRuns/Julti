@@ -14,7 +14,7 @@ import java.awt.event.MouseEvent;
 
 public class ScriptPanel extends JPanel {
 
-    public ScriptPanel(String name, byte hotkeyContext, Runnable onChange) {
+    public ScriptPanel(String name, byte hotkeyContext, Runnable onChange, Runnable onSuggestCustomize) {
         this.setBorder(new FlatBorder());
         this.setLayout(new FlowLayout());
         JPanel panel = new JPanel();
@@ -45,7 +45,7 @@ public class ScriptPanel extends JPanel {
 
         panel.add(GUIUtil.getButtonWithMethod(new JButton("Run"), a -> runScript(name)));
 
-        this.addPopupMenu(name, onChange);
+        this.addPopupMenu(name, onChange, onSuggestCustomize);
 
         this.add(panel);
 
@@ -56,7 +56,7 @@ public class ScriptPanel extends JPanel {
         ScriptManager.runScript(name);
     }
 
-    private void addPopupMenu(String name, Runnable onChange) {
+    private void addPopupMenu(String name, Runnable onChange, Runnable onSuggestCustomize) {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -77,6 +77,13 @@ public class ScriptPanel extends JPanel {
                         }
                     });
                     editItem.setText("Edit");
+                    JMenuItem customizeItem = new JMenuItem(new AbstractAction() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            onSuggestCustomize.run();
+                        }
+                    });
+                    customizeItem.setText("Customize");
                     JMenuItem deleteItem = new JMenuItem(new AbstractAction() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -87,6 +94,7 @@ public class ScriptPanel extends JPanel {
 
                     menu.add(runItem);
                     menu.add(editItem);
+                    menu.add(customizeItem);
                     menu.add(deleteItem);
 
                     menu.show(ScriptPanel.this, e.getX(), e.getY());
