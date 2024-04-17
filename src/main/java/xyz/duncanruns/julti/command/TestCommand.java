@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.util.ResetCounter;
 
 import java.util.Arrays;
@@ -15,7 +16,8 @@ public class TestCommand extends Command {
     CommandManager innerManager = new CommandManager(Arrays.asList(
             new IncrementCommand(),
             new AddPluginDataCommand(),
-            new RemovePluginDataCommand()
+            new RemovePluginDataCommand(),
+            new ScriptCustomizeCommand()
     ));
 
     @Override
@@ -139,6 +141,41 @@ public class TestCommand extends Command {
             } else {
                 Julti.log(Level.INFO, "Removed plugin data for " + pluginId);
             }
+        }
+    }
+
+    static class ScriptCustomizeCommand extends Command {
+
+        @Override
+        public String helpDescription() {
+            return "test scriptcust <Script Name>,<Variable Name>,<Value>,<Data Type> - Tests adding a value to customizable storage";
+        }
+
+        @Override
+        public int getMinArgs() {
+            return 1;
+        }
+
+        @Override
+        public int getMaxArgs() {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public String getName() {
+            return "scriptcust";
+        }
+
+        @Override
+        public void run(String[] args, CancelRequester cancelRequester) {
+            String s = CommandManager.combineArgs(args);
+            String[] split = s.split(",");
+            if (!CustomizableManager.isValid(split[3], split[2])) {
+                Julti.log(Level.ERROR, "Not in bounds");
+                return;
+            }
+            CustomizableManager.set(split[0], split[1], split[2], CustomizableManager.getType(split[3]));
+            Julti.log(Level.INFO, "Set");
         }
     }
 }
