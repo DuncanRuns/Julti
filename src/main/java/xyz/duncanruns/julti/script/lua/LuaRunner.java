@@ -65,7 +65,7 @@ public class LuaRunner {
             @Override
             public void visit(Exp.FuncCall exp) {
                 String extracted = extractScriptSection(script, exp.beginLine, exp.endLine, exp.beginColumn, exp.endColumn);
-                if (extracted.replaceAll("\\s", "").contains("julti.customizable(\"")) {
+                if (extracted.replaceAll("\\s", "").contains("julti.customizable(")) {
                     try {
                         CancelRequester requester = new CancelRequester();
                         Globals globals = makeCustomizableExtractorGlobals(map, requester);
