@@ -316,6 +316,7 @@ public class MinecraftInstance {
                 if (options.autoFullscreen && options.fullscreenBeforeUnpause) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
                     this.waitForFullscreen();
+                    this.windowStateDirty = true;
                 }
                 if ((options.unpauseOnSwitch || options.coopMode)) {
                     this.presser.pressEsc();
