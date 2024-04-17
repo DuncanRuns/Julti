@@ -4,7 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.*;
 import org.luaj.vm2.ast.Chunk;
-import org.luaj.vm2.ast.Stat;
+import org.luaj.vm2.ast.Exp;
 import org.luaj.vm2.ast.Visitor;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
@@ -16,6 +16,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.util.ExceptionUtil;
+import xyz.duncanruns.julti.util.SleepUtil;
 
 import java.io.StringReader;
 import java.util.Collections;
@@ -62,16 +63,18 @@ public class LuaRunner {
 
         chunk.accept(new Visitor() {
             @Override
-            public void visit(Stat.LocalAssign stat) {
-                String assignStatement = extractScriptSection(script, stat.beginLine, stat.endLine, stat.beginColumn, stat.endColumn);
-                if (assignStatement.replaceAll("\\s", "").contains("=julti.customizable(\"")) {
+            public void visit(Exp.FuncCall exp) {
+                String extracted = extractScriptSection(script, exp.beginLine, exp.endLine, exp.beginColumn, exp.endColumn);
+                if (extracted.replaceAll("\\s", "").contains("julti.customizable(\"")) {
                     try {
                         CancelRequester requester = new CancelRequester();
                         Globals globals = makeCustomizableExtractorGlobals(map, requester);
-                        Thread thread = new Thread(() -> globals.load(assignStatement).call());
+                        String executableExtract = extracted.substring(extracted.indexOf("julti.customizable"));
+                        Thread thread = new Thread(() -> globals.load(executableExtract).call());
                         thread.start();
                         long start = System.currentTimeMillis();
                         while (thread.isAlive()) {
+                            SleepUtil.sleep(1);
                             if (Math.abs(System.currentTimeMillis() - start) > 100) {
                                 requester.cancel();
                             }
@@ -79,7 +82,7 @@ public class LuaRunner {
                     } catch (Throwable ignored) {
                     }
                 }
-                super.visit(stat);
+                super.visit(exp);
             }
         });
         return map;
