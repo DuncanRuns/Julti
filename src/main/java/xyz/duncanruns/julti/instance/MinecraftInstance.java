@@ -49,7 +49,7 @@ public class MinecraftInstance {
     private boolean resetPressed = false;
     private boolean resetEverPressed = false;
     private boolean activeSinceReset = false;
-    private boolean windowStateChangedToPlaying = false;
+    private boolean windowStateDirty = false;
     private long lastSetVisible = 0;
     private boolean openedToLan = false;
 
@@ -277,7 +277,7 @@ public class MinecraftInstance {
         // Increment Reset Counter
         ResetCounter.increment();
 
-        if (this.windowStateChangedToPlaying) {
+        if (this.windowStateDirty) {
             // Do the window state change later to ensure resetting is fast
             Julti.doLater(() -> this.ensureResettingWindowState(true));
         }
@@ -662,7 +662,7 @@ public class MinecraftInstance {
                 (options.maximizeWhenResetting && (!options.useBorderless || options.resizeableBorderless)),
                 options.windowPosIsCenter ? WindowStateUtil.withTopLeftToCenter(bounds) : bounds,
                 offload);
-        this.windowStateChangedToPlaying = false;
+        this.windowStateDirty = false;
     }
 
     public void ensureInitialWindowState() {
@@ -681,7 +681,7 @@ public class MinecraftInstance {
                 maximize,
                 options.windowPosIsCenter ? WindowStateUtil.withTopLeftToCenter(bounds) : bounds,
                 offload);
-        this.windowStateChangedToPlaying = true;
+        this.windowStateDirty = true;
     }
 
     public void openToLan(boolean skipUnpauseCheck) {
@@ -816,7 +816,7 @@ public class MinecraftInstance {
         consumer.accept("resetPressed = " + this.resetPressed);
         consumer.accept("resetEverPressed = " + this.resetEverPressed);
         consumer.accept("activeSinceReset = " + this.activeSinceReset);
-        consumer.accept("windowStateChangedToPlaying = " + this.windowStateChangedToPlaying);
+        consumer.accept("windowStateChangedToPlaying = " + this.windowStateDirty);
         consumer.accept("lastSetVisible = " + this.lastSetVisible);
         consumer.accept("openedToLan = " + this.openedToLan);
         consumer.accept("isResettable() = " + this.isResettable());
