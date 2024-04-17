@@ -146,7 +146,7 @@ public class ScriptManager {
 
     public static void cancelAllScripts() {
         int cancelled = requesterManager.cancelAll();
-        if(cancelled > 0) {
+        if (cancelled > 0) {
             Julti.log(Level.INFO, "Cancelled " + cancelled + " scripts.");
         }
     }

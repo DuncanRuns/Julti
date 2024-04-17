@@ -4,7 +4,6 @@ import org.luaj.vm2.Globals;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
