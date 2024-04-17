@@ -2,7 +2,6 @@ package xyz.duncanruns.julti.script.lua;
 
 import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
-import org.luaj.vm2.Lua;
 import org.luaj.vm2.LuaValue;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -15,8 +14,8 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.script.LuaScript;
-import xyz.duncanruns.julti.script.Script;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 
@@ -24,6 +23,7 @@ import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,12 +37,12 @@ class JultiLuaLibrary extends LuaLibrary {
         this.script = script;
     }
 
-    public String getScriptName() {
-        return this.script.getName();
-    }
-
     private static MinecraftInstance getInstanceFromInt(int instanceNum) {
         return InstanceManager.getInstanceManager().getInstances().get(instanceNum - 1);
+    }
+
+    public String getScriptName() {
+        return this.script.getName();
     }
 
     public void activateInstance(int instanceNum, Boolean doSetupStyle) {
@@ -348,6 +348,18 @@ class JultiLuaLibrary extends LuaLibrary {
                 }
                 SleepUtil.sleep(50);
             }
+        }
+    }
+
+    public LuaValue customizable(String name, String typeFormat, String description, LuaValue def) {
+        try {
+            Optional<Object> value = CustomizableManager.get(this.script.getName(), name, CustomizableManager.getType(typeFormat));
+            if (!value.isPresent()) {
+                return def;
+            }
+            return (LuaValue) LuaConverter.convertToLua(value.get());
+        } catch (Exception e) {
+            return def;
         }
     }
 }

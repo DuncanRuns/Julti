@@ -1,16 +1,23 @@
 package xyz.duncanruns.julti.script.lua;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.*;
+import org.luaj.vm2.ast.Chunk;
+import org.luaj.vm2.ast.Stat;
+import org.luaj.vm2.ast.Visitor;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.JseBaseLib;
 import org.luaj.vm2.lib.jse.JseMathLib;
+import org.luaj.vm2.parser.LuaParser;
+import org.luaj.vm2.parser.ParseException;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +54,72 @@ public class LuaRunner {
         return globals;
     }
 
+    public static Map<String, Pair<String, String>> extractCustomizables(String script) throws ParseException {
+        LuaParser p = new LuaParser(new StringReader(script));
+        Chunk chunk = p.Chunk();
+
+        Map<String, Pair<String, String>> map = new HashMap<>(); // Customizable name -> <Type, Description>
+
+        chunk.accept(new Visitor() {
+            @Override
+            public void visit(Stat.LocalAssign stat) {
+                String assignStatement = extractScriptSection(script, stat.beginLine, stat.endLine, stat.beginColumn, stat.endColumn);
+                if (assignStatement.replaceAll("\\s", "").contains("=julti.customizable(\"")) {
+                    try {
+                        CancelRequester requester = new CancelRequester();
+                        Globals globals = makeCustomizableExtractorGlobals(map, requester);
+                        Thread thread = new Thread(() -> globals.load(assignStatement).call());
+                        thread.start();
+                        long start = System.currentTimeMillis();
+                        while (thread.isAlive()) {
+                            if (Math.abs(System.currentTimeMillis() - start) > 100) {
+                                requester.cancel();
+                            }
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
+                super.visit(stat);
+            }
+        });
+        return map;
+    }
+
+    private static Globals makeCustomizableExtractorGlobals(Map<String, Pair<String, String>> map, CancelRequester requester) {
+        Globals globals = getSafeGlobals();
+        globals.load(new TwoArgFunction() {
+            @Override
+            public LuaValue call(LuaValue modname, LuaValue env) {
+                LuaValue library = tableOf();
+                library.set("customizable", new ThreeArgFunction() {
+                    @Override
+                    public LuaValue call(LuaValue arg1, LuaValue arg2, LuaValue arg3) {
+                        map.put(arg1.checkjstring(), Pair.of(arg2.checkjstring(), arg3.checkjstring()));
+                        return NIL;
+                    }
+                });
+                env.set("julti", library);
+                return library;
+            }
+        });
+        globals.load(new InterruptibleDebugLib(requester));
+        return globals;
+    }
+
+    private static String extractScriptSection(String script, int beginLine, int endLine, int beginCol, int endCol) {
+        String[] lines = script.split("\n");
+
+        if (beginLine == endLine) {
+            return lines[beginLine - 1].substring(beginCol - 1, endCol);
+        }
+        StringBuilder out = new StringBuilder(lines[beginLine - 1].substring(beginCol - 1));
+        for (int i = beginLine; i <= endLine - 2; i++) {
+            out.append("\n").append(lines[i]);
+        }
+        out.append("\n").append(lines[endLine - 1], 0, endCol);
+        return out.toString();
+    }
+
     private static class LuaScriptCancelledException extends RuntimeException {
     }
 
@@ -65,6 +138,5 @@ public class LuaRunner {
             }
             super.onInstruction(pc, v, top);
         }
-
     }
 }

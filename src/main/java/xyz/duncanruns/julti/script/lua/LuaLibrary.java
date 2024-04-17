@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.script.lua;
 
-import com.google.common.primitives.Primitives;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -14,13 +13,8 @@ import xyz.duncanruns.julti.util.ExceptionUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 public abstract class LuaLibrary extends TwoArgFunction {
-    public static final Map<Class<?>, Function<Varargs, Object>> luaToJavaMap = generateLuaToJavaMap();
-    public static final Map<Class<?>, Function<Object, Varargs>> javaToLuaMap = generateJavaToLuaMap();
 
     protected final CancelRequester cancelRequester;
     private final String libraryName;
@@ -28,41 +22,6 @@ public abstract class LuaLibrary extends TwoArgFunction {
     public LuaLibrary(CancelRequester requester, String libraryName) {
         this.cancelRequester = requester;
         this.libraryName = libraryName;
-    }
-
-    private static Map<Class<?>, Function<Varargs, Object>> generateLuaToJavaMap() {
-        Map<Class<?>, Function<Varargs, Object>> map = new HashMap<>();
-        map.put(int.class, varargs -> ((LuaValue) varargs).checknumber().toint());
-        map.put(float.class, varargs -> ((LuaValue) varargs).checknumber().tofloat());
-        map.put(long.class, varargs -> ((LuaValue) varargs).checknumber().tolong());
-        map.put(double.class, varargs -> ((LuaValue) varargs).checknumber().todouble());
-        map.put(char.class, varargs -> ((LuaValue) varargs).checknumber().tochar());
-        map.put(short.class, varargs -> ((LuaValue) varargs).checknumber().toshort());
-        map.put(byte.class, varargs -> ((LuaValue) varargs).checknumber().tobyte());
-        map.put(boolean.class, varargs -> ((LuaValue) varargs).checkboolean());
-        map.put(String.class, varargs -> ((LuaValue) varargs).isnil() ? null : ((LuaValue) varargs).checkjstring());
-        map.put(LuaValue.class, varargs -> varargs);
-        map.put(Varargs.class, varargs -> varargs);
-        Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, varargs -> varargs == NIL ? null : map.get(Primitives.unwrap(clazz)).apply(varargs)));
-        return map;
-    }
-
-    private static Map<Class<?>, Function<Object, Varargs>> generateJavaToLuaMap() {
-        Map<Class<?>, Function<Object, Varargs>> map = new HashMap<>();
-        map.put(int.class, o -> valueOf((int) o));
-        map.put(float.class, o -> valueOf((float) o));
-        map.put(long.class, o -> valueOf((long) o));
-        map.put(double.class, o -> valueOf((double) o));
-        map.put(char.class, o -> valueOf((char) o));
-        map.put(short.class, o -> valueOf((short) o));
-        map.put(byte.class, o -> valueOf((byte) o));
-        map.put(boolean.class, o -> valueOf((boolean) o));
-        map.put(void.class, o -> NIL);
-        map.put(String.class, o -> valueOf((String) o));
-        map.put(LuaValue.class, o -> (LuaValue) o);
-        map.put(Varargs.class, o -> (Varargs) o);
-        Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, o -> o == null ? NIL : map.get(Primitives.unwrap(clazz)).apply(o)));
-        return map;
     }
 
     private static LibFunction convertToArgFunctionObj(LuaLibrary obj, Method method) {
@@ -74,7 +33,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
 
                 for (int i = 0; i < method.getParameterCount(); i++) {
                     try {
-                        params[i] = luaToJavaMap.get(parameterTypes[i]).apply(args.arg(i + 1));
+                        params[i] = LuaConverter.convertToJava(args.arg(i + 1), parameterTypes[i]);
                     } catch (Throwable t) {
                         Julti.log(Level.ERROR, "Failed to convert parameter " + i + " (" + parameterTypes[i].getSimpleName() + ") for method \"" + method.getName() + "\": " + ExceptionUtil.toDetailedString(t));
                         throw t;
@@ -82,7 +41,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
                 }
 
                 try {
-                    return javaToLuaMap.get(method.getReturnType()).apply(method.invoke(obj, params));
+                    return LuaConverter.convertToLua(method.invoke(obj, params), method.getReturnType());
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }

@@ -44,6 +44,8 @@ public class ScriptManager {
         } catch (IOException e) {
             Julti.log(Level.ERROR, "Failed to load scripts: " + ExceptionUtil.toDetailedString(e));
         }
+
+        CustomizableManager.load();
     }
 
     private static void convertOldScripts() {
