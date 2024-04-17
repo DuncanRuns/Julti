@@ -151,7 +151,7 @@ public class ScriptsGUI extends JFrame {
     private void suggestCustomizables(String scriptName, boolean reportNone) {
         Iterator<String> iterator = ScriptManager.getScriptCustomizables(scriptName).iterator();
 
-        if (!iterator.hasNext()) {
+        if (!iterator.hasNext() && reportNone) {
             JOptionPane.showMessageDialog(this, "This script has no customization!", "Julti: Customize Script", JOptionPane.INFORMATION_MESSAGE);
         }
 
