@@ -331,6 +331,7 @@ public class MinecraftInstance {
                 }
                 if (options.autoFullscreen && !options.fullscreenBeforeUnpause) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
+                    this.windowStateDirty = true;
                 }
             }
         }
@@ -413,6 +414,7 @@ public class MinecraftInstance {
 
             if (options.autoFullscreen) {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
+                this.windowStateDirty = true;
             }
             if (this.gameOptions.f1SS) {
                 this.presser.pressF1();
