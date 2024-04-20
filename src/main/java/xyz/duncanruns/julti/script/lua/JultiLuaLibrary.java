@@ -14,7 +14,6 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
-import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
@@ -23,7 +22,6 @@ import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -348,18 +346,6 @@ class JultiLuaLibrary extends LuaLibrary {
                 }
                 SleepUtil.sleep(50);
             }
-        }
-    }
-
-    public LuaValue customizable(String name, String typeFormat, String description, LuaValue def) {
-        try {
-            Optional<Object> value = CustomizableManager.get(this.script.getName(), name, CustomizableManager.getType(typeFormat));
-            if (!value.isPresent()) {
-                return def;
-            }
-            return (LuaValue) LuaConverter.convertToLua(value.get());
-        } catch (Exception e) {
-            return def;
         }
     }
 }

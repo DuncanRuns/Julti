@@ -12,7 +12,10 @@ import xyz.duncanruns.julti.util.LauncherUtil;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -205,13 +208,5 @@ public class ScriptManager {
 
     public static boolean isGist(String string) {
         return GIST_PATTERN.matcher(string).matches();
-    }
-
-    public static List<String> getScriptCustomizables(String scriptName) {
-        Optional<Script> scriptOpt = findScript(scriptName);
-        if (!scriptOpt.isPresent()) {
-            return Collections.emptyList();
-        }
-        return scriptOpt.get().getCustomizables();
     }
 }

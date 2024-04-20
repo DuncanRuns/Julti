@@ -5,7 +5,6 @@ import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GHGistFile;
 import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
-import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
@@ -15,7 +14,6 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -149,43 +147,6 @@ public class ScriptsGUI extends JFrame {
     }
 
     private void suggestCustomizables(String scriptName, boolean reportNone) {
-        Iterator<String> iterator = ScriptManager.getScriptCustomizables(scriptName).iterator();
-
-        if (!iterator.hasNext() && reportNone) {
-            JOptionPane.showMessageDialog(this, "This script has no customization!", "Julti: Customize Script", JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        customizationLoop:
-        while (iterator.hasNext()) {
-            String varName = iterator.next();
-            String type = iterator.next();
-            String description = iterator.next();
-            String def = iterator.next();
-
-            CustomizableManager.CustomizableType customizableType = CustomizableManager.getType(type);
-            Optional<Object> o = CustomizableManager.get(scriptName, varName, customizableType);
-            if (o.isPresent()) {
-                def = o.get().toString();
-            }
-
-            String msg = description;
-            while (true) {
-                Object ans = JOptionPane.showInputDialog(this, msg, "Julti: Customize Script", JOptionPane.QUESTION_MESSAGE, null, null, def);
-                if (ans == null || ans.toString().isEmpty()) {
-                    break customizationLoop;
-                }
-                if (CustomizableManager.isValid(type, ans)) {
-                    try {
-                        CustomizableManager.set(scriptName, varName, ans, customizableType);
-                        break;
-                    } catch (Exception e) {
-                        msg = "An error occured while trying to set the value!\n" + description;
-                    }
-                } else {
-                    msg = "Invalid input!\n" + description;
-                }
-            }
-        }
     }
 
     private void importLegacyScriptDialog(String out) {

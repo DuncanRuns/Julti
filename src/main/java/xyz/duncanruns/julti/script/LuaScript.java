@@ -1,14 +1,11 @@
 package xyz.duncanruns.julti.script;
 
-import org.luaj.vm2.parser.ParseException;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.script.lua.LuaRunner;
 import xyz.duncanruns.julti.util.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 
 public class LuaScript extends Script {
     private final String name;
@@ -85,15 +82,6 @@ public class LuaScript extends Script {
     @Override
     public boolean allowsParallelRunning() {
         return this.allowParallel;
-    }
-
-    @Override
-    public List<String> getCustomizables() {
-        try {
-            return LuaRunner.extractCustomizables(this.contents);
-        } catch (ParseException e) {
-            return Collections.emptyList();
-        }
     }
 
     public String getContents() {

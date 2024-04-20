@@ -4,8 +4,6 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 public abstract class Script {
@@ -40,9 +38,5 @@ public abstract class Script {
     @Override
     public int hashCode() {
         return this.getName().hashCode();
-    }
-
-    public List<String> getCustomizables() {
-        return Collections.emptyList();
     }
 }
