@@ -147,7 +147,10 @@ public class ScriptsGUI extends JFrame {
     }
 
     private void runCustomization(String scriptName, boolean reportNone) {
-        ScriptManager.runCustomization(scriptName, reportNone);
+        boolean hasCustomization = ScriptManager.runCustomization(scriptName);
+        if (!hasCustomization && reportNone) {
+            JOptionPane.showMessageDialog(this, "This script offers no customization! (or an error occurred)", "Julti: No Script Customization", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private void importLegacyScriptDialog(String out) {

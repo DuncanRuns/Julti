@@ -39,11 +39,18 @@ public class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
 
     @Override
     @AllowedWhileCustomizing
+    public void log(String message) {
+        if (this.hasCheckedCustomizing()) {
+            super.log(message);
+        }
+    }
+
+    @Override
+    @AllowedWhileCustomizing
     public boolean isCustomizing() {
         this.checkedCustomizing = true;
         return true;
     }
-
 
     @Override
     @AllowedWhileCustomizing
@@ -68,7 +75,7 @@ public class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     }
 
     @NotALuaFunction
-    public boolean isCheckedCustomizing() {
+    public boolean hasCheckedCustomizing() {
         return this.checkedCustomizing;
     }
 }

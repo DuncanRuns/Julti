@@ -38,10 +38,17 @@ public class LuaRunner {
         }
     }
 
+    /**
+     * Runs the script in customization mode, where libraries have their functions (ones not marked with the @AllowedWhileCustomizing annotation)
+     * transformed into error-throwing functions that self report the invalid usage.
+     *
+     * @return true if julti.isCustomizing() was used at any point, otherwise
+     */
     public static boolean customizeLuaScript(LuaScript script, CancelRequester cancelRequester) {
         Globals globals = getSafeGlobals();
         globals.load(new InterruptibleDebugLib(cancelRequester));
-        globals.load(new CustomizingJultiLuaLibrary(cancelRequester, script));
+        CustomizingJultiLuaLibrary customLib = new CustomizingJultiLuaLibrary(cancelRequester, script);
+        globals.load(customLib);
         LuaLibraries.addMockLibraries(globals, cancelRequester);
         LuaValue chunk = globals.load(script.getContents());
         try {
@@ -50,14 +57,15 @@ public class LuaRunner {
             // Get Root Cause
             Throwable cause = ExceptionUtil.getRootCause(e);
             if (cause instanceof CustomizingException) {
-                Julti.log(Level.ERROR, cause.getMessage());
-                return false;
+                // Script almost certainly doesn't do customization
+                if (customLib.hasCheckedCustomizing()) {
+                    Julti.log(Level.ERROR, cause.getMessage());
+                }
             } else if (!(cause instanceof LuaScriptCancelledException)) {
                 Julti.log(Level.ERROR, "Error while customizing script: " + ExceptionUtil.toDetailedString(cause != null ? cause : e));
-                return false;
             }
         }
-        return true;
+        return customLib.hasCheckedCustomizing();
     }
 
     private static Globals getSafeGlobals() {

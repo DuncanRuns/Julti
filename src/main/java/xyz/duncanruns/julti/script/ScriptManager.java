@@ -210,21 +210,23 @@ public class ScriptManager {
         return GIST_PATTERN.matcher(string).matches();
     }
 
-    public static void runCustomization(String name, boolean reportNone) {
+    public static boolean runCustomization(String name) {
         Optional<Script> scriptOpt = findScript(name);
         if (!scriptOpt.isPresent()) {
-            return;
+            return false;
         }
         Script script = scriptOpt.get();
         if (!script.allowsParallelRunning() && requesterManager.isActive(name)) {
-            return;
+            return false;
         }
         CancelRequester cancelRequester = requesterManager.createNew(name);
         try {
-            script.customize(cancelRequester);
+            return script.customize(cancelRequester);
         } catch (Throwable t) {
-            Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
+            Julti.log(Level.ERROR, "Failed to customize script: " + ExceptionUtil.toDetailedString(t));
+            return false;
+        } finally {
+            requesterManager.remove(name);
         }
-        requesterManager.remove(name);
     }
 }
