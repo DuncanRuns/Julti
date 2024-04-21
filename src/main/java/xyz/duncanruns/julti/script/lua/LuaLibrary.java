@@ -72,7 +72,8 @@ public abstract class LuaLibrary extends TwoArgFunction {
         return library;
     }
 
-    TwoArgFunction toMockLibrary() {
+    @NotALuaFunction
+    TwoArgFunction asCustomizable() {
         return new TwoArgFunction() {
             @Override
             public LuaValue call(LuaValue modname, LuaValue env) {
