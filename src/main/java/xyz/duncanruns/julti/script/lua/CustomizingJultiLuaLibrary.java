@@ -12,10 +12,10 @@ import javax.swing.*;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-public class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
+class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     private boolean checkedCustomizing = false;
 
-    public CustomizingJultiLuaLibrary(CancelRequester requester, LuaScript luaScript) {
+    CustomizingJultiLuaLibrary(CancelRequester requester, LuaScript luaScript) {
         super(requester, luaScript);
     }
 
