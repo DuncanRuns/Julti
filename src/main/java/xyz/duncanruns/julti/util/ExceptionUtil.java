@@ -26,4 +26,11 @@ public final class ExceptionUtil {
         LogManager.getLogger("Julti-Crash").error(detailedException); // We don't want to use Julti.log because it has a couple more steps.
         System.exit(1);
     }
+
+    public static Throwable getRootCause(Throwable t) {
+        while (t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t;
+    }
 }

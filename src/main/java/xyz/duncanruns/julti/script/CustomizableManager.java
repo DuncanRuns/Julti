@@ -17,7 +17,7 @@ public class CustomizableManager {
     private static JsonObject json = new JsonObject();
     private static final Path STORAGE_PATH = ScriptManager.SCRIPTS_FOLDER.resolve("customizable.storage");
 
-    public static void load() {
+    public synchronized static void load() {
         if (Files.exists(STORAGE_PATH)) {
             String s;
             try {
@@ -29,7 +29,7 @@ public class CustomizableManager {
         }
     }
 
-    public static void save() {
+    public synchronized static void save() {
         try {
             FileUtil.writeString(STORAGE_PATH, GSON.toJson(json));
         } catch (IOException e) {
@@ -37,7 +37,7 @@ public class CustomizableManager {
         }
     }
 
-    public static void set(String scriptName, String key, Object val) {
+    public synchronized static void set(String scriptName, String key, Object val) {
         if (!json.has(scriptName)) {
             json.add(scriptName, new JsonObject());
         }
@@ -46,7 +46,7 @@ public class CustomizableManager {
         // TODO: saving is no longer done here, make sure run save() after customization
     }
 
-    public static String get(String scriptName, String key) {
+    public synchronized static String get(String scriptName, String key) {
         if (!json.has(scriptName)) {
             return null;
         }

@@ -18,7 +18,11 @@ public class LuaLibraries {
         return LIBRARY_PROVIDERS;
     }
 
-    public static void addLibraries(Globals globals, CancelRequester cr) {
+    static void addLibraries(Globals globals, CancelRequester cr) {
         LIBRARY_PROVIDERS.forEach(provider -> globals.load(provider.apply(cr)));
+    }
+
+    static void addMockLibraries(Globals globals, CancelRequester cancelRequester) {
+        LIBRARY_PROVIDERS.forEach(f -> globals.load(f.apply(cancelRequester).toMockLibrary()));
     }
 }

@@ -80,7 +80,7 @@ public class ScriptsGUI extends JFrame {
 
         this.panel.add(GUIUtil.leftJustify(new JLabel("(Right click for action menu)")));
         for (String name : ScriptManager.getScriptNames()) {
-            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(name, ScriptManager.getHotkeyContext(name), this::reload, () -> this.suggestCustomizables(name, true))));
+            this.panel.add(GUIUtil.leftJustify(new ScriptPanel(name, ScriptManager.getHotkeyContext(name), this::reload, () -> this.runCustomization(name, true))));
         }
 
         verticalScrollBar.setValue(i);
@@ -138,7 +138,7 @@ public class ScriptsGUI extends JFrame {
             ScriptManager.deleteScript(scriptName);
             ScriptManager.writeScript(scriptName, ghFileOpt.get().getValue().getContent(), isLegacy);
             ScriptManager.reload();
-            this.suggestCustomizables(scriptName, false);
+            this.runCustomization(scriptName, false);
         } catch (IOException e) {
             Julti.log(Level.ERROR, "Failed to write script: " + ExceptionUtil.toDetailedString(e));
             JOptionPane.showMessageDialog(this, "Failed to write script!", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
@@ -146,7 +146,8 @@ public class ScriptsGUI extends JFrame {
         this.reload();
     }
 
-    private void suggestCustomizables(String scriptName, boolean reportNone) {
+    private void runCustomization(String scriptName, boolean reportNone) {
+        ScriptManager.runCustomization(scriptName, reportNone);
     }
 
     private void importLegacyScriptDialog(String out) {
@@ -173,7 +174,7 @@ public class ScriptsGUI extends JFrame {
             ScriptManager.deleteScript(scriptName);
             ScriptManager.writeLegacyScript(out);
             ScriptManager.reload();
-            this.suggestCustomizables(scriptName, false);
+            this.runCustomization(scriptName, false);
         } catch (IOException e) {
             Julti.log(Level.ERROR, "Failed to write script: " + ExceptionUtil.toDetailedString(e));
         }

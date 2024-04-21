@@ -70,6 +70,11 @@ public class LuaScript extends Script {
     }
 
     @Override
+    public boolean customize(CancelRequester cancelRequester) {
+        return LuaRunner.customizeLuaScript(this, cancelRequester);
+    }
+
+    @Override
     public Path getPath() {
         return this.path;
     }

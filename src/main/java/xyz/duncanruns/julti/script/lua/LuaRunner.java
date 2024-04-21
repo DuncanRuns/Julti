@@ -28,10 +28,36 @@ public class LuaRunner {
         try {
             chunk.call();
         } catch (LuaError e) {
-            if (!(e.getCause() instanceof LuaScriptCancelledException)) {
-                Julti.log(Level.ERROR, "Error while executing script: " + ExceptionUtil.toDetailedString(e.getCause() != null ? e.getCause() : e));
+            // Get Root Cause
+            Throwable cause = ExceptionUtil.getRootCause(e);
+            if (cause instanceof CustomizingException) {
+                Julti.log(Level.ERROR, cause.getMessage());
+            } else if (!(cause instanceof LuaScriptCancelledException)) {
+                Julti.log(Level.ERROR, "Error while executing script: " + ExceptionUtil.toDetailedString(cause != null ? cause : e));
             }
         }
+    }
+
+    public static boolean customizeLuaScript(LuaScript script, CancelRequester cancelRequester) {
+        Globals globals = getSafeGlobals();
+        globals.load(new InterruptibleDebugLib(cancelRequester));
+        globals.load(new CustomizingJultiLuaLibrary(cancelRequester, script));
+        LuaLibraries.addMockLibraries(globals, cancelRequester);
+        LuaValue chunk = globals.load(script.getContents());
+        try {
+            chunk.call();
+        } catch (LuaError e) {
+            // Get Root Cause
+            Throwable cause = ExceptionUtil.getRootCause(e);
+            if (cause instanceof CustomizingException) {
+                Julti.log(Level.ERROR, cause.getMessage());
+                return false;
+            } else if (!(cause instanceof LuaScriptCancelledException)) {
+                Julti.log(Level.ERROR, "Error while customizing script: " + ExceptionUtil.toDetailedString(cause != null ? cause : e));
+                return false;
+            }
+        }
+        return true;
     }
 
     private static Globals getSafeGlobals() {

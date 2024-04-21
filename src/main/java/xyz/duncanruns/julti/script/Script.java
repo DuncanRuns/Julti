@@ -29,6 +29,10 @@ public abstract class Script {
 
     public abstract void run(CancelRequester cancelRequester);
 
+    public boolean customize(CancelRequester cancelRequester) {
+        return false;
+    }
+
     public abstract Path getPath();
 
     public abstract String getName();

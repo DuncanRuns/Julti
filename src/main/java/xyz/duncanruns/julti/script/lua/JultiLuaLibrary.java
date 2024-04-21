@@ -14,10 +14,12 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("unused")
 class JultiLuaLibrary extends LuaLibrary {
-    private final LuaScript script;
+    protected final LuaScript script;
 
     public JultiLuaLibrary(CancelRequester requester, LuaScript script) {
         super(requester, "julti");
@@ -39,6 +41,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return InstanceManager.getInstanceManager().getInstances().get(instanceNum - 1);
     }
 
+    @AllowedWhileCustomizing
     public String getScriptName() {
         return this.script.getName();
     }
@@ -90,10 +93,12 @@ class JultiLuaLibrary extends LuaLibrary {
         Julti.waitForExecute(() -> InstanceManager.getInstanceManager().getInstances().forEach(instance -> ResetHelper.getManager().lockInstance(instance)));
     }
 
+    @AllowedWhileCustomizing
     public void log(String message) {
         Julti.log(Level.INFO, message);
     }
 
+    @AllowedWhileCustomizing
     public void openFile(String filePath) {
         LauncherUtil.openFile(filePath);
     }
@@ -107,11 +112,15 @@ class JultiLuaLibrary extends LuaLibrary {
         });
     }
 
+    @AllowedWhileCustomizing
+
     public boolean trySetOption(String optionName, String optionValue) {
         AtomicBoolean out = new AtomicBoolean(false);
         Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage(optionName, optionValue));
         return out.get();
     }
+
+    @AllowedWhileCustomizing
 
     public String getOptionAsString(String optionName) {
         AtomicReference<String> out = new AtomicReference<>("");
@@ -124,6 +133,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return out.get();
     }
 
+    @AllowedWhileCustomizing
     public boolean tryPlaySound(String soundLocation, float volume) {
         Path pathFromSoundsFolder = JultiOptions.getJultiDir().resolve("sounds").resolve(soundLocation);
         if (Files.isRegularFile(pathFromSoundsFolder)) {
@@ -198,6 +208,7 @@ class JultiLuaLibrary extends LuaLibrary {
         Julti.waitForExecute(() -> getInstanceFromInt(instanceNum).getKeyPresser().pressEsc());
     }
 
+    @AllowedWhileCustomizing
     public int getInstanceCount() {
         return InstanceManager.getInstanceManager().getSize();
     }
@@ -219,10 +230,12 @@ class JultiLuaLibrary extends LuaLibrary {
         ScriptManager.runScriptAndWait(scriptName);
     }
 
+    @AllowedWhileCustomizing
     public void setGlobal(String key, LuaValue val) {
         LuaRunner.GLOBALS_MAP.put(key, val);
     }
 
+    @AllowedWhileCustomizing
     public LuaValue getGlobal(String key, LuaValue def) {
         return LuaRunner.GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
     }
@@ -292,16 +305,16 @@ class JultiLuaLibrary extends LuaLibrary {
 
     public long getLastActivation(int instanceNum) {
         AtomicLong out = new AtomicLong();
-        Julti.waitForExecute(() -> {
-            out.set(getInstanceFromInt(instanceNum).getLastActivation());
-        });
+        Julti.waitForExecute(() -> out.set(getInstanceFromInt(instanceNum).getLastActivation()));
         return out.get();
     }
 
+    @AllowedWhileCustomizing
     public long getCurrentTime() {
         return System.currentTimeMillis();
     }
 
+    @AllowedWhileCustomizing
     public void cancelScript() {
         this.cancelRequester.cancel();
     }
@@ -347,5 +360,34 @@ class JultiLuaLibrary extends LuaLibrary {
                 SleepUtil.sleep(50);
             }
         }
+    }
+
+    @AllowedWhileCustomizing
+    public boolean isCustomizing() {
+        return false;
+    }
+
+    @AllowedWhileCustomizing
+    @Nullable
+    public String getCustomizable(String key, String def) {
+        String out = CustomizableManager.get(this.script.getName(), key);
+        return out == null ? def : out;
+    }
+
+    @AllowedWhileCustomizing
+    public void setCustomizable(String key, String value) {
+        CustomizableManager.set(this.script.getName(), key, value);
+    }
+
+    @AllowedWhileCustomizing
+    @Nullable
+    public String askTextBox(String message, String startingVal) {
+        throw new CustomizingException("Script Error: julti.askTextBox used while not customizing.");
+    }
+
+    @AllowedWhileCustomizing
+    @Nullable
+    public Boolean askYesNo(String message) {
+        throw new CustomizingException("Script Error: julti.askYesNo used while not customizing.");
     }
 }

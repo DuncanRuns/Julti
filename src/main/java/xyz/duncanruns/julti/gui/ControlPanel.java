@@ -186,7 +186,7 @@ public class ControlPanel extends JPanel {
         }), gbc);
     }
 
-    private ScriptsGUI openScriptsGUI() {
+    public ScriptsGUI openScriptsGUI() {
         if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
             this.scriptsGUI = new ScriptsGUI();
         } else {

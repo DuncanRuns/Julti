@@ -209,4 +209,22 @@ public class ScriptManager {
     public static boolean isGist(String string) {
         return GIST_PATTERN.matcher(string).matches();
     }
+
+    public static void runCustomization(String name, boolean reportNone) {
+        Optional<Script> scriptOpt = findScript(name);
+        if (!scriptOpt.isPresent()) {
+            return;
+        }
+        Script script = scriptOpt.get();
+        if (!script.allowsParallelRunning() && requesterManager.isActive(name)) {
+            return;
+        }
+        CancelRequester cancelRequester = requesterManager.createNew(name);
+        try {
+            script.customize(cancelRequester);
+        } catch (Throwable t) {
+            Julti.log(Level.ERROR, "Failed to run script: " + ExceptionUtil.toDetailedString(t));
+        }
+        requesterManager.remove(name);
+    }
 }
