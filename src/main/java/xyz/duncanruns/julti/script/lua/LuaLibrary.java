@@ -105,10 +105,20 @@ public abstract class LuaLibrary extends TwoArgFunction {
         };
     }
 
+    /**
+     * Mark a method with @AllowedWhileCustomizing to allow it to still function in customization mode.
+     * <p>
+     * Alternatively you can annotate the entire class with @AllowedWhileCustomizing to allow all methods
+     * in it to function in customization mode (not recommended).
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @interface AllowedWhileCustomizing {
     }
 
+    /**
+     * Mark a method with @NotALuaFunction to exclude it from automatic conversion to a lua library.
+     * Static methods and synthetic (lambda) methods are already excluded.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @interface NotALuaFunction {
     }
