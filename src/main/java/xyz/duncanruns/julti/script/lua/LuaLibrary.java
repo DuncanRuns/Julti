@@ -127,6 +127,10 @@ public abstract class LuaLibrary extends TwoArgFunction {
                 writer.write("\n--- " + documentation.get().description().replace("\n", "\n--- "));
             }
 
+            if (method.isAnnotationPresent(AllowedWhileCustomizing.class) || this.getClass().isAnnotationPresent(AllowedWhileCustomizing.class)) {
+                writer.write("\n--- This function can be ran while in customization mode.");
+            }
+
             List<String> paramNames = Arrays.stream(method.getParameters()).map(Parameter::getName).collect(Collectors.toList());
             Class<?>[] paramTypes = method.getParameterTypes();
             if (paramNames.size() != paramTypes.length) {
