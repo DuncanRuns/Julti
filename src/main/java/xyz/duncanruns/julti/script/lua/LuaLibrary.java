@@ -168,7 +168,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
      * in it to function in customization mode (not recommended).
      */
     @Retention(RetentionPolicy.RUNTIME)
-    protected @interface AllowedWhileCustomizing {
+    public @interface AllowedWhileCustomizing {
     }
 
     /**
