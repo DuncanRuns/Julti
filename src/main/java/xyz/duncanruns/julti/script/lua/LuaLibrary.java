@@ -168,7 +168,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
      * in it to function in customization mode (not recommended).
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @interface AllowedWhileCustomizing {
+    protected @interface AllowedWhileCustomizing {
     }
 
     /**
@@ -176,7 +176,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
      * Static methods and synthetic (lambda) methods are already excluded.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @interface NotALuaFunction {
+    protected @interface NotALuaFunction {
     }
 
     /**
@@ -185,7 +185,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
      * You can also define parameter types in a similar case for parameters.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @interface LuaDocumentation {
+    protected @interface LuaDocumentation {
         String description();
 
         String[] returnTypes() default {};
