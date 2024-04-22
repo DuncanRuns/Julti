@@ -56,7 +56,8 @@ class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     @AllowedWhileCustomizing
     @Nullable
     public String askTextBox(String message, String startingVal) {
-        return JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse("")).toString();
+        Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+        return o == null ? null : o.toString();
     }
 
     @Override
