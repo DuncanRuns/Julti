@@ -61,7 +61,11 @@ public abstract class LuaLibrary extends TwoArgFunction {
     }
 
     public static void addMethodsToLibrary(LuaValue library, LuaLibrary libraryObject) {
-        for (Method method : libraryObject.getClass().getDeclaredMethods()) {
+        addMethodsToLibrary(library, libraryObject, libraryObject.getClass());
+    }
+
+    public static void addMethodsToLibrary(LuaValue library, LuaLibrary libraryObject, Class<? extends LuaLibrary> clazz) {
+        for (Method method : clazz.getDeclaredMethods()) {
             if (method.isSynthetic() || Modifier.isStatic(method.getModifiers()) || method.isAnnotationPresent(NotALuaFunction.class)) {
                 continue;
             }

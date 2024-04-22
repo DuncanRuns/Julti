@@ -85,10 +85,16 @@ public final class LuaConverter {
     }
 
     public static Varargs convertToLua(Object value) {
+        if (value == null) {
+            return LuaValue.NIL;
+        }
         return javaToLuaMap.get(value.getClass()).apply(value);
     }
 
     public static Varargs convertToLua(Object value, Class<?> conversionClass) {
+        if (value == null) {
+            return LuaValue.NIL;
+        }
         return javaToLuaMap.get(conversionClass).apply(value);
     }
 

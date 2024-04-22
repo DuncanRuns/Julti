@@ -1,15 +1,12 @@
 package xyz.duncanruns.julti.script.lua;
 
 import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.VarArgFunction;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.script.LuaScript;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
@@ -19,21 +16,14 @@ class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
         super(requester, luaScript);
     }
 
+
     @NotALuaFunction
     @Override
     public LuaValue call(LuaValue modname, LuaValue env) {
-        LuaValue library = super.call(modname, env);
-        for (Method method : JultiLuaLibrary.class.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(AllowedWhileCustomizing.class) || method.isAnnotationPresent(NotALuaFunction.class)) {
-                continue;
-            }
-            library.set(method.getName(), new VarArgFunction() {
-                @Override
-                public Varargs invoke(Varargs args) {
-                    throw new CustomizingException("Customization Error: julti." + method.getName() + " used while customizing.");
-                }
-            });
-        }
+        LuaValue library = tableOf();
+        addMethodsToLibrary(library, this, JultiLuaLibrary.class);
+        addMethodsToLibrary(library, this);
+        env.set(this.getLibraryName(), library);
         return library;
     }
 
