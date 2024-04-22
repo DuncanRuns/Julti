@@ -233,10 +233,27 @@ public class ScriptManager {
 
     public static void generateDocs() {
         Path libsFolder = SCRIPTS_FOLDER.resolve("libs");
-        try {
-            Files.createDirectory(libsFolder);
-        } catch (IOException ignored) {
+        if (!Files.exists(libsFolder)) {
+            try {
+                Files.createDirectory(libsFolder);
+            } catch (IOException e) {
+                Julti.log(Level.ERROR, "Failed to create scripts/libs folder: " + ExceptionUtil.toDetailedString(e));
+                return;
+            }
         }
         LuaLibraries.generateDocs(libsFolder);
+
+        Path vscodeFolder = SCRIPTS_FOLDER.resolve(".vscode");
+        if (!Files.isDirectory(vscodeFolder)) {
+            vscodeFolder.toAbsolutePath().toFile().mkdirs();
+        }
+        Path vscodeSettingsPath = vscodeFolder.resolve("settings.json");
+        if (!Files.isRegularFile(vscodeSettingsPath)) {
+            try {
+                FileUtil.writeString(vscodeSettingsPath, "{\"Lua.workspace.library\": [\"libs.*\"]}");
+            } catch (IOException e) {
+                Julti.log(Level.ERROR, "Failed to set vscode settings for scripts folder: " + ExceptionUtil.toDetailedString(e));
+            }
+        }
     }
 }
