@@ -124,7 +124,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
             LuaDocumentation[] documentations = method.getAnnotationsByType(LuaDocumentation.class);
             Optional<LuaDocumentation> documentation = documentations.length == 0 ? Optional.empty() : Optional.of(documentations[0]);
             if (documentation.isPresent()) {
-                writer.write("\n--- " + documentation.get().description());
+                writer.write("\n--- " + documentation.get().description().replace("\n", "\n--- "));
             }
 
             List<String> paramNames = Arrays.stream(method.getParameters()).map(Parameter::getName).collect(Collectors.toList());
