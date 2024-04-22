@@ -32,7 +32,8 @@ public class CommandManager {
             new DoActionCommand(),
             new ClearWorldsCommand(),
             new CancelIfCommand(),
-            new ScriptCommand()
+            new ScriptCommand(),
+            new GenerateLuaDocsCommand()
     )));
 
     static {

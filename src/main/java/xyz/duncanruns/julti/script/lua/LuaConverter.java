@@ -10,9 +10,33 @@ import java.util.function.Function;
 public final class LuaConverter {
     private static final Map<Class<?>, Function<Varargs, Object>> luaToJavaMap = generateLuaToJavaMap();
     private static final Map<Class<?>, Function<Object, Varargs>> javaToLuaMap = generateJavaToLuaMap();
+    private static final Map<Class<?>, String> luaTypeMap = generateLuaTypeMap();
 
     private LuaConverter() {
 
+    }
+
+    private static Map<Class<?>, String> generateLuaTypeMap() {
+        Map<Class<?>, String> map = new HashMap<>();
+        map.put(int.class, "number");
+        map.put(LuaInteger.class, "number");
+        map.put(float.class, "number");
+        map.put(long.class, "number");
+        map.put(double.class, "number");
+        map.put(LuaNumber.class, "number");
+        map.put(LuaDouble.class, "number");
+        map.put(char.class, "number");
+        map.put(short.class, "number");
+        map.put(byte.class, "number");
+        map.put(boolean.class, "boolean");
+        map.put(LuaBoolean.class, "boolean");
+        map.put(void.class, "nil");
+        map.put(String.class, "string");
+        map.put(LuaString.class, "string");
+        map.put(LuaValue.class, "any");
+        map.put(Varargs.class, "any");
+        Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, map.get(Primitives.unwrap(clazz))));
+        return map;
     }
 
     private static Map<Class<?>, Function<Varargs, Object>> generateLuaToJavaMap() {
@@ -74,5 +98,9 @@ public final class LuaConverter {
 
     public static <T> Object convertToJava(Varargs value, Class<?> conversionClass) {
         return luaToJavaMap.get(conversionClass).apply(value);
+    }
+
+    public static String classToLuaName(Class<?> clazz) {
+        return luaTypeMap.get(clazz);
     }
 }

@@ -6,6 +6,7 @@ import org.luaj.vm2.LuaValue;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -35,6 +36,15 @@ class JultiLuaLibrary extends LuaLibrary {
     public JultiLuaLibrary(CancelRequester requester, LuaScript script) {
         super(requester, "julti");
         this.script = script;
+    }
+
+    private JultiLuaLibrary() {
+        super(CancelRequesters.ALWAYS_CANCEL_REQUESTER, "julti");
+        this.script = null;
+    }
+
+    public static JultiLuaLibrary forLibGen() {
+        return new JultiLuaLibrary();
     }
 
     private static MinecraftInstance getInstanceFromInt(int instanceNum) {

@@ -5,6 +5,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesterManager;
+import xyz.duncanruns.julti.script.lua.LuaLibraries;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
 import xyz.duncanruns.julti.util.LauncherUtil;
@@ -228,5 +229,14 @@ public class ScriptManager {
         } finally {
             requesterManager.remove(name);
         }
+    }
+
+    public static void generateDocs() {
+        Path libsFolder = SCRIPTS_FOLDER.resolve("libs");
+        try {
+            Files.createDirectory(libsFolder);
+        } catch (IOException ignored) {
+        }
+        LuaLibraries.generateDocs(libsFolder);
     }
 }

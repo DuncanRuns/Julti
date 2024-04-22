@@ -11,13 +11,19 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class LuaLibrary extends TwoArgFunction {
 
@@ -105,6 +111,56 @@ public abstract class LuaLibrary extends TwoArgFunction {
         };
     }
 
+    @NotALuaFunction
+    public void writeLuaFile(Writer writer) throws IOException {
+        writer.write("-- Java methods defined by the \"" + this.libraryName + "\" library  automatically converted to lua functions for scripting environment usage.");
+        writer.write("\n\n" + this.getLibraryName() + " = {}");
+        for (Method method : this.getClass().getDeclaredMethods()) {
+            if (method.isSynthetic() || Modifier.isStatic(method.getModifiers()) || method.isAnnotationPresent(NotALuaFunction.class)) {
+                continue;
+            }
+            writer.write("\n");
+
+            LuaDocumentation[] documentations = method.getAnnotationsByType(LuaDocumentation.class);
+            Optional<LuaDocumentation> documentation = documentations.length == 0 ? Optional.empty() : Optional.of(documentations[0]);
+            if (documentation.isPresent()) {
+                writer.write("\n--- " + documentation.get().description());
+            }
+
+            List<String> paramNames = Arrays.stream(method.getParameters()).map(Parameter::getName).collect(Collectors.toList());
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (paramNames.size() != paramTypes.length) {
+                continue; // method is stupid?
+            }
+            List<String> paramsForFunction = new ArrayList<>();
+            for (int i = 0; i < paramTypes.length; i++) {
+                String paramTypeName = "";
+                if (documentation.isPresent() && i < documentation.get().paramTypes().length) {
+                    paramTypeName = documentation.get().paramTypes()[i];
+                } else {
+                    paramTypeName = LuaConverter.classToLuaName(paramTypes[i]);
+                }
+                writer.write(String.format("\n--- @param %s %s", paramNames.get(i), paramTypeName));
+                paramsForFunction.add(paramNames.get(i));
+            }
+
+            if (documentation.isPresent() && documentation.get().returnTypes().length > 0) {
+                for (String returnType : documentation.get().returnTypes()) {
+                    writer.write("\n--- @return " + returnType);
+                }
+            } else {
+                writer.write("\n--- @return " + LuaConverter.classToLuaName(method.getReturnType()));
+            }
+
+            writer.write(String.format("\nfunction %s.%s(%s) end", this.getLibraryName(), method.getName(), String.join(", ", paramsForFunction)));
+        }
+    }
+
+    @NotALuaFunction
+    public String getLibraryName() {
+        return this.libraryName;
+    }
+
     /**
      * Mark a method with @AllowedWhileCustomizing to allow it to still function in customization mode.
      * <p>
@@ -121,5 +177,19 @@ public abstract class LuaLibrary extends TwoArgFunction {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @interface NotALuaFunction {
+    }
+
+    /**
+     * Mark a method with @LuaDocumentation to give a documentation description that will appear in automatically generated lua.
+     * Optionally you can define the return type(s) in cases where the java method returns "LuaValue" or "Varargs"
+     * You can also define parameter types in a similar case for parameters.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface LuaDocumentation {
+        String description();
+
+        String[] returnTypes() default {};
+
+        String[] paramTypes() default {};
     }
 }
