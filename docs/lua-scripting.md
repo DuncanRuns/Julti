@@ -6,11 +6,12 @@ Running lua scripts from java is possible because of [luaj](https://github.com/l
 
 ## Importing Scripts
 
-An example script for launching and benchmarking can be found [here](https://gist.github.com/DuncanRuns/bf35099b3192f797998ae3b9a126c4c5).
+An example script for launching and benchmarking can be
+found [here](https://gist.github.com/DuncanRuns/bf35099b3192f797998ae3b9a126c4c5).
 It can be imported by using the gist link or the gist id:
+
 - `https://gist.github.com/DuncanRuns/bf35099b3192f797998ae3b9a126c4c5`
 - `bf35099b3192f797998ae3b9a126c4c5`
-
 
 ## Script Attributes
 
@@ -42,108 +43,37 @@ You can set parallel running to true using a comment:
 
 ## Default Modules
 
-Julti uses `JsePlatform.standardGlobals()`, which provides the following modules to lua scripts:
+Julti provides the following default modules to lua scripts:
+
 - `bit32`
 - `table`
 - `string`
-- `coroutine`
 - `math`
-- `io`
-- `os`
-- `luajava`
 
-Half of these modules probably shouldn't be used like `luajava` and `coroutine` as scripts are mostly intended to be
-fully contained in Julti and use the provided functionality, however it takes no effort to keep these modules included,
-and it may open up more possibilities for scripting.
+Julti also provides a `julti` module to lua scripts, which contains lots of useful functions relevant to Julti usage,
+and plugins may also provide functions.
 
-Julti also provides a `julti` module to lua scripts, which contains lots of useful functions relevant to Julti usage.
+### Library Docs
 
-### The Julti Module
-
-The `julti` module provided to lua scripts contains the following functions (formatted like java methods):
-```java
-void activateInstance(int instanceNum, boolean doSetupStyle)
-void sendChatMessage(String message)
-void clearWorlds()
-void closeInstance(int instanceNum)
-void closeAllInstances()
-void replicateHotkey(String hotkeyCode, int mouseX, int mouseY)
-void launchInstance(int instanceNum)
-void launchAllInstances()
-void lockInstance(int instanceNum)
-void lockAllInstances()
-void log(String message)
-void openFile(String filePath)
-void openInstanceToLan()
-boolean trySetOption(String optionName, anything optionValue)
-String getOptionAsString(String optionName)
-boolean tryPlaySound(String soundLocation, float volume)
-void resetInstance(int instanceNum)
-void resetAllInstances()
-void setSessionResets(int sessionResets)
-void sleep(long millis)
-void waitForInstanceLaunch(int instanceNum)
-void waitForInstancePreviewLoad(int instanceNum)
-void waitForInstanceLoad(int instanceNum)
-void pressEscOnInstance(int instanceNum)
-int getInstanceCount()
-int getSelectedInstanceNum()
-void runCommand(String command)
-void focusWall()
-void runScript(String scriptName)
-void setGlobal(String key, anything val)
-anything getGlobal(String key, anything def)
-String getInstanceState(int instanceNum)
-String getInstanceInWorldState(int instanceNum)
-boolean isOnMinecraftWindow()
-void keyDown(String key)
-void keyUp(String key)
-void pressKey(String key)
-void holdKey(String key, int millis)
-boolean isInstanceActive()
-boolean isWallActive()
-long getLastActivation(int instanceNum)
-long getCurrentTime()
-void cancelScript()
-void cancelAllScripts()
-void waitForAllInstancesLaunch()
-void waitForAllInstanceSPreviewLoad()
-void waitForAllInstancesLoad()
-```
-(Generated with [this python script](https://gist.github.com/DuncanRuns/764867339c17e713b28796a2cbb29e10))
-
-A few notes on some of the parameters and return values:
-- `keyDown`, `keyUp`, `pressKey`, and `holdKey`, can take a single character (`'a'`, `'b'`, `'c'`, `'1'`, `'2'`, `'3'`), or a VK constant (`'VK_TAB'`, `'VK_RETURN'`). Microsoft documentation has a [list for virtual key code constants](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
-
-
-- `getInstanceState(...)` will return one of the following strings:
-  - `'WAITING'`
-  - `'INWORLD'`
-  - `'TITLE'`
-  - `'GENERATING'`
-  - `'PREVIEWING'`
-
-
-- `getInstanceInWorldState(...)` will return one of the following strings:
-  - `'UNPAUSED'`
-  - `'PAUSED'`
-  - `'GAMESCREENOPEN'`
-
-
-- `isInstanceActive()` and `isOnMinecraftWindow()` differ in the following way: 
-  - `isInstanceActive()` will return `true` only if a minecraft instance from Julti's instances list is active.
-  - `isOnMinecraftWindow()` will return `true` if any minecraft window is active.
+Running the `genluadocs` command in the Julti command line will generate library lua files in
+the `%userprofile%/.Julti/scripts/libs` folder. The generated files will contain function definitions with
+descriptions (if provided by the plugin), parameter types, and return types.
 
 # Making a Lua Library for Julti
+
 Sample code here:
 https://github.com/DuncanRuns/Julti-Benchmark/commit/884d853a0d34bfe537b99cd424379bae55c03fa6
 
 1. Make a class that `extends LuaLibrary`
 2. Use `@SuppressWarnings("unused")` on the class so that you don't get unused warnings
-3. Make a constructor: `public YourLibraryClass(CancelRequester requester) {super(requester,"namethatluauseshere")}` replacing "namethatluauseshere" with the library name you want to use in lua scripts
+3. Make a constructor: `public YourLibraryClass(CancelRequester requester) {super(requester,"namethatluauseshere")}`
+   replacing "namethatluauseshere" with the library name you want to use in lua scripts
 4. Make some regular java methods to be magically turned into lua functions.
-  - Supported parameter types:
-    - Basic java types: primitives (`int`, `double`), primitive wrappers (`Integer`, `Double`),  and `String`
+
+- Supported parameter types:
+    - Basic java types: primitives (`int`, `double`), primitive wrappers (`Integer`, `Double`), and `String`
     - `LuaValue` which directly takes what is given by lua with no conversion to java types
 - Supported return types include all supported parameter types as well as `void`
+
 5. Register the library with `LuaLibraries.registerLuaLibrary(YourLibraryClass::new)`
+6. Add documentation by using the `@LuaDocumentation(description =\"Description here.\")` annotation on your methods.
