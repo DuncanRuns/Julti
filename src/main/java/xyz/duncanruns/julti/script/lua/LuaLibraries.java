@@ -44,6 +44,7 @@ public class LuaLibraries {
                 FileWriter writer = new FileWriter(file);
                 library.writeLuaFile(writer);
                 writer.close();
+                Julti.log(Level.INFO, "Generated " + file.getName());
             } catch (IOException e) {
                 Julti.log(Level.ERROR, "Failed to write lua documentation for library " + library.getLibraryName() + ": " + ExceptionUtil.toDetailedString(e));
             }
