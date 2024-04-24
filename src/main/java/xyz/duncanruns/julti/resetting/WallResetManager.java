@@ -290,7 +290,7 @@ public class WallResetManager extends ResetManager {
 
         boolean resetFirst = options.coopMode && options.wallBypass;
 
-        selectedInstance.ensureNotFullscreen();
+        selectedInstance.ensureNotFullscreen(true);
 
         // Unlock instance
         this.unlockInstance(selectedInstance);

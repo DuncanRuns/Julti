@@ -46,7 +46,7 @@ public class MultiResetManager extends ResetManager {
             return actionResults;
         }
 
-        selectedInstance.ensureNotFullscreen();
+        selectedInstance.ensureNotFullscreen(true);
 
         List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         instancePool.removeIf(instance -> instance.equals(selectedInstance));

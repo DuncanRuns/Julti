@@ -747,9 +747,16 @@ public class MinecraftInstance {
     }
 
     public void ensureNotFullscreen() {
+        this.ensureNotFullscreen(false);
+    }
+
+    /**
+     * @param canSkip If true, the function can be cancelled if Julti hasn't activated this instance since last reset.
+     */
+    public void ensureNotFullscreen(boolean canSkip) {
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        if ((!this.activeSinceReset) || (!this.isFullscreen())) {
+        if ((canSkip && (!this.activeSinceReset)) || (!this.isFullscreen())) {
             Julti.log(Level.DEBUG, "Skipping fullscreen check because " + (!this.activeSinceReset ? "the instance was not active" : "the instance is not in fullscreen"));
             return;
         }
