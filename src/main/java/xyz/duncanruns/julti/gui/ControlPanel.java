@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import com.formdev.flatlaf.ui.FlatMarginBorder;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.*;
@@ -37,15 +38,17 @@ public class ControlPanel extends JPanel {
         this.add(GUIUtil.getButtonWithMethod(new JButton("Instance Utilities..."), a -> {
             JPopupMenu menu = new JPopupMenu("Instance Utilities");
 
-            GUIUtil.addMenuItem(menu, "Redetect Instances", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Thread.currentThread().setName("julti-gui");
-                    if (0 == JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
-                        Julti.doLater(() -> InstanceManager.getInstanceManager().redetectInstances());
+            if (!JultiOptions.getJultiOptions().utilityMode) {
+                GUIUtil.addMenuItem(menu, "Redetect Instances", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Thread.currentThread().setName("julti-gui");
+                        if (0 == JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI(), "This will remove all instances saved to the profile and replace them with new ones.\nAre you sure you want to do this?", "Julti: Redetect Instances", JOptionPane.OK_CANCEL_OPTION)) {
+                            Julti.doLater(() -> InstanceManager.getInstanceManager().redetectInstances());
+                        }
                     }
-                }
-            });
+                });
+            }
 
             GUIUtil.addMenuItem(menu, "Reload Instance Options", new AbstractAction() {
                 @Override
@@ -55,14 +58,15 @@ public class ControlPanel extends JPanel {
 
                 }
             });
-
-            GUIUtil.addMenuItem(menu, "Launch All Instances", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Thread.currentThread().setName("julti-gui");
-                    SafeInstanceLauncher.launchInstances(InstanceManager.getInstanceManager().getInstances());
-                }
-            });
+            if (!JultiOptions.getJultiOptions().utilityMode) {
+                GUIUtil.addMenuItem(menu, "Launch All Instances", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Thread.currentThread().setName("julti-gui");
+                        SafeInstanceLauncher.launchInstances(InstanceManager.getInstanceManager().getInstances());
+                    }
+                });
+            }
 
             GUIUtil.addMenuItem(menu, "Close All Instances", new AbstractAction() {
                 @Override

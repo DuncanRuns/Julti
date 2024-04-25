@@ -276,7 +276,16 @@ public final class Julti {
             ScriptManager.cancelAllScripts();
         } else {
             PluginEvents.MiscEventType.HOTKEY_PRESS.runAll(Pair.of(hotkeyCode, mousePosition));
-            ResetHelper.run(hotkeyCode, mousePosition);
+            if (JultiOptions.getJultiOptions().utilityMode) {
+                if (hotkeyCode.equals("reset")) {
+                    MinecraftInstance instance = InstanceManager.getInstanceManager().getSelectedInstance();
+                    if (instance != null) {
+                        instance.getKeyPresser().pressKey(instance.getGameOptions().createWorldKey);
+                    }
+                }
+            } else {
+                ResetHelper.run(hotkeyCode, mousePosition);
+            }
         }
     }
 

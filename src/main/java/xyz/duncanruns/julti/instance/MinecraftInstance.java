@@ -376,7 +376,6 @@ public class MinecraftInstance {
 
     private void onWorldLoad(boolean bypassPieChartGate) {
         this.scheduler.clear();
-
         JultiOptions options = JultiOptions.getJultiOptions();
 
         boolean instanceCanPauseItself = this.gameOptions.pauseOnLostFocus || this.gameOptions.f3PauseOnWorldLoad;
@@ -404,6 +403,7 @@ public class MinecraftInstance {
         int toPress = options.useF3 ? 2 : 1;
 
         if (ActiveWindowManager.isWindowActive(this.hwnd)) {
+            this.lastActivation = System.currentTimeMillis();
             if (options.unpauseOnSwitch || options.coopMode) {
                 toPress = 0;
             }
@@ -412,14 +412,14 @@ public class MinecraftInstance {
                 this.openToLan(true);
             }
 
-            if (options.autoFullscreen) {
+            if (options.autoFullscreen && !options.utilityMode && !this.isFullscreen()) {
                 this.presser.pressKey(this.gameOptions.fullscreenKey);
                 this.windowStateDirty = true;
             }
             if (this.gameOptions.f1SS) {
                 this.presser.pressF1();
             }
-        } else if (instanceCanPauseItself) {
+        } else if (instanceCanPauseItself || options.utilityMode) {
             toPress = 0;
         }
 

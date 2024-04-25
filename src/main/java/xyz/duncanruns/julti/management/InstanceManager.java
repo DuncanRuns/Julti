@@ -27,6 +27,7 @@ public final class InstanceManager {
     private static final InstanceManager INSTANCE = new InstanceManager();
     private final ArrayList<MinecraftInstance> instances = new ArrayList<>();
 
+    private boolean utilityMode = false;
     private boolean instancesMissing = true;
 
     private InstanceManager() {
@@ -103,6 +104,38 @@ public final class InstanceManager {
     }
 
     public void tick(long cycles) {
+        if (JultiOptions.getJultiOptions().utilityMode != this.utilityMode) {
+            this.reloadUtilityMode();
+        }
+        if (this.utilityMode) {
+            this.tickUtility(cycles);
+        } else {
+            this.tickRegular(cycles);
+        }
+    }
+
+    private void reloadUtilityMode() {
+        this.utilityMode = JultiOptions.getJultiOptions().utilityMode;
+        if (this.utilityMode) {
+            this.instances.clear();
+        } else {
+            this.loadInstances();
+        }
+    }
+
+    private void tickUtility(long cycles) {
+        this.instances.forEach(MinecraftInstance::checkWindowMissing);
+        this.instances.removeIf(MinecraftInstance::isWindowMarkedMissing);
+        if (cycles % 5000 == 0 && this.getSelectedInstance() == null) {
+            InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
+                i.discoverInformation();
+                this.instances.add(i);
+            });
+        }
+        this.instancesMissing = false;
+    }
+
+    private void tickRegular(long cycles) {
         this.instances.forEach(MinecraftInstance::checkWindowMissing);
         if (cycles % 5000 == 0) {
             if (this.checkInstancesMarkedMissing()) {
@@ -113,7 +146,6 @@ public final class InstanceManager {
                 this.renameWindows();
             }
         }
-
     }
 
     public void tickInstances() {

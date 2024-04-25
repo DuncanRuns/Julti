@@ -88,6 +88,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode")));
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto Fullscreen", "autoFullscreen", b -> this.reload())));
 
         if (options.autoFullscreen) {
@@ -364,6 +370,7 @@ public class OptionsGUI extends JFrame {
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
+                    options.utilityMode = false;
                 });
             }
             this.reload();

@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.GUIUtil;
@@ -123,13 +124,15 @@ public class SingleInstancePanel extends JPanel implements MouseListener {
                 }
             }
         });
-        GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Thread.currentThread().setName("julti-gui");
-                Julti.waitForExecute(() -> InstanceManager.getInstanceManager().removeInstance(SingleInstancePanel.this.instance));
-            }
-        });
+        if (!JultiOptions.getJultiOptions().utilityMode) {
+            GUIUtil.addMenuItem(popupMenu, "Remove", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Thread.currentThread().setName("julti-gui");
+                    Julti.waitForExecute(() -> InstanceManager.getInstanceManager().removeInstance(SingleInstancePanel.this.instance));
+                }
+            });
+        }
         popupMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 }
