@@ -7,6 +7,11 @@ Changes in v1.4.0:
   - Not as good as an OBS projector
     - Doesn't render instances at 60FPS, instead having no FPS and drawing single frames of instances at a time when they reach certain states
     - No custom images for locks or background, just basic shapes and solid colors only
+- Added "Utility Mode", will be a main button on the GUI in the future but for now is at the top of experimental.
+  - Instances list won't be saved, closed instances will be automatically removed from the instances list, any new opened instances will be added to the instances list
+  - Multi instance functionality is mostly disabled
+  - Only the main reset hotkey and script hotkeys will work
+  - Useful for practice, ranked, or tournament playing instances (or a new secret scenario in the future)
 - Added scripts action menu (right click scripts for more stuff)
   - Added script editing (@pants721 #91)
 - Scripts system entirely reworked:
@@ -17,10 +22,14 @@ Changes in v1.4.0:
     - .txt script files will be legacy scripts, .lua script files will be lua scripts
     - Added lua functions equivalents for all the Julti commands and a few more
     - Plugins are be able to register libraries for lua scripts to have access to
+    - Added the `genluadocs` command which will convert all loaded libraries (`julti`, `benchmark`, possible `moveresize`) into `.lua` files which can be used like libraries while making scripts.
+      -A vscode settings file will be generated for the scripts folder to support these library files.
   - Greatly improved script importing
-    - You can now put a github gist link or id and download scripts
+    - You can now put a GitHub gist link or id and download scripts
       - The gist must contain a .lua file for a lua script or .txt file for a legacy script
     - You can still use the old legacy script codes to import
+  - Added script customization.
+      - Lua scripts can define customization functionality so that when importing (or right clicking and pressing customize) the script can prompt the user and ask for custom values (such as eye measuring width).
 - Added illegal mod checker (will appear as warnings in log, you can ignore them if playing something like icarus)
 - Added more sounds (bone sounds, specnr sounds)
 - Added basic sound randomization (selecting a folder will pick a random sound from the folder)
@@ -31,6 +40,7 @@ Changes in v1.4.0:
 - Fix instance detection for weird legacy versions
 - Update benchmark plugin
 - Added lots of stuff for plugins to use, including saving custom data into Julti profiles
+- Update PaceMan Tracker to v0.4.0, this will support item tracking so that pacemans can (attempt to) be more accurate
 - Various tweaks/fixes
 
 Changes in v1.3.1:
