@@ -75,7 +75,7 @@ public abstract class ResetManager {
     }
 
     @Nullable
-    protected MinecraftInstance getHoveredWallInstance(Point mousePosition) {
+    public MinecraftInstance getHoveredWallInstance(Point mousePosition) {
         JultiOptions options = JultiOptions.getJultiOptions();
         Point point = new Point(mousePosition.x, mousePosition.y);
         Rectangle bounds = ActiveWindowManager.getActiveWindowBounds();
