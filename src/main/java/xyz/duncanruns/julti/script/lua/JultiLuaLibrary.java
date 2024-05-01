@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.script.lua;
 import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
@@ -49,6 +50,12 @@ class JultiLuaLibrary extends LuaLibrary {
 
     private static MinecraftInstance getInstanceFromInt(int instanceNum) {
         return InstanceManager.getInstanceManager().getInstances().get(instanceNum - 1);
+    }
+
+    private static Integer getInstanceNumAtPosition(Point mousePos) {
+        AtomicReference<MinecraftInstance> instance = new AtomicReference<>();
+        Julti.waitForExecute(() -> instance.set(ResetHelper.getManager().getHoveredWallInstance(mousePos)));
+        return InstanceManager.getInstanceManager().getInstanceNum(instance.get());
     }
 
     @AllowedWhileCustomizing
@@ -244,7 +251,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return InstanceManager.getInstanceManager().getSize();
     }
 
-    @LuaDocumentation(description = "Gets the instance number of the currently selected instance. Returns 0 if no instance is selected.")
+    @LuaDocumentation(description = "Gets the instance number of the currently active instance. Returns 0 if no instance is active.")
     public int getSelectedInstanceNum() {
         InstanceManager instanceManager = InstanceManager.getInstanceManager();
         return instanceManager.getInstanceNum(instanceManager.getSelectedInstance());
@@ -271,7 +278,7 @@ class JultiLuaLibrary extends LuaLibrary {
         LuaRunner.GLOBALS_MAP.put(key, val);
     }
 
-    @LuaDocumentation(description = "Retrieves a value from global storage set by julti.setGlobal(). A default value can optionally be provided in the case that no value is found in the globals storage.")
+    @LuaDocumentation(description = "Retrieves a value from global storage set by julti.setGlobal(). A default value can optionally be provided in the case that no value is found in the globals storage.", returnTypes = "any|nil")
     @AllowedWhileCustomizing
     public LuaValue getGlobal(String key, LuaValue def) {
         return LuaRunner.GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
@@ -435,17 +442,33 @@ class JultiLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.")
+    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil")
     @AllowedWhileCustomizing
     @Nullable
     public String askTextBox(String message, String startingVal) {
         throw new CustomizingException("Script Error: julti.askTextBox used while not customizing.");
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a message and Yes/No/Cancel buttons. Returns true for yes, false for no, and nil for cancel or if the user closes the window.")
+    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a message and Yes/No/Cancel buttons. Returns true for yes, false for no, and nil for cancel or if the user closes the window.", returnTypes = "boolean|nil")
     @AllowedWhileCustomizing
     @Nullable
     public Boolean askYesNo(String message) {
         throw new CustomizingException("Script Error: julti.askYesNo used while not customizing.");
+    }
+
+    @LuaDocumentation(description = "Gets the position of the mouse.", returnTypes = {"number", "number"})
+    public Varargs getMousePosition() {
+        Point mousePos = MouseUtil.getMousePos();
+        return varargsOf(new LuaValue[]{valueOf(mousePos.x), valueOf(mousePos.y)});
+    }
+
+    @LuaDocumentation(description = "Gets the instance number of the instance at the specified mouse position, or 0 if no instance at position.")
+    public Integer getInstanceNumAtPosition(int mouseX, int mouseY) {
+        return getInstanceNumAtPosition(new Point(mouseX, mouseY));
+    }
+
+    @LuaDocumentation(description = "Gets the instance number of the hovered instance, or 0 if no hovered instance.")
+    public Integer getHoveredInstanceNum() {
+        return getInstanceNumAtPosition(MouseUtil.getMousePos());
     }
 }
