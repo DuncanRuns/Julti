@@ -468,7 +468,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil",paramTypes = {"string","string|nil","function|nil"})
+    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil",paramTypes = {"string","string|nil","(fun(input: string): boolean)|nil"})
     @AllowedWhileCustomizing
     @Nullable
     public String askTextBox(String message, String startingVal, LuaFunction validator) {
