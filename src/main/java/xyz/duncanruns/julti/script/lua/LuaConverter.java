@@ -64,22 +64,15 @@ public final class LuaConverter {
     private static Map<Class<?>, Function<Object, Varargs>> generateJavaToLuaMap() {
         Map<Class<?>, Function<Object, Varargs>> map = new HashMap<>();
         map.put(int.class, o -> LuaValue.valueOf((int) o));
-        map.put(LuaInteger.class, o -> LuaValue.valueOf((int) o));
         map.put(float.class, o -> LuaValue.valueOf((float) o));
         map.put(long.class, o -> LuaValue.valueOf((long) o));
         map.put(double.class, o -> LuaValue.valueOf((double) o));
-        map.put(LuaNumber.class, o -> LuaValue.valueOf((double) o));
-        map.put(LuaDouble.class, o -> LuaValue.valueOf((double) o));
         map.put(char.class, o -> LuaValue.valueOf((char) o));
         map.put(short.class, o -> LuaValue.valueOf((short) o));
         map.put(byte.class, o -> LuaValue.valueOf((byte) o));
         map.put(boolean.class, o -> LuaValue.valueOf((boolean) o));
-        map.put(LuaBoolean.class, o -> LuaValue.valueOf((boolean) o));
         map.put(void.class, o -> LuaValue.NIL);
         map.put(String.class, o -> LuaValue.valueOf((String) o));
-        map.put(LuaString.class, o -> LuaValue.valueOf((String) o));
-        map.put(LuaValue.class, o -> (LuaValue) o);
-        map.put(Varargs.class, o -> (Varargs) o);
         Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, o -> o == null ? LuaValue.NIL : map.get(Primitives.unwrap(clazz)).apply(o)));
         return map;
     }
@@ -88,12 +81,18 @@ public final class LuaConverter {
         if (value == null) {
             return LuaValue.NIL;
         }
+        if (value instanceof Varargs) {
+            return (Varargs) value;
+        }
         return javaToLuaMap.get(value.getClass()).apply(value);
     }
 
     public static Varargs convertToLua(Object value, Class<?> conversionClass) {
         if (value == null) {
             return LuaValue.NIL;
+        }
+        if (value instanceof Varargs) {
+            return (Varargs) value;
         }
         return javaToLuaMap.get(conversionClass).apply(value);
     }
