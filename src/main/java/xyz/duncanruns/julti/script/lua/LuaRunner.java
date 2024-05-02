@@ -11,14 +11,8 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.script.LuaScript;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 @SuppressWarnings("unused")
 public class LuaRunner {
-    public static final Map<String, LuaValue> GLOBALS_MAP = Collections.synchronizedMap(new HashMap<>());
-
     public static void runLuaScript(LuaScript script, CancelRequester cancelRequester) {
         Globals globals = getSafeGlobals();
         globals.load(new InterruptibleDebugLib(cancelRequester));

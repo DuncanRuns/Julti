@@ -26,12 +26,15 @@ import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("unused")
 class JultiLuaLibrary extends LuaLibrary {
+    public static final Map<String, LuaValue> GLOBALS_MAP = Collections.synchronizedMap(new HashMap<>());
     protected final LuaScript script;
 
     public JultiLuaLibrary(CancelRequester requester, LuaScript script) {
@@ -49,13 +52,15 @@ class JultiLuaLibrary extends LuaLibrary {
     }
 
     private static MinecraftInstance getInstanceFromInt(int instanceNum) {
-        return InstanceManager.getInstanceManager().getInstances().get(instanceNum - 1);
+        synchronized (Julti.getJulti()) {
+            return InstanceManager.getInstanceManager().getInstances().get(instanceNum - 1);
+        }
     }
 
     private static Integer getInstanceNumAtPosition(Point mousePos) {
-        AtomicReference<MinecraftInstance> instance = new AtomicReference<>();
-        Julti.waitForExecute(() -> instance.set(ResetHelper.getManager().getHoveredWallInstance(mousePos)));
-        return InstanceManager.getInstanceManager().getInstanceNum(instance.get());
+        synchronized (Julti.getJulti()) {
+            return InstanceManager.getInstanceManager().getInstanceNum(ResetHelper.getManager().getHoveredWallInstance(mousePos));
+        }
     }
 
     @AllowedWhileCustomizing
@@ -65,33 +70,41 @@ class JultiLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Brings the user to the instance specified by instanceNum. Optionally a second argument (doSetupStyle) can be specified to prevent window resizing, fullscreening, unpausing, etc.")
     public void activateInstance(int instanceNum, Boolean doSetupStyle) {
-        Julti.waitForExecute(() -> Julti.getJulti().activateInstance(getInstanceFromInt(instanceNum), !(doSetupStyle == null) && doSetupStyle));
+        synchronized (Julti.getJulti()) {
+            Julti.getJulti().activateInstance(getInstanceFromInt(instanceNum), !(doSetupStyle == null) && doSetupStyle);
+        }
     }
 
     @LuaDocumentation(description = "Sends a chat message in the active instance. A slash needs to be given if executing a command (eg. julti.sendChatMessage(\"/kill\")).")
     public void sendChatMessage(String message) {
-        Julti.waitForExecute(() -> {
+        synchronized (Julti.getJulti()) {
             MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
             if (selectedInstance == null) {
                 return;
             }
             selectedInstance.sendChatMessage(message, false);
-        });
+        }
     }
 
     @LuaDocumentation(description = "Clears all but the last 5 worlds in each instance.")
     public void clearWorlds() {
-        Julti.waitForExecute(BopperUtil::clearWorlds);
+        synchronized (Julti.getJulti()) {
+            BopperUtil.clearWorlds();
+        }
     }
 
     @LuaDocumentation(description = "Closes a specific instance.")
     public void closeInstance(int instanceNum) {
-        Julti.waitForExecute(() -> getInstanceFromInt(instanceNum).reset());
+        synchronized (Julti.getJulti()) {
+            getInstanceFromInt(instanceNum).reset();
+        }
     }
 
     @LuaDocumentation(description = "Closes all instances.")
     public void closeAllInstances() {
-        Julti.waitForExecute(() -> DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow));
+        synchronized (Julti.getJulti()) {
+            DoAllFastUtil.doAllFast(MinecraftInstance::closeWindow);
+        }
     }
 
     @LuaDocumentation(description = "Replicates a hotkey action exactly. Possible codes are: \"reset\", \"bgReset\", \"wallReset\", \"wallSingleReset\", \"wallLock\", \"wallPlay\", \"wallFocusReset\", \"wallPlayLock\", \"debugHover\", or \"script:<script name>\"\nA mouse position can also be specified with 2 extra arguments, or if left blank will use the user's mouse position.")
@@ -231,10 +244,10 @@ class JultiLuaLibrary extends LuaLibrary {
     public void waitForInstanceLoad(int instanceNum) {
         MinecraftInstance instance = getInstanceFromInt(instanceNum);
         while ((!this.cancelRequester.isCancelRequested())) {
-            AtomicBoolean b = new AtomicBoolean(false);
-            Julti.waitForExecute(() -> b.set(instance.getStateTracker().isCurrentState(InstanceState.INWORLD)));
-            if (b.get()) {
-                break;
+            synchronized (Julti.getJulti()) {
+                if (instance.getStateTracker().isCurrentState(InstanceState.INWORLD)) {
+                    break;
+                }
             }
             SleepUtil.sleep(50);
         }
@@ -248,13 +261,17 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Gets the amount of instances in the instance list.")
     @AllowedWhileCustomizing
     public int getInstanceCount() {
-        return InstanceManager.getInstanceManager().getSize();
+        synchronized (Julti.getJulti()) {
+            return InstanceManager.getInstanceManager().getSize();
+        }
     }
 
     @LuaDocumentation(description = "Gets the instance number of the currently active instance. Returns 0 if no instance is active.")
     public int getSelectedInstanceNum() {
-        InstanceManager instanceManager = InstanceManager.getInstanceManager();
-        return instanceManager.getInstanceNum(instanceManager.getSelectedInstance());
+        synchronized (Julti.getJulti()) {
+            InstanceManager instanceManager = InstanceManager.getInstanceManager();
+            return instanceManager.getInstanceNum(instanceManager.getSelectedInstance());
+        }
     }
 
     @LuaDocumentation(description = "Runs a Julti command.")
@@ -275,32 +292,34 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Sets a value in global storage. The value can be accessed on other runs of this script or any other script.\nGlobal storage is not persistent through restarts of Julti.\nFor string storage that is private to this specific script and persists through restarts, see julti.getCustomizable and julti.setCustomizable.")
     @AllowedWhileCustomizing
     public void setGlobal(String key, LuaValue val) {
-        LuaRunner.GLOBALS_MAP.put(key, val);
+        GLOBALS_MAP.put(key, val);
     }
 
     @LuaDocumentation(description = "Retrieves a value from global storage set by julti.setGlobal(). A default value can optionally be provided in the case that no value is found in the globals storage.", returnTypes = "any|nil")
     @AllowedWhileCustomizing
     public LuaValue getGlobal(String key, LuaValue def) {
-        return LuaRunner.GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
+        return GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
     }
 
     @LuaDocumentation(description = "Gets the current state of the instance. Returns \"WAITING\", \"INWORLD\", \"TITLE\", \"GENERATING\", or \"PREVIEWING\".")
     public String getInstanceState(int instanceNum) {
-        MinecraftInstance instance = getInstanceFromInt(instanceNum);
-        return instance.getStateTracker().getInstanceState().name();
+        synchronized (Julti.getJulti()) {
+            return getInstanceFromInt(instanceNum).getStateTracker().getInstanceState().name();
+        }
     }
 
     @LuaDocumentation(description = "Gets a more detailed state of the \"INWORLD\" state. Returns \"UNPAUSED\", \"PAUSED\", or \"GAMESCREENOPEN\".")
     public String getInstanceInWorldState(int instanceNum) {
-        MinecraftInstance instance = getInstanceFromInt(instanceNum);
-        return instance.getStateTracker().getInWorldType().name();
+        synchronized (Julti.getJulti()) {
+            return getInstanceFromInt(instanceNum).getStateTracker().getInWorldType().name();
+        }
     }
 
     @LuaDocumentation(description = "Returns true if any Minecraft window is active.")
     public boolean isOnMinecraftWindow() {
-        AtomicBoolean out = new AtomicBoolean();
-        Julti.waitForExecute(() -> out.set(ActiveWindowManager.isMinecraftActive()));
-        return out.get();
+        synchronized (Julti.getJulti()) {
+            return ActiveWindowManager.isMinecraftActive();
+        }
     }
 
     @LuaDocumentation(description = "Simulates holding a key on the keyboard.\nTakes a single character (\"a\", \"b\", \"1\", \"2\") or a VK constant such as \"VK_RETURN\" (https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)")
@@ -344,23 +363,21 @@ class JultiLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Returns true if an instance from the instances list is active.")
     public boolean isInstanceActive() {
-        AtomicBoolean out = new AtomicBoolean();
-        Julti.waitForExecute(() -> out.set(InstanceManager.getInstanceManager().getSelectedInstance() != null));
-        return out.get();
+        synchronized (Julti.getJulti()) {
+            return InstanceManager.getInstanceManager().getSelectedInstance() != null;
+        }
     }
 
     @LuaDocumentation(description = "Returns true if the wall window is active.")
     public boolean isWallActive() {
-        AtomicBoolean out = new AtomicBoolean();
-        Julti.waitForExecute(() -> out.set(ActiveWindowManager.isWallActive()));
-        return out.get();
+        synchronized (Julti.getJulti()) {
+            return ActiveWindowManager.isWallActive();
+        }
     }
 
     @LuaDocumentation(description = "Gets the last activation time of the specified instance in milliseconds. Useful in combination with julti.getCurrentTime().")
     public long getLastActivation(int instanceNum) {
-        AtomicLong out = new AtomicLong();
-        Julti.waitForExecute(() -> out.set(getInstanceFromInt(instanceNum).getLastActivation()));
-        return out.get();
+        return getInstanceFromInt(instanceNum).getLastActivation();
     }
 
     @LuaDocumentation(description = "Gets the current time in milliseconds.")
@@ -384,10 +401,10 @@ class JultiLuaLibrary extends LuaLibrary {
     public void waitForAllInstancesLaunch() {
         for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
             while ((!this.cancelRequester.isCancelRequested())) {
-                AtomicBoolean b = new AtomicBoolean(false);
-                Julti.waitForExecute(() -> b.set(InstanceManager.getInstanceManager().getMatchingInstance(instance).hasWindow()));
-                if (b.get()) {
-                    break;
+                synchronized (Julti.getJulti()) {
+                    if (InstanceManager.getInstanceManager().getMatchingInstance(instance).hasWindow()) {
+                        break;
+                    }
                 }
                 SleepUtil.sleep(50);
             }
@@ -398,10 +415,10 @@ class JultiLuaLibrary extends LuaLibrary {
     public void waitForAllInstancesPreviewLoad() {
         for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
             while ((!this.cancelRequester.isCancelRequested())) {
-                AtomicBoolean b = new AtomicBoolean(false);
-                Julti.waitForExecute(() -> b.set(instance.getStateTracker().isCurrentState(InstanceState.PREVIEWING)));
-                if (b.get()) {
-                    break;
+                synchronized (Julti.getJulti()) {
+                    if (instance.getStateTracker().isCurrentState(InstanceState.PREVIEWING)) {
+                        break;
+                    }
                 }
                 SleepUtil.sleep(50);
             }
@@ -412,10 +429,10 @@ class JultiLuaLibrary extends LuaLibrary {
     public void waitForAllInstancesLoad() {
         for (MinecraftInstance instance : InstanceManager.getInstanceManager().getInstances()) {
             while ((!this.cancelRequester.isCancelRequested())) {
-                AtomicBoolean b = new AtomicBoolean(false);
-                Julti.waitForExecute(() -> b.set(instance.getStateTracker().isCurrentState(InstanceState.INWORLD)));
-                if (b.get()) {
-                    break;
+                synchronized (Julti.getJulti()) {
+                    if (instance.getStateTracker().isCurrentState(InstanceState.INWORLD)) {
+                        break;
+                    }
                 }
                 SleepUtil.sleep(50);
             }

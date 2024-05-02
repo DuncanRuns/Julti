@@ -62,6 +62,10 @@ public final class Julti {
     private Julti() {
     }
 
+    /**
+     * Returns the main Julti object which gives access to some useful synchronization methods and miscellaneous wrapper methods.
+     * Alternatively synchronize over the Julti object itself to ensure thread safety.
+     */
     public static Julti getJulti() {
         return INSTANCE;
     }
@@ -194,7 +198,9 @@ public final class Julti {
 
         while (this.running) {
             sleep(1);
-            this.tick(cycles++);
+            synchronized (this) {
+                this.tick(cycles++);
+            }
         }
     }
 
