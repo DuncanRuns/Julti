@@ -245,7 +245,7 @@ public final class Julti {
 
         while (!this.hotkeyQueue.isEmpty()) {
             HotkeyPressQMessage message = this.hotkeyQueue.poll();
-            if (instancesMissing && !message.getHotkeyCode().startsWith("script:")) {
+            if (instancesMissing && !message.getHotkeyCode().equals("cancelScript") && !message.getHotkeyCode().startsWith("script:")) {
                 message.markProcessed();
                 continue;
             }
