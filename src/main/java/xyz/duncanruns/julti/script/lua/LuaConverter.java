@@ -35,12 +35,14 @@ public final class LuaConverter {
         map.put(LuaString.class, "string");
         map.put(LuaValue.class, "any");
         map.put(Varargs.class, "any");
+        map.put(LuaFunction.class, "function");
         Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, map.get(Primitives.unwrap(clazz))));
         return map;
     }
 
     private static Map<Class<?>, Function<Varargs, Object>> generateLuaToJavaMap() {
         Map<Class<?>, Function<Varargs, Object>> map = new HashMap<>();
+        map.put(LuaNil.class, varargs -> null);
         map.put(int.class, varargs -> ((LuaValue) varargs).checknumber().toint());
         map.put(LuaInteger.class, varargs -> ((LuaValue) varargs).checknumber().toint());
         map.put(float.class, varargs -> ((LuaValue) varargs).checknumber().tofloat());
@@ -98,11 +100,11 @@ public final class LuaConverter {
     }
 
     public static Object convertToJava(Varargs value) {
-        return luaToJavaMap.get(value.getClass()).apply(value);
+        return luaToJavaMap.getOrDefault(value.getClass(), varargs -> varargs).apply(value);
     }
 
     public static <T> Object convertToJava(Varargs value, Class<?> conversionClass) {
-        return luaToJavaMap.get(conversionClass).apply(value);
+        return luaToJavaMap.getOrDefault(conversionClass, LuaConverter::convertToJava).apply(value);
     }
 
     public static String classToLuaName(Class<?> clazz) {
