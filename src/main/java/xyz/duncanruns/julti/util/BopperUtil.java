@@ -97,4 +97,10 @@ public final class BopperUtil {
         }
         return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
     }
+
+    public static void waitForFinish() {
+        while (clearing) {
+            SleepUtil.sleep(5);
+        }
+    }
 }

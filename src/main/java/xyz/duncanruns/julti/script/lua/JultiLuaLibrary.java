@@ -93,6 +93,14 @@ class JultiLuaLibrary extends LuaLibrary {
         }
     }
 
+    @LuaDocumentation(description = "Clears all but the last 5 worlds in each instance and waits for it to complete.")
+    public void clearWorldsAndWait() {
+        synchronized (Julti.getJulti()) {
+            BopperUtil.clearWorlds();
+        }
+        BopperUtil.waitForFinish();
+    }
+
     @LuaDocumentation(description = "Closes a specific instance.")
     public void closeInstance(int instanceNum) {
         synchronized (Julti.getJulti()) {
