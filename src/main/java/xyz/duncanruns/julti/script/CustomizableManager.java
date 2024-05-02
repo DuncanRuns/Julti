@@ -43,7 +43,7 @@ public class CustomizableManager {
         }
         JsonObject scriptSpace = json.getAsJsonObject(scriptName);
         scriptSpace.addProperty(key, val.toString());
-        // TODO: saving is no longer done here, make sure run save() after customization
+        save();
     }
 
     public synchronized static String get(String scriptName, String key) {
