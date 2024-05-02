@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.script.lua;
 
 import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
+import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import xyz.duncanruns.julti.Julti;
@@ -467,10 +468,10 @@ class JultiLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil")
+    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil",paramTypes = {"string","string|nil","function|nil"})
     @AllowedWhileCustomizing
     @Nullable
-    public String askTextBox(String message, String startingVal) {
+    public String askTextBox(String message, String startingVal, LuaFunction validator) {
         throw new CustomizingException("Script Error: julti.askTextBox used while not customizing.");
     }
 

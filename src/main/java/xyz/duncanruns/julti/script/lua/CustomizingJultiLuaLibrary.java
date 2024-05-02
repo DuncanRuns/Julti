@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.script.lua;
 
+import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaValue;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.gui.JultiGUI;
@@ -45,9 +46,19 @@ class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     @Override
     @AllowedWhileCustomizing
     @Nullable
-    public String askTextBox(String message, String startingVal) {
-        Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
-        return o == null ? null : o.toString();
+    public String askTextBox(String message, String startingVal, LuaFunction validator) {
+        boolean invalidInput = false;
+        while (true) {
+            Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+            if (o == null) {
+                return null;
+            }
+            String string = o.toString();
+            if (validator == null || validator.call(valueOf(string)).checkboolean()) {
+                return string;
+            }
+            invalidInput = true;
+        }
     }
 
     @Override
