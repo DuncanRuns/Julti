@@ -97,8 +97,7 @@ public abstract class LuaLibrary extends TwoArgFunction {
                     }
                     String funcName = k.checkjstring();
                     Class<? extends LuaLibrary> clazz = LuaLibrary.this.getClass();
-                    Optional<Method> methodOpt = Arrays.stream(clazz.getMethods()).filter(method -> method.getName().equals(funcName)).findAny();
-                    if (this.getClass().isAnnotationPresent(AllowedWhileCustomizing.class) || (methodOpt.isPresent() && methodOpt.get().isAnnotationPresent(AllowedWhileCustomizing.class))) {
+                    if (this.getClass().isAnnotationPresent(AllowedWhileCustomizing.class) || doesClassHaveCustomizableFunc(clazz, funcName)) {
                         out.set(funcName, n.arg(2));
                     } else {
                         out.set(funcName, new VarArgFunction() {
@@ -113,6 +112,10 @@ public abstract class LuaLibrary extends TwoArgFunction {
                 return out;
             }
         };
+    }
+
+    private static boolean doesClassHaveCustomizableFunc(Class<? extends LuaLibrary> clazz, String funcName) {
+        return Arrays.stream(clazz.getMethods()).anyMatch(method -> method.getName().equals(funcName) && (method.isAnnotationPresent(AllowedWhileCustomizing.class)));
     }
 
     @NotALuaFunction

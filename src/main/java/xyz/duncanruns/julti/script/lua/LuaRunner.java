@@ -42,7 +42,7 @@ public class LuaRunner {
         Globals globals = getSafeGlobals();
         globals.load(new InterruptibleDebugLib(cancelRequester));
         CustomizingJultiLuaLibrary customLib = new CustomizingJultiLuaLibrary(cancelRequester, script);
-        globals.load(customLib);
+        globals.load(customLib.asCustomizable());
         LuaLibraries.addMockLibraries(globals, cancelRequester);
         LuaValue chunk = globals.load(script.getContents());
         try {
