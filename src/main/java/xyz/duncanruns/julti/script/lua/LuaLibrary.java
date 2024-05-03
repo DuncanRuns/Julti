@@ -73,6 +73,10 @@ public abstract class LuaLibrary extends TwoArgFunction {
         }
     }
 
+    private static boolean doesClassHaveCustomizableFunc(Class<? extends LuaLibrary> clazz, String funcName) {
+        return Arrays.stream(clazz.getMethods()).anyMatch(method -> method.getName().equals(funcName) && (method.isAnnotationPresent(AllowedWhileCustomizing.class)));
+    }
+
     @NotALuaFunction
     @Override
     public LuaValue call(LuaValue modname, LuaValue env) {
@@ -112,10 +116,6 @@ public abstract class LuaLibrary extends TwoArgFunction {
                 return out;
             }
         };
-    }
-
-    private static boolean doesClassHaveCustomizableFunc(Class<? extends LuaLibrary> clazz, String funcName) {
-        return Arrays.stream(clazz.getMethods()).anyMatch(method -> method.getName().equals(funcName) && (method.isAnnotationPresent(AllowedWhileCustomizing.class)));
     }
 
     @NotALuaFunction
