@@ -69,7 +69,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return this.script.getName();
     }
 
-    @LuaDocumentation(description = "Brings the user to the instance specified by instanceNum. Optionally a second argument (doSetupStyle) can be specified to prevent window resizing, fullscreening, unpausing, etc.")
+    @LuaDocumentation(description = "Brings the user to the instance specified by instanceNum. Optionally a second argument (doSetupStyle) can be specified to prevent window resizing, fullscreening, unpausing, etc.", paramTypes = {"number", "boolean|nil"})
     public void activateInstance(int instanceNum, Boolean doSetupStyle) {
         synchronized (Julti.getJulti()) {
             Julti.getJulti().activateInstance(getInstanceFromInt(instanceNum), !(doSetupStyle == null) && doSetupStyle);
@@ -116,7 +116,7 @@ class JultiLuaLibrary extends LuaLibrary {
         }
     }
 
-    @LuaDocumentation(description = "Replicates a hotkey action exactly. Possible codes are: \"reset\", \"bgReset\", \"wallReset\", \"wallSingleReset\", \"wallLock\", \"wallPlay\", \"wallFocusReset\", \"wallPlayLock\", \"debugHover\", or \"script:<script name>\"\nA mouse position can also be specified with 2 extra arguments, or if left blank will use the user's mouse position.")
+    @LuaDocumentation(description = "Replicates a hotkey action exactly. Possible codes are: \"reset\", \"bgReset\", \"wallReset\", \"wallSingleReset\", \"wallLock\", \"wallPlay\", \"wallFocusReset\", \"wallPlayLock\", \"debugHover\", or \"script:<script name>\"\nA mouse position can also be specified with 2 extra arguments, or if left blank will use the user's mouse position.", paramTypes = {"string", "number|nil", "number|nil"})
     public void replicateHotkey(String hotkeyCode, Integer mouseX, Integer mouseY) {
         Point mousePos = mouseX == null ? MouseUtil.getMousePos() : new Point(mouseX, mouseY);
         Julti.getJulti().queueMessageAndWait(new HotkeyPressQMessage(hotkeyCode, mousePos));
@@ -304,7 +304,7 @@ class JultiLuaLibrary extends LuaLibrary {
         GLOBALS_MAP.put(key, val);
     }
 
-    @LuaDocumentation(description = "Retrieves a value from global storage set by julti.setGlobal(). A default value can optionally be provided in the case that no value is found in the globals storage.", returnTypes = "any|nil")
+    @LuaDocumentation(description = "Retrieves a value from global storage set by julti.setGlobal(). A default value can optionally be provided in the case that no value is found in the globals storage.", returnTypes = "any|nil", paramTypes = {"string", "any|nil"})
     @AllowedWhileCustomizing
     public LuaValue getGlobal(String key, LuaValue def) {
         return GLOBALS_MAP.getOrDefault(key, def == null ? NIL : def);
@@ -468,7 +468,7 @@ class JultiLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil",paramTypes = {"string","string|nil","(fun(input: string): boolean)|nil"})
+    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil", paramTypes = {"string", "string|nil", "(fun(input: string): boolean)|nil"})
     @AllowedWhileCustomizing
     @Nullable
     public String askTextBox(String message, String startingVal, LuaFunction validator) {
