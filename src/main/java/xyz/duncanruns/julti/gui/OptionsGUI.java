@@ -201,10 +201,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Affinity", "useAffinity", b -> {
             this.reload();
-            if (b) {
-                AffinityManager.start();
-            } else {
-                AffinityManager.stop();
+            if (!b) {
                 AffinityManager.release();
             }
         })));

@@ -60,9 +60,6 @@ public final class JultiAppLaunch {
         // Reload Scripts
         ScriptManager.reload();
 
-        // Start Affinity Manager
-        AffinityManager.start();
-
         // Start GUI
         JultiGUI.getJultiGUI().setVisible();
 
