@@ -460,7 +460,7 @@ class JultiLuaLibrary extends LuaLibrary {
         CustomizableManager.set(this.script.getName(), key, value);
     }
 
-    @LuaDocumentation(description = "Gets a stored customizable string. A default value can optionally be provided in the case that no value is found in the customizables storage.")
+    @LuaDocumentation(description = "Gets a stored customizable string. A default value can optionally be provided in the case that no value is found in the customizables storage.", paramTypes = {"string", "string|nil"})
     @AllowedWhileCustomizing
     @Nullable
     public String getCustomizable(String key, String def) {
@@ -496,5 +496,10 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Gets the instance number of the hovered instance, or 0 if no hovered instance.")
     public Integer getHoveredInstanceNum() {
         return getInstanceNumAtPosition(MouseUtil.getMousePos());
+    }
+
+    @LuaDocumentation(description = "Checks if an instance is locked.")
+    public boolean isInstanceLocked(int instanceNum) {
+        return ResetHelper.getManager().getLockedInstances().contains(getInstanceFromInt(instanceNum));
     }
 }
