@@ -303,13 +303,11 @@ public class MinecraftInstance {
 
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        AffinityManager.pause();
         AffinityManager.jumpPlayingAffinity(this); // Affinity Jump (BRAND NEW TECH POGGERS)
         ActiveWindowManager.activateHwnd(this.hwnd);
         if (!doingSetup && (!options.autoFullscreen || options.usePlayingSizeWithFullscreen)) {
             this.ensurePlayingWindowState(false);
         }
-        AffinityManager.unpause();
 
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {

@@ -162,7 +162,7 @@ public final class Julti {
 
     private void stop() {
         JultiOptions.getJultiOptions().trySave();
-        AffinityManager.stop();
+        AffinityManager.release();
         SleepBGUtil.disableLock();
         AffinityManager.release();
         PluginEvents.RunnableEventType.STOP.runAll();
@@ -214,6 +214,9 @@ public final class Julti {
         }
         this.processQMessages();
         this.processHotkeyMessages();
+        if (cycles % 100 == 0) {
+            AffinityManager.ping();
+        }
         InstanceManager.getInstanceManager().tickInstances();
         OBSStateManager.getOBSStateManager().tryOutputState();
         PluginEvents.RunnableEventType.END_TICK.runAll();

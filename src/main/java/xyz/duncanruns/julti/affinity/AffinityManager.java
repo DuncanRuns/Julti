@@ -1,30 +1,25 @@
 package xyz.duncanruns.julti.affinity;
 
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.instance.StateTracker;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.resetting.ResetHelper;
+import xyz.duncanruns.julti.util.SleepUtil;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public final class AffinityManager {
     private static final List<Supplier<Boolean>> LOCK_CONDITIONS = new CopyOnWriteArrayList<>();
-    private static final Object LOCK = new Object();
     public static final int AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors();
-    private static ScheduledExecutorService EXECUTOR = null;
-    private static boolean paused = false;
 
     private AffinityManager() {
     }
@@ -33,34 +28,11 @@ public final class AffinityManager {
         LOCK_CONDITIONS.add(lockCondition);
     }
 
-    public static void start() {
-        stop();
-        ScheduledExecutorService executorService = getExecutor();
-        executorService.scheduleAtFixedRate(AffinityManager::tick, 100, 100, TimeUnit.MILLISECONDS);
-    }
-
-    public static void stop() {
-        if (EXECUTOR == null || EXECUTOR.isShutdown() || EXECUTOR.isTerminated()) {
+    public static void ping() {
+        if (LOCK_CONDITIONS.stream().anyMatch(Supplier::get)) {
             return;
         }
-        EXECUTOR.shutdown();
-        EXECUTOR = null;
-    }
-
-    public static ScheduledExecutorService getExecutor() {
-        if (EXECUTOR == null || EXECUTOR.isShutdown() || EXECUTOR.isTerminated()) {
-            EXECUTOR = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("affinity-manager").build());
-        }
-        return EXECUTOR;
-    }
-
-    public static void tick() {
-        synchronized (LOCK) {
-            if (paused || LOCK_CONDITIONS.stream().anyMatch(Supplier::get)) {
-                return;
-            }
-            setAffinityForAllInstances();
-        }
+        setAffinityForAllInstances();
     }
 
     private static void setAffinityForAllInstances() {
@@ -113,44 +85,42 @@ public final class AffinityManager {
         InstanceManager.getInstanceManager().getInstances().forEach(i -> setAffinity(i, AVAILABLE_THREADS));
     }
 
-    public static void ping() {
-        getExecutor().execute(AffinityManager::tick);
-    }
-
     public static void ping(int delay) {
         if (delay == 0) {
             ping();
         } else {
-            getExecutor().schedule(AffinityManager::tick, delay, TimeUnit.MILLISECONDS);
+            new Thread(() -> {
+                SleepUtil.sleep(delay);
+                Julti.doLater(AffinityManager::ping);
+            }).start();
         }
     }
 
     public static void jumpPlayingAffinity(MinecraftInstance instance) {
-        if (!paused && LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+        if (LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
             setAffinity(instance, JultiOptions.getJultiOptions().threadsPlaying);
         }
     }
 
     public static void jumpPrePreviewAffinity(MinecraftInstance instance) {
-        if (!paused && LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+        if (LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
             setAffinity(instance, JultiOptions.getJultiOptions().threadsPrePreview);
         }
     }
 
-    /**
-     * Pause the affinity manager to carry out a specific task, usually instance activation.
-     * <p>
-     * Should be paired with {@link AffinityManager#unpause()} shortly afterwards.
-     */
+    @Deprecated
     public static void pause() {
-        synchronized (LOCK) {
-            paused = true;
-        }
     }
 
+    @Deprecated
     public static void unpause() {
-        synchronized (LOCK) {
-            paused = false;
-        }
+    }
+
+    @Deprecated
+    public static void start() {
+    }
+
+    @Deprecated
+    public static void stop() {
     }
 }
