@@ -299,7 +299,9 @@ public class MinecraftInstance {
         }
         this.lastActivation = System.currentTimeMillis();
         this.scheduler.clear();
-        this.activeSinceReset = true;
+        if (!doingSetup) {
+            this.activeSinceReset = true;
+        }
 
         JultiOptions options = JultiOptions.getJultiOptions();
 
@@ -334,7 +336,7 @@ public class MinecraftInstance {
             }
         }
         if (doingSetup) {
-            this.ensureInitialWindowState();
+            this.ensureInitialWindowState(true);
         } else {
             PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
@@ -508,7 +510,6 @@ public class MinecraftInstance {
         return this.name;
     }
 
-
     public boolean isFullscreen() {
         if (MCVersionUtil.isOlderThan(this.versionString, "1.16") || MCVersionUtil.isNewerThan(this.versionString, "1.18.2")) {
             return this.activeSinceReset && JultiOptions.getJultiOptions().autoFullscreen && WindowStateUtil.isHwndBorderless(this.hwnd);
@@ -667,8 +668,12 @@ public class MinecraftInstance {
     }
 
     public void ensureInitialWindowState() {
+        this.ensureInitialWindowState(false);
+    }
+
+    public void ensureInitialWindowState(boolean canSkipFSCheck) {
         // ensure instance is unfullscreened and unminimized
-        this.ensureNotFullscreen();
+        this.ensureNotFullscreen(canSkipFSCheck);
         User32.INSTANCE.ShowWindow(this.hwnd, User32.SW_NORMAL);
         Julti.doLater(() -> this.ensureResettingWindowState(false));
     }
