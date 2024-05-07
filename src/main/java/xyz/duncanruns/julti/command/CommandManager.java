@@ -33,7 +33,8 @@ public class CommandManager {
             new ClearWorldsCommand(),
             new CancelIfCommand(),
             new ScriptCommand(),
-            new GenerateLuaDocsCommand()
+            new GenerateLuaDocsCommand(),
+            new FixFullscreenCommand()
     )));
 
     static {
