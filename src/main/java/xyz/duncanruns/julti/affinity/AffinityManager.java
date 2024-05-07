@@ -91,6 +91,9 @@ public final class AffinityManager {
         } else {
             new Thread(() -> {
                 SleepUtil.sleep(delay);
+                if (!JultiOptions.getJultiOptions().useAffinity) {
+                    return;
+                }
                 Julti.doLater(AffinityManager::ping);
             }).start();
         }
