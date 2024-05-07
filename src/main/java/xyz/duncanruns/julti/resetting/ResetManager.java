@@ -65,9 +65,7 @@ public abstract class ResetManager {
     }
 
     public void notifyWorldLoaded(MinecraftInstance instance) {
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
     }
 
     public List<MinecraftInstance> getLockedInstances() {

@@ -65,9 +65,7 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
         List<ActionResult> out = this.resetNonLockedExcept(selectedInstance);
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return out;
     }
 
@@ -89,9 +87,7 @@ public class WallResetManager extends ResetManager {
             }
         });
 
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return actionResults;
     }
 
@@ -104,9 +100,7 @@ public class WallResetManager extends ResetManager {
         if (selectedInstance == null) {
             return Collections.emptyList();
         }
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return this.resetInstance(selectedInstance) ? Collections.singletonList(ActionResult.INSTANCE_RESET) : Collections.emptyList();
     }
 
@@ -120,9 +114,7 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
         boolean out = this.lockInstance(clickedInstance);
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return out ? Collections.singletonList(ActionResult.INSTANCE_LOCKED) : Collections.emptyList();
     }
 
@@ -154,9 +146,7 @@ public class WallResetManager extends ResetManager {
             }
         });
 
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return actionResults;
     }
 
@@ -180,9 +170,7 @@ public class WallResetManager extends ResetManager {
         this.lastAttemptedJoinTime = currentTime;
 
         List<ActionResult> out = this.playInstanceFromWall(clickedInstance, forceEnter);
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return out;
     }
 
@@ -197,9 +185,7 @@ public class WallResetManager extends ResetManager {
         List<MinecraftInstance> instancePool = new ArrayList<>(this.lockedInstances);
         instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
         List<ActionResult> out = this.playInstanceFromWall(instancePool.get(0), false);
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return out;
     }
 

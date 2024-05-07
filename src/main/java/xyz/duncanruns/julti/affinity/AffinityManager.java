@@ -28,11 +28,22 @@ public final class AffinityManager {
         LOCK_CONDITIONS.add(lockCondition);
     }
 
-    public static void ping() {
-        if (LOCK_CONDITIONS.stream().anyMatch(Supplier::get)) {
-            return;
+    public static boolean isEnabled() {
+        return LOCK_CONDITIONS.stream().noneMatch(Supplier::get) && JultiOptions.getJultiOptions().useAffinity;
+    }
+
+    public static void tick() {
+        if (isEnabled()) {
+            ping();
+        } else {
+            release();
         }
-        setAffinityForAllInstances();
+    }
+
+    public static void ping() {
+        if (isEnabled()) {
+            setAffinityForAllInstances();
+        }
     }
 
     private static void setAffinityForAllInstances() {
@@ -91,22 +102,19 @@ public final class AffinityManager {
         } else {
             new Thread(() -> {
                 SleepUtil.sleep(delay);
-                if (!JultiOptions.getJultiOptions().useAffinity) {
-                    return;
-                }
                 Julti.doLater(AffinityManager::ping);
             }).start();
         }
     }
 
     public static void jumpPlayingAffinity(MinecraftInstance instance) {
-        if (LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+        if (isEnabled()) {
             setAffinity(instance, JultiOptions.getJultiOptions().threadsPlaying);
         }
     }
 
     public static void jumpPrePreviewAffinity(MinecraftInstance instance) {
-        if (LOCK_CONDITIONS.stream().noneMatch(Supplier::get)) {
+        if (isEnabled()) {
             setAffinity(instance, JultiOptions.getJultiOptions().threadsPrePreview);
         }
     }

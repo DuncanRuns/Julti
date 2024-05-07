@@ -214,8 +214,8 @@ public final class Julti {
         }
         this.processQMessages();
         this.processHotkeyMessages();
-        if (cycles % 100 == 0 && JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
+        if (cycles % 100 == 0) {
+            AffinityManager.tick();
         }
         InstanceManager.getInstanceManager().tickInstances();
         OBSStateManager.getOBSStateManager().tryOutputState();

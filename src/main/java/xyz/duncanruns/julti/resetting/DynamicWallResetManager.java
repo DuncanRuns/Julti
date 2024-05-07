@@ -104,9 +104,7 @@ public class DynamicWallResetManager extends WallResetManager {
             }
         });
 
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         // Fill display with null then refresh to ensure good order
         Collections.fill(this.displayInstancesIndices, null);
         this.refreshDisplayInstances();
@@ -140,9 +138,7 @@ public class DynamicWallResetManager extends WallResetManager {
             }
         });
 
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return actionResults;
     }
 

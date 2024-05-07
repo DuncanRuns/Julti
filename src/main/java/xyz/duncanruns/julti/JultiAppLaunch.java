@@ -2,7 +2,6 @@ package xyz.duncanruns.julti;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import org.apache.logging.log4j.Level;
-import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
 import xyz.duncanruns.julti.plugin.PluginInitializer;

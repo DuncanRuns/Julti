@@ -92,9 +92,7 @@ public class MultiResetManager extends ResetManager {
                 actionResults.add(ActionResult.INSTANCE_RESET);
             }
         });
-        if (JultiOptions.getJultiOptions().useAffinity) {
-            AffinityManager.ping();
-        }
+        AffinityManager.ping();
         return actionResults;
     }
 }
