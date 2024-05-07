@@ -1,4 +1,5 @@
 Changes in v1.4.0:
+- Added a new command: `fixfs` - attempts to fix any instances stuck in the background due to fullscreen/minimization.
 - Added JuWaWi as a default plugin
   - JuWaWi (Julti Wall Window) provides a way to use Julti without having to open or set up OBS (or even have it installed)
   - Works with any wall style (should even work with draconix's custom wall plugin)
