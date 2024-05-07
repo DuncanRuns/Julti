@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import com.sun.jna.platform.win32.WinDef;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.instance.KeyPresser;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
@@ -62,8 +63,9 @@ public class FixFullscreenCommand extends Command {
                 continue;
             }
             synchronized (julti) {
+                AffinityManager.jumpPlayingAffinity(instance);
                 WindowStateUtil.restoreHwnd(hwnd);
-                SleepUtil.sleep(300);
+                SleepUtil.sleep(1000);
                 ActiveWindowManager.activateHwnd(hwnd);
                 Integer fullscreenKey = instance.getGameOptions().fullscreenKey;
                 if (fullscreenKey == null) {
@@ -71,12 +73,13 @@ public class FixFullscreenCommand extends Command {
                     continue;
                 }
                 do {
-                    SleepUtil.sleep(300);
+                    SleepUtil.sleep(1000);
                     KeyPresser keyPresser = instance.getKeyPresser();
                     keyPresser.pressKey(fullscreenKey);
-                    SleepUtil.sleep(300);
+                    SleepUtil.sleep(1000);
                 } while (couldBeFullscreen(instance));
             }
         }
+        Julti.doLater(julti::focusWall);
     }
 }
