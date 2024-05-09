@@ -243,23 +243,18 @@ public class StateTracker {
     }
 
     public int getResetSortingNum() {
-        if (this.isCurrentState(InstanceState.WAITING)) {
-            return -1;
+        switch (this.getInstanceState()) {
+            case WAITING:
+                return -1;
+            case GENERATING: // 0 -> 999999 where loading percents are worth 10000 each and up to 9.999 seconds worth of milliseconds can be added for precise comparison
+                return 10000 * Math.min(this.loadingPercent, 99) + Math.min((int) (System.currentTimeMillis() - this.getLastStartOf(InstanceState.GENERATING)), 9999);
+            case PREVIEWING: // 1000000 -> 1999999 where loading percents are worth 10000 each and up to 9.999 seconds worth of milliseconds can be added for precise comparison
+                return 10000 * (this.loadingPercent + 100) + Math.min((int) (System.currentTimeMillis() - this.getLastStartOf(InstanceState.PREVIEWING)), 9999);
+            case INWORLD: // 2000000 -> MAX_VALUE-2
+                return 2000000 + Math.min((int) (System.currentTimeMillis() - this.getLastStartOf(InstanceState.INWORLD)), Integer.MAX_VALUE - 2000002);
+            default: // (title screen, most in need of resetting so max value)
+                return Integer.MAX_VALUE;
         }
-        if (this.isCurrentState(InstanceState.TITLE)) {
-            return 10000000;
-        }
-        int i = 0;
-        if (this.isCurrentState(InstanceState.PREVIEWING)) {
-            i += 1100000;
-        } else if (this.isCurrentState(InstanceState.INWORLD)) {
-            i += 2200000;
-        }
-        if (this.isCurrentState(InstanceState.PREVIEWING) || this.isCurrentState(InstanceState.GENERATING)) {
-            i += 10000 * this.loadingPercent;
-        }
-        i += (System.currentTimeMillis() - this.getLastOccurrenceOf(InstanceState.WAITING));
-        return Math.min(10000000, i);
     }
 
     @Override

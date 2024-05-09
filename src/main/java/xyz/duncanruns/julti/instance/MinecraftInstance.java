@@ -362,7 +362,7 @@ public class MinecraftInstance {
 
     public int getResetSortingNum() {
         if (!this.resetEverPressed) {
-            return 10000000;
+            return Integer.MAX_VALUE;
         }
         if (this.resetPressed) {
             return -2;
