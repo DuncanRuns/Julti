@@ -8,6 +8,7 @@ import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
@@ -50,7 +51,7 @@ public class MultiResetManager extends ResetManager {
 
         List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         instancePool.removeIf(instance -> instance.equals(selectedInstance));
-        instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
+        instancePool.sort(Comparator.comparingInt(i -> -i.getResetSortingNum()));
         MinecraftInstance nextInstance = instancePool.get(0);
 
         if (resetFirst) {

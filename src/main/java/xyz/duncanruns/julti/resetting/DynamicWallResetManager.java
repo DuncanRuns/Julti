@@ -9,10 +9,8 @@ import xyz.duncanruns.julti.management.OBSStateManager;
 import xyz.duncanruns.julti.util.DoAllFastUtil;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DynamicWallResetManager extends WallResetManager {
@@ -70,7 +68,7 @@ public class DynamicWallResetManager extends WallResetManager {
         List<MinecraftInstance> instancePool = new ArrayList<>(InstanceManager.getInstanceManager().getInstances());
         instancePool.removeIf(instance -> this.getLockedInstances().contains(instance));
         instancePool.removeIf(displayInstances::contains);
-        instancePool.sort((o1, o2) -> o2.getResetSortingNum() - o1.getResetSortingNum());
+        instancePool.sort(Comparator.comparingInt(i -> -i.getResetSortingNum()));
 
         while (displayInstances.contains(null)) {
             if (instancePool.isEmpty()) {
