@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.util;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LONG;
 import com.sun.jna.platform.win32.WinDef.RECT;
+import com.sun.jna.platform.win32.WinUser;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
@@ -104,5 +105,24 @@ public final class WindowStateUtil {
 
     public static Rectangle withTopLeftToCenter(Rectangle bounds) {
         return new Rectangle(bounds.x - bounds.width / 2, bounds.y - bounds.height / 2, bounds.width, bounds.height);
+    }
+
+    public static void ensureNotMinimized(HWND hwnd) {
+        // https://stackoverflow.com/questions/29837268/how-can-i-restore-a-winapi-window-if-its-minimized
+        if (User32.INSTANCE.IsIconic(hwnd)) {
+            WinUser.WINDOWPLACEMENT windowplacement = new WinUser.WINDOWPLACEMENT();
+            User32.INSTANCE.GetWindowPlacement(hwnd, windowplacement);
+            switch (windowplacement.showCmd) {
+                case User32.SW_SHOWMAXIMIZED:
+                    User32.INSTANCE.ShowWindow(hwnd, User32.SW_SHOWMAXIMIZED);
+                    break;
+                case User32.SW_SHOWMINIMIZED:
+                    User32.INSTANCE.ShowWindow(hwnd, User32.SW_RESTORE);
+                    break;
+                default:
+                    User32.INSTANCE.ShowWindow(hwnd, User32.SW_NORMAL);
+                    break;
+            }
+        }
     }
 }

@@ -89,6 +89,7 @@ public final class ActiveWindowManager {
         if (JultiOptions.getJultiOptions().useAltSwitching) {
             KeyboardUtil.keyDown(Win32VK.VK_LMENU);
             KeyboardUtil.keyUp(Win32VK.VK_LMENU);
+            WindowStateUtil.ensureNotMinimized(hwnd);
             User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
         } else {
@@ -98,6 +99,7 @@ public final class ActiveWindowManager {
             int appThread = Kernel32.INSTANCE.GetCurrentThreadId();
 
             User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), true);
+            WindowStateUtil.ensureNotMinimized(hwnd);
             // If the order of SetForegroundWindow and BringWindowToTop are switched, keyboard focus gets fucked
             User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
