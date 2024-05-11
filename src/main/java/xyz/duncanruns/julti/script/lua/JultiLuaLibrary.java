@@ -504,6 +504,12 @@ class JultiLuaLibrary extends LuaLibrary {
         }
     }
 
+    @LuaDocumentation(description = "Shows a message in a message box to the user.")
+    @AllowedWhileCustomizing
+    public void showMessageBox(String message) {
+        JOptionPane.showMessageDialog(JultiGUI.getJultiGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null);
+    }
+
     @LuaDocumentation(description = "Gets the position of the mouse.", returnTypes = {"number", "number"})
     public Varargs getMousePosition() {
         Point mousePos = MouseUtil.getMousePos();
