@@ -10,6 +10,7 @@ import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.command.CommandManager;
+import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
@@ -23,6 +24,7 @@ import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 
 import javax.annotation.Nullable;
+import javax.swing.*;
 import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -164,7 +167,7 @@ class JultiLuaLibrary extends LuaLibrary {
         });
     }
 
-    @LuaDocumentation(description = "Sets the Julti option to the given value after attempting to convert it.")
+    @LuaDocumentation(description = "Sets the Julti option to the given value after attempting to convert it.", paramTypes = {"string", "any"})
     @AllowedWhileCustomizing
     public boolean trySetOption(String optionName, String optionValue) {
         return Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage(optionName, optionValue));
