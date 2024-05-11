@@ -154,12 +154,12 @@ class JultiLuaLibrary extends LuaLibrary {
         LauncherUtil.openFile(filePath);
     }
 
-    @LuaDocumentation(description = "Opens the currently active instance's world to lan.")
-    public void openInstanceToLan() {
+    @LuaDocumentation(description = "Opens the currently active instance's world to lan.", paramTypes = "boolean|nil")
+    public void openInstanceToLan(Boolean enableCheats) {
         Julti.waitForExecute(() -> {
             MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
             if (selectedInstance != null) {
-                selectedInstance.openToLan(false);
+                selectedInstance.openToLan(false, enableCheats != null && enableCheats);
             }
         });
     }
