@@ -471,18 +471,37 @@ class JultiLuaLibrary extends LuaLibrary {
         return out == null ? def : out;
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil", paramTypes = {"string", "string|nil", "(fun(input: string): boolean)|nil"})
+    @LuaDocumentation(description = "Presents the user with a text input box and returns the string entered, or nil if they cancel/close the prompt without pressing Ok.", returnTypes = "string|nil", paramTypes = {"string", "string|nil", "(fun(input: string): boolean)|nil"})
     @AllowedWhileCustomizing
     @Nullable
     public String askTextBox(String message, String startingVal, LuaFunction validator) {
-        throw new CustomizingException("Script Error: julti.askTextBox used while not customizing.");
+        boolean invalidInput = false;
+        while (true) {
+            Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+            if (o == null) {
+                return null;
+            }
+            String string = o.toString();
+            if (validator == null || validator.call(valueOf(string)).checkboolean()) {
+                return string;
+            }
+            invalidInput = true;
+        }
     }
 
-    @LuaDocumentation(description = "This function only works during customization.\nPresents the user with a message and Yes/No/Cancel buttons. Returns true for yes, false for no, and nil for cancel or if the user closes the window.", returnTypes = "boolean|nil")
+    @LuaDocumentation(description = "Presents the user with a message and Yes/No/Cancel buttons. Returns true for yes, false for no, and nil for cancel or if the user closes the window.", returnTypes = "boolean|nil")
     @AllowedWhileCustomizing
     @Nullable
     public Boolean askYesNo(String message) {
-        throw new CustomizingException("Script Error: julti.askYesNo used while not customizing.");
+        int ans = JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+        switch (ans) {
+            case 0:
+                return true;
+            case 1:
+                return false;
+            default:
+                return null;
+        }
     }
 
     @LuaDocumentation(description = "Gets the position of the mouse.", returnTypes = {"number", "number"})

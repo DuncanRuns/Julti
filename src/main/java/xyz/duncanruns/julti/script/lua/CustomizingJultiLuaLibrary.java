@@ -1,14 +1,8 @@
 package xyz.duncanruns.julti.script.lua;
 
-import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaValue;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
-import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.script.LuaScript;
-
-import javax.annotation.Nullable;
-import javax.swing.*;
-import java.util.Optional;
 
 class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     private boolean checkedCustomizing = false;
@@ -41,39 +35,6 @@ class CustomizingJultiLuaLibrary extends JultiLuaLibrary {
     public boolean isCustomizing() {
         this.checkedCustomizing = true;
         return true;
-    }
-
-    @Override
-    @AllowedWhileCustomizing
-    @Nullable
-    public String askTextBox(String message, String startingVal, LuaFunction validator) {
-        boolean invalidInput = false;
-        while (true) {
-            Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
-            if (o == null) {
-                return null;
-            }
-            String string = o.toString();
-            if (validator == null || validator.call(valueOf(string)).checkboolean()) {
-                return string;
-            }
-            invalidInput = true;
-        }
-    }
-
-    @Override
-    @AllowedWhileCustomizing
-    @Nullable
-    public Boolean askYesNo(String message) {
-        int ans = JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-        switch (ans) {
-            case 0:
-                return true;
-            case 1:
-                return false;
-            default:
-                return null;
-        }
     }
 
     @NotALuaFunction
