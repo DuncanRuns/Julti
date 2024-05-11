@@ -439,7 +439,8 @@ public class MinecraftInstance {
 
     private void onPreviewLoad() {
         this.scheduler.clear();
-        if (JultiOptions.getJultiOptions().useF3 && (ActiveWindowManager.isWindowActive(this.hwnd) || !this.gameOptions.f3PauseOnWorldLoad)) {
+        this.openedToLan = false;
+        if (JultiOptions.getJultiOptions().useF3 && !this.gameOptions.f3PauseOnWorldLoad) {
             this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
@@ -716,7 +717,7 @@ public class MinecraftInstance {
         if (MCVersionUtil.isNewerThan(this.versionString, "1.16.5")) {
             this.presser.pressTab(2);
         }
-        if(enableCheats) {
+        if (enableCheats) {
             this.presser.pressEnter();
         }
         this.presser.pressTab(MCVersionUtil.isNewerThan(this.versionString, "1.19.2") ? 2 : 1);
