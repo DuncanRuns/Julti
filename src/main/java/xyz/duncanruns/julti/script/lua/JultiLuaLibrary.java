@@ -530,4 +530,12 @@ class JultiLuaLibrary extends LuaLibrary {
     public boolean isInstanceLocked(int instanceNum) {
         return ResetHelper.getManager().getLockedInstances().contains(getInstanceFromInt(instanceNum));
     }
+
+    @LuaDocumentation(description = "Checks if a script of the specified name exists.")
+    @AllowedWhileCustomizing
+    public boolean scriptExists(String scriptName) {
+        synchronized (Julti.getJulti()) {
+            return ScriptManager.SCRIPTS.stream().anyMatch(script -> script.getName().equals(scriptName));
+        }
+    }
 }
