@@ -327,7 +327,7 @@ public class MinecraftInstance {
                     }
                 }
                 if (options.coopMode) {
-                    this.openToLan(true);
+                    this.openToLan(true, options.coopModeCheats);
                 }
                 if (options.autoFullscreen && !options.fullscreenBeforeUnpause) {
                     this.presser.pressKey(this.gameOptions.fullscreenKey);
@@ -409,7 +409,7 @@ public class MinecraftInstance {
             }
 
             if (options.coopMode) {
-                this.openToLan(true);
+                this.openToLan(true, options.coopModeCheats);
             }
 
             if (options.autoFullscreen && !options.utilityMode && !this.isFullscreen()) {
@@ -691,6 +691,10 @@ public class MinecraftInstance {
     }
 
     public void openToLan(boolean skipUnpauseCheck) {
+        this.openToLan(skipUnpauseCheck, true);
+    }
+
+    public void openToLan(boolean skipUnpauseCheck, boolean enableCheats) {
         if (this.openedToLan) {
             return;
         } else if (!this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
@@ -712,7 +716,9 @@ public class MinecraftInstance {
         if (MCVersionUtil.isNewerThan(this.versionString, "1.16.5")) {
             this.presser.pressTab(2);
         }
-        this.presser.pressEnter();
+        if(enableCheats) {
+            this.presser.pressEnter();
+        }
         this.presser.pressTab(MCVersionUtil.isNewerThan(this.versionString, "1.19.2") ? 2 : 1);
         this.presser.pressEnter();
         this.openedToLan = true;

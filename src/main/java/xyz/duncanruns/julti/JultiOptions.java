@@ -44,6 +44,7 @@ public final class JultiOptions {
     public String clipboardOnReset = "";
     public String resetStyle = "Wall";
     public boolean coopMode = false;
+    public boolean coopModeCheats = false;
 
     // Wall
     public boolean wallLockInsteadOfPlay = true;

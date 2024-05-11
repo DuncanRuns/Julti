@@ -709,8 +709,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Unpause on Switch", "unpauseOnSwitch")));
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Coop Mode", "coopMode", b -> this.reload())));
         panel.add(GUIUtil.createSpacer());
+        if (options.coopMode) {
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Cheats Enabled on Join", "coopModeCheats")));
+            panel.add(GUIUtil.createSpacer());
+        }
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("clipboardOnReset", "Clipboard On Reset", this)));
     }
 
