@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.util;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -133,6 +134,11 @@ public final class GameOptionsUtil {
             out = FileUtil.readString(path).trim();
         } catch (IOException e) {
             // This should never be reached
+            return null;
+        }
+
+        if (!new File(out).exists()) {
+            Julti.log(Level.ERROR, path + " contains an invalid character or path.");
             return null;
         }
 
