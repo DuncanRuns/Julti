@@ -8,6 +8,8 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
+import xyz.duncanruns.julti.util.GitHubUtil;
+import xyz.duncanruns.julti.util.OfficialScriptsUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,10 +18,13 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class ScriptsGUI extends JFrame {
+    private static OfficialScriptsBrowserGUI officialScriptsBrowserGUI;
     private boolean closed = false;
     private JPanel panel;
+    private JButton officialScriptsButton;
 
     public ScriptsGUI() {
         Point location = JultiGUI.getJultiGUI().getLocation();
@@ -38,7 +43,7 @@ public class ScriptsGUI extends JFrame {
                 ScriptsGUI.this.onClose();
             }
         });
-        this.setSize(410, 500);
+        this.setSize(420, 500);
         this.setVisible(true);
         this.panel = new JPanel();
         this.panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -51,7 +56,7 @@ public class ScriptsGUI extends JFrame {
         this.setContentPane(scrollPane);
     }
 
-    private void reload() {
+    public void reload() {
         JScrollBar verticalScrollBar = ((JScrollPane) this.getContentPane()).getVerticalScrollBar();
         int i = verticalScrollBar.getValue();
         this.panel.removeAll();
@@ -60,6 +65,8 @@ public class ScriptsGUI extends JFrame {
         buttonsPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Import Script..."), a -> this.startImportDialog()));
+        this.officialScriptsButton = GUIUtil.getButtonWithMethod(new JButton("Browse Official Scripts..."), a -> this.browseOfficialScriptsButton());
+        buttonsPanel.add(this.officialScriptsButton);
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Edit Hotkeys..."), a -> {
             OptionsGUI optionsGUI = JultiGUI.getJultiGUI().getControlPanel().openOptions();
             optionsGUI.reload();
@@ -203,4 +210,36 @@ public class ScriptsGUI extends JFrame {
     }
 
 
+    private void browseOfficialScriptsButton() {
+        if (officialScriptsBrowserGUI != null && !officialScriptsBrowserGUI.isClosed()) {
+            officialScriptsBrowserGUI.requestFocus();
+            this.dispose();
+            this.onClose();
+            return;
+        }
+
+        this.officialScriptsButton.setEnabled(false);
+        this.officialScriptsButton.setText("Loading...");
+        Runnable cleanup = () -> {
+            this.officialScriptsButton.setEnabled(true);
+            this.officialScriptsButton.setText("Browse Official Scripts...");
+        };
+        new Thread(() -> {
+            Set<String> fileNames;
+            try {
+                fileNames = OfficialScriptsUtil.retrieveOfficialScriptFileNames();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Failed to retrieve official scripts! You could be rate limited by GitHub, so try again in a few minutes...", "Julti: Official Scripts Failure", JOptionPane.ERROR_MESSAGE);
+                cleanup.run();
+                return;
+            }
+            officialScriptsBrowserGUI = new OfficialScriptsBrowserGUI(fileNames);
+            officialScriptsBrowserGUI.setLocation(this.getX(), this.getY());
+            this.dispose();
+            this.onClose();
+            officialScriptsBrowserGUI.requestFocus();
+        }).start();
+
+        // TODO: show default scripts menu
+    }
 }
