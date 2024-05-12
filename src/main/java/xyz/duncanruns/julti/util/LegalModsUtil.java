@@ -37,6 +37,6 @@ public class LegalModsUtil {
 
 
     private static Set<String> obtainLegalMods() throws IOException {
-        return GitHub.connectAnonymously().getRepository("Minecraft-Java-Edition-Speedrunning/legal-mods").getDirectoryContent("legal-mods").stream().map(GHContent::getName).map(String::trim).map(s -> s.replaceAll("[-_]", "")).collect(Collectors.toSet());
+        return GitHubUtil.getGitHub().getRepository("Minecraft-Java-Edition-Speedrunning/legal-mods").getDirectoryContent("legal-mods").stream().map(GHContent::getName).map(String::trim).map(s -> s.replaceAll("[-_]", "")).collect(Collectors.toSet());
     }
 }

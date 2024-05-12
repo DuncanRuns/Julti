@@ -54,7 +54,7 @@ public final class UpdateUtil {
         }
 
         // Get the version tag of the first found release (always latest) of the list of releases of the Julti repository from an anonymous GitHub connection.
-        GHRelease release = GitHub.connectAnonymously().getRepository("DuncanRuns/Julti").listReleases().toList().get(0);
+        GHRelease release = GitHubUtil.getGitHub().getRepository("DuncanRuns/Julti").listReleases().toList().get(0);
         GHAsset asset = null;
         for (GHAsset listAsset : release.listAssets()) {
             if (listAsset.getBrowserDownloadUrl().endsWith(".jar")) {

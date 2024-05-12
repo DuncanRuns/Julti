@@ -34,7 +34,8 @@ public class CommandManager {
             new CancelIfCommand(),
             new ScriptCommand(),
             new GenerateLuaDocsCommand(),
-            new FixFullscreenCommand()
+            new FixFullscreenCommand(),
+            new SetGitHubTokenCommand()
     )));
 
     static {

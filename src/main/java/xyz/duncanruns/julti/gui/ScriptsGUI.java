@@ -123,7 +123,7 @@ public class ScriptsGUI extends JFrame {
         String gistId = split[split.length - 1];
         GHGist gist;
         try {
-            gist = GitHub.connectAnonymously().getGist(gistId);
+            gist = GitHubUtil.getGitHub().getGist(gistId);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Failed to retrieve github gist of id " + gistId + "! Maybe you didn't enter a real gist id/link?", "Julti: Import Script Failed", JOptionPane.WARNING_MESSAGE);
             Julti.log(Level.ERROR, "Failed to retrieve github gist: " + ExceptionUtil.toDetailedString(e));
