@@ -535,7 +535,7 @@ class JultiLuaLibrary extends LuaLibrary {
     @AllowedWhileCustomizing
     public boolean scriptExists(String scriptName) {
         synchronized (Julti.getJulti()) {
-            return ScriptManager.SCRIPTS.stream().anyMatch(script -> script.getName().equals(scriptName));
+            return ScriptManager.getScriptNames().contains(scriptName);
         }
     }
 }
