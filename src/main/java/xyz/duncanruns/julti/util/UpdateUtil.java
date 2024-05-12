@@ -39,7 +39,7 @@ public final class UpdateUtil {
             checkForUpdates(gui, currentVersion);
 
         } catch (Exception e) {
-            log(Level.WARN, "Update check failed! Maybe you are not connected to the internet.");
+            log(Level.WARN, "Update check failed! Maybe you are not connected to the internet, or GitHub could be rate limiting you.");
             log(Level.WARN, "Update exception: " + ExceptionUtil.toDetailedString(e));
         }
     }

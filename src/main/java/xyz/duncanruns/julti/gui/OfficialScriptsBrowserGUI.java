@@ -46,6 +46,7 @@ public class OfficialScriptsBrowserGUI extends JFrame {
                     scriptsGUI.reload();
                     ScriptManager.runCustomization(scriptName);
                 } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Failed to download script! (GitHub could be rate limiting you!)", "Julti: Script Download Failed", JOptionPane.ERROR_MESSAGE);
                     Julti.log(Level.ERROR, "Error while trying to download official script: " + ExceptionUtil.toDetailedString(e));
                 }
             }));

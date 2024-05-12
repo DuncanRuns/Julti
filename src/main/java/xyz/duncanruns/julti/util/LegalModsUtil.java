@@ -22,7 +22,7 @@ public class LegalModsUtil {
         try {
             legalMods = obtainLegalMods();
         } catch (Exception e) {
-            Julti.log(Level.WARN, "Failed to obtain legal mod ids from github!");
+            Julti.log(Level.WARN, "Failed to obtain legal mod ids from github! (GitHub could be rate limiting you!)");
         }
         updated = true;
     }
