@@ -1,5 +1,8 @@
 Changes in v1.4.0:
 - Added a new command: `fixfs` - attempts to fix any instances stuck in the background due to fullscreen/minimization.
+- Added Move Resize plugin as a default plugin
+  - Adds script functionality for resizing minecraft windows and also adds in a magnifier window with a ruler overlay for measuring eyes!
+  - Try some new scripts from the official scripts browser (found in the scripts menu)
 - Added JuWaWi as a default plugin
   - JuWaWi (Julti Wall Window) provides a way to use Julti without having to open or set up OBS (or even have it installed)
   - Works with any wall style (should even work with draconix's custom wall plugin)
@@ -16,6 +19,8 @@ Changes in v1.4.0:
 - Added scripts action menu (right click scripts for more stuff)
   - Added script editing (@pants721 #91)
 - Scripts system entirely reworked:
+  - Added an official scripts browser to download approved scripts
+    - Prone to GitHub rate limiting (60 requests per hour for anonymous users)
   - Scripts moved to a scripts folder rather than all being in scripts.txt
     - Any legacy scripts from scripts.txt will be converted to script files
   - Added lua scripting
@@ -31,6 +36,7 @@ Changes in v1.4.0:
     - You can still use the old legacy script codes to import
   - Added script customization.
       - Lua scripts can define customization functionality so that when importing (or right clicking and pressing customize) the script can prompt the user and ask for custom values (such as eye measuring width).
+- Added a cheats option for coop mode 
 - Added illegal mod checker (will appear as warnings in log, you can ignore them if playing something like icarus)
 - Added more sounds (bone sounds, specnr sounds)
 - Added basic sound randomization (selecting a folder will pick a random sound from the folder)
