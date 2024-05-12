@@ -27,7 +27,7 @@ public final class GitHubUtil {
     }
 
     @Nullable
-    private static String get() {
+    private synchronized static String get() {
         if (!Files.exists(TOKEN_PATH)) {
             return null;
         }
@@ -39,7 +39,7 @@ public final class GitHubUtil {
     }
 
     @SuppressWarnings("deprecation")
-    public static GitHub getGitHub() throws IOException {
+    public synchronized static GitHub getGitHub() throws IOException {
         String token = get();
         if (token == null) {
             return new GitHubBuilder().withAbuseLimitHandler(AbuseLimitHandler.FAIL).withRateLimitHandler(RateLimitHandler.FAIL).build();
