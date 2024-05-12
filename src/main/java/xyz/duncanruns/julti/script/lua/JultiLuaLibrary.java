@@ -11,6 +11,7 @@ import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
 import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
+import xyz.duncanruns.julti.gui.ScriptsGUI;
 import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
@@ -507,7 +508,8 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Shows a message in a message box to the user.")
     @AllowedWhileCustomizing
     public void showMessageBox(String message) {
-        JOptionPane.showMessageDialog(JultiGUI.getJultiGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null);
+        ScriptsGUI scriptsGUI = JultiGUI.getJultiGUI().getControlPanel().getScriptsGUI();
+        JOptionPane.showMessageDialog(scriptsGUI == null || scriptsGUI.isClosed() ? JultiGUI.getJultiGUI() : scriptsGUI, message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null);
     }
 
     @LuaDocumentation(description = "Gets the position of the mouse.", returnTypes = {"number", "number"})
