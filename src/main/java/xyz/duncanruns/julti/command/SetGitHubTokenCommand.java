@@ -29,7 +29,7 @@ public class SetGitHubTokenCommand extends Command {
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
         if (GitHubUtil.setToken(args[0])) {
-            Julti.log(Level.INFO, "GitHub token set!");
+            Julti.log(Level.INFO, "GitHub token set! (Delete %userprofile%/.Julti/gh_token.txt to remove token)");
         } else {
             Julti.log(Level.ERROR, "Failed to set token!");
         }
