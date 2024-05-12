@@ -163,7 +163,7 @@ class JultiLuaLibrary extends LuaLibrary {
         Julti.waitForExecute(() -> {
             MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
             if (selectedInstance != null) {
-                selectedInstance.openToLan(false, enableCheats != null && enableCheats);
+                selectedInstance.openToLan(false, enableCheats == null || enableCheats);
             }
         });
     }
