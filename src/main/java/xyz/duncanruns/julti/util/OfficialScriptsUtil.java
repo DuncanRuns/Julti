@@ -1,10 +1,7 @@
 package xyz.duncanruns.julti.util;
 
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.github.AbuseLimitHandler;
 import org.kohsuke.github.GHContent;
-import org.kohsuke.github.GitHubBuilder;
-import org.kohsuke.github.RateLimitHandler;
 import xyz.duncanruns.julti.script.ScriptManager;
 
 import java.io.IOException;

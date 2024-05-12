@@ -2,7 +2,6 @@ package xyz.duncanruns.julti.util;
 
 import org.apache.logging.log4j.Level;
 import org.kohsuke.github.GHContent;
-import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 
 import java.io.IOException;

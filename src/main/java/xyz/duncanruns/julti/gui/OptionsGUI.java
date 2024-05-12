@@ -26,7 +26,7 @@ import java.util.List;
 public class OptionsGUI extends JFrame {
     private boolean closed = false;
     private JTabbedPane tabbedPane;
-    private List<String> tabNames = new ArrayList<>();
+    private final List<String> tabNames = new ArrayList<>();
 
     public OptionsGUI() {
         this.setupWindow();
