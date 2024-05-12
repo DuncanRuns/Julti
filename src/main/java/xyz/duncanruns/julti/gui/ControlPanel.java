@@ -199,6 +199,10 @@ public class ControlPanel extends JPanel {
         return this.scriptsGUI;
     }
 
+    public ScriptsGUI getScriptsGUI() {
+        return this.scriptsGUI == null || this.scriptsGUI.isClosed() ? null : this.scriptsGUI;
+    }
+
     public PluginsGUI openPluginsGui() {
         if (this.pluginsGUI == null || this.pluginsGUI.isClosed()) {
             this.pluginsGUI = new PluginsGUI();
@@ -206,6 +210,10 @@ public class ControlPanel extends JPanel {
             this.pluginsGUI.requestFocus();
         }
         return this.pluginsGUI;
+    }
+
+    public PluginsGUI getPluginsGUI(){
+        return this.pluginsGUI == null || this.pluginsGUI.isClosed() ? null : this.pluginsGUI;
     }
 
     public OptionsGUI openOptions() {

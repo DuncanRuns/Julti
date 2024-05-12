@@ -57,22 +57,28 @@ public class ScriptsGUI extends JFrame {
         this.panel.removeAll();
 
         JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new GridLayout(2, 2, 5, 5));
+        buttonsPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Import Script"), a -> this.startImportDialog()));
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Scripts"), a -> ScriptManager.cancelAllScripts()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Import Script..."), a -> this.startImportDialog()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Edit Hotkeys..."), a -> {
+            OptionsGUI optionsGUI = JultiGUI.getJultiGUI().getControlPanel().openOptions();
+            optionsGUI.reload();
+            optionsGUI.openTab("Hotkeys");
+            optionsGUI.setScroll(100000);
+        }));
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Open Scripts Folder"), a -> {
             try {
                 Desktop.getDesktop().browse(ScriptManager.SCRIPTS_FOLDER.toUri());
             } catch (IOException ignored) {
             }
         }));
-        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Reload"), a -> {
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Cancel Running Scripts"), a -> ScriptManager.cancelAllScripts()));
+        buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Reload Scripts"), a -> {
             ScriptManager.reload();
             this.reload();
         }));
 
-        GUIUtil.setActualSize(buttonsPanel, 355, 55);
+        GUIUtil.setActualSize(buttonsPanel, 355, 85);
         this.panel.add(GUIUtil.leftJustify(buttonsPanel));
         this.panel.add(GUIUtil.createSpacer());
 

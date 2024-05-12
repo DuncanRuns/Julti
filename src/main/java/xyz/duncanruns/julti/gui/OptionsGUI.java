@@ -26,6 +26,7 @@ import java.util.List;
 public class OptionsGUI extends JFrame {
     private boolean closed = false;
     private JTabbedPane tabbedPane;
+    private List<String> tabNames = new ArrayList<>();
 
     public OptionsGUI() {
         this.setupWindow();
@@ -551,6 +552,7 @@ public class OptionsGUI extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
         this.tabbedPane.add(name, scrollPane);
+        this.tabNames.add(name);
         return panel;
     }
 
@@ -718,7 +720,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("clipboardOnReset", "Clipboard On Reset", this)));
     }
 
-    private void reload() {
+    public void reload() {
         // Get current index
         int index = this.getTabbedPane().getSelectedIndex();
         // Get current scroll
@@ -865,6 +867,14 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Prepare Window on Lock", "When locking, set the size of the instance to the \"Playing\" size, making switching quicker.", "prepareWindowOnLock")));
+    }
+
+    public void openTab(String tabName) {
+        this.getTabbedPane().setSelectedIndex(this.tabNames.indexOf(tabName));
+    }
+
+    public void setScroll(int scroll) {
+        ((JScrollPane) this.getTabbedPane().getSelectedComponent()).getVerticalScrollBar().setValue(scroll);
     }
 
     public boolean isClosed() {
