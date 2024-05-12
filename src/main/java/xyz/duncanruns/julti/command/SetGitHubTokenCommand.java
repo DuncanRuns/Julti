@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.command;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GitHubUtil;
 
 public class SetGitHubTokenCommand extends Command {
@@ -29,7 +30,12 @@ public class SetGitHubTokenCommand extends Command {
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
         if (GitHubUtil.setToken(args[0])) {
-            Julti.log(Level.INFO, "GitHub token set! (Delete %userprofile%/.Julti/gh_token.txt to remove token)");
+            try {
+                String name = GitHubUtil.getGitHub().getMyself().getLogin();
+                Julti.log(Level.INFO, "GitHub token set! Julti is now connected to " + name + "! (Delete %userprofile%/.Julti/gh_token.txt to remove token)");
+            } catch (Exception e) {
+                Julti.log(Level.INFO, "An error occurred trying to test the token! " + ExceptionUtil.toDetailedString(e));
+            }
         } else {
             Julti.log(Level.ERROR, "Failed to set token!");
         }

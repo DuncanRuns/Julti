@@ -4,7 +4,6 @@ import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 import org.apache.logging.log4j.Level;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
-import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.JultiOptions;

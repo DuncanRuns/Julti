@@ -212,7 +212,7 @@ public class ControlPanel extends JPanel {
         return this.pluginsGUI;
     }
 
-    public PluginsGUI getPluginsGUI(){
+    public PluginsGUI getPluginsGUI() {
         return this.pluginsGUI == null || this.pluginsGUI.isClosed() ? null : this.pluginsGUI;
     }
 

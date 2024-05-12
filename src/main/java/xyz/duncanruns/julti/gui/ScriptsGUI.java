@@ -3,7 +3,6 @@ package xyz.duncanruns.julti.gui;
 import org.apache.logging.log4j.Level;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GHGistFile;
-import org.kohsuke.github.GitHub;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
