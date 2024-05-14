@@ -8,6 +8,7 @@ import xyz.duncanruns.julti.plugin.PluginManager.LoadedJultiPlugin;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.GUIUtil;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -19,6 +20,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class PluginsGUI extends JFrame {
+    private static PluginsGUI instance = null;
     private boolean closed = false;
     private JPanel panel;
 
@@ -27,6 +29,18 @@ public class PluginsGUI extends JFrame {
         this.setLocation(location.x, location.y + 30);
         this.setupWindow();
         this.reload();
+    }
+
+    @Nullable
+    public static PluginsGUI getGUI() {
+        return instance;
+    }
+
+    public static PluginsGUI openGUI() {
+        if (instance == null || instance.isClosed()) {
+            instance = new PluginsGUI();
+        }
+        return instance;
     }
 
     private void setupWindow() {

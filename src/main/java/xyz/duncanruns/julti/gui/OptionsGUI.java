@@ -12,6 +12,7 @@ import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.ScriptManager;
 import xyz.duncanruns.julti.util.*;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
+    private static OptionsGUI instance = null;
     private boolean closed = false;
     private JTabbedPane tabbedPane;
     private final List<String> tabNames = new ArrayList<>();
@@ -31,6 +33,18 @@ public class OptionsGUI extends JFrame {
     public OptionsGUI() {
         this.setupWindow();
         this.reloadComponents();
+    }
+
+    @Nullable
+    public static OptionsGUI getGUI() {
+        return instance;
+    }
+
+    public static OptionsGUI openGUI() {
+        if (instance == null || instance.isClosed()) {
+            instance = new OptionsGUI();
+        }
+        return instance;
     }
 
     private static void changeProfile(String profile) {

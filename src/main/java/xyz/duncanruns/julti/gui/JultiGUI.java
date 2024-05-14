@@ -44,7 +44,7 @@ public class JultiGUI extends JFrame {
     }
 
     public static PluginsGUI getPluginsGUI() {
-        return getJultiGUI().getControlPanel().openPluginsGui();
+        return PluginsGUI.getGUI();
     }
 
     public ControlPanel getControlPanel() {
@@ -135,7 +135,7 @@ public class JultiGUI extends JFrame {
     }
 
     private boolean isOptionsActive() {
-        OptionsGUI optionsGUI = this.controlPanel.getOptionsGUI();
+        OptionsGUI optionsGUI = OptionsGUI.getGUI();
         return optionsGUI != null && (!optionsGUI.isClosed()) && optionsGUI.isActive();
     }
 

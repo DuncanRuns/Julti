@@ -478,7 +478,7 @@ class JultiLuaLibrary extends LuaLibrary {
     public String askTextBox(String message, String startingVal, LuaFunction validator) {
         boolean invalidInput = false;
         while (true) {
-            Object o = JOptionPane.showInputDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
+            Object o = JOptionPane.showInputDialog(ScriptsGUI.openGUI(), invalidInput ? "Your input was invalid!\n" + message : message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null, null, Optional.ofNullable(startingVal).orElse(""));
             if (o == null) {
                 return null;
             }
@@ -494,7 +494,7 @@ class JultiLuaLibrary extends LuaLibrary {
     @AllowedWhileCustomizing
     @Nullable
     public Boolean askYesNo(String message) {
-        int ans = JOptionPane.showConfirmDialog(JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+        int ans = JOptionPane.showConfirmDialog(ScriptsGUI.openGUI(), message, "Julti Script: " + this.script.getName(), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
         switch (ans) {
             case 0:
                 return true;
@@ -508,7 +508,7 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Shows a message in a message box to the user.")
     @AllowedWhileCustomizing
     public void showMessageBox(String message) {
-        ScriptsGUI scriptsGUI = JultiGUI.getJultiGUI().getControlPanel().getScriptsGUI();
+        ScriptsGUI scriptsGUI = ScriptsGUI.getGUI();
         JOptionPane.showMessageDialog(scriptsGUI == null || scriptsGUI.isClosed() ? JultiGUI.getJultiGUI() : scriptsGUI, message, "Julti Script: " + this.script.getName(), JOptionPane.PLAIN_MESSAGE, null);
     }
 

@@ -10,6 +10,7 @@ import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.GitHubUtil;
 import xyz.duncanruns.julti.util.OfficialScriptsUtil;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 public class ScriptsGUI extends JFrame {
     private static OfficialScriptsBrowserGUI officialScriptsBrowserGUI;
+    private static ScriptsGUI instance = null;
     private boolean closed = false;
     private JPanel panel;
     private JButton officialScriptsButton;
@@ -30,6 +32,18 @@ public class ScriptsGUI extends JFrame {
         this.setLocation(location.x, location.y + 30);
         this.setupWindow();
         this.reload();
+    }
+
+    @Nullable
+    public static ScriptsGUI getGUI() {
+        return instance;
+    }
+
+    public static ScriptsGUI openGUI() {
+        if (instance == null || instance.isClosed()) {
+            instance = new ScriptsGUI();
+        }
+        return instance;
     }
 
     private void setupWindow() {
@@ -67,10 +81,11 @@ public class ScriptsGUI extends JFrame {
         this.officialScriptsButton = GUIUtil.getButtonWithMethod(new JButton("Browse Official Scripts..."), a -> this.browseOfficialScriptsButton());
         buttonsPanel.add(this.officialScriptsButton);
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Edit Hotkeys..."), a -> {
-            OptionsGUI optionsGUI = JultiGUI.getJultiGUI().getControlPanel().openOptions();
+            OptionsGUI optionsGUI = OptionsGUI.openGUI();
             optionsGUI.reload();
             optionsGUI.openTab("Hotkeys");
             optionsGUI.setScroll(100000);
+            optionsGUI.requestFocus();
         }));
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Open Scripts Folder"), a -> {
             try {

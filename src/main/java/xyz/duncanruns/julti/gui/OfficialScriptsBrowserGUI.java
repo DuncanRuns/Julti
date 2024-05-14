@@ -27,7 +27,7 @@ public class OfficialScriptsBrowserGUI extends JFrame {
     private void addComponents(Set<String> fileNames) {
         this.panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Back to Scripts..."), a -> {
             this.dispose();
-            JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI().setLocation(this.getLocation());
+            ScriptsGUI.openGUI().setLocation(this.getLocation());
         })));
         this.panel.add(GUIUtil.createSpacer());
         fileNames.stream().sorted(String::compareTo).forEach(fileName -> {
@@ -43,7 +43,7 @@ public class OfficialScriptsBrowserGUI extends JFrame {
             scriptPanel.add(GUIUtil.getButtonWithMethod(button, a -> {
                 try {
                     OfficialScriptsUtil.downloadScript(fileName);
-                    ScriptsGUI scriptsGUI = JultiGUI.getJultiGUI().getControlPanel().getScriptsGUI();
+                    ScriptsGUI scriptsGUI = ScriptsGUI.getGUI();
                     if (scriptsGUI != null && !scriptsGUI.isClosed()) {
                         scriptsGUI.reload();
                     }

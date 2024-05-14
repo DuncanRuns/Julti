@@ -18,10 +18,6 @@ import java.util.Objects;
 import static xyz.duncanruns.julti.Julti.log;
 
 public class ControlPanel extends JPanel {
-    private OptionsGUI optionsGUI = null;
-    private ScriptsGUI scriptsGUI = null;
-    private PluginsGUI pluginsGUI = null;
-
     public ControlPanel() {
         this.setLayout(new GridBagLayout());
         GridBagConstraints gbc2 = new GridBagConstraints();
@@ -149,13 +145,13 @@ public class ControlPanel extends JPanel {
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> this.openScriptsGUI()), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Scripts..."), a -> ScriptsGUI.openGUI()), gbc);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Plugins..."), a -> this.openPluginsGui()), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Plugins..."), a -> PluginsGUI.openGUI()), gbc);
 
         // add(GUIUtil.createSpacer(2), gbc2);
 
-        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> this.openOptions()), gbc);
+        this.add(GUIUtil.getButtonWithMethod(new JButton("Options..."), a -> OptionsGUI.openGUI()), gbc);
 
         if (!Objects.equals("DEV", Julti.VERSION)) {
             return;
@@ -190,42 +186,33 @@ public class ControlPanel extends JPanel {
         }), gbc);
     }
 
+    @Deprecated
     public ScriptsGUI openScriptsGUI() {
-        if (this.scriptsGUI == null || this.scriptsGUI.isClosed()) {
-            this.scriptsGUI = new ScriptsGUI();
-        } else {
-            this.scriptsGUI.requestFocus();
-        }
-        return this.scriptsGUI;
+        return ScriptsGUI.openGUI();
     }
 
+    @Deprecated
     public ScriptsGUI getScriptsGUI() {
-        return this.scriptsGUI == null || this.scriptsGUI.isClosed() ? null : this.scriptsGUI;
+        return ScriptsGUI.getGUI();
     }
 
+    @Deprecated
     public PluginsGUI openPluginsGui() {
-        if (this.pluginsGUI == null || this.pluginsGUI.isClosed()) {
-            this.pluginsGUI = new PluginsGUI();
-        } else {
-            this.pluginsGUI.requestFocus();
-        }
-        return this.pluginsGUI;
+        return PluginsGUI.openGUI();
     }
 
+    @Deprecated
     public PluginsGUI getPluginsGUI() {
-        return this.pluginsGUI == null || this.pluginsGUI.isClosed() ? null : this.pluginsGUI;
+        return PluginsGUI.getGUI();
     }
 
+    @Deprecated
     public OptionsGUI openOptions() {
-        if (this.optionsGUI == null || this.optionsGUI.isClosed()) {
-            this.optionsGUI = new OptionsGUI();
-        } else {
-            this.optionsGUI.requestFocus();
-        }
-        return this.optionsGUI;
+        return OptionsGUI.getGUI();
     }
 
+    @Deprecated
     public OptionsGUI getOptionsGUI() {
-        return this.optionsGUI;
+        return OptionsGUI.openGUI();
     }
 }
