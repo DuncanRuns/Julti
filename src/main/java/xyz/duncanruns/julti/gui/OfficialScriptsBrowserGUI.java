@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class OfficialScriptsBrowserGUI extends JFrame {
     private boolean closed = false;
@@ -37,14 +38,18 @@ public class OfficialScriptsBrowserGUI extends JFrame {
             JLabel nameLabel = new JLabel(scriptName);
             GUIUtil.setActualSize(nameLabel, 270, 20);
             scriptPanel.add(nameLabel);
-            scriptPanel.add(GUIUtil.getButtonWithMethod(new JButton(ScriptManager.getScriptNames().contains(scriptName) ? "Update" : "Install"), a -> {
+            Supplier<String> buttonTextSupplier = () -> ScriptManager.getScriptNames().contains(scriptName) ? "Update" : "Install";
+            JButton button = new JButton(buttonTextSupplier.get());
+            scriptPanel.add(GUIUtil.getButtonWithMethod(button, a -> {
                 try {
                     OfficialScriptsUtil.downloadScript(fileName);
-                    this.dispose();
-                    ScriptsGUI scriptsGUI = JultiGUI.getJultiGUI().getControlPanel().openScriptsGUI();
-                    scriptsGUI.requestFocus();
-                    scriptsGUI.reload();
+                    ScriptsGUI scriptsGUI = JultiGUI.getJultiGUI().getControlPanel().getScriptsGUI();
+                    if (scriptsGUI != null && !scriptsGUI.isClosed()) {
+                        scriptsGUI.reload();
+                    }
                     ScriptManager.runCustomization(scriptName);
+                    button.setText(buttonTextSupplier.get());
+                    this.requestFocus();
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(this, "Failed to download script! (GitHub could be rate limiting you!)", "Julti: Script Download Failed", JOptionPane.ERROR_MESSAGE);
                     Julti.log(Level.ERROR, "Error while trying to download official script: " + ExceptionUtil.toDetailedString(e));
