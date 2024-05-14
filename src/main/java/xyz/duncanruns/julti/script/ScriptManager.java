@@ -63,6 +63,10 @@ public class ScriptManager {
         }
 
         for (String s : out.split("\n")) {
+            s = s.trim();
+            if (s.isEmpty()) {
+                continue;
+            }
             try {
                 writeLegacyScript(s);
             } catch (NumberFormatException | IOException ignored) {
