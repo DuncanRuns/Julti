@@ -17,7 +17,6 @@ import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.HotkeyPressQMessage;
-import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.resetting.ResetHelper;
 import xyz.duncanruns.julti.script.CustomizableManager;
 import xyz.duncanruns.julti.script.LuaScript;
@@ -170,8 +169,10 @@ class JultiLuaLibrary extends LuaLibrary {
 
     @LuaDocumentation(description = "Sets the Julti option to the given value after attempting to convert it.", paramTypes = {"string", "any"})
     @AllowedWhileCustomizing
-    public boolean trySetOption(String optionName, String optionValue) {
-        return Julti.getJulti().queueMessageAndWait(new OptionChangeQMessage(optionName, optionValue));
+    public boolean trySetOption(String optionName, LuaValue optionValue) {
+        synchronized (Julti.getJulti()) {
+            return JultiOptions.getJultiOptions().trySetValue(optionName, LuaConverter.convertToJava(optionValue));
+        }
     }
 
     @LuaDocumentation(description = "Gets a Julti option and returns it as a string.")
