@@ -40,7 +40,7 @@ public class WallResetManager extends ResetManager {
 
         // Get selected instance, return if no selected instance
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
-        if (selectedInstance == null) {
+        if (selectedInstance == null || selectedInstance.isWindowMarkedMissing()) {
             return Collections.emptyList();
         }
 
@@ -61,7 +61,7 @@ public class WallResetManager extends ResetManager {
     @Override
     public List<ActionResult> doBGReset() {
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
-        if (selectedInstance == null) {
+        if (selectedInstance == null || selectedInstance.isWindowMarkedMissing()) {
             return Collections.emptyList();
         }
         List<ActionResult> out = this.resetNonLockedExcept(selectedInstance);
@@ -97,7 +97,7 @@ public class WallResetManager extends ResetManager {
             return Collections.emptyList();
         }
         MinecraftInstance selectedInstance = this.getHoveredWallInstance(mousePosition);
-        if (selectedInstance == null) {
+        if (selectedInstance == null || selectedInstance.isWindowMarkedMissing()) {
             return Collections.emptyList();
         }
         AffinityManager.ping();

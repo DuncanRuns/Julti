@@ -34,7 +34,7 @@ public class MultiResetManager extends ResetManager {
 
         // Get selected instance, return if no selected instance,
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
-        if (selectedInstance == null) {
+        if (selectedInstance == null || selectedInstance.isWindowMarkedMissing()) {
             return actionResults;
         }
 
