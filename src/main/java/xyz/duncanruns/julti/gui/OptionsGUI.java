@@ -51,6 +51,12 @@ public class OptionsGUI extends JFrame {
         Julti.waitForExecute(() -> Julti.getJulti().changeProfile(profile));
     }
 
+    public static void reloadIfOpen() {
+        if (instance != null && !instance.isClosed()) {
+            instance.reload();
+        }
+    }
+
     private JTabbedPane getTabbedPane() {
         return this.tabbedPane;
     }
