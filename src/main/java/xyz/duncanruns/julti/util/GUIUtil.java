@@ -358,4 +358,14 @@ public final class GUIUtil {
         scalePanel.add(createValueChangerButton("centerAlignScaleY", "Y", scalePanel));
         return scalePanel;
     }
+
+    public static void forAllComponents(final Container container, Consumer<Component> consumer) {
+        consumer.accept(container);
+        for (Component comp : container.getComponents()) {
+            consumer.accept(comp);
+            if (comp instanceof Container) {
+                forAllComponents((Container) comp, consumer);
+            }
+        }
+    }
 }
