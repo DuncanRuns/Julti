@@ -1,21 +1,48 @@
 package xyz.duncanruns.julti.gui;
 
+import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.messages.OptionChangeQMessage;
 import xyz.duncanruns.julti.messages.ShutdownQMessage;
+import xyz.duncanruns.julti.util.GUIUtil;
 import xyz.duncanruns.julti.util.MonitorUtil;
 import xyz.duncanruns.julti.util.MonitorUtil.Monitor;
 import xyz.duncanruns.julti.util.ResourceUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 public class JultiGUI extends JFrame {
+    private static long lastUtilityKeyPress = 0;
+    public static final KeyAdapter UTILITY_MODE_SWITCHER_LISTENER = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            if (e.isControlDown() && e.getKeyCode() == 85) {
+                if (Math.abs(lastUtilityKeyPress - System.currentTimeMillis()) < 50) {
+                    return;
+                }
+                lastUtilityKeyPress = System.currentTimeMillis();
+                synchronized (Julti.getJulti()) {
+                    JultiOptions options = JultiOptions.getJultiOptions();
+                    options.utilityMode = !options.utilityMode;
+                    if (options.utilityMode) {
+                        Julti.log(Level.INFO, "Utility Mode enabled! Press Ctrl+U or go to experimental options to disable Utilty Mode.");
+                    } else {
+                        Julti.log(Level.INFO, "Utility Mode disabled.");
+                    }
+                    OptionsGUI.reloadIfOpen();
+                }
+            }
+        }
+    };
+    
     private static final JultiGUI INSTANCE = new JultiGUI();
 
     private boolean closed;
@@ -132,6 +159,9 @@ public class JultiGUI extends JFrame {
         this.setIconImage(JultiGUI.getLogo());
         this.trayIcon = new JultiIcon(JultiGUI.getLogo());
         this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
+
+        this.addKeyListener(UTILITY_MODE_SWITCHER_LISTENER);
+        GUIUtil.forAllComponents(this, component -> component.addKeyListener(UTILITY_MODE_SWITCHER_LISTENER));
     }
 
     private boolean isOptionsActive() {
