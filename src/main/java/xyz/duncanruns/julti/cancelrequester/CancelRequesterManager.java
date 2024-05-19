@@ -3,6 +3,8 @@ package xyz.duncanruns.julti.cancelrequester;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CancelRequesterManager {
     private List<NamedCancelRequester> requesters = new ArrayList<>();
@@ -36,6 +38,11 @@ public class CancelRequesterManager {
     public synchronized void remove(String name) {
         this.update();
         this.requesters.removeIf(r -> r.getName().equals(name));
+    }
+
+    public synchronized Set<String> getAllActive() {
+        this.update();
+        return this.requesters.stream().map(NamedCancelRequester::getName).collect(Collectors.toSet());
     }
 
     private static class NamedCancelRequester extends CancelRequester {

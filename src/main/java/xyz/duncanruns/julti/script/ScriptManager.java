@@ -260,4 +260,12 @@ public class ScriptManager {
             }
         }
     }
+
+    public static boolean isRunning(String scriptName) {
+        return requesterManager.isActive(scriptName);
+    }
+
+    public static Set<String> getRunningScriptNames() {
+        return requesterManager.getAllActive();
+    }
 }
