@@ -78,7 +78,7 @@ public class MinecraftInstance {
     public void tick() {
         this.getStateTracker().tryUpdate();
         this.scheduler.checkSchedule();
-        if (ActiveWindowManager.isWindowActive(this.getHwnd()) && !this.activeSinceReset) {
+        if (ActiveWindowManager.isWindowActive(this.getHwnd())) {
             this.activeSinceReset = true;
         }
     }
