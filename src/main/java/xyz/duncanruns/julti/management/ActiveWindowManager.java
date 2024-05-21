@@ -54,11 +54,7 @@ public final class ActiveWindowManager {
     }
 
     public static void update() {
-        activeHwnd = User32.INSTANCE.GetForegroundWindow();
-        activeTitle = WindowTitleUtil.getHwndTitle(activeHwnd);
-        if (isWallActive()) {
-            lastWallHwnd = activeHwnd;
-        }
+        setAsActive(User32.INSTANCE.GetForegroundWindow());
     }
 
     public static Rectangle getActiveWindowBounds() {
@@ -86,11 +82,12 @@ public final class ActiveWindowManager {
     }
 
     public static void activateHwnd(HWND hwnd) {
+        boolean exists = false;
         if (JultiOptions.getJultiOptions().useAltSwitching) {
             KeyboardUtil.keyDown(Win32VK.VK_LMENU);
             KeyboardUtil.keyUp(Win32VK.VK_LMENU);
             WindowStateUtil.ensureNotMinimized(hwnd);
-            User32.INSTANCE.SetForegroundWindow(hwnd);
+            exists = User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
         } else {
             // Using Erlend Robaye's answer from https://stackoverflow.com/questions/20444735/issue-with-setforegroundwindow-in-net
@@ -101,9 +98,20 @@ public final class ActiveWindowManager {
             User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), true);
             WindowStateUtil.ensureNotMinimized(hwnd);
             // If the order of SetForegroundWindow and BringWindowToTop are switched, keyboard focus gets fucked
-            User32.INSTANCE.SetForegroundWindow(hwnd);
+            exists = User32.INSTANCE.SetForegroundWindow(hwnd);
             User32.INSTANCE.BringWindowToTop(hwnd);
             User32.INSTANCE.AttachThreadInput(new WinDef.DWORD(currentlyFocusedWindowProcessId), new WinDef.DWORD(appThread), false);
+        }
+        if (exists) {
+            setAsActive(hwnd);
+        }
+    }
+
+    private static void setAsActive(HWND hwnd) {
+        activeHwnd = hwnd;
+        activeTitle = WindowTitleUtil.getHwndTitle(activeHwnd);
+        if (isWallActive()) {
+            lastWallHwnd = activeHwnd;
         }
     }
 
