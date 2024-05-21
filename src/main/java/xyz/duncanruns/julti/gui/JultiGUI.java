@@ -42,7 +42,7 @@ public class JultiGUI extends JFrame {
             }
         }
     };
-    
+
     private static final JultiGUI INSTANCE = new JultiGUI();
 
     private boolean closed;
