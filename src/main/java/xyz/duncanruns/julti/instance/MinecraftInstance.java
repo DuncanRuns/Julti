@@ -78,6 +78,9 @@ public class MinecraftInstance {
     public void tick() {
         this.getStateTracker().tryUpdate();
         this.scheduler.checkSchedule();
+        if (ActiveWindowManager.isWindowActive(this.getHwnd()) && !this.activeSinceReset) {
+            this.activeSinceReset = true;
+        }
     }
 
     /**
@@ -403,6 +406,7 @@ public class MinecraftInstance {
         int toPress = options.useF3 ? 2 : 1;
 
         if (ActiveWindowManager.isWindowActive(this.hwnd)) {
+            this.activeSinceReset = true;
             this.lastActivation = System.currentTimeMillis();
             if (options.unpauseOnSwitch || options.coopMode) {
                 toPress = 0;
@@ -777,12 +781,14 @@ public class MinecraftInstance {
         this.presser.pressKey(this.gameOptions.fullscreenKey);
 
         Julti.log(Level.DEBUG, "Waiting for fullscreen option to turn false...");
+
+        int i = 0;
         do {
             sleep(5);
             delay += 5;
-        } while (this.isFullscreen());
+        } while (this.isFullscreen() && (i++ < 50));
 
-        int i = 0;
+        i = 0;
 
         Julti.log(Level.DEBUG, "Waiting for window border to reappear...");
         // Fullscreened MC windows are naturally borderless, and using isHwndBorderless works for checking this
