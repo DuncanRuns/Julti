@@ -56,7 +56,7 @@ public final class JultiOptions {
     public int overrideColumnsAmount = 3;
     public long wallResetCooldown = 150L;
     public float lockedInstanceSpace = 16.666668f;
-    public boolean dwReplaceLocked = true;
+    public boolean dwReplaceLocked = false;
     public boolean doDirtCovers = false;
     public boolean useFreezeFilter = false;
     public int freezePercent = 80;
