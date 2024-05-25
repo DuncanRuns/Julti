@@ -5,6 +5,8 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesterManager;
+import xyz.duncanruns.julti.management.ActiveWindowManager;
+import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.script.lua.LuaLibraries;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 import xyz.duncanruns.julti.util.FileUtil;
@@ -267,5 +269,18 @@ public class ScriptManager {
 
     public static Set<String> getRunningScriptNames() {
         return requesterManager.getAllActive();
+    }
+
+    public static void runScriptHotkey(String scriptName) {
+        boolean instanceActive = InstanceManager.getInstanceManager().getSelectedInstance() != null;
+        boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
+        if ((!instanceActive) && (!wallActive)) {
+            return;
+        }
+        byte hotkeyContext = getHotkeyContext(scriptName);
+        if (hotkeyContext == 0 || (hotkeyContext == 1 && wallActive) || (hotkeyContext == 2 && instanceActive)) {
+            return;
+        }
+        runScript(scriptName);
     }
 }

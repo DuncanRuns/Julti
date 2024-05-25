@@ -125,6 +125,13 @@ public final class Julti {
         return !Paths.get("").toAbsolutePath().equals(getSourcePath().getParent());
     }
 
+    private static void runUtilityModeReset() {
+        MinecraftInstance instance = InstanceManager.getInstanceManager().getSelectedInstance();
+        if (instance != null) {
+            instance.getKeyPresser().pressKey(instance.getGameOptions().createWorldKey);
+        }
+    }
+
     private void changeProfile(QMessage message) {
         this.changeProfile(((ProfileChangeQMessage) message).getProfileName());
     }
@@ -254,47 +261,40 @@ public final class Julti {
 
         while (!this.hotkeyQueue.isEmpty()) {
             HotkeyPressQMessage message = this.hotkeyQueue.poll();
-            if (instancesMissing && !message.getHotkeyCode().equals("cancelScript") && !message.getHotkeyCode().startsWith("script:")) {
-                message.markProcessed();
-                continue;
-            }
-            try {
-                this.runHotkeyAction(message.getHotkeyCode(), message.getMousePosition());
-            } catch (Exception e) {
-                message.markFailed();
-                this.onCrashMessage(new CrashQMessage(e));
+            if (message.getHotkeyCode().equals("cancelScript") || message.getHotkeyCode().startsWith("script:") || !instancesMissing) {
+                this.tryProcessHotkeyMessage(message);
             }
             message.markProcessed();
         }
     }
 
+    private void tryProcessHotkeyMessage(HotkeyPressQMessage message) {
+        try {
+            this.runHotkeyAction(message.getHotkeyCode(), message.getMousePosition());
+        } catch (Exception e) {
+            message.markFailed();
+            this.onCrashMessage(new CrashQMessage(e));
+        }
+    }
+
     private void runHotkeyAction(String hotkeyCode, Point mousePosition) {
+        PluginEvents.MiscEventType.HOTKEY_PRESS.runAll(Pair.of(hotkeyCode, mousePosition));
         if (hotkeyCode.startsWith("script:")) {
-            String scriptName = hotkeyCode.split(":")[1];
-            boolean instanceActive = InstanceManager.getInstanceManager().getSelectedInstance() != null;
-            boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
-            if ((!instanceActive) && (!wallActive)) {
-                return;
+            String[] parts = hotkeyCode.split(":");
+            if (parts.length < 2) {
+                log(Level.ERROR, "Hotkey with empty script name was ran!");
             }
-            byte hotkeyContext = ScriptManager.getHotkeyContext(scriptName);
-            if (hotkeyContext == 0 || (hotkeyContext == 1 && wallActive) || (hotkeyContext == 2 && instanceActive)) {
-                return;
-            }
-            ScriptManager.runScript(scriptName);
+            String scriptName = parts[1];
+            ScriptManager.runScriptHotkey(scriptName);
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.cancelAllScripts();
         } else {
-            PluginEvents.MiscEventType.HOTKEY_PRESS.runAll(Pair.of(hotkeyCode, mousePosition));
             if (!JultiOptions.getJultiOptions().utilityMode) {
                 ResetHelper.run(hotkeyCode, mousePosition);
                 return;
             }
-            if (!hotkeyCode.equals("reset")) {
-                return;
-            }
-            MinecraftInstance instance = InstanceManager.getInstanceManager().getSelectedInstance();
-            if (instance != null) {
-                instance.getKeyPresser().pressKey(instance.getGameOptions().createWorldKey);
+            if (hotkeyCode.equals("reset")) {
+                runUtilityModeReset();
             }
         }
     }
