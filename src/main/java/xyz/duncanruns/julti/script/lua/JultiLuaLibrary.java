@@ -541,4 +541,12 @@ class JultiLuaLibrary extends LuaLibrary {
             return ScriptManager.getScriptNames().contains(scriptName);
         }
     }
+
+    @LuaDocumentation(description = "Checks if a script of the specified name is running.")
+    @AllowedWhileCustomizing
+    public boolean scriptIsRunning(String scriptName) {
+        synchronized (Julti.getJulti()) {
+            return ScriptManager.isRunning(scriptName);
+        }
+    }
 }
