@@ -57,8 +57,6 @@ public final class Julti {
             .put(RunnableQMessage.class, m -> ((RunnableQMessage) m).getRunnable().run())
     ).build();
 
-    private final boolean usingShortcut = false;
-
     private Julti() {
     }
 
