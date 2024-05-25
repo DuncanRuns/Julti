@@ -1,3 +1,13 @@
+Changes in v1.4.2:
+- Pressing Ctrl+U on the main Julti GUI will now toggle utility mode.
+- Some tweaks/fixes to window activation and fullscreen, especially for pre 1.16 and 1.19+
+- Set the default value for dynamic wall's "Replace Locked Instances" to false (off).
+
+Changes in v1.4.1:
+- Fix empty scripts.txt file crashing Julti on startup (possible when updating from v1.3.1)
+- Add some window checks in wall and multi reset styles to fix a crash
+- Allow more values for the `trySetOption` lua function
+
 Changes in v1.4.0:
 - Added a new command: `fixfs` - attempts to fix any instances stuck in the background due to fullscreen/minimization.
 - Added Move Resize plugin as a default plugin
