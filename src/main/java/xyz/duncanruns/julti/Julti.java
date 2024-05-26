@@ -29,13 +29,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
@@ -257,13 +257,26 @@ public final class Julti {
         // Cancel all hotkeys if instances are missing
         boolean instancesMissing = InstanceManager.getInstanceManager().areInstancesMissing();
 
-        while (!this.hotkeyQueue.isEmpty()) {
-            HotkeyPressQMessage message = this.hotkeyQueue.poll();
+        Set<String> hotkeyables = ActiveWindowManager.isWallActive() ? HotkeyManager.WALL_HOTKEYABLE_CODES : HotkeyManager.INGAME_HOTKEYABLE_CODES;
+        Predicate<String> scriptHotkeyablePredicate = ActiveWindowManager.isWallActive() ? ScriptManager::isWallHotkeyable : ScriptManager::isInGameHotkeyable;
+        this.hotkeyQueue.stream().filter(m -> {
+            String hotkeyCode = m.getHotkeyCode();
+            if (hotkeyables.contains(hotkeyCode) || HotkeyManager.ANYWHERE_HOTKEYABLE_CODES.contains(hotkeyCode)) {
+                return true;
+            }
+            if (!hotkeyCode.startsWith("script:")) {
+                return false;
+            }
+            String[] parts = hotkeyCode.split(":");
+            return parts.length > 1 && scriptHotkeyablePredicate.test(parts[1]);
+        }).forEach(message -> {
             if (message.getHotkeyCode().equals("cancelScript") || message.getHotkeyCode().startsWith("script:") || !instancesMissing) {
                 this.tryProcessHotkeyMessage(message);
             }
             message.markProcessed();
-        }
+        });
+
+        this.hotkeyQueue.clear();
     }
 
     private void tryProcessHotkeyMessage(HotkeyPressQMessage message) {

@@ -283,4 +283,12 @@ public class ScriptManager {
         }
         runScript(scriptName);
     }
+
+    public static boolean isWallHotkeyable(String scriptName) {
+        return findScript(scriptName).map(script -> (script.getHotkeyContext() & 2) == 2).orElse(false);
+    }
+
+    public static boolean isInGameHotkeyable(String scriptName) {
+        return findScript(scriptName).map(script -> (script.getHotkeyContext() & 1) == 1).orElse(false);
+    }
 }

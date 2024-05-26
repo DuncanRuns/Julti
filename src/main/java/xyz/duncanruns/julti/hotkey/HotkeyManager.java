@@ -9,11 +9,31 @@ import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.script.ScriptHotkeyData;
 import xyz.duncanruns.julti.util.MouseUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public final class HotkeyManager {
+    public static final Set<String> WALL_HOTKEYABLE_CODES = new HashSet<>(Arrays.asList(
+            "wallReset",
+            "wallSingleReset",
+            "wallLock",
+            "wallPlay",
+            "wallFocusReset",
+            "wallPlayLock"
+    ));
+    public static final Set<String> INGAME_HOTKEYABLE_CODES = new HashSet<>(Arrays.asList(
+            "reset",
+            "bgReset"
+    ));
+    public static final Set<String> ANYWHERE_HOTKEYABLE_CODES = new HashSet<>(Arrays.asList(
+            "debugHover",
+            "cancelScript"
+    ));
+
     private static final HotkeyManager INSTANCE = new HotkeyManager();
     public final CopyOnWriteArrayList<Pair<Hotkey, String>> hotkeys = new CopyOnWriteArrayList<>(); // This lets us run the hotkey checker without ever having to stop it
 
