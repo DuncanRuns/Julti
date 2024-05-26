@@ -259,24 +259,31 @@ public final class Julti {
 
         Set<String> hotkeyables = ActiveWindowManager.isWallActive() ? HotkeyManager.WALL_HOTKEYABLE_CODES : HotkeyManager.INGAME_HOTKEYABLE_CODES;
         Predicate<String> scriptHotkeyablePredicate = ActiveWindowManager.isWallActive() ? ScriptManager::isWallHotkeyable : ScriptManager::isInGameHotkeyable;
-        this.hotkeyQueue.stream().filter(m -> {
-            String hotkeyCode = m.getHotkeyCode();
-            if (hotkeyables.contains(hotkeyCode) || HotkeyManager.ANYWHERE_HOTKEYABLE_CODES.contains(hotkeyCode)) {
-                return true;
-            }
-            if (!hotkeyCode.startsWith("script:")) {
-                return false;
-            }
-            String[] parts = hotkeyCode.split(":");
-            return parts.length > 1 && scriptHotkeyablePredicate.test(parts[1]);
-        }).forEach(message -> {
-            if (message.getHotkeyCode().equals("cancelScript") || message.getHotkeyCode().startsWith("script:") || !instancesMissing) {
-                this.tryProcessHotkeyMessage(message);
-            }
-            message.markProcessed();
-        });
 
-        this.hotkeyQueue.clear();
+        while (!this.hotkeyQueue.isEmpty()) {
+            boolean shouldRun;
+
+            HotkeyPressQMessage m = this.hotkeyQueue.poll();
+            String hotkeyCode = m.getHotkeyCode();
+
+            String[] parts;
+            if (hotkeyables.contains(hotkeyCode) || HotkeyManager.ANYWHERE_HOTKEYABLE_CODES.contains(hotkeyCode)) {
+                shouldRun = true;
+            } else if (!hotkeyCode.startsWith("script:") || !((parts = hotkeyCode.split(":")).length > 1 && scriptHotkeyablePredicate.test(parts[1]))) {
+                shouldRun = false;
+            } else {
+                shouldRun = (parts = hotkeyCode.split(":")).length > 1 && scriptHotkeyablePredicate.test(parts[1]);
+            }
+
+            if (shouldRun) {
+                if (hotkeyCode.equals("cancelScript") || hotkeyCode.startsWith("script:") || !instancesMissing) {
+                    this.tryProcessHotkeyMessage(m);
+                }
+            } else {
+                m.markFailed();
+            }
+            m.markProcessed();
+        }
     }
 
     private void tryProcessHotkeyMessage(HotkeyPressQMessage message) {
@@ -284,7 +291,7 @@ public final class Julti {
             this.runHotkeyAction(message.getHotkeyCode(), message.getMousePosition());
         } catch (Exception e) {
             message.markFailed();
-            this.onCrashMessage(new CrashQMessage(e));
+            throw new RuntimeException(e);
         }
     }
 
