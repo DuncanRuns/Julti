@@ -1,6 +1,10 @@
 # Julti
  A Java application to automate the process of using multiple Minecraft instances.
 
+## Download
+
+You can download Julti through the latest GitHub release [here: https://github.com/DuncanRuns/Julti/releases/latest](https://github.com/DuncanRuns/Julti/releases/latest)
+
 ## Support Julti
 
 [Donations: https://ko-fi.com/DuncanRuns](https://ko-fi.com/DuncanRuns)
