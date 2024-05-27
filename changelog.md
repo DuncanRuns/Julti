@@ -1,4 +1,8 @@
 Changes in v1.4.2:
+- Fixed an issue where a wall hotkey set to the same key as "reset" would trigger both actions when returning to wall.
+- Updated standard manager to be less annoying for single instance and utility mode users (also puts the julti logo in there).
+
+Changes in v1.4.2:
 - Pressing Ctrl+U on the main Julti GUI will now toggle utility mode.
 - Some tweaks/fixes to window activation and fullscreen, especially for pre 1.16 and 1.19+
 - Set the default value for dynamic wall's "Replace Locked Instances" to false (off).
