@@ -43,6 +43,7 @@ public class ScriptsGUI extends JFrame {
         if (instance == null || instance.isClosed()) {
             instance = new ScriptsGUI();
         }
+        instance.requestFocus();
         return instance;
     }
 

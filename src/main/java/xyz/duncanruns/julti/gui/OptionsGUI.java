@@ -44,6 +44,7 @@ public class OptionsGUI extends JFrame {
         if (instance == null || instance.isClosed()) {
             instance = new OptionsGUI();
         }
+        instance.requestFocus();
         return instance;
     }
 

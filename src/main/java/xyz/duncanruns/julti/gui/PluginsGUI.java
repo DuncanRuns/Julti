@@ -40,6 +40,7 @@ public class PluginsGUI extends JFrame {
         if (instance == null || instance.isClosed()) {
             instance = new PluginsGUI();
         }
+        instance.requestFocus();
         return instance;
     }
 
