@@ -43,6 +43,7 @@ public class ScriptsGUI extends JFrame {
         if (instance == null || instance.isClosed()) {
             instance = new ScriptsGUI();
         }
+        instance.setExtendedState(NORMAL);
         instance.requestFocus();
         return instance;
     }
@@ -86,6 +87,7 @@ public class ScriptsGUI extends JFrame {
             optionsGUI.reload();
             optionsGUI.openTab("Hotkeys");
             optionsGUI.setScroll(100000);
+            optionsGUI.setExtendedState(NORMAL);
             optionsGUI.requestFocus();
         }));
         buttonsPanel.add(GUIUtil.getButtonWithMethod(new JButton("Open Scripts Folder"), a -> {
@@ -227,6 +229,7 @@ public class ScriptsGUI extends JFrame {
 
     private void browseOfficialScriptsButton() {
         if (officialScriptsBrowserGUI != null && !officialScriptsBrowserGUI.isClosed()) {
+            officialScriptsBrowserGUI.setExtendedState(NORMAL);
             officialScriptsBrowserGUI.requestFocus();
             this.dispose();
             this.onClose();
@@ -252,6 +255,7 @@ public class ScriptsGUI extends JFrame {
             officialScriptsBrowserGUI.setLocation(this.getX(), this.getY());
             this.dispose();
             this.onClose();
+            officialScriptsBrowserGUI.setExtendedState(NORMAL);
             officialScriptsBrowserGUI.requestFocus();
         }).start();
 
