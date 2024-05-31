@@ -111,8 +111,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> this.reload())));
 
+        if (options.utilityMode) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeResets")));
+        }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
@@ -391,6 +395,7 @@ public class OptionsGUI extends JFrame {
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
                     options.utilityMode = false;
+                    options.utilityModeResets = true;
                 });
             }
             this.reload();
@@ -921,4 +926,3 @@ public class OptionsGUI extends JFrame {
         }
     }
 }
-
