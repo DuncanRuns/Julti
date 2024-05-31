@@ -115,7 +115,7 @@ public class OptionsGUI extends JFrame {
 
         if (options.utilityMode) {
             panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeResets")));
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
         }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
@@ -395,7 +395,7 @@ public class OptionsGUI extends JFrame {
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
                     options.utilityMode = false;
-                    options.utilityModeResets = true;
+                    options.utilityModeAllowResets = true;
                 });
             }
             this.reload();

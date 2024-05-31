@@ -311,7 +311,7 @@ public final class Julti {
                 ResetHelper.run(hotkeyCode, mousePosition);
                 return;
             }
-            if (JultiOptions.getJultiOptions().utilityModeResets){
+            if (JultiOptions.getJultiOptions().utilityModeAllowResets){
                 if (hotkeyCode.equals("reset")) {
                     runUtilityModeReset();
                 }
