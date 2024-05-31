@@ -682,11 +682,11 @@ public class MinecraftInstance {
         User32.INSTANCE.ShowWindow(this.hwnd, User32.SW_NORMAL);
         Julti.doLater(() -> this.ensureResettingWindowState(false));
     }
-    
+
     public void ensurePlayingWindowState() {
         this.ensurePlayingWindowState(false);
     }
-    
+
     public void ensurePlayingWindowState(boolean offload) {
         JultiOptions options = JultiOptions.getJultiOptions();
         Rectangle bounds = new Rectangle(options.windowPos[0], options.windowPos[1], options.playingWindowSize[0], options.playingWindowSize[1]);
