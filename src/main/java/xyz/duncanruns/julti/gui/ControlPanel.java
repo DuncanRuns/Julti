@@ -82,15 +82,28 @@ public class ControlPanel extends JPanel {
                 }
             });
 
-            GUIUtil.addMenuItem(menu, "Reset Instance Positions", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Thread.currentThread().setName("julti-gui");
-                    SleepBGUtil.disableLock();
-                    // ensure instance is unfullscreened and unminimized
-                    Julti.doLater(() -> DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureInitialWindowState()));
-                }
-            });
+            if (!JultiOptions.getJultiOptions().utilityMode) {
+                GUIUtil.addMenuItem(menu, "Reset Instance Positions", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Thread.currentThread().setName("julti-gui");
+                        SleepBGUtil.disableLock();
+                        // ensure instance is unfullscreened and unminimized
+                        Julti.doLater(() -> DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureInitialWindowState()));
+                    }
+                });
+            }
+            if (JultiOptions.getJultiOptions().utilityMode) {
+                GUIUtil.addMenuItem(menu, "Set Playing Positions", new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Thread.currentThread().setName("julti-gui");
+                        SleepBGUtil.disableLock();
+                        // ensure instance is at playing size
+                        Julti.doLater(() -> DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensurePlayingWindowState()));
+                    }
+                });
+            }
 
             Point mousePos = this.getMousePosition();
             if (mousePos == null) {
