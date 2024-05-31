@@ -130,6 +130,10 @@ public final class Julti {
         }
     }
 
+    public static void resetInstancePositions() {
+        DoAllFastUtil.doAllFast(JultiOptions.getJultiOptions().utilityMode ? MinecraftInstance::ensurePlayingWindowState : MinecraftInstance::ensureInitialWindowState);
+    }
+
     private void changeProfile(QMessage message) {
         this.changeProfile(((ProfileChangeQMessage) message).getProfileName());
     }
