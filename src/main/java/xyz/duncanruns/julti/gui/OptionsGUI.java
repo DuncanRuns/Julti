@@ -111,8 +111,12 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode")));
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> this.reload())));
 
+        if (options.utilityMode) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
+        }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
@@ -391,6 +395,7 @@ public class OptionsGUI extends JFrame {
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
                     options.utilityMode = false;
+                    options.utilityModeAllowResets = true;
                 });
             }
             this.reload();
@@ -906,10 +911,12 @@ public class OptionsGUI extends JFrame {
     private void onClose() {
         this.closed = true;
         Julti.doLater(() -> {
-            OBSStateManager.getOBSStateManager().tryOutputLSInfo();
+            if (!JultiOptions.getJultiOptions().utilityMode) {
+                OBSStateManager.getOBSStateManager().tryOutputLSInfo();
+                MistakesUtil.checkStartupMistakes();
+            }
             SleepBGUtil.disableLock();
-            MistakesUtil.checkStartupMistakes();
-            DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
+            Julti.resetInstancePositions();
         });
     }
 }

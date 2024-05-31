@@ -87,8 +87,7 @@ public class ControlPanel extends JPanel {
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
                     SleepBGUtil.disableLock();
-                    // ensure instance is unfullscreened and unminimized
-                    Julti.doLater(() -> DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureInitialWindowState()));
+                    Julti.doLater(Julti::resetInstancePositions);
                 }
             });
 

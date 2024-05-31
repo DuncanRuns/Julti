@@ -130,6 +130,10 @@ public final class Julti {
         }
     }
 
+    public static void resetInstancePositions() {
+        InstanceManager.getInstanceManager().getInstances().forEach(JultiOptions.getJultiOptions().utilityMode ? MinecraftInstance::ensurePlayingWindowState : MinecraftInstance::ensureInitialWindowState);
+    }
+
     private void changeProfile(QMessage message) {
         this.changeProfile(((ProfileChangeQMessage) message).getProfileName());
     }
@@ -307,11 +311,10 @@ public final class Julti {
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.cancelAllScripts();
         } else {
-            if (!JultiOptions.getJultiOptions().utilityMode) {
+            JultiOptions options = JultiOptions.getJultiOptions();
+            if (!options.utilityMode) {
                 ResetHelper.run(hotkeyCode, mousePosition);
-                return;
-            }
-            if (hotkeyCode.equals("reset")) {
+            } else if (options.utilityModeAllowResets && hotkeyCode.equals("reset")) {
                 runUtilityModeReset();
             }
         }
