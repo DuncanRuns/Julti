@@ -230,6 +230,12 @@ public class WallResetManager extends ResetManager {
         return false;
     }
 
+    @Override
+    public void reload() {
+        this.lockedInstances.replaceAll(InstanceManager.getInstanceManager()::getMatchingInstance);
+        super.reload();
+    }
+
     protected List<ActionResult> playInstanceFromWall(MinecraftInstance instance, boolean bypassLoadCheck) {
         JultiOptions options = JultiOptions.getJultiOptions();
 
