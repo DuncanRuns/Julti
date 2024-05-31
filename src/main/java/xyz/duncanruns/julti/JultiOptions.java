@@ -153,6 +153,7 @@ public final class JultiOptions {
     public boolean allowResetDuringGenerating = false;
     public boolean resizeableBorderless = false;
     public boolean utilityMode = false;
+    public boolean utilityModeResets = true;
     // public boolean forceActivate = false;
 
     // Launching
