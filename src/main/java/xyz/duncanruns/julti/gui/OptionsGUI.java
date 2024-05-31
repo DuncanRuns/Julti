@@ -905,11 +905,20 @@ public class OptionsGUI extends JFrame {
 
     private void onClose() {
         this.closed = true;
-        Julti.doLater(() -> {
-            OBSStateManager.getOBSStateManager().tryOutputLSInfo();
-            SleepBGUtil.disableLock();
-            MistakesUtil.checkStartupMistakes();
-            DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
-        });
+        JultiOptions options = JultiOptions.getJultiOptions();
+        if(options.utilityMode){
+            Julti.doLater(() -> {
+                SleepBGUtil.disableLock();
+                DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensurePlayingWindowState(false));
+            });
+        } else{
+            Julti.doLater(() -> {
+                OBSStateManager.getOBSStateManager().tryOutputLSInfo();
+                SleepBGUtil.disableLock();
+                MistakesUtil.checkStartupMistakes();
+                DoAllFastUtil.doAllFast(minecraftInstance -> minecraftInstance.ensureResettingWindowState(false));
+            });
+        }
     }
 }
+
