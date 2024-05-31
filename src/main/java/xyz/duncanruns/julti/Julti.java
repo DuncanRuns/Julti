@@ -311,14 +311,11 @@ public final class Julti {
         } else if (hotkeyCode.equals("cancelScript")) {
             ScriptManager.cancelAllScripts();
         } else {
-            if (!JultiOptions.getJultiOptions().utilityMode) {
+            JultiOptions options = JultiOptions.getJultiOptions();
+            if (!options.utilityMode) {
                 ResetHelper.run(hotkeyCode, mousePosition);
-                return;
-            }
-            if (JultiOptions.getJultiOptions().utilityModeAllowResets){
-                if (hotkeyCode.equals("reset")) {
-                    runUtilityModeReset();
-                }
+            } else if (options.utilityModeAllowResets && hotkeyCode.equals("reset")) {
+                runUtilityModeReset();
             }
         }
     }
