@@ -196,6 +196,14 @@ public class DynamicWallResetManager extends WallResetManager {
         return false;
     }
 
+    @Override
+    public void reload() {
+        this.displayInstancesIndices = new ArrayList<>();
+        this.isFirstReset = true;
+        this.refreshDisplayInstances();
+        super.reload();
+    }
+
     protected boolean resetNoWallUpdate(MinecraftInstance instance) {
         return super.resetInstance(instance, false);
     }
@@ -253,14 +261,6 @@ public class DynamicWallResetManager extends WallResetManager {
         List<MinecraftInstance> instances = this.getDisplayInstances();
         int startIndex = selectedInstance == null ? -1 : instances.indexOf(selectedInstance);
         return instances.get((startIndex + offset) % instances.size());
-    }
-
-    @Override
-    public void reload() {
-        this.displayInstancesIndices = new ArrayList<>();
-        this.isFirstReset = true;
-        this.refreshDisplayInstances();
-        super.reload();
     }
 
     private Rectangle getLockedInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
