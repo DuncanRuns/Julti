@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.script.lua;
 import com.sun.jna.platform.win32.Win32VK;
 import org.apache.logging.log4j.Level;
 import org.luaj.vm2.LuaFunction;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import xyz.duncanruns.julti.Julti;
@@ -29,10 +30,8 @@ import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,6 +64,14 @@ class JultiLuaLibrary extends LuaLibrary {
         synchronized (Julti.getJulti()) {
             return InstanceManager.getInstanceManager().getInstanceNum(ResetHelper.getManager().getHoveredWallInstance(mousePos));
         }
+    }
+
+    private static List<FabricJarUtil.FabricJarInfo> getFabricJarInfos(int instanceNum) {
+        List<FabricJarUtil.FabricJarInfo> jars;
+        synchronized (Julti.getJulti()) {
+            jars = new ArrayList<>(getInstanceFromInt(instanceNum).getGameOptions().jars);
+        }
+        return jars;
     }
 
     @AllowedWhileCustomizing
@@ -548,5 +555,74 @@ class JultiLuaLibrary extends LuaLibrary {
         synchronized (Julti.getJulti()) {
             return ScriptManager.isRunning(scriptName);
         }
+    }
+
+    @LuaDocumentation(description = "Gets a table of all modids for an instance.")
+    @AllowedWhileCustomizing
+    public LuaTable getFabricMods(int instanceNum) {
+        LuaTable table = tableOf();
+        int i = 0;
+        for (FabricJarUtil.FabricJarInfo jar : getFabricJarInfos(instanceNum)) {
+            table.set(valueOf(++i), valueOf(jar.id));
+        }
+        return table;
+    }
+
+    @LuaDocumentation(description = "Gets the version of a fabric mod installed on a specific instance.")
+    @AllowedWhileCustomizing
+    public String getFabricModVersion(int instanceNum, String modid) {
+        return getFabricJarInfos(instanceNum).stream().filter(i -> i.id.equalsIgnoreCase(modid)).findFirst().map(i -> i.version).orElse(null);
+    }
+
+    @LuaDocumentation(description = "Checks if an instance has a mod of the specified modid.")
+    @AllowedWhileCustomizing
+    public boolean hasFabricMod(int instanceNum, String modid) {
+        return getFabricJarInfos(instanceNum).stream().anyMatch(i -> i.id.equalsIgnoreCase(modid));
+    }
+
+    @LuaDocumentation(description = "Compares two version strings. Examples:\njulti.compareVersionStrings(\"1.0.0\", \"1.0.1\") -> -1\njulti.compareVersionStrings(\"1.1.0\", \"1.0.1\") -> 1\njulti.compareVersionStrings(\"1.1.0\", \"1.1.0\") -> 0\njulti.compareVersionStrings(\"mario\", \"1.1.0\", 100) -> 100")
+    @AllowedWhileCustomizing
+    public int compareVersionStrings(String a, String b, Integer onFailure) {
+        return VersionUtil.tryCompare(a, b, onFailure);
+    }
+
+
+    @LuaDocumentation(description = "Retrieves a value from an instance's options.txt.")
+    @AllowedWhileCustomizing
+    public String getInstanceOption(int instanceNum, String optionName) {
+        return GameOptionsUtil.tryGetOption(getInstanceFromInt(instanceNum).getPath(), optionName, false);
+    }
+
+    @LuaDocumentation(description = "Retrieves a value from an instance's standard options.")
+    @AllowedWhileCustomizing
+    public String getInstanceStandardOption(int instanceNum, String optionName) {
+        return GameOptionsUtil.tryGetStandardOption(getInstanceFromInt(instanceNum).getPath(), optionName);
+    }
+
+    @LuaDocumentation(description = "Retrieves a minecraft key option from an instance's standard options or options.txt and converts it into a Windows key integer.")
+    @AllowedWhileCustomizing
+    public Integer getInstanceKeyOption(int instanceNum, String keyOptionName) {
+        MinecraftInstance instance = getInstanceFromInt(instanceNum);
+        return GameOptionsUtil.getKey(instance.getPath(), keyOptionName, MCVersionUtil.isOlderThan(instance.getVersionString(), "1.13"));
+    }
+
+    @LuaDocumentation(description = "Sends a key down and up message to an instance with no delay between.")
+    public void sendKeyToInstance(int instanceNum, int key) {
+        KeyboardUtil.sendKeyToHwnd(getInstanceFromInt(instanceNum).getHwnd(), key);
+    }
+
+    @LuaDocumentation(description = "Sends a key down message to an instance.")
+    public void sendKeyDownToInstance(int instanceNum, int key) {
+        KeyboardUtil.sendKeyDownToHwnd(getInstanceFromInt(instanceNum).getHwnd(), key);
+    }
+
+    @LuaDocumentation(description = "Sends a key up message to an instance.")
+    public void sendKeyUpToInstance(int instanceNum, int key) {
+        KeyboardUtil.sendKeyUpToHwnd(getInstanceFromInt(instanceNum).getHwnd(), key);
+    }
+
+    @LuaDocumentation(description = "Sends a key down and up message to an instance with a specified delay between.")
+    public void sendKeyHoldToInstance(int instanceNum, int key, long millis) {
+        KeyboardUtil.sendKeyToHwnd(getInstanceFromInt(instanceNum).getHwnd(), key, millis);
     }
 }

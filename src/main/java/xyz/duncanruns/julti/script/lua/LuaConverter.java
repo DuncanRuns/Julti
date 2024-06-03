@@ -31,11 +31,14 @@ public final class LuaConverter {
         map.put(boolean.class, "boolean");
         map.put(LuaBoolean.class, "boolean");
         map.put(void.class, "nil");
+        map.put(LuaNil.class, "nil");
         map.put(String.class, "string");
         map.put(LuaString.class, "string");
         map.put(LuaValue.class, "any");
         map.put(Varargs.class, "any");
         map.put(LuaFunction.class, "function");
+        map.put(LuaClosure.class, "function");
+        map.put(LuaTable.class, "table");
         Primitives.allWrapperTypes().forEach(clazz -> map.put(clazz, map.get(Primitives.unwrap(clazz))));
         return map;
     }
