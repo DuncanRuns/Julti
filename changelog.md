@@ -1,4 +1,12 @@
-Changes in v1.4.2:
+Changes in v1.4.4:
+- Fix GUIs not refocusing if already open
+- A few utility mode changes (#100 @dfanm)
+  - Add "Allow Resets In Utility" option
+  - The "Reset Instance Positions" button and closing the options menu will now set instances to their playing size if Utility Mode is enabled.
+- Fixed an issue where a "ghost instance" could exist in locked instances
+- Added more lua functionality
+
+Changes in v1.4.3:
 - Fixed an issue where a wall hotkey set to the same key as "reset" would trigger both actions when returning to wall.
 - Updated standard manager to be less annoying for single instance and utility mode users (also puts the julti logo in there).
 
