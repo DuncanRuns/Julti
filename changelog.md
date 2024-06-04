@@ -1,3 +1,6 @@
+Changes in v1.4.5:
+- Fix Julti crashing when closing the options GUI when any instances are closed.
+
 Changes in v1.4.4:
 - Fix GUIs not refocusing if already open
 - A few utility mode changes (#100 @dfanm)
