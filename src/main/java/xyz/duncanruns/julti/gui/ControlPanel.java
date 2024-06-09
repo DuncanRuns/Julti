@@ -1,7 +1,6 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatMarginBorder;
-import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -15,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static xyz.duncanruns.julti.Julti.log;
 
@@ -122,18 +123,23 @@ public class ControlPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     Thread.currentThread().setName("julti-gui");
-                    List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
-                    int ans = JOptionPane.showConfirmDialog(thisComponent, "Copy mods and config from " + instances.get(0) + " to all other instances?", "Julti: Sync Instances", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                    if (ans == 0) {
-                        new Thread(() -> {
-                            try {
-                                ImmutableSet<SyncUtil.SyncOptions> syncOptions = ImmutableSet.<SyncUtil.SyncOptions>builder().add(SyncUtil.SyncOptions.MODS, SyncUtil.SyncOptions.MOD_CONFIGS, SyncUtil.SyncOptions.GAME_OPTIONS, SyncUtil.SyncOptions.RESOURCE_PACKS, SyncUtil.SyncOptions.INSTANCE_SETTINGS).build();
-                                SyncUtil.sync(instances, instances.get(0), syncOptions);
-                            } catch (IOException er) {
-                                log(Level.ERROR, "Failed to copy files:\n" + ExceptionUtil.toDetailedString(er));
-                            }
-                        }, "instance-sync").start();
+                    if (InstanceManager.getInstanceManager().getInstances().size() < 2) {
+                        Julti.log(Level.ERROR, "Can't sync instances with less than 2 instances!");
+                        return;
                     }
+                    Optional<Set<SyncUtil.SyncOptions>> ans = SyncUtil.ask();
+                    if (!ans.isPresent()) {
+                        return;
+                    }
+                    new Thread(() -> {
+                        try {
+                            List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
+                            SyncUtil.sync(instances, instances.get(0), ans.get());
+                        } catch (IOException er) {
+                            log(Level.ERROR, "Failed to copy files:\n" + ExceptionUtil.toDetailedString(er));
+                        }
+                    }, "instance-sync").start();
+
                 }
             });
 
