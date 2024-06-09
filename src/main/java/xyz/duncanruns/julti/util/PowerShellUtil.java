@@ -4,19 +4,26 @@ import com.github.tuupertunut.powershelllibjava.PowerShell;
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 public class PowerShellUtil {
-    private static final PowerShell POWER_SHELL;
+    private static PowerShell POWER_SHELL = null;
 
-    static {
+    private static PowerShell getPowerShell() throws IOException {
+        if (POWER_SHELL != null) return POWER_SHELL;
+        Optional<Path> powerShellExecutable = Optional.empty();
         try {
-            POWER_SHELL = PowerShell.open();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            powerShellExecutable = Files.walk(Paths.get("C:\\Windows\\System32\\WindowsPowerShell")).filter(path -> path.getFileName().toString().equals("powershell.exe")).findAny();
+        } catch (IOException ignored) {
         }
+        POWER_SHELL = powerShellExecutable.isPresent() ? PowerShell.open(powerShellExecutable.get().toString()) : PowerShell.open();
+        return POWER_SHELL;
     }
 
     public static String execute(String command) throws PowerShellExecutionException, IOException {
-        return POWER_SHELL.executeCommands(command);
+        return getPowerShell().executeCommands(command);
     }
 }
