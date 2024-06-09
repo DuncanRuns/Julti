@@ -103,7 +103,7 @@ public final class SafeInstanceLauncher {
         if (multiMCExists(exeName)) {
             return true;
         }
-        Runtime.getRuntime().exec(new String[]{multiMCLocation});
+        LauncherUtil.openFile(multiMCLocation);
         int tries = 0;
         while ((!multiMCExists(exeName)) && (!cancelRequester.isCancelRequested())) {
             if (++tries > 50) {
