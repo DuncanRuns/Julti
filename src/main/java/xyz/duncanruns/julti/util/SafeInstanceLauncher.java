@@ -34,28 +34,12 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstance(MinecraftInstance instance, CancelRequester cancelRequester) {
-        JultiOptions options = JultiOptions.getJultiOptions();
-        String multiMCPath = options.multiMCPath;
-        if (Files.isDirectory(Paths.get(multiMCPath))) {
-            Optional<Path> actualExe = Optional.empty();
-            try {
-                actualExe = Files.list(Paths.get(multiMCPath)).filter(p -> executableNames.stream().anyMatch(p.getFileName().toString()::equalsIgnoreCase)).findAny();
-            } catch (IOException ignored) {
-            }
-            if (actualExe.isPresent()) {
-                Julti.log(Level.WARN, "You selected a MultiMC folder instead of the exe. I've fixed that for you.");
-                multiMCPath = actualExe.get().toAbsolutePath().toString();
-                options.multiMCPath = multiMCPath;
-            } else {
-                log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
-                return;
-            }
-        }
+        String multiMCPath = getMultiMCPath();
         if (instance.hasWindow()) {
             log(Level.ERROR, "Could not launch " + instance + " (already open).");
             return;
         }
-        if (multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath))) {
+        if (isInvalidMultiMCPath(multiMCPath)) {
             log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
             return;
         }
@@ -71,7 +55,7 @@ public final class SafeInstanceLauncher {
         }
         log(Level.INFO, "Launching instance...");
         JultiOptions options = JultiOptions.getJultiOptions();
-        String multiMCPath = options.multiMCPath;
+        String multiMCPath = getMultiMCPath();
         try {
             if (!startMultiMC(multiMCPath, cancelRequester)) {
                 log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
@@ -131,8 +115,8 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstances(List<MinecraftInstance> instances, CancelRequester cancelRequester) {
-        String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
-        if (multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath))) {
+        String multiMCPath = getMultiMCPath();
+        if (isInvalidMultiMCPath(multiMCPath)) {
             log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
             return;
         }
@@ -147,8 +131,7 @@ public final class SafeInstanceLauncher {
             return;
         }
         log(Level.INFO, "Launching instances...");
-        JultiOptions options = JultiOptions.getJultiOptions();
-        String multiMCPath = options.multiMCPath;
+        String multiMCPath = getMultiMCPath();
         try {
             if (!startMultiMC(multiMCPath, cancelRequester)) {
                 log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
@@ -160,6 +143,7 @@ public final class SafeInstanceLauncher {
         if (cancelRequester.isCancelRequested()) {
             return;
         }
+        JultiOptions options = JultiOptions.getJultiOptions();
         boolean launchOffline = options.launchOffline;
         Path multiMCActualPath = Paths.get(multiMCPath);
         if (launchOffline && multiMCActualPath.getName(multiMCActualPath.getNameCount() - 1).toString().contains("prism")) {
@@ -182,5 +166,28 @@ public final class SafeInstanceLauncher {
             }
             instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
         }
+    }
+
+    private static boolean isInvalidMultiMCPath(String multiMCPath) {
+        return multiMCPath.isEmpty() || !Files.exists(Paths.get(multiMCPath)) || !multiMCPath.endsWith(".exe");
+    }
+
+    private static String getMultiMCPath() {
+        JultiOptions options = JultiOptions.getJultiOptions();
+        String multiMCPath = options.multiMCPath;
+        Path originalPath = Paths.get(multiMCPath);
+        if (Files.isDirectory(originalPath)) {
+            Optional<Path> actualExe = Optional.empty();
+            try {
+                actualExe = Files.list(originalPath).filter(p -> executableNames.stream().anyMatch(p.getFileName().toString()::equalsIgnoreCase)).findAny();
+            } catch (IOException ignored) {
+            }
+            if (actualExe.isPresent()) {
+                Julti.log(Level.WARN, "You selected a MultiMC folder instead of the exe. I've fixed that for you.");
+                multiMCPath = actualExe.get().toAbsolutePath().toString();
+                options.multiMCPath = multiMCPath;
+            }
+        }
+        return multiMCPath;
     }
 }
