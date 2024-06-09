@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatMarginBorder;
+import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
@@ -126,9 +127,10 @@ public class ControlPanel extends JPanel {
                     if (ans == 0) {
                         new Thread(() -> {
                             try {
-                                SyncUtil.sync(instances, instances.get(0), true, true, true);
+                                ImmutableSet<SyncUtil.SyncOptions> syncOptions = ImmutableSet.<SyncUtil.SyncOptions>builder().add(SyncUtil.SyncOptions.MODS, SyncUtil.SyncOptions.MOD_CONFIGS, SyncUtil.SyncOptions.GAME_OPTIONS, SyncUtil.SyncOptions.RESOURCE_PACKS, SyncUtil.SyncOptions.INSTANCE_SETTINGS).build();
+                                SyncUtil.sync(instances, instances.get(0), syncOptions);
                             } catch (IOException er) {
-                                log(Level.ERROR, "Failed to copy files:\n" + er);
+                                log(Level.ERROR, "Failed to copy files:\n" + ExceptionUtil.toDetailedString(er));
                             }
                         }, "instance-sync").start();
                     }
