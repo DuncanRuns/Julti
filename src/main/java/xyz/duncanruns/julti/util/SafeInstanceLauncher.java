@@ -43,7 +43,7 @@ public final class SafeInstanceLauncher {
             } catch (IOException ignored) {
             }
             if (actualExe.isPresent()) {
-                Julti.log(Level.WARN,"You selected a MultiMC folder instead of the exe. I've fixed that for you.");
+                Julti.log(Level.WARN, "You selected a MultiMC folder instead of the exe. I've fixed that for you.");
                 multiMCPath = actualExe.get().toAbsolutePath().toString();
                 options.multiMCPath = multiMCPath;
             } else {

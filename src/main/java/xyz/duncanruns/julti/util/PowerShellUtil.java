@@ -13,7 +13,9 @@ public class PowerShellUtil {
     private static PowerShell POWER_SHELL = null;
 
     private static PowerShell getPowerShell() throws IOException {
-        if (POWER_SHELL != null) return POWER_SHELL;
+        if (POWER_SHELL != null) {
+            return POWER_SHELL;
+        }
         Optional<Path> powerShellExecutable = Optional.empty();
         try {
             powerShellExecutable = Files.walk(Paths.get("C:\\Windows\\System32\\WindowsPowerShell")).filter(path -> path.getFileName().toString().equals("powershell.exe")).findAny();
