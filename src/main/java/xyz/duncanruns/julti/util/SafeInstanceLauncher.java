@@ -1,6 +1,8 @@
 package xyz.duncanruns.julti.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
@@ -13,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xyz.duncanruns.julti.Julti.log;
@@ -20,6 +24,7 @@ import static xyz.duncanruns.julti.util.SleepUtil.sleep;
 
 public final class SafeInstanceLauncher {
     // Safely launches instance(s) so that MultiMC does not crash.
+    private static final Set<String> executableNames = ImmutableSet.<String>builder().add("multimc.exe", "prismlauncher.exe").build();
 
     private SafeInstanceLauncher() {
     }
@@ -29,7 +34,23 @@ public final class SafeInstanceLauncher {
     }
 
     public static void launchInstance(MinecraftInstance instance, CancelRequester cancelRequester) {
-        String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
+        JultiOptions options = JultiOptions.getJultiOptions();
+        String multiMCPath = options.multiMCPath;
+        if (Files.isDirectory(Paths.get(multiMCPath))) {
+            Optional<Path> actualExe = Optional.empty();
+            try {
+                actualExe = Files.list(Paths.get(multiMCPath)).filter(p -> executableNames.stream().anyMatch(p.getFileName().toString()::equalsIgnoreCase)).findAny();
+            } catch (IOException ignored) {
+            }
+            if (actualExe.isPresent()) {
+                Julti.log(Level.WARN,"You selected a MultiMC folder instead of the exe. I've fixed that for you.");
+                multiMCPath = actualExe.get().toAbsolutePath().toString();
+                options.multiMCPath = multiMCPath;
+            } else {
+                log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
+                return;
+            }
+        }
         if (instance.hasWindow()) {
             log(Level.ERROR, "Could not launch " + instance + " (already open).");
             return;
