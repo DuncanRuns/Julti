@@ -8,6 +8,7 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -146,7 +147,16 @@ public final class InstanceInfoUtil {
             }
         }
 
-        return new FoundInstanceInfo(versionString, Paths.get(nativesPathString).resolveSibling(".minecraft"));
+        Path nativesPath = Paths.get(nativesPathString);
+        Path instancePath = nativesPath.resolveSibling(".minecraft");
+        if (Files.isDirectory(instancePath)) {
+            return new FoundInstanceInfo(versionString, instancePath);
+        }
+        instancePath = nativesPath.resolveSibling("minecraft"); // New prism launchers will have `minecraft` as the folder name :skull:
+        if (Files.isDirectory(instancePath)) {
+            return new FoundInstanceInfo(versionString, instancePath);
+        }
+        return null;
     }
 
     private static String getVersionWithPattern(String commandLine, Pattern multimcVersionPattern) {

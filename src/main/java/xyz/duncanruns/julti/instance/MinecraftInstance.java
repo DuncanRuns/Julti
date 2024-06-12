@@ -216,7 +216,7 @@ public class MinecraftInstance {
             }
         }
 
-        if (instancePath.getName(instancePath.getNameCount() - 1).toString().equals(".minecraft")) {
+        if (Files.isRegularFile(instancePath.resolveSibling("instance.cfg"))) {
             instancePath = instancePath.getParent();
             // If this runs, instancePath is no longer an accurate variable name, and describes the parent path
         }
