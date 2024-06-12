@@ -216,15 +216,10 @@ public class MinecraftInstance {
             }
         }
 
-        if (Files.isRegularFile(instancePath.resolveSibling("instance.cfg"))) {
-            instancePath = instancePath.getParent();
-            // If this runs, instancePath is no longer an accurate variable name, and describes the parent path
+        this.name = instancePath.getFileName().toString();
+        if (this.name.equals(".minecraft") || this.name.equals("minecraft")) {
+            this.name = "Unnamed Instance";
         }
-        String name = instancePath.getName(instancePath.getNameCount() - 1).toString();
-        if (name.equals("Roaming")) {
-            name = "Default Launcher";
-        }
-        this.name = name;
     }
 
     private boolean usesMultiMC() {
