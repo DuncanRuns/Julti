@@ -39,6 +39,6 @@ public class LegalModsUtil {
         return GrabUtil.grabJson("https://raw.githubusercontent.com/tildejustin/mcsr-meta/schema-6/mods.json")
                 .getAsJsonArray("mods").asList().stream()
                 .map(JsonElement::getAsJsonObject)
-                .map(j -> j.get("modid").getAsString()).collect(Collectors.toSet());
+                .map(j -> j.get("modid").getAsString().replaceAll("[-_]", "")).collect(Collectors.toSet());
     }
 }
