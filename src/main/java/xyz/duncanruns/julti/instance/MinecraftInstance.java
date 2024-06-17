@@ -209,6 +209,7 @@ public class MinecraftInstance {
                     line = line.trim();
                     if (line.startsWith("name=")) {
                         this.name = StringEscapeUtils.unescapeJson(line.split("=")[1]);
+                        return;
                     }
                 }
             } catch (Exception ignored) {
