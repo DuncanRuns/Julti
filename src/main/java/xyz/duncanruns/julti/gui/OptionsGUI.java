@@ -383,7 +383,7 @@ public class OptionsGUI extends JFrame {
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Pre-Release Updates", "Update checking will also check for pre-releases. Checking this box will trigger an update check.", "usePreReleases", b -> {
             if (b) {
-                UpdateUtil.tryCheckForUpdates(JultiGUI.getJultiGUI()); // Don't need to do in a thread because grabJson is cached
+                new Thread(() -> UpdateUtil.tryCheckForUpdates(JultiGUI.getJultiGUI()), "update-checker").start();
             }
         })));
         panel.add(GUIUtil.createSpacer());

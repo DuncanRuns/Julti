@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,7 +89,7 @@ public final class UpdateUtil {
     }
 
     private static void updateAndLaunch(String download) throws IOException, PowerShellExecutionException {
-        Path newJarPath = Julti.getSourcePath().resolveSibling(FilenameUtils.getName(download));
+        Path newJarPath = Julti.getSourcePath().resolveSibling(URLDecoder.decode(FilenameUtils.getName(download), StandardCharsets.UTF_8.name()));
 
         Point location = JultiGUI.getJultiGUI().getLocation();
         JultiGUI.getJultiGUI().closeForUpdate();
@@ -101,6 +103,7 @@ public final class UpdateUtil {
         PluginEvents.RunnableEventType.PRE_UPDATE.runAll();
         // Release LOCK so updating can go smoothly
         JultiAppLaunch.releaseLock();
+        JultiOptions.getJultiOptions().trySave();
 
         // Use powershell's start-process to start it detached
         String powerCommand = String.format("start-process '%s' '-jar \"%s\" -deleteOldJar \"%s\"'", javaExe, newJarPath, Julti.getSourcePath());
