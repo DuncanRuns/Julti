@@ -114,6 +114,7 @@ public final class JultiOptions {
     public long launchDelay = 500;
     public int resetCounter = 0;
     public boolean minimizeToTray = false;
+    public boolean usePreReleases = false;
 
 
     // Affinity

@@ -381,6 +381,13 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Julti To System Tray", "Minimizing Julti will move it to an icon in the system tray (bottom right).", "minimizeToTray", JultiGUI.getJultiGUI().getJultiIcon()::setTrayIconListener)));
         panel.add(GUIUtil.createSpacer());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Pre-Release Updates", "Update checking will also check for pre-releases. Checking this box will trigger an update check.", "usePreReleases", b -> {
+            if (b) {
+                UpdateUtil.tryCheckForUpdates(JultiGUI.getJultiGUI()); // Don't need to do in a thread because grabJson is cached
+            }
+        })));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Enable Experimental Options", "enableExperimentalOptions", b -> {
             if (!b) {
                 Julti.waitForExecute(() -> {

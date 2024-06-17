@@ -1,9 +1,9 @@
 package xyz.duncanruns.julti.util;
 
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
+import com.google.gson.JsonObject;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
-import org.kohsuke.github.GHAsset;
-import org.kohsuke.github.GHRelease;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.JultiOptions;
@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import static xyz.duncanruns.julti.Julti.log;
 
 public final class UpdateUtil {
+    private static JsonObject meta = null;
 
     private UpdateUtil() {
     }
@@ -43,92 +44,56 @@ public final class UpdateUtil {
         }
     }
 
-    private static void checkForUpdates(JultiGUI gui, String currentVersion) throws IOException {
+    private synchronized static void checkForUpdates(JultiGUI gui, String currentVersion) throws IOException {
         if (currentVersion == null) {
             currentVersion = Julti.VERSION;
         }
+        currentVersion = currentVersion.replaceAll("^v", "");
         if (currentVersion.equals("DEV")) {
             log(Level.INFO, "No updates because Julti is in DEV version.");
             return;
         }
 
-        // Get the version tag of the first found release (always latest) of the list of releases of the Julti repository from an anonymous GitHub connection.
-        GHRelease release = GitHubUtil.getGitHub().getRepository("DuncanRuns/Julti").listReleases().toList().get(0);
-        GHAsset asset = null;
-        for (GHAsset listAsset : release.listAssets()) {
-            if (listAsset.getBrowserDownloadUrl().endsWith(".jar")) {
-                asset = listAsset;
-                break;
-            }
-        }
-        String latestVersion = release.getTagName();
-
-        if (asset == null || asset.getBrowserDownloadUrl() == null) {
-            Julti.log(Level.WARN, "Latest github release does not have a .jar asset! Please report this to the developer.");
-        }
-
-        checkForUpdates(gui, currentVersion, latestVersion, asset);
-    }
-
-    private static void checkForUpdates(JultiGUI gui, String currentVersion, String latestVersion, GHAsset asset) {
-        currentVersion = currentVersion.replaceAll("^v", "");
-        latestVersion = latestVersion.replaceAll("^v", "");
         JultiOptions options = JultiOptions.getJultiOptions();
+        if (meta == null) {
+            meta = GrabUtil.grabJson("https://raw.githubusercontent.com/DuncanRuns/Julti/main/meta.json");
+        }
+        Julti.log(Level.DEBUG, "Grabbed Meta: " + meta.toString());
 
-        boolean shouldSuggestUpdate = !options.lastCheckedVersion.equals(latestVersion) && shouldUpdate(currentVersion, latestVersion);
+        String latestVersion = meta.get(options.usePreReleases ? "latest_dev" : "latest").getAsString();
+        String download = meta.get(options.usePreReleases ? "latest_dev_download" : "latest_download").getAsString();
+        boolean matchesLatest = latestVersion.equals(currentVersion);
 
-        if (shouldSuggestUpdate) {
+        if (!matchesLatest && !options.lastCheckedVersion.equals(latestVersion)) {
             options.lastCheckedVersion = latestVersion;
             if (JOptionPane.showConfirmDialog(gui, "A new update has been found!\nYou are on v" + currentVersion + ", and the latest version is " + latestVersion + ".\nWould you like to update now?", "Julti: New Update!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
                 if (Julti.isRanFromAlternateLocation()) {
                     JOptionPane.showMessageDialog(gui, "Julti has detected that it is being ran from an alternate location. If you are using a shortcut, you will likely need to recreate it once the update has finished.", "Julti: Ran from Alternate Location", JOptionPane.INFORMATION_MESSAGE);
                 }
                 // Desktop.getDesktop().browse(new URI("https://github.com/DuncanRuns/Julti/releases"));
-                tryUpdateAndLaunch(asset);
+                tryUpdateAndLaunch(download);
             }
         } else {
             log(Level.INFO, "No new updates found!");
         }
     }
 
-    private static boolean shouldUpdate(String currentVersion, String latestVersion) {
-        if (latestVersion.equals(currentVersion)) {
-            return false;
-        }
-        int compare = VersionUtil.compare(currentVersion.split("\\+")[0], latestVersion.split("\\+")[0]);
-        if (compare < 0) { // If current version is older
-            // If latest version is not a pre-release or current is a pre-release, it should update
-            // This covers updating from a pre-release to any type of new version, and full releases to newer full releases,
-            // but does not allow full releases to pre releases.
-            return (!isPreRelease(latestVersion)) || (isPreRelease(currentVersion));
-        } else if (compare == 0) { // If versions are loosely the same
-            // If latest version is not a pre-release or both current and latest are pre releases, it should update.
-            // This covers pre-release updating to another pre-release of the same upcoming version, or pre-release to the final version.
-            return (!isPreRelease(latestVersion)) || (isPreRelease(latestVersion) && isPreRelease(currentVersion));
-        }
-        return false;
-    }
-
-    private static boolean isPreRelease(String versionString) {
-        return versionString.contains("+pre");
-    }
-
-    public static void tryUpdateAndLaunch(GHAsset asset) {
+    public static void tryUpdateAndLaunch(String download) {
         try {
-            updateAndLaunch(asset);
+            updateAndLaunch(download);
         } catch (Exception e) {
             ExceptionUtil.showExceptionAndExit(e, "Julti has crashed during an update!");
         }
     }
 
-    private static void updateAndLaunch(GHAsset asset) throws IOException, PowerShellExecutionException {
-        Path newJarPath = Julti.getSourcePath().resolveSibling(asset.getName());
+    private static void updateAndLaunch(String download) throws IOException, PowerShellExecutionException {
+        Path newJarPath = Julti.getSourcePath().resolveSibling(FilenameUtils.getName(download));
 
         Point location = JultiGUI.getJultiGUI().getLocation();
         JultiGUI.getJultiGUI().closeForUpdate();
 
         if (!Files.exists(newJarPath)) {
-            downloadAssetWithProgress(asset, newJarPath, new DownloadProgressFrame(location).getBar());
+            downloadWithProgress(download, newJarPath, new DownloadProgressFrame(location).getBar());
         }
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
@@ -145,8 +110,8 @@ public final class UpdateUtil {
         System.exit(0);
     }
 
-    public static void downloadAssetWithProgress(GHAsset asset, Path newJarPath, JProgressBar bar) throws IOException {
-        URL url = new URL(asset.getBrowserDownloadUrl());
+    public static void downloadWithProgress(String download, Path newJarPath, JProgressBar bar) throws IOException {
+        URL url = new URL(download);
         URLConnection connection = url.openConnection();
         connection.connect();
         int fileSize = connection.getContentLength();
