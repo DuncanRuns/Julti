@@ -1,3 +1,15 @@
+Changes in v1.4.6:
+- Greatly Improved Sync Instances 
+  - (was going to be in 1.5.0, but I want to push some other things out)
+- Improved Update Suggestions:
+  - You can now check "Enable Pre-Release Updates" to always get notified for a pre-release update, even if you are on a main update. 
+- Avoided the GitHub API in some places, making it easier to avoid the 60 requests per hour limit.
+  - Official Scripts no longer requires GitHub API
+  - Julti update checking no longer requires GitHub API
+  - Checking what mods are legal no longer requires GitHub API (thanks justin)
+- Launching instance(s) with MultiMC/Prism Launcher closed should be less likely to crash. (I changed the way Julti initially opens it)
+- Various other tweaks/fixes
+
 Changes in v1.4.5:
 - Fix Julti crashing when closing the options GUI when any instances are closed.
 
