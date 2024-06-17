@@ -1,6 +1,5 @@
 package xyz.duncanruns.julti.util;
 
-import com.google.common.net.UrlEscapers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
