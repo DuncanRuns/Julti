@@ -1,7 +1,7 @@
 package xyz.duncanruns.julti.util;
 
+import com.google.gson.JsonElement;
 import org.apache.logging.log4j.Level;
-import org.kohsuke.github.GHContent;
 import xyz.duncanruns.julti.Julti;
 
 import java.io.IOException;
@@ -36,6 +36,9 @@ public class LegalModsUtil {
 
 
     private static Set<String> obtainLegalMods() throws IOException {
-        return GitHubUtil.getGitHub().getRepository("Minecraft-Java-Edition-Speedrunning/legal-mods").getDirectoryContent("legal-mods").stream().map(GHContent::getName).map(String::trim).map(s -> s.replaceAll("[-_]", "")).collect(Collectors.toSet());
+        return GrabUtil.grabJson("https://raw.githubusercontent.com/tildejustin/mcsr-meta/schema-6/mods.json")
+                .getAsJsonArray("mods").asList().stream()
+                .map(JsonElement::getAsJsonObject)
+                .map(j -> j.get("modid").getAsString()).collect(Collectors.toSet());
     }
 }
