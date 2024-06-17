@@ -204,7 +204,7 @@ public class MinecraftInstance {
         // Check MultiMC/Prism name
         if (this.usesMultiMC()) {
             try {
-                Path mmcConfigPath = instancePath.getParent().resolve("instance.cfg");
+                Path mmcConfigPath = instancePath.resolveSibling("instance.cfg");
                 for (String line : Files.readAllLines(mmcConfigPath)) {
                     line = line.trim();
                     if (line.startsWith("name=")) {
