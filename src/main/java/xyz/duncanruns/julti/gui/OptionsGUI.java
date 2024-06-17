@@ -395,7 +395,6 @@ public class OptionsGUI extends JFrame {
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
                     options.utilityMode = false;
-                    options.utilityModeAllowResets = true;
                 });
             }
             this.reload();
