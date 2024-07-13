@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
@@ -77,6 +78,7 @@ public final class Julti {
     }
 
     public static void log(Level level, String message) {
+        Configurator.setRootLevel(JultiOptions.getJultiOptions().showDebug ? Level.DEBUG : Level.INFO); // whether to write debug logs to latest.log (info is default)
         LOGGER.log(level, message);
         LogReceiver.receive(level, message);
     }

@@ -2,6 +2,7 @@ package xyz.duncanruns.julti.gui;
 
 import com.formdev.flatlaf.ui.FlatBorder;
 import com.formdev.flatlaf.ui.FlatMarginBorder;
+import com.google.common.collect.EvictingQueue;
 import xyz.duncanruns.julti.command.CommandManager;
 import xyz.duncanruns.julti.management.LogReceiver;
 
@@ -12,6 +13,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 public class LogPanel extends JPanel {
+
+    private final static int MAX_LOG_ENTRIES = 2000; // arbitrary number, can be changed
+    private final EvictingQueue<String> logs = EvictingQueue.create(MAX_LOG_ENTRIES);
 
     public LogPanel() {
         this.setupWindow();
@@ -27,10 +31,13 @@ public class LogPanel extends JPanel {
     private void createTextArea() {
         JTextArea textArea = new JTextArea();
         LogReceiver.setLogConsumer(s -> {
-            if (!textArea.getText().isEmpty()) {
-                textArea.append("\n");
+            logs.add(s);
+
+            textArea.setText(null);
+            if (logs.size() >= MAX_LOG_ENTRIES) {
+                textArea.setText("Logs have been truncated. To view the full logs, go to Options > Other > View Julti Logs.\n\n");
             }
-            textArea.append(s);
+            textArea.append(String.join("\n", logs));
         });
         textArea.setEditable(false);
         textArea.setBorder(new FlatBorder());
