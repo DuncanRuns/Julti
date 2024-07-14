@@ -12,7 +12,6 @@ import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogPanel extends JPanel {
     private final static int MAX_LOG_CHARS = 75000; // arbitrary number, can be changed
@@ -32,35 +31,28 @@ public class LogPanel extends JPanel {
 
     private void createTextArea() {
         JTextArea textArea = new JTextArea();
-        AtomicInteger totalChars = new AtomicInteger();
         AtomicBoolean truncateMessageAdded = new AtomicBoolean(false);
         LogReceiver.setLogConsumer(s -> {
-            if (totalChars.get() > 0) {
+            if (textArea.getDocument().getLength() > 0) {
                 s = "\n" + s;
             }
             textArea.append(s);
-            totalChars.addAndGet(s.length());
-            if (totalChars.get() > MAX_LOG_CHARS) {
-                // Prepend our truncate message
-                if(!truncateMessageAdded.get()){
-                    truncateMessageAdded.set(true);
-                    textArea.insert(TRUNCATE_MESSAGE,0);
-                }
-
-                // We could just remove totalChars.get() - MAX_LOG_CHARS, but that could cut off some lines, so lets cut it off near at a nearby newline
-                // This means once MAX_LOG_CHARS is reached, we actually stay a tiny bit over it
-                int toRemove;
+            int textLength = textArea.getDocument().getLength();
+            if (textLength > MAX_LOG_CHARS) {
                 try {
-                    toRemove = textArea.getText(TRUNCATE_MESSAGE_LEN, TRUNCATE_MESSAGE_LEN + totalChars.get() - MAX_LOG_CHARS).lastIndexOf("\n");
+                    if (!truncateMessageAdded.get()) {
+                        truncateMessageAdded.set(true);
+                        textArea.getDocument().insertString(0, TRUNCATE_MESSAGE, null);
+                    }
+                    int toRemove = textArea.getText(TRUNCATE_MESSAGE_LEN, TRUNCATE_MESSAGE_LEN + textLength - MAX_LOG_CHARS).lastIndexOf("\n");
+                    if (toRemove == -1) {
+                        return;
+                    }
+                    toRemove += 1; // Include the newline itself for removal, and then remove logOffset
+                    textArea.getDocument().remove(TRUNCATE_MESSAGE_LEN, toRemove);
                 } catch (BadLocationException e) {
                     throw new RuntimeException(e);
                 }
-                if (toRemove == -1) {
-                    return;
-                }
-                toRemove += 1; // Include the newline itself for removal, and then remove logOffset
-                textArea.replaceRange(null, TRUNCATE_MESSAGE_LEN, toRemove + TRUNCATE_MESSAGE_LEN);
-                totalChars.addAndGet(-toRemove);
             }
         });
         textArea.setEditable(false);
