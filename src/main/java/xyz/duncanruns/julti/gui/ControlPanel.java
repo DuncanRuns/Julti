@@ -143,6 +143,17 @@ public class ControlPanel extends JPanel {
                 }
             });
 
+            GUIUtil.addMenuItem(menu, "Open .Julti", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        Desktop.getDesktop().browse(JultiOptions.getJultiDir().toAbsolutePath().toUri());
+                    } catch (IOException ex) {
+                        Julti.log(Level.ERROR, "Failed to open .Julti folder:\n" + ExceptionUtil.toDetailedString(ex));
+                    }
+                }
+            });
+
             Point mousePos = this.getMousePosition();
             if (mousePos == null) {
                 mousePos = new Point(0, 0);

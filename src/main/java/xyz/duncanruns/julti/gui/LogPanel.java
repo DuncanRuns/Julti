@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogPanel extends JPanel {
     private final static int MAX_LOG_CHARS = 3000; // arbitrary number, can be changed
-    private final static String TRUNCATE_MESSAGE = "Logs have been truncated. To view the full logs, go to Options > Other > View Julti Logs.\n\n";
+    private final static String TRUNCATE_MESSAGE = "Logs have been truncated. To view the full logs, go to File Utilities... -> Open .Julti -> logs.\n\n";
     private final static int TRUNCATE_MESSAGE_LEN = TRUNCATE_MESSAGE.length();
 
     public LogPanel() {

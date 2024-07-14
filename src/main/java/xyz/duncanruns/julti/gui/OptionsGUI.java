@@ -380,21 +380,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
-        panel.add(GUIUtil.leftJustify(new JLabel("Julti logs:")));
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("View Julti Logs"), actionEvent -> {
-            try {
-                Desktop.getDesktop().browse(JultiOptions.getJultiDir().resolve("logs").toAbsolutePath().toUri());
-            } catch (IOException e) {
-                Julti.log(Level.ERROR, "Failed to open logs folder:\n" + ExceptionUtil.toDetailedString(e));
-            }
-        })));
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Minimize Julti To System Tray", "Minimizing Julti will move it to an icon in the system tray (bottom right).", "minimizeToTray", JultiGUI.getJultiGUI().getJultiIcon()::setTrayIconListener)));
         panel.add(GUIUtil.createSpacer());
 
