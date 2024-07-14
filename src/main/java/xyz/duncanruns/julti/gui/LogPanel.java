@@ -37,6 +37,9 @@ public class LogPanel extends JPanel {
                 s = "\n" + s;
             }
             textArea.append(s);
+            if (!JultiGUI.getJultiGUI().isActive()) {
+                textArea.setCaretPosition(textArea.getDocument().getLength());
+            }
             int textLength = textArea.getDocument().getLength();
             if (textLength > MAX_LOG_CHARS) {
                 try {
