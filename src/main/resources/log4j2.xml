@@ -10,6 +10,7 @@
                 <TimeBasedTriggeringPolicy/>
                 <OnStartupTriggeringPolicy/>
             </Policies>
+            <ImmediateFlush>true</ImmediateFlush>
         </RollingRandomAccessFile>
     </Appenders>
     <Loggers>
