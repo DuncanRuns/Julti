@@ -2,7 +2,6 @@ package xyz.duncanruns.julti;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ClassUtils;
@@ -35,8 +34,8 @@ public final class JultiOptions {
 
     private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
 
-    private transient final Path location;
-    private transient final String profileName;
+    private transient Path location = null;
+    private transient String profileName = null;
 
     // Reset
     public boolean useF3 = true;
@@ -168,9 +167,7 @@ public final class JultiOptions {
     public int[] lastGUIPos = new int[]{0, 0};
     public String lastCheckedVersion = "v0.0.0";
 
-    public JultiOptions(Path location) {
-        this.location = location;
-        this.profileName = location == null ? null : FilenameUtils.removeExtension(location.getFileName().toString());
+    private JultiOptions() {
     }
 
     public static void registerPluginDataLoader(String pluginId, Consumer<JsonObject> dataConsumer) {
@@ -190,8 +187,7 @@ public final class JultiOptions {
             INSTANCE = null;
         }
         if (INSTANCE == null) {
-            INSTANCE = new JultiOptions(getSelectedProfilePath());
-            INSTANCE.tryLoad();
+            tryLoad(getSelectedProfilePath());
         }
         return INSTANCE;
     }
@@ -278,24 +274,38 @@ public final class JultiOptions {
     }
 
     public static JultiOptions getDefaults() {
-        return new JultiOptions(null);
+        return new JultiOptions();
     }
 
-    public boolean tryLoad() {
-        if (Files.isRegularFile(this.location)) {
-            try {
-                // Regular gson's fromJson can't load json strings into existing objects and can only create new objects, this is a work-around.
-                String jsonString = FileUtil.readString(this.location);
-                OldOptions oldOptions = GSON_OBJECT_MAKER.fromJson(jsonString, OldOptions.class);
-                Gson gson = new GsonBuilder().registerTypeAdapter(JultiOptions.class, (InstanceCreator<?>) type -> this).create();
-                gson.fromJson(jsonString, JultiOptions.class);
-                this.processOldOptions(oldOptions);
-                return true;
-            } catch (Exception e) {
-                Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e));
-            }
+    public static boolean tryLoad(Path location) {
+        if (!Files.isRegularFile(location)) {
+            createDefaultOptions(location);
+            return false;
         }
-        return false;
+        try {
+            String jsonString = FileUtil.readString(location);
+            JultiOptions options = GSON_OBJECT_MAKER.fromJson(jsonString, JultiOptions.class);
+            options.setLocation(location);
+            OldOptions oldOptions = GSON_OBJECT_MAKER.fromJson(jsonString, OldOptions.class);
+            options.processOldOptions(oldOptions);
+            INSTANCE = options;
+            return true;
+        } catch (Exception e) {
+            Julti.doLater(() -> Julti.log(Level.ERROR, "Failed to load options:\n" + ExceptionUtil.toDetailedString(e)));
+            createDefaultOptions(location);
+            return false;
+        }
+    }
+
+    private static void createDefaultOptions(Path location) {
+        JultiOptions options = new JultiOptions();
+        options.setLocation(location);
+        INSTANCE = options;
+    }
+
+    public void setLocation(Path location) {
+        this.location = location;
+        this.profileName = FilenameUtils.removeExtension(location.getFileName().toString());
     }
 
     public void triggerPluginDataLoaders() {
