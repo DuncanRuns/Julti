@@ -53,11 +53,13 @@ public class InstancesPanel extends JPanel {
         List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
         if (this.instancePanels.size() != instances.size()) {
-            while (this.instancePanels.size() < instances.size()) {
-                this.instancePanels.add((SingleInstancePanel) this.mainPanel.add(new SingleInstancePanel()));
-            }
-            while (this.instancePanels.size() > instances.size()) {
-                this.mainPanel.remove(this.instancePanels.remove(0));
+            this.instancePanels.forEach(this.mainPanel::remove);
+            this.instancePanels.clear();
+            for (MinecraftInstance instance : instances) {
+                SingleInstancePanel sip = new SingleInstancePanel();
+                this.mainPanel.add(sip);
+                this.instancePanels.add(sip);
+                sip.setInfo(instance);
             }
             this.mainPanel.setLayout(new GridLayout(0, Math.max(1, Math.min(instances.size(), 5))));
             this.revalidate();
