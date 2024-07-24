@@ -172,7 +172,7 @@ public class MinecraftInstance {
         }
 
         if (!hasStateOutput) {
-            Julti.log(Level.WARN, "Warning: Instance \"" + this + "\" does not have an updated version of world preview or the state output mod and will likely not function!");
+            Julti.log(Level.WARN, "Warning: Instance \"" + this + "\" does not have the state output mod and will likely not function!");
         }
 
         boolean hasSS = FabricJarUtil.getJarInfo(this.gameOptions.jars, "standardsettings") != null;
