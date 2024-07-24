@@ -154,7 +154,7 @@ public final class JultiOptions {
     public boolean resizeableBorderless = false;
     public boolean utilityMode = false;
     public boolean utilityModeAllowResets = true;
-    public boolean utilityModeUsePlaying = false;
+    public boolean utilityModeAutoBorderless = false;
     // public boolean forceActivate = false;
 
     // Launching

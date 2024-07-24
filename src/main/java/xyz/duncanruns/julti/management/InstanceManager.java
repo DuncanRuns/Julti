@@ -130,7 +130,7 @@ public final class InstanceManager {
             InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
                 i.discoverInformation();
                 JultiOptions options = JultiOptions.getJultiOptions();
-                if (!options.autoFullscreen && options.utilityModeUsePlaying) {
+                if (!options.autoFullscreen && options.utilityModeAutoBorderless) {
                     Julti.doLater(() -> i.activate(false));
                 }
 
