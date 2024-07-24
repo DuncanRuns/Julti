@@ -122,6 +122,14 @@ public final class GrabUtil {
         });
     }
 
+    /**
+     * Tells the length of the content, if known.
+     *
+     * @return  the number of bytes of the content, or
+     *          a negative number if unknown. If the content length is known
+     *          but exceeds {@link java.lang.Long#MAX_VALUE Long.MAX_VALUE},
+     *          a negative number is returned.
+     */
     public static long getFileSize(String origin) throws IOException {
         HttpGet request = new HttpGet(origin);
         try (CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(request)) {
