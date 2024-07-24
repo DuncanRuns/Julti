@@ -378,13 +378,14 @@ public class MinecraftInstance {
         JultiOptions options = JultiOptions.getJultiOptions();
 
         boolean instanceCanPauseItself = this.gameOptions.pauseOnLostFocus || this.gameOptions.f3PauseOnWorldLoad;
+        boolean shouldF3Pause = this.shouldF3Pause();
 
         // Warnings
         if (this.gameOptions.pauseOnLostFocus && this.gameOptions.f3PauseOnWorldLoad) {
             Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus and f3PauseOnWorldLoad enabled at the same time! Setting pauseOnLostFocus to false is recommended.");
-        } else if (options.useF3 && this.gameOptions.pauseOnLostFocus) {
+        } else if (shouldF3Pause && this.gameOptions.pauseOnLostFocus) {
             Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus enabled while Julti has \"Use F3\" enabled, so instances will not pause with f3 pausing. Setting pauseOnLostFocus to false is recommended.");
-        } else if (!options.useF3 && this.gameOptions.f3PauseOnWorldLoad) {
+        } else if (!shouldF3Pause && this.gameOptions.f3PauseOnWorldLoad) {
             Julti.log(Level.WARN, "Instance " + this + " has f3PauseOnWorldLoad enabled while Julti has \"Use F3\" disabled, so instances will pause with f3 pausing. Setting f3PauseOnWorldLoad to false is recommended.");
         }
 
@@ -399,7 +400,7 @@ public class MinecraftInstance {
             return;
         }
 
-        int toPress = options.useF3 ? 2 : 1;
+        int toPress = shouldF3Pause ? 2 : 1;
 
         if (ActiveWindowManager.isWindowActive(this.hwnd)) {
             this.activeSinceReset = true;
@@ -437,10 +438,14 @@ public class MinecraftInstance {
         ResetHelper.getManager().notifyWorldLoaded(this);
     }
 
+    private boolean shouldF3Pause() {
+        return MCVersionUtil.isOlderThan(this.versionString, "1.14.1") && JultiOptions.getJultiOptions().useF3;
+    }
+
     private void onPreviewLoad() {
         this.scheduler.clear();
         this.openedToLan = false;
-        if (JultiOptions.getJultiOptions().useF3 && !this.gameOptions.f3PauseOnWorldLoad) {
+        if (this.shouldF3Pause() && !this.gameOptions.f3PauseOnWorldLoad) {
             this.scheduler.schedule(this.presser::pressF3Esc, 50);
         }
         ResetHelper.getManager().notifyPreviewLoaded(this);
