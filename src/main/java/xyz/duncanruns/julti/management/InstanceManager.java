@@ -129,6 +129,11 @@ public final class InstanceManager {
         if (cycles % 5000 == 0 && this.getSelectedInstance() == null) {
             InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
                 i.discoverInformation();
+                JultiOptions options = JultiOptions.getJultiOptions();
+                if (!options.autoFullscreen && options.utilityModeUsePlaying) {
+                    Julti.doLater(() -> i.activate(false));
+                }
+
                 this.instances.add(i);
             });
         }
