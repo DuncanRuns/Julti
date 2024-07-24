@@ -13,11 +13,7 @@ import xyz.duncanruns.julti.plugin.PluginEvents;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -91,11 +87,10 @@ public final class UpdateUtil {
     private static void updateAndLaunch(String download) throws IOException, PowerShellExecutionException {
         Path newJarPath = Julti.getSourcePath().resolveSibling(URLDecoder.decode(FilenameUtils.getName(download), StandardCharsets.UTF_8.name()));
 
-        Point location = JultiGUI.getJultiGUI().getLocation();
         JultiGUI.getJultiGUI().closeForUpdate();
 
         if (!Files.exists(newJarPath)) {
-            downloadWithProgress(download, newJarPath, new DownloadProgressFrame(location).getBar());
+            downloadWithProgress(download, newJarPath);
         }
 
         Path javaExe = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("javaw.exe");
@@ -113,26 +108,11 @@ public final class UpdateUtil {
         System.exit(0);
     }
 
-    public static void downloadWithProgress(String download, Path newJarPath, JProgressBar bar) throws IOException {
-        URL url = new URL(download);
-        URLConnection connection = url.openConnection();
-        connection.connect();
-        int fileSize = connection.getContentLength();
-        bar.setMaximum(fileSize);
-        bar.setValue(0);
-        int i = 0;
-        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(newJarPath.toFile())) {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-                i += bytesRead;
-                if (i >= 102400) {
-                    bar.setValue(bar.getValue() + i);
-                    i = 0;
-                }
-            }
-        }
+    private static void downloadWithProgress(String download, Path newJarPath) throws IOException {
+        Point location = JultiGUI.getJultiGUI().getLocation();
+        JProgressBar bar = new DownloadProgressFrame(location).getBar();
+        bar.setMaximum((int) GrabUtil.getFileSize(download));
+        GrabUtil.download(download, newJarPath, bar::setValue);
     }
+
 }
