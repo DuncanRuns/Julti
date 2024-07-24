@@ -1,3 +1,12 @@
+Changes in v1.4.7:
+- Fix internet things for old Java 8 (maybe)
+- Fix Use F3 option for old versions
+  - Btw 1.7.10 should fully work at this point (I recommend dirt covers and no fullscreen) 
+- Update PaceMan Tracker for multi version support (stay tuned)
+- Implement Rolling Log and Add Open .Julti Button (#103 @marin774)
+- Log will now jump to the bottom when Julti window is unfocused (maybe idk its janky)
+- Various other tweaks/fixes
+
 Changes in v1.4.6:
 - Greatly Improved Sync Instances 
   - (was going to be in 1.5.0, but I want to push some other things out)
