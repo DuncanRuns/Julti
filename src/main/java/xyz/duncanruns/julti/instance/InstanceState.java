@@ -5,7 +5,8 @@ public enum InstanceState {
     INWORLD,
     TITLE,
     GENERATING,
-    PREVIEWING;
+    PREVIEWING,
+    WALL;
 
     public enum InWorldState {
         UNPAUSED,

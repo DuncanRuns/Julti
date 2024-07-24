@@ -118,6 +118,9 @@ public class StateTracker {
                 this.setState(InstanceState.INWORLD);
                 this.inWorldState = InWorldState.GAMESCREENOPEN;
                 return true;
+            case "wall":
+                this.setState(InstanceState.WALL);
+                return true;
         }
 
         // Literal failed, should be generating/previewing
