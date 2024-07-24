@@ -23,6 +23,7 @@ public final class JultiAppLaunch {
     public static String[] args;
     private static RandomAccessFile file;
     private static FileLock lock;
+    public static boolean launchedWithDevPlugin = false;
 
     private JultiAppLaunch() {
     }
@@ -39,6 +40,7 @@ public final class JultiAppLaunch {
     }
 
     public static void launchWithDevPlugin(String[] args, PluginManager.JultiPluginData pluginData, PluginInitializer pluginInitializer) {
+        launchedWithDevPlugin = true;
         PluginManager.getPluginManager().registerPlugin(pluginData, pluginInitializer);
         main(args);
     }
