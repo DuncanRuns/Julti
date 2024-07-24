@@ -1,4 +1,7 @@
 Changes in v1.4.7:
+- Fix inverted warning message
+
+Changes in v1.4.7:
 - Fix internet things for old Java 8 (maybe)
 - Fix Use F3 option for old versions
   - Btw 1.7.10 should fully work at this point (I recommend dirt covers and no fullscreen) 

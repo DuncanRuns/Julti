@@ -383,10 +383,13 @@ public class MinecraftInstance {
         // Warnings
         if (this.gameOptions.pauseOnLostFocus && this.gameOptions.f3PauseOnWorldLoad) {
             Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus and f3PauseOnWorldLoad enabled at the same time! Setting pauseOnLostFocus to false is recommended.");
-        } else if (shouldF3Pause && this.gameOptions.pauseOnLostFocus) {
-            Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus enabled while Julti has \"Use F3\" enabled, so instances will not pause with f3 pausing. Setting pauseOnLostFocus to false is recommended.");
-        } else if (!shouldF3Pause && this.gameOptions.f3PauseOnWorldLoad) {
-            Julti.log(Level.WARN, "Instance " + this + " has f3PauseOnWorldLoad enabled while Julti has \"Use F3\" disabled, so instances will pause with f3 pausing. Setting f3PauseOnWorldLoad to false is recommended.");
+        } else {
+            boolean useF3 = JultiOptions.getJultiOptions().useF3;
+            if (useF3 && this.gameOptions.pauseOnLostFocus) {
+                Julti.log(Level.WARN, "Instance " + this + " has pauseOnLostFocus enabled while Julti has \"Use F3\" enabled, so instances will not pause with f3 pausing. Setting pauseOnLostFocus to false is recommended.");
+            } else if (!useF3 && this.gameOptions.f3PauseOnWorldLoad) {
+                Julti.log(Level.WARN, "Instance " + this + " has f3PauseOnWorldLoad enabled while Julti has \"Use F3\" disabled, so instances will pause with f3 pausing. Setting f3PauseOnWorldLoad to false is recommended.");
+            }
         }
 
         if (instanceCanPauseItself && options.pieChartOnLoad) {
@@ -439,7 +442,7 @@ public class MinecraftInstance {
     }
 
     private boolean shouldF3Pause() {
-        return MCVersionUtil.isOlderThan(this.versionString, "1.14.1") && JultiOptions.getJultiOptions().useF3;
+        return MCVersionUtil.isNewerThan(this.versionString, "1.14") && JultiOptions.getJultiOptions().useF3;
     }
 
     private void onPreviewLoad() {
