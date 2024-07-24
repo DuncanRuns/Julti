@@ -116,7 +116,10 @@ public class OptionsGUI extends JFrame {
         if (options.utilityMode) {
             panel.add(GUIUtil.createSpacer());
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Auto use playing size in Utility","Enables fullscreen/borderless and uses playing size", "utilityModeUsePlaying")));
         }
+
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
