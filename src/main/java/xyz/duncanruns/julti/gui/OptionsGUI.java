@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
@@ -359,7 +360,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runMMCExecutableHelper();
+            this.runLauncherExecutableHelper(true);
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());
@@ -373,6 +374,21 @@ public class OptionsGUI extends JFrame {
         }
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchDelay", "Delay Between Instance Launches", this, "ms")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.createSeparator());
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(new JLabel("ColorMC Executable Path (.exe):")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("colormcPath", "ColorMC Executable Path", this)));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
+            this.runLauncherExecutableHelper(false);
+            this.reload();
+        })));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -408,8 +424,9 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void runMMCExecutableHelper() {
-        List<String> appNames = Arrays.asList("multimc.exe,prismlauncher.exe".split(","));
+    private void runLauncherExecutableHelper(boolean mmc) {
+        List<String> appNames = mmc ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
+                : Collections.singletonList("ColorMC.Launcher.exe");
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
         possibleLocations.add(userHome.resolve("Desktop"));
@@ -446,8 +463,8 @@ public class OptionsGUI extends JFrame {
             }
         }
         if (candidates.size() == 0) {
-            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                this.browseForMMCExecutable();
+            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                this.browseForLauncherExecutable(mmc);
             }
             return;
         }
@@ -461,29 +478,38 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
         if (ans == -1) {
             return;
         }
         if (ans == candidates.size()) {
-            this.browseForMMCExecutable();
+            this.browseForLauncherExecutable(mmc);
         } else {
             Path chosen = candidates.get(ans);
-            JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
+            if(mmc) {
+                JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
+            }
+            else {
+                JultiOptions.getJultiOptions().colormcPath = chosen.toString();
+            }
         }
     }
 
-    private void browseForMMCExecutable() {
+    private void browseForLauncherExecutable(boolean mmc) {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose MultiMC Executable");
+        jfc.setDialogTitle("Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable");
         jfc.setAcceptAllFileFilterUsed(false);
         jfc.addChoosableFileFilter(new FileNameExtensionFilter("Executables", "exe"));
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
+            if (mmc) {
+                JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
+            } else {
+                JultiOptions.getJultiOptions().colormcPath = jfc.getSelectedFile().toPath().toString();
+            }
         }
     }
 

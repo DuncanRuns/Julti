@@ -70,7 +70,8 @@ public class InstanceChecker {
             Julti.log(Level.DEBUG, "InstanceChecker: FoundInstanceInfo found.");
             // Create the instance object
             // Add the minecraft instance to the set of opened instances
-            this.openedInstances.add(new MinecraftInstance(hWnd, instanceInfo.instancePath, instanceInfo.versionString));
+            this.openedInstances.add(new MinecraftInstance(hWnd, instanceInfo.instancePath,
+                    instanceInfo.versionString, instanceInfo.instanceType));
             Julti.log(Level.DEBUG, "InstanceChecker: Added instance to opened instances.");
             foundAny.set(true);
 

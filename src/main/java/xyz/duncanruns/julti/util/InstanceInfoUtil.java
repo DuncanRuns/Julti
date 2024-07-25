@@ -5,6 +5,7 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.instance.InstanceType;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.io.IOException;
@@ -39,7 +40,6 @@ public final class InstanceInfoUtil {
      * Uses powershell to get the command line of a Minecraft instance and retrieve relevant information about it
      *
      * @param hwnd the window pointer object of the Minecraft instance
-     *
      * @return the extracted instance info of the Minecraft instance
      */
     public static FoundInstanceInfo getInstanceInfoFromHwnd(HWND hwnd) {
@@ -123,7 +123,7 @@ public final class InstanceInfoUtil {
         // Get the version out of the group
         String versionString = matcher.group(3);
 
-        return new FoundInstanceInfo(versionString, Paths.get(pathString));
+        return new FoundInstanceInfo(versionString, Paths.get(pathString), InstanceType.Vanilla);
     }
 
     private static FoundInstanceInfo getColorMCInfo(String commandLine) throws InvalidPathException {
@@ -174,7 +174,7 @@ public final class InstanceInfoUtil {
 
         Path instancePath = Paths.get(pathString);
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath);
+            return new FoundInstanceInfo(versionString, instancePath, InstanceType.ColorMC);
         }
 
         return null;
@@ -209,11 +209,11 @@ public final class InstanceInfoUtil {
         Path nativesPath = Paths.get(nativesPathString);
         Path instancePath = nativesPath.resolveSibling(".minecraft");
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath);
+            return new FoundInstanceInfo(versionString, instancePath, InstanceType.MultiMC);
         }
         instancePath = nativesPath.resolveSibling("minecraft"); // New prism launchers will have `minecraft` as the folder name :skull:
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath);
+            return new FoundInstanceInfo(versionString, instancePath, InstanceType.MultiMC);
         }
         return null;
     }
@@ -234,11 +234,12 @@ public final class InstanceInfoUtil {
     public static class FoundInstanceInfo {
         public final String versionString;
         public final Path instancePath;
+        public final InstanceType instanceType;
 
-        private FoundInstanceInfo(String versionString, Path instancePath) {
+        private FoundInstanceInfo(String versionString, Path instancePath, InstanceType instanceType) {
             this.versionString = versionString;
             this.instancePath = instancePath;
+            this.instanceType = instanceType;
         }
     }
-
 }
