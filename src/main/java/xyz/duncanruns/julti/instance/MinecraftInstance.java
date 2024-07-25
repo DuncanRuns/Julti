@@ -401,6 +401,7 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(boolean bypassPieChartGate) {
+        this.openedToLan = false;
         this.scheduler.clear();
         JultiOptions options = JultiOptions.getJultiOptions();
 
