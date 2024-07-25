@@ -137,19 +137,27 @@ public final class SafeInstanceLauncher {
 
         boolean mmcok = false;
         String multiMCPath = getLauncherPath(InstanceType.MultiMC);
-        String colorMCPath = getLauncherPath(InstanceType.ColorMC);
         try {
-            if (!startLauncher(multiMCPath, cancelRequester)) {
-                log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
-            } else {
-                mmcok = true;
+            if (isInvalidLauncherPath(multiMCPath)) {
+                log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
+            }
+            else {
+                if (!startLauncher(multiMCPath, cancelRequester)) {
+                    log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
+                } else {
+                    mmcok = true;
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
+        String colorMCPath = getLauncherPath(InstanceType.ColorMC);
         try {
-            if (!startLauncher(colorMCPath, cancelRequester)) {
+            if (isInvalidLauncherPath(colorMCPath)) {
+                log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
+            }
+            else if (!startLauncher(colorMCPath, cancelRequester)) {
                 log(Level.ERROR, "ColorMC did not start! Try ending it in task manager and opening it manually.");
             }
         } catch (Exception e) {
