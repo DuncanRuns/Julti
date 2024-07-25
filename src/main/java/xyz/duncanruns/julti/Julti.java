@@ -240,7 +240,7 @@ public final class Julti {
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         boolean instanceActive = selectedInstance != null;
         boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
-        if (wallActive || selectedInstance.getStateTracker().isCurrentState(InstanceState.WALL)) {
+        if (wallActive || (instanceActive && selectedInstance.getStateTracker().isCurrentState(InstanceState.WALL))) {
             OBSStateManager.getOBSStateManager().setLocationToWall();
         } else if (instanceActive) {
             OBSStateManager.getOBSStateManager().setLocation(InstanceManager.getInstanceManager().getInstanceNum(selectedInstance));
