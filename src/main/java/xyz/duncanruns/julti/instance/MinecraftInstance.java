@@ -17,10 +17,7 @@ import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -76,11 +73,21 @@ public class MinecraftInstance {
         this.versionString = null;
         this.presser = null;
         this.scheduler = null;
-        this.instanceType = InstanceType.Vanilla;
+        this.instanceType = obtainClosedInstanceType(path);
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null, null);
 
         this.path = path;
         this.windowMissing = true;
+    }
+
+    private static InstanceType obtainClosedInstanceType(Path path) {
+        if (Files.isRegularFile(path.resolveSibling("instance.cfg"))) {
+            return InstanceType.MultiMC;
+        }
+        if (Files.isRegularFile(path.resolve("game.json"))) {
+            return InstanceType.ColorMC;
+        }
+        return InstanceType.Vanilla;
     }
 
     public void tick() {
@@ -227,13 +234,12 @@ public class MinecraftInstance {
         // Check ColorMC
         else if (this.usesColorMC()) {
             try {
-                Path colormcFile = instancePath.resolveSibling("game.json");
-                InputStreamReader reader = new InputStreamReader(
-                        Files.newInputStream(colormcFile), StandardCharsets.UTF_8);
-                BufferedReader bf = new BufferedReader(reader);
-                ColorMCGameObj config = new Gson().fromJson(bf, ColorMCGameObj.class);
-                this.name = config.getName();
-                return;
+                String contents = FileUtil.readString(instancePath.resolveSibling("game.json"));
+                JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+                if (json.has("Name")) {
+                    this.name = json.get("Name").getAsString();
+                    return;
+                }
             } catch (Exception ignored) {
                 // Failed to check if it uses ColorMC, ignore and move on to taking folder name
             }
@@ -274,7 +280,7 @@ public class MinecraftInstance {
     }
 
     public InstanceType getInstanceType() {
-        return instanceType;
+        return this.instanceType;
     }
 
     public void reset() {
@@ -566,17 +572,17 @@ public class MinecraftInstance {
     }
 
     public String getColorMCUUID() throws IOException {
-        Path colormcFile = this.path.resolveSibling("game.json");
-        InputStreamReader reader = new InputStreamReader(
-                Files.newInputStream(colormcFile), StandardCharsets.UTF_8);
-        BufferedReader bf = new BufferedReader(reader);
-        ColorMCGameObj config = new Gson().fromJson(bf, ColorMCGameObj.class);
-        return config.getUUID();
+        String contents = FileUtil.readString(this.path.resolveSibling("game.json"));
+        JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+        if (json.has("UUID")) {
+            return json.get("UUID").getAsString();
+        }
+        return null;
     }
 
     public void launch(String offlineName) {
         this.ensureLaunchable();
-        if (instanceType == InstanceType.MultiMC) {
+        if (this.instanceType == InstanceType.MultiMC) {
             try {
                 String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
                 if (!multiMCPath.isEmpty()) {
@@ -591,12 +597,12 @@ public class MinecraftInstance {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (instanceType == InstanceType.ColorMC) {
+        } else if (this.instanceType == InstanceType.ColorMC) {
             try {
-                String colormcPath = JultiOptions.getJultiOptions().colormcPath;
-                if (!colormcPath.isEmpty()) {
+                String colorMCPath = JultiOptions.getJultiOptions().colorMCPath;
+                if (!colorMCPath.isEmpty()) {
                     String[] cmd;
-                    cmd = new String[]{colormcPath.trim(), "-game", this.getColorMCUUID()};
+                    cmd = new String[]{colorMCPath.trim(), "-game", this.getColorMCUUID()};
                     Runtime.getRuntime().exec(cmd);
                 }
             } catch (IOException e) {
@@ -908,5 +914,9 @@ public class MinecraftInstance {
         Julti.log(Level.INFO, "");
 
         KeyboardUtil.copyToClipboard(toCopy.toString());
+    }
+
+    public enum InstanceType {
+        Vanilla, MultiMC, ColorMC
     }
 }

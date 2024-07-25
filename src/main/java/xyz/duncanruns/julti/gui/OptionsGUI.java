@@ -3,7 +3,6 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
-import xyz.duncanruns.julti.instance.InstanceType;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
@@ -166,6 +165,21 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Resizeable Borderless", "Allows the window to be resized, restored and maximized when Use Borderless is checked.", "resizeableBorderless", b -> this.reload())));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("ColorMC Executable Path (.exe):")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("colorMCPath", "ColorMC Executable Path", this)));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
+            this.runLauncherExecutableHelper(MinecraftInstance.InstanceType.ColorMC);
+            this.reload();
+        })));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
@@ -361,7 +375,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runLauncherExecutableHelper(InstanceType.MultiMC);
+            this.runLauncherExecutableHelper(MinecraftInstance.InstanceType.MultiMC);
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());
@@ -378,18 +392,6 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(new JLabel("ColorMC Executable Path (.exe):")));
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("colormcPath", "ColorMC Executable Path", this)));
-        panel.add(GUIUtil.createSpacer());
-
-        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runLauncherExecutableHelper(InstanceType.ColorMC);
-            this.reload();
-        })));
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -425,8 +427,8 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void runLauncherExecutableHelper(InstanceType type) {
-        List<String> appNames = type == InstanceType.MultiMC ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
+    private void runLauncherExecutableHelper(MinecraftInstance.InstanceType type) {
+        List<String> appNames = type == MinecraftInstance.InstanceType.MultiMC ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
                 : Collections.singletonList("ColorMC.Launcher.exe");
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
@@ -465,7 +467,7 @@ public class OptionsGUI extends JFrame {
         }
         if (candidates.size() == 0) {
             if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?",
-                    "Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                    "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                 this.browseForLauncherExecutable(type);
             }
             return;
@@ -480,7 +482,7 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC")
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC")
                 + " Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
         if (ans == -1) {
             return;
@@ -489,29 +491,28 @@ public class OptionsGUI extends JFrame {
             this.browseForLauncherExecutable(type);
         } else {
             Path chosen = candidates.get(ans);
-            if(type == InstanceType.MultiMC) {
+            if (type == MinecraftInstance.InstanceType.MultiMC) {
                 JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
-            }
-            else {
-                JultiOptions.getJultiOptions().colormcPath = chosen.toString();
+            } else {
+                JultiOptions.getJultiOptions().colorMCPath = chosen.toString();
             }
         }
     }
 
-    private void browseForLauncherExecutable(InstanceType type) {
+    private void browseForLauncherExecutable(MinecraftInstance.InstanceType type) {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable");
+        jfc.setDialogTitle("Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable");
         jfc.setAcceptAllFileFilterUsed(false);
         jfc.addChoosableFileFilter(new FileNameExtensionFilter("Executables", "exe"));
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            if (type == InstanceType.MultiMC) {
+            if (type == MinecraftInstance.InstanceType.MultiMC) {
                 JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
             } else {
-                JultiOptions.getJultiOptions().colormcPath = jfc.getSelectedFile().toPath().toString();
+                JultiOptions.getJultiOptions().colorMCPath = jfc.getSelectedFile().toPath().toString();
             }
         }
     }

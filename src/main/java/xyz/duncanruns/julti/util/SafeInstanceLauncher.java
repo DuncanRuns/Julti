@@ -6,7 +6,6 @@ import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.cancelrequester.CancelRequester;
 import xyz.duncanruns.julti.cancelrequester.CancelRequesters;
-import xyz.duncanruns.julti.instance.InstanceType;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.win32.User32;
@@ -15,7 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static xyz.duncanruns.julti.Julti.log;
@@ -38,13 +39,13 @@ public final class SafeInstanceLauncher {
             log(Level.ERROR, "Could not launch " + instance + " (already open).");
             return;
         }
-        if (instance.getInstanceType() == InstanceType.MultiMC &&
-                isInvalidLauncherPath(getLauncherPath(InstanceType.MultiMC))) {
+        if (instance.getInstanceType() == MinecraftInstance.InstanceType.MultiMC &&
+                isInvalidLauncherPath(getLauncherPath(MinecraftInstance.InstanceType.MultiMC))) {
             log(Level.ERROR, "Could not launch " + instance + " (invalid MultiMC.exe path).");
             return;
         }
-        if (instance.getInstanceType() == InstanceType.ColorMC &&
-                isInvalidLauncherPath(getLauncherPath(InstanceType.ColorMC))) {
+        if (instance.getInstanceType() == MinecraftInstance.InstanceType.ColorMC &&
+                isInvalidLauncherPath(getLauncherPath(MinecraftInstance.InstanceType.ColorMC))) {
             log(Level.ERROR, "Could not launch " + instance + " (invalid ColorMC.Launcher.exe path).");
             return;
         }
@@ -61,8 +62,8 @@ public final class SafeInstanceLauncher {
         log(Level.INFO, "Launching instance...");
         JultiOptions options = JultiOptions.getJultiOptions();
         boolean launchOffline = options.launchOffline;
-        if (instance.getInstanceType() == InstanceType.MultiMC) {
-            String multiMCPath = getLauncherPath(InstanceType.MultiMC);
+        if (instance.getInstanceType() == MinecraftInstance.InstanceType.MultiMC) {
+            String multiMCPath = getLauncherPath(MinecraftInstance.InstanceType.MultiMC);
             try {
                 if (!startLauncher(multiMCPath, cancelRequester)) {
                     log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
@@ -135,33 +136,37 @@ public final class SafeInstanceLauncher {
         }
         log(Level.INFO, "Launching instances...");
 
-        boolean mmcok = false;
-        String multiMCPath = getLauncherPath(InstanceType.MultiMC);
-        try {
-            if (isInvalidLauncherPath(multiMCPath)) {
-                log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
-            }
-            else {
-                if (!startLauncher(multiMCPath, cancelRequester)) {
-                    log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
-                } else {
-                    mmcok = true;
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        boolean usesMMC = instances.stream().map(MinecraftInstance::getInstanceType).anyMatch(MinecraftInstance.InstanceType.MultiMC::equals);
+        boolean usesCMC = instances.stream().map(MinecraftInstance::getInstanceType).anyMatch(MinecraftInstance.InstanceType.ColorMC::equals);
 
-        String colorMCPath = getLauncherPath(InstanceType.ColorMC);
-        try {
-            if (isInvalidLauncherPath(colorMCPath)) {
-                log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
+        boolean mmcok = false;
+        String multiMCPath = getLauncherPath(MinecraftInstance.InstanceType.MultiMC);
+        if (usesMMC) {
+            try {
+                if (isInvalidLauncherPath(multiMCPath)) {
+                    log(Level.ERROR, "Could not launch instances (invalid MultiMC.exe path).");
+                } else {
+                    if (!startLauncher(multiMCPath, cancelRequester)) {
+                        log(Level.ERROR, "MultiMC did not start! Try ending it in task manager and opening it manually.");
+                    } else {
+                        mmcok = true;
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            else if (!startLauncher(colorMCPath, cancelRequester)) {
-                log(Level.ERROR, "ColorMC did not start! Try ending it in task manager and opening it manually.");
+        }
+        if (usesCMC) {
+            String colorMCPath = getLauncherPath(MinecraftInstance.InstanceType.ColorMC);
+            try {
+                if (isInvalidLauncherPath(colorMCPath)) {
+                    log(Level.ERROR, "Could not launch instances (invalid ColorMC.Launcher.exe path).");
+                } else if (!startLauncher(colorMCPath, cancelRequester)) {
+                    log(Level.ERROR, "ColorMC did not start! Try ending it in task manager and opening it manually.");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
 
         if (cancelRequester.isCancelRequested()) {
@@ -177,11 +182,14 @@ public final class SafeInstanceLauncher {
             }
         }
 
+        if (launchOffline && usesCMC) {
+            log(Level.WARN, "Warning: ColorMC cannot use offline launching!");
+        }
+
         sleep(200);
         if (cancelRequester.isCancelRequested()) {
             return;
         }
-        List<MinecraftInstance> colormclist = new ArrayList<>();
         for (MinecraftInstance instance : instances) {
             int instanceNum = instances.indexOf(instance) + 1;
             if (instance.hasWindow()) {
@@ -191,27 +199,7 @@ public final class SafeInstanceLauncher {
             if (cancelRequester.isCancelRequested()) {
                 return;
             }
-            if (instance.getInstanceType() == InstanceType.ColorMC) {
-                colormclist.add(instance);
-                continue;
-            }
             instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
-        }
-        if (!colormclist.isEmpty()) {
-            try {
-                String colormcPath = JultiOptions.getJultiOptions().colormcPath;
-                if (!colormcPath.isEmpty()) {
-                    String[] cmd = new String[colormcPath.length() + 2];
-                    cmd[0] = colormcPath.trim();
-                    cmd[1] = "-game";
-                    for (int a = 0; a < colormclist.size(); a++) {
-                        cmd[a + 2] = colormclist.get(a).getColorMCUUID();
-                    }
-                    Runtime.getRuntime().exec(cmd);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
@@ -219,16 +207,16 @@ public final class SafeInstanceLauncher {
         return launcherPath.isEmpty() || !Files.exists(Paths.get(launcherPath)) || !launcherPath.endsWith(".exe");
     }
 
-    private static String getLauncherPath(InstanceType type) {
+    private static String getLauncherPath(MinecraftInstance.InstanceType type) {
         JultiOptions options = JultiOptions.getJultiOptions();
-        String path = type == InstanceType.ColorMC ? options.colormcPath : options.multiMCPath;
+        String path = type == MinecraftInstance.InstanceType.ColorMC ? options.colorMCPath : options.multiMCPath;
         Path originalPath = Paths.get(path);
         if (Files.isDirectory(originalPath)) {
             Optional<Path> actualExe = Optional.empty();
             try {
-                if (type == InstanceType.MultiMC) {
+                if (type == MinecraftInstance.InstanceType.MultiMC) {
                     actualExe = Files.list(originalPath).filter(p -> multiMCExecutableNames.stream().anyMatch(p.getFileName().toString()::equalsIgnoreCase)).findAny();
-                } else if (type == InstanceType.ColorMC) {
+                } else if (type == MinecraftInstance.InstanceType.ColorMC) {
                     actualExe = Files.list(originalPath).filter(p -> colorMCExecutableNames.stream().anyMatch(p.getFileName().toString()::equalsIgnoreCase)).findAny();
                 }
             } catch (IOException ignored) {
@@ -236,10 +224,10 @@ public final class SafeInstanceLauncher {
             if (actualExe.isPresent()) {
                 Julti.log(Level.WARN, "You selected a Launcher folder instead of the exe. I've fixed that for you.");
                 path = actualExe.get().toAbsolutePath().toString();
-                if (type == InstanceType.MultiMC) {
+                if (type == MinecraftInstance.InstanceType.MultiMC) {
                     options.multiMCPath = path;
                 } else {
-                    options.colormcPath = path;
+                    options.colorMCPath = path;
                 }
             }
         }
