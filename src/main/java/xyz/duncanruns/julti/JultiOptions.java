@@ -108,6 +108,7 @@ public final class JultiOptions {
 
     // Other
     public String multiMCPath = "";
+    public String colorMCPath = "";
     public boolean launchOffline = false;
     public String launchOfflineName = "Instance*";
     public long launchDelay = 500;

@@ -1,5 +1,7 @@
 package xyz.duncanruns.julti.instance;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.commons.text.StringEscapeUtils;
@@ -35,6 +37,7 @@ public class MinecraftInstance {
     private int pid;
     private final Path path;
     private final String versionString;
+    private final InstanceType instanceType;
 
     // Discoverable Information
     private GameOptions gameOptions = null;
@@ -55,9 +58,10 @@ public class MinecraftInstance {
 
     private long lastActivation = 0L;
 
-    public MinecraftInstance(HWND hwnd, Path path, String versionString) {
+    public MinecraftInstance(HWND hwnd, Path path, String versionString, InstanceType instanceType) {
         this.hwnd = hwnd;
         this.path = path;
+        this.instanceType = instanceType;
         this.versionString = versionString;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange, this::onPercentageUpdate);
         this.presser = new KeyPresser(hwnd);
@@ -69,10 +73,21 @@ public class MinecraftInstance {
         this.versionString = null;
         this.presser = null;
         this.scheduler = null;
+        this.instanceType = obtainClosedInstanceType(path);
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), null, null);
 
         this.path = path;
         this.windowMissing = true;
+    }
+
+    private static InstanceType obtainClosedInstanceType(Path path) {
+        if (Files.isRegularFile(path.resolveSibling("instance.cfg"))) {
+            return InstanceType.MultiMC;
+        }
+        if (Files.isRegularFile(path.resolve("game.json"))) {
+            return InstanceType.ColorMC;
+        }
+        return InstanceType.Vanilla;
     }
 
     public void tick() {
@@ -216,6 +231,19 @@ public class MinecraftInstance {
                 // Failed to check if it uses MultiMC, ignore and move on to taking folder name
             }
         }
+        // Check ColorMC
+        else if (this.usesColorMC()) {
+            try {
+                String contents = FileUtil.readString(instancePath.resolveSibling("game.json"));
+                JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+                if (json.has("Name")) {
+                    this.name = json.get("Name").getAsString();
+                    return;
+                }
+            } catch (Exception ignored) {
+                // Failed to check if it uses ColorMC, ignore and move on to taking folder name
+            }
+        }
 
         this.name = instancePath.getFileName().toString();
         if (this.name.equals(".minecraft") || this.name.equals("minecraft")) {
@@ -227,9 +255,12 @@ public class MinecraftInstance {
         return Files.exists(this.getPath().getParent().resolve("instance.cfg"));
     }
 
+    private boolean usesColorMC() {
+        return Files.exists(this.getPath().getParent().resolve("game.json"));
+    }
 
     public MinecraftInstance createLazyCopy() {
-        return new MinecraftInstance(this.getHwnd(), this.getPath(), this.getVersionString());
+        return new MinecraftInstance(this.getHwnd(), this.getPath(), this.getVersionString(), this.getInstanceType());
     }
 
     public HWND getHwnd() {
@@ -246,6 +277,10 @@ public class MinecraftInstance {
 
     public String getVersionString() {
         return this.versionString;
+    }
+
+    public InstanceType getInstanceType() {
+        return this.instanceType;
     }
 
     public void reset() {
@@ -536,22 +571,43 @@ public class MinecraftInstance {
         return this.path.getName(this.path.getNameCount() - 2).toString();
     }
 
+    public String getColorMCUUID() throws IOException {
+        String contents = FileUtil.readString(this.path.resolveSibling("game.json"));
+        JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+        if (json.has("UUID")) {
+            return json.get("UUID").getAsString();
+        }
+        return null;
+    }
+
     public void launch(String offlineName) {
         this.ensureLaunchable();
-        try {
-            String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
-            if (!multiMCPath.isEmpty()) {
-                String[] cmd;
-                if (offlineName == null) {
-                    cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName()};
-                } else {
-                    cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName(), "-o", "-n", offlineName};
+        if (this.instanceType == InstanceType.MultiMC) {
+            try {
+                String multiMCPath = JultiOptions.getJultiOptions().multiMCPath;
+                if (!multiMCPath.isEmpty()) {
+                    String[] cmd;
+                    if (offlineName == null) {
+                        cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName()};
+                    } else {
+                        cmd = new String[]{multiMCPath.trim(), "--launch", this.getMMCInstanceFolderName(), "-o", "-n", offlineName};
+                    }
+                    Runtime.getRuntime().exec(cmd);
                 }
-                Runtime.getRuntime().exec(cmd);
-
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else if (this.instanceType == InstanceType.ColorMC) {
+            try {
+                String colorMCPath = JultiOptions.getJultiOptions().colorMCPath;
+                if (!colorMCPath.isEmpty()) {
+                    String[] cmd;
+                    cmd = new String[]{colorMCPath.trim(), "-game", this.getColorMCUUID()};
+                    Runtime.getRuntime().exec(cmd);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -858,5 +914,9 @@ public class MinecraftInstance {
         Julti.log(Level.INFO, "");
 
         KeyboardUtil.copyToClipboard(toCopy.toString());
+    }
+
+    public enum InstanceType {
+        Vanilla, MultiMC, ColorMC
     }
 }

@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class OptionsGUI extends JFrame {
@@ -164,6 +165,21 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Resizeable Borderless", "Allows the window to be resized, restored and maximized when Use Borderless is checked.", "resizeableBorderless", b -> this.reload())));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(new JLabel("ColorMC Executable Path (.exe):")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("colorMCPath", "ColorMC Executable Path", this)));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
+            this.runLauncherExecutableHelper(MinecraftInstance.InstanceType.ColorMC);
+            this.reload();
+        })));
+        panel.add(GUIUtil.createSpacer());
+
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
@@ -359,7 +375,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runMMCExecutableHelper();
+            this.runLauncherExecutableHelper(MinecraftInstance.InstanceType.MultiMC);
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());
@@ -373,6 +389,9 @@ public class OptionsGUI extends JFrame {
         }
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("launchDelay", "Delay Between Instance Launches", this, "ms")));
+        panel.add(GUIUtil.createSpacer());
+
+        panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.createSeparator());
@@ -408,8 +427,9 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void runMMCExecutableHelper() {
-        List<String> appNames = Arrays.asList("multimc.exe,prismlauncher.exe".split(","));
+    private void runLauncherExecutableHelper(MinecraftInstance.InstanceType type) {
+        List<String> appNames = type == MinecraftInstance.InstanceType.MultiMC ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
+                : Collections.singletonList("ColorMC.Launcher.exe");
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
         possibleLocations.add(userHome.resolve("Desktop"));
@@ -446,8 +466,9 @@ public class OptionsGUI extends JFrame {
             }
         }
         if (candidates.size() == 0) {
-            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose MultiMC Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                this.browseForMMCExecutable();
+            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?",
+                    "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                this.browseForLauncherExecutable(type);
             }
             return;
         }
@@ -461,29 +482,38 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose MultiMC Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC")
+                + " Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
         if (ans == -1) {
             return;
         }
         if (ans == candidates.size()) {
-            this.browseForMMCExecutable();
+            this.browseForLauncherExecutable(type);
         } else {
             Path chosen = candidates.get(ans);
-            JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
+            if (type == MinecraftInstance.InstanceType.MultiMC) {
+                JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
+            } else {
+                JultiOptions.getJultiOptions().colorMCPath = chosen.toString();
+            }
         }
     }
 
-    private void browseForMMCExecutable() {
+    private void browseForLauncherExecutable(MinecraftInstance.InstanceType type) {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose MultiMC Executable");
+        jfc.setDialogTitle("Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable");
         jfc.setAcceptAllFileFilterUsed(false);
         jfc.addChoosableFileFilter(new FileNameExtensionFilter("Executables", "exe"));
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
+            if (type == MinecraftInstance.InstanceType.MultiMC) {
+                JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
+            } else {
+                JultiOptions.getJultiOptions().colorMCPath = jfc.getSelectedFile().toPath().toString();
+            }
         }
     }
 

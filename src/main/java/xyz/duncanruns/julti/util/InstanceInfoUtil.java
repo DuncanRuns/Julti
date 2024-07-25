@@ -5,6 +5,7 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
+import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.io.IOException;
@@ -54,8 +55,13 @@ public final class InstanceInfoUtil {
         // Check launcher type
         try {
             if (commandLine.contains("--gameDir")) {
-                Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected vanilla launcher.");
+                if (commandLine.contains("-Djava.library.path=")) {
+                    //ColorMC
+                    Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected ColorMC launcher.");
+                    return getColorMCInfo(commandLine);
+                }
                 // Vanilla
+                Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected vanilla launcher.");
                 return getVanillaInfo(commandLine);
             } else if (commandLine.contains("-Djava.library.path=")) {
                 Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected MultiMC launcher.");
@@ -65,8 +71,8 @@ public final class InstanceInfoUtil {
         } catch (Exception e) {
             Julti.log(Level.ERROR, "An exception occured while obtaining instance information: " + ExceptionUtil.toDetailedString(e));
         }
-        // If the command line does not match MultiMC or Vanilla, or if there was an exception, return null
-        Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla, or there was an exception, returning null");
+        // If the command line does not match MultiMC or Vanilla or ColorMC, or if there was an exception, return null
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla or ColorMC, or there was an exception, returning null");
         return null;
     }
 
@@ -118,7 +124,61 @@ public final class InstanceInfoUtil {
         // Get the version out of the group
         String versionString = matcher.group(3);
 
-        return new FoundInstanceInfo(versionString, Paths.get(pathString));
+        return new FoundInstanceInfo(versionString, Paths.get(pathString), MinecraftInstance.InstanceType.Vanilla);
+    }
+
+    private static FoundInstanceInfo getColorMCInfo(String commandLine) throws InvalidPathException {
+        Matcher matcher;
+
+        // Check for quotation mark to determine matcher
+        if (commandLine.contains("--gameDir \"")) {
+            matcher = VANILLA_PATH_PATTERN_SPACES.matcher(commandLine);
+        } else {
+            matcher = VANILLA_PATH_PATTERN.matcher(commandLine);
+        }
+
+        // If no matches are found for the path, return null
+        if (!matcher.find()) {
+            return null;
+        }
+
+        // Get the path out of the group
+        String pathString = matcher.group(1);
+
+        // Assign the version matcher
+        Matcher matcher1;
+        if (commandLine.contains("\"-Djava.library.path=")) {
+            matcher1 = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
+        } else {
+            matcher1 = MULTIMC_PATH_PATTERN.matcher(commandLine);
+        }
+
+        // If no matches are found for the path, return null
+        if (!matcher1.find()) {
+            return null;
+        }
+
+        // Get the natives path out of the group
+        String nativesPathString = matcher1.group(1);
+
+        String versionString;
+
+        if (nativesPathString.contains("\\")) {
+            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("\\") + 1);
+        } else {
+            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("/") + 1);
+        }
+
+        if (versionString.isEmpty()) {
+            return null;
+        }
+
+        Path instancePath = Paths.get(pathString);
+        if (Files.isDirectory(instancePath)) {
+            return new FoundInstanceInfo(versionString, instancePath, MinecraftInstance.InstanceType.ColorMC);
+        }
+
+        return null;
     }
 
     private static FoundInstanceInfo getMultiMCInfo(String commandLine) throws InvalidPathException {
@@ -150,11 +210,11 @@ public final class InstanceInfoUtil {
         Path nativesPath = Paths.get(nativesPathString);
         Path instancePath = nativesPath.resolveSibling(".minecraft");
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath);
+            return new FoundInstanceInfo(versionString, instancePath, MinecraftInstance.InstanceType.MultiMC);
         }
         instancePath = nativesPath.resolveSibling("minecraft"); // New prism launchers will have `minecraft` as the folder name :skull:
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath);
+            return new FoundInstanceInfo(versionString, instancePath, MinecraftInstance.InstanceType.MultiMC);
         }
         return null;
     }
@@ -175,11 +235,12 @@ public final class InstanceInfoUtil {
     public static class FoundInstanceInfo {
         public final String versionString;
         public final Path instancePath;
+        public final MinecraftInstance.InstanceType instanceType;
 
-        private FoundInstanceInfo(String versionString, Path instancePath) {
+        private FoundInstanceInfo(String versionString, Path instancePath, MinecraftInstance.InstanceType instanceType) {
             this.versionString = versionString;
             this.instancePath = instancePath;
+            this.instanceType = instanceType;
         }
     }
-
 }
