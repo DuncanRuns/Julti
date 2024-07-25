@@ -12,6 +12,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import xyz.duncanruns.julti.affinity.AffinityManager;
 import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.hotkey.HotkeyManager;
+import xyz.duncanruns.julti.instance.InstanceState;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.ActiveWindowManager;
 import xyz.duncanruns.julti.management.InstanceManager;
@@ -239,7 +240,7 @@ public final class Julti {
         MinecraftInstance selectedInstance = InstanceManager.getInstanceManager().getSelectedInstance();
         boolean instanceActive = selectedInstance != null;
         boolean wallActive = !instanceActive && ActiveWindowManager.isWallActive();
-        if (wallActive) {
+        if (wallActive || selectedInstance.getStateTracker().isCurrentState(InstanceState.WALL)) {
             OBSStateManager.getOBSStateManager().setLocationToWall();
         } else if (instanceActive) {
             OBSStateManager.getOBSStateManager().setLocation(InstanceManager.getInstanceManager().getInstanceNum(selectedInstance));
