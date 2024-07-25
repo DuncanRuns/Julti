@@ -3,6 +3,7 @@ package xyz.duncanruns.julti.gui;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiOptions;
 import xyz.duncanruns.julti.affinity.AffinityManager;
+import xyz.duncanruns.julti.instance.InstanceType;
 import xyz.duncanruns.julti.instance.MinecraftInstance;
 import xyz.duncanruns.julti.management.InstanceManager;
 import xyz.duncanruns.julti.management.OBSStateManager;
@@ -360,7 +361,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runLauncherExecutableHelper(true);
+            this.runLauncherExecutableHelper(InstanceType.MultiMC);
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());
@@ -386,7 +387,7 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.getButtonWithMethod(new JButton("Auto-detect..."), actionEvent -> {
-            this.runLauncherExecutableHelper(false);
+            this.runLauncherExecutableHelper(InstanceType.ColorMC);
             this.reload();
         })));
         panel.add(GUIUtil.createSpacer());
@@ -424,8 +425,8 @@ public class OptionsGUI extends JFrame {
         })));
     }
 
-    private void runLauncherExecutableHelper(boolean mmc) {
-        List<String> appNames = mmc ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
+    private void runLauncherExecutableHelper(InstanceType type) {
+        List<String> appNames = type == InstanceType.MultiMC ? Arrays.asList("multimc.exe,prismlauncher.exe".split(","))
                 : Collections.singletonList("ColorMC.Launcher.exe");
         List<Path> possibleLocations = new ArrayList<>();
         Path userHome = Paths.get(System.getProperty("user.home"));
@@ -463,8 +464,9 @@ public class OptionsGUI extends JFrame {
             }
         }
         if (candidates.size() == 0) {
-            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?", "Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
-                this.browseForLauncherExecutable(mmc);
+            if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?",
+                    "Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
+                this.browseForLauncherExecutable(type);
             }
             return;
         }
@@ -478,15 +480,16 @@ public class OptionsGUI extends JFrame {
         }
         options[candidates.size()] = "Browse...";
         // The ans int will be the index of the candidate, or one larger than any possible index to indicate browsing.
-        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
+        int ans = JOptionPane.showOptionDialog(this, message.toString(), "Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC")
+                + " Executable", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, null);
         if (ans == -1) {
             return;
         }
         if (ans == candidates.size()) {
-            this.browseForLauncherExecutable(mmc);
+            this.browseForLauncherExecutable(type);
         } else {
             Path chosen = candidates.get(ans);
-            if(mmc) {
+            if(type == InstanceType.MultiMC) {
                 JultiOptions.getJultiOptions().multiMCPath = chosen.toString();
             }
             else {
@@ -495,17 +498,17 @@ public class OptionsGUI extends JFrame {
         }
     }
 
-    private void browseForLauncherExecutable(boolean mmc) {
+    private void browseForLauncherExecutable(InstanceType type) {
         JFileChooser jfc = new JFileChooser();
         jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        jfc.setDialogTitle("Julti: Choose " + (mmc ? "MultiMC" : "ColorMC") + " Executable");
+        jfc.setDialogTitle("Julti: Choose " + (type == InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable");
         jfc.setAcceptAllFileFilterUsed(false);
         jfc.addChoosableFileFilter(new FileNameExtensionFilter("Executables", "exe"));
 
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
 
-            if (mmc) {
+            if (type == InstanceType.MultiMC) {
                 JultiOptions.getJultiOptions().multiMCPath = jfc.getSelectedFile().toPath().toString();
             } else {
                 JultiOptions.getJultiOptions().colormcPath = jfc.getSelectedFile().toPath().toString();
