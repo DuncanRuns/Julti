@@ -55,6 +55,11 @@ public final class InstanceInfoUtil {
         try {
             if (commandLine.contains("--gameDir")) {
                 Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected vanilla launcher.");
+                if (commandLine.contains("-Djava.library.path=")) {
+                    //ColorMC
+                    Julti.log(Level.DEBUG, "InstanceInfoUtil: Detected ColorMC launcher.");
+                    return getColorMCInfo(commandLine);
+                }
                 // Vanilla
                 return getVanillaInfo(commandLine);
             } else if (commandLine.contains("-Djava.library.path=")) {
@@ -65,8 +70,8 @@ public final class InstanceInfoUtil {
         } catch (Exception e) {
             Julti.log(Level.ERROR, "An exception occured while obtaining instance information: " + ExceptionUtil.toDetailedString(e));
         }
-        // If the command line does not match MultiMC or Vanilla, or if there was an exception, return null
-        Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla, or there was an exception, returning null");
+        // If the command line does not match MultiMC or Vanilla or ColorMC, or if there was an exception, return null
+        Julti.log(Level.DEBUG, "InstanceInfoUtil: Command line does not match MultiMC or Vanilla or ColorMC, or there was an exception, returning null");
         return null;
     }
 
@@ -119,6 +124,60 @@ public final class InstanceInfoUtil {
         String versionString = matcher.group(3);
 
         return new FoundInstanceInfo(versionString, Paths.get(pathString));
+    }
+
+    private static FoundInstanceInfo getColorMCInfo(String commandLine) throws InvalidPathException {
+        Matcher matcher;
+
+        // Check for quotation mark to determine matcher
+        if (commandLine.contains("--gameDir \"")) {
+            matcher = VANILLA_PATH_PATTERN_SPACES.matcher(commandLine);
+        } else {
+            matcher = VANILLA_PATH_PATTERN.matcher(commandLine);
+        }
+
+        // If no matches are found for the path, return null
+        if (!matcher.find()) {
+            return null;
+        }
+
+        // Get the path out of the group
+        String pathString = matcher.group(1);
+
+        // Assign the version matcher
+        Matcher matcher1;
+        if (commandLine.contains("\"-Djava.library.path=")) {
+            matcher1 = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
+        } else {
+            matcher1 = MULTIMC_PATH_PATTERN.matcher(commandLine);
+        }
+
+        // If no matches are found for the path, return null
+        if (!matcher1.find()) {
+            return null;
+        }
+
+        // Get the natives path out of the group
+        String nativesPathString = matcher1.group(1);
+
+        String versionString;
+
+        if (nativesPathString.contains("\\")) {
+            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("\\") + 1);
+        } else {
+            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("/") + 1);
+        }
+
+        if (versionString.isEmpty()) {
+            return null;
+        }
+
+        Path instancePath = Paths.get(pathString);
+        if (Files.isDirectory(instancePath)) {
+            return new FoundInstanceInfo(versionString, instancePath);
+        }
+
+        return null;
     }
 
     private static FoundInstanceInfo getMultiMCInfo(String commandLine) throws InvalidPathException {

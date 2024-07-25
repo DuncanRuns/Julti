@@ -1,5 +1,7 @@
 package xyz.duncanruns.julti.instance;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import org.apache.commons.text.StringEscapeUtils;
@@ -15,7 +17,10 @@ import xyz.duncanruns.julti.util.*;
 import xyz.duncanruns.julti.win32.User32;
 
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -216,6 +221,20 @@ public class MinecraftInstance {
                 // Failed to check if it uses MultiMC, ignore and move on to taking folder name
             }
         }
+        // Check ColorMC
+        else if (this.usesColorMC()) {
+            try {
+                Path colormcFile = instancePath.resolveSibling("game.json");
+                InputStreamReader reader = new InputStreamReader(
+                        Files.newInputStream(colormcFile), StandardCharsets.UTF_8);
+                BufferedReader bf = new BufferedReader(reader);
+                ColorMCGameObj config = new Gson().fromJson(bf, ColorMCGameObj.class);
+                this.name = config.getName();
+                return;
+            } catch (Exception ignored) {
+                // Failed to check if it uses MultiMC, ignore and move on to taking folder name
+            }
+        }
 
         this.name = instancePath.getFileName().toString();
         if (this.name.equals(".minecraft") || this.name.equals("minecraft")) {
@@ -227,6 +246,9 @@ public class MinecraftInstance {
         return Files.exists(this.getPath().getParent().resolve("instance.cfg"));
     }
 
+    private boolean usesColorMC() {
+        return Files.exists(this.getPath().getParent().resolve("game.json"));
+    }
 
     public MinecraftInstance createLazyCopy() {
         return new MinecraftInstance(this.getHwnd(), this.getPath(), this.getVersionString());
