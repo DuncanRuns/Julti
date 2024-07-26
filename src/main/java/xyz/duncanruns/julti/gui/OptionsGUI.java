@@ -465,7 +465,7 @@ public class OptionsGUI extends JFrame {
                 }
             }
         }
-        if (candidates.size() == 0) {
+        if (candidates.isEmpty()) {
             if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?",
                     "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                 this.browseForLauncherExecutable(type);
