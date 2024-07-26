@@ -33,11 +33,12 @@ public class JultiGUI extends JFrame {
                     JultiOptions options = JultiOptions.getJultiOptions();
                     options.utilityMode = !options.utilityMode;
                     if (options.utilityMode) {
-                        Julti.log(Level.INFO, "Utility Mode enabled! Press Ctrl+U or go to experimental options to disable Utilty Mode.");
+                        Julti.log(Level.INFO, "Utility Mode enabled! Press Ctrl+U again to disable Utilty Mode.");
                     } else {
                         Julti.log(Level.INFO, "Utility Mode disabled.");
                     }
                     OptionsGUI.reloadIfOpen();
+                    INSTANCE.getInstancesPanel().utilityCheckBox.setSelected(options.utilityMode);
                 }
             }
         }
