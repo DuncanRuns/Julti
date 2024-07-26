@@ -832,7 +832,7 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Playing", "maximizeWhenPlaying", b -> this.reload())));
             panel.add(GUIUtil.createSpacer());
 
-            if(!options.utilityMode) {
+            if (!options.utilityMode) {
                 panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
                 panel.add(GUIUtil.createSpacer());
             }
