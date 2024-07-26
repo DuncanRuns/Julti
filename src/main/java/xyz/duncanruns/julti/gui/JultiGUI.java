@@ -47,6 +47,7 @@ public class JultiGUI extends JFrame {
 
     private boolean closed;
     private ControlPanel controlPanel;
+    private InstancesPanel instancesPanel;
     private boolean updating = false;
 
     private JultiIcon trayIcon;
@@ -76,6 +77,10 @@ public class JultiGUI extends JFrame {
 
     public ControlPanel getControlPanel() {
         return this.controlPanel;
+    }
+
+    public InstancesPanel getInstancesPanel() {
+        return this.instancesPanel;
     }
 
     public JultiIcon getJultiIcon() {
@@ -116,7 +121,8 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        this.add(new InstancesPanel(() -> this.isActive() || this.isOptionsActive() || InstanceManager.getInstanceManager().getSelectedInstance() != null, this::isClosed), new GridBagConstraints(
+        this.instancesPanel = new InstancesPanel(() -> this.isActive() || this.isOptionsActive() || InstanceManager.getInstanceManager().getSelectedInstance() != null, this::isClosed);
+        this.add(this.instancesPanel, new GridBagConstraints(
                 0,
                 1,
                 1,

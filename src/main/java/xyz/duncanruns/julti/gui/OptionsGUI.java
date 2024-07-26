@@ -108,16 +108,7 @@ public class OptionsGUI extends JFrame {
         JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Experimental Settings")));
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.createSeparator());
 
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> this.reload())));
-
-        if (options.utilityMode) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
-        }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
@@ -360,6 +351,20 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> {
+            this.reload();
+            JultiGUI.getJultiGUI().getInstancesPanel().utilityCheckBox.setSelected(b);
+        })));
+
+        if (options.utilityMode) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
+        }
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("resetCounter", "Reset Counter", this, "", ResetCounter::updateFiles)));
@@ -420,7 +425,6 @@ public class OptionsGUI extends JFrame {
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
-                    options.utilityMode = false;
                 });
             }
             this.reload();

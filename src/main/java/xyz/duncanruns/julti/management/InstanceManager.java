@@ -103,7 +103,7 @@ public final class InstanceManager {
         return this.instancesMissing;
     }
 
-    public void runChecks(){
+    public void runChecks() {
         if (this.utilityMode) {
             this.runChecksUtility();
         } else {
@@ -133,8 +133,6 @@ public final class InstanceManager {
     }
 
     private void tickUtility(long cycles) {
-        this.instances.forEach(MinecraftInstance::checkWindowMissing);
-        this.instances.removeIf(MinecraftInstance::isWindowMarkedMissing);
         if (cycles % 5000 == 0 && this.getSelectedInstance() == null) {
             this.runChecksUtility();
         }
@@ -142,10 +140,13 @@ public final class InstanceManager {
     }
 
     private void runChecksUtility() {
+        this.instances.forEach(MinecraftInstance::checkWindowMissing);
+        this.instances.removeIf(MinecraftInstance::isWindowMarkedMissing);
         InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
             i.discoverInformation();
             this.instances.add(i);
         });
+        this.checkForWindowRename();
     }
 
     private void tickRegular(long cycles) {
@@ -160,6 +161,10 @@ public final class InstanceManager {
             this.checkOpenedInstances();
             return;
         }
+        this.checkForWindowRename();
+    }
+
+    private void checkForWindowRename() {
         if (this.instances.stream().anyMatch(instance -> instance.getStateTracker().isCurrentState(InstanceState.TITLE))) {
             this.renameWindows();
         }
