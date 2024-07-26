@@ -286,18 +286,10 @@ public class MinecraftInstance {
     public void reset() {
         this.scheduler.clear();
         // Press Reset Keys
-        if (this.stateTracker.isCurrentState(InstanceState.TITLE)) {
-            if (MCVersionUtil.isOlderThan(this.versionString, "1.9")) {
-                this.presser.pressKey(this.gameOptions.createWorldKey); // Thanks pix
-            } else if (this.versionString.equals("1.17.1") || MCVersionUtil.isOlderThan(this.versionString, "1.16")) {
-                this.presser.pressShiftTabEnter();
-            } else {
-                this.presser.pressKey(this.gameOptions.createWorldKey);
-            }
-        } else {
+        if (!this.stateTracker.isCurrentState(InstanceState.TITLE)) {
             this.presser.pressKey(this.gameOptions.leavePreviewKey);
-            this.presser.pressKey(this.gameOptions.createWorldKey);
         }
+        this.presser.pressKey(this.gameOptions.createWorldKey);
 
         // Set values
         this.resetPressed = true;
@@ -409,6 +401,7 @@ public class MinecraftInstance {
     }
 
     private void onWorldLoad(boolean bypassPieChartGate) {
+        this.openedToLan = false;
         this.scheduler.clear();
         JultiOptions options = JultiOptions.getJultiOptions();
 
