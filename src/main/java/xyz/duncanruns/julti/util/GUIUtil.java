@@ -360,7 +360,6 @@ public final class GUIUtil {
     }
 
     public static void forAllComponents(final Container container, Consumer<Component> consumer) {
-        consumer.accept(container);
         for (Component comp : container.getComponents()) {
             consumer.accept(comp);
             if (comp instanceof Container) {
