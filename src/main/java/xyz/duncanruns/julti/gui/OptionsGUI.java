@@ -818,6 +818,13 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.createSpacer());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Settings with Utility Mode", "utilityModeUsePlayingSettings", b -> this.reload())));
+        panel.add(GUIUtil.createSpacer());
+
+        if (options.utilityMode && !options.utilityModeUsePlayingSettings) {
+            return;
+        }
+
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless", b -> this.reload())));
         panel.add(GUIUtil.createSpacer());
 
@@ -825,8 +832,10 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Playing", "maximizeWhenPlaying", b -> this.reload())));
             panel.add(GUIUtil.createSpacer());
 
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
-            panel.add(GUIUtil.createSpacer());
+            if(!options.utilityMode) {
+                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
+                panel.add(GUIUtil.createSpacer());
+            }
         }
 
         panel.add(GUIUtil.createSeparator());
@@ -951,12 +960,15 @@ public class OptionsGUI extends JFrame {
     private void onClose() {
         this.closed = true;
         Julti.doLater(() -> {
-            if (!JultiOptions.getJultiOptions().utilityMode) {
+            JultiOptions options = JultiOptions.getJultiOptions();
+            if (!options.utilityMode) {
                 OBSStateManager.getOBSStateManager().tryOutputLSInfo();
                 MistakesUtil.checkStartupMistakes();
             }
             SleepBGUtil.disableLock();
-            Julti.resetInstancePositions();
+            if (options.utilityModeUsePlayingSettings || !options.utilityMode) {
+                Julti.resetInstancePositions();
+            }
         });
     }
 }

@@ -62,6 +62,7 @@ public final class JultiOptions {
 
     // Window
     public boolean letJultiMoveWindows = true;
+    public boolean utilityModeUsePlayingSettings = false;
     public boolean useBorderless = false;
     public boolean maximizeWhenPlaying = true;
     public boolean maximizeWhenResetting = true;

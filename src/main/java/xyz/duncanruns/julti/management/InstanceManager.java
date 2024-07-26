@@ -145,6 +145,9 @@ public final class InstanceManager {
         InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
             i.discoverInformation();
             this.instances.add(i);
+            if (JultiOptions.getJultiOptions().utilityModeUsePlayingSettings) {
+                i.ensurePlayingWindowState();
+            }
         });
         this.checkForWindowRename();
     }
