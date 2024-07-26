@@ -107,6 +107,8 @@ public final class JultiOptions {
     public boolean showInstanceIndicators = true;
 
     // Other
+    public boolean utilityMode = false;
+    public boolean utilityModeAllowResets = true;
     public String multiMCPath = "";
     public String colorMCPath = "";
     public boolean launchOffline = false;
@@ -153,8 +155,6 @@ public final class JultiOptions {
     public boolean useAltSwitching = false;
     public boolean allowResetDuringGenerating = false;
     public boolean resizeableBorderless = false;
-    public boolean utilityMode = false;
-    public boolean utilityModeAllowResets = true;
     // public boolean forceActivate = false;
 
     // Launching
