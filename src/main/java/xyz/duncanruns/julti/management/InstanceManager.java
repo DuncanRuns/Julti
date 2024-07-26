@@ -103,6 +103,14 @@ public final class InstanceManager {
         return this.instancesMissing;
     }
 
+    public void runChecks(){
+        if (this.utilityMode) {
+            this.runChecksUtility();
+        } else {
+            this.runChecksRegular();
+        }
+    }
+
     public void tick(long cycles) {
         if (JultiOptions.getJultiOptions().utilityMode != this.utilityMode) {
             this.reloadUtilityMode();
@@ -121,30 +129,39 @@ public final class InstanceManager {
         } else {
             this.loadInstances();
         }
+        this.runChecks();
     }
 
     private void tickUtility(long cycles) {
         this.instances.forEach(MinecraftInstance::checkWindowMissing);
         this.instances.removeIf(MinecraftInstance::isWindowMarkedMissing);
         if (cycles % 5000 == 0 && this.getSelectedInstance() == null) {
-            InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
-                i.discoverInformation();
-                this.instances.add(i);
-            });
+            this.runChecksUtility();
         }
         this.instancesMissing = false;
+    }
+
+    private void runChecksUtility() {
+        InstanceChecker.getInstanceChecker().getAllOpenedInstances().stream().filter(i -> !this.instances.contains(i)).forEach(i -> {
+            i.discoverInformation();
+            this.instances.add(i);
+        });
     }
 
     private void tickRegular(long cycles) {
         this.instances.forEach(MinecraftInstance::checkWindowMissing);
         if (cycles % 5000 == 0) {
-            if (this.checkInstancesMarkedMissing()) {
-                this.checkOpenedInstances();
-                return;
-            }
-            if (this.instances.stream().anyMatch(instance -> instance.getStateTracker().isCurrentState(InstanceState.TITLE))) {
-                this.renameWindows();
-            }
+            this.runChecksRegular();
+        }
+    }
+
+    private void runChecksRegular() {
+        if (this.checkInstancesMarkedMissing()) {
+            this.checkOpenedInstances();
+            return;
+        }
+        if (this.instances.stream().anyMatch(instance -> instance.getStateTracker().isCurrentState(InstanceState.TITLE))) {
+            this.renameWindows();
         }
     }
 
