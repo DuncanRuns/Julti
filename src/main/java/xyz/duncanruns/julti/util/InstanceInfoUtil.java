@@ -1,6 +1,8 @@
 package xyz.duncanruns.julti.util;
 
 import com.github.tuupertunut.powershelllibjava.PowerShellExecutionException;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 import org.apache.logging.log4j.Level;
@@ -145,40 +147,26 @@ public final class InstanceInfoUtil {
         // Get the path out of the group
         String pathString = matcher.group(1);
 
-//        // Assign the version matcher
-//        Matcher matcher1;
-//        if (commandLine.contains("\"-Djava.library.path=")) {
-//            matcher1 = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
-//        } else {
-//            matcher1 = MULTIMC_PATH_PATTERN.matcher(commandLine);
-//        }
-//
-//        // If no matches are found for the path, return null
-//        if (!matcher1.find()) {
-//            return null;
-//        }
-//
-//        // Get the natives path out of the group
-//        String nativesPathString = matcher1.group(1);
-//
-//        String versionString;
-//
-//        if (nativesPathString.contains("\\")) {
-//            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("\\") + 1);
-//        } else {
-//            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("/") + 1);
-//        }
-//
-//        if (versionString.isEmpty()) {
-//            return null;
-//        }
-
         Path instancePath = Paths.get(pathString);
+        String version = getVersionWithColorMC(instancePath);
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo("", instancePath, MinecraftInstance.InstanceType.ColorMC);
+            return new FoundInstanceInfo(version, instancePath, MinecraftInstance.InstanceType.ColorMC);
         }
 
         return null;
+    }
+
+
+    private static String getVersionWithColorMC(Path instancePath) {
+        try {
+            String contents = FileUtil.readString(instancePath.resolveSibling("game.json"));
+            JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+            if (json.has("Version")) {
+                return json.get("Version").getAsString();
+            }
+        } catch (Exception ignored) {
+        }
+        return "1.16.1";
     }
 
     private static FoundInstanceInfo getMultiMCInfo(String commandLine) throws InvalidPathException {
