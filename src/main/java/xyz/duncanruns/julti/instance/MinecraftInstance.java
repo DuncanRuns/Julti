@@ -1,6 +1,7 @@
 package xyz.duncanruns.julti.instance;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
@@ -74,7 +75,7 @@ public class MinecraftInstance {
 
     public MinecraftInstance(Path path) {
         this.hwnd = null;
-        this.versionString = null;
+        this.versionString = tryObtainVersionString(path);
         this.presser = null;
         this.scheduler = null;
         this.instanceType = obtainClosedInstanceType(path);
@@ -82,6 +83,33 @@ public class MinecraftInstance {
 
         this.path = path;
         this.windowMissing = true;
+    }
+
+    private static String tryObtainVersionString(Path path) {
+        try {
+            return obtainVersionString(path);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String obtainVersionString(Path path) throws IOException {
+        Path mmcPackPath = path.resolveSibling("mmc-pack.json");
+        if (!Files.isRegularFile(mmcPackPath)) {
+            return null;
+        }
+        String contents = FileUtil.readString(mmcPackPath);
+        JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+        if (!json.has("components")) {
+            return null;
+        }
+        for (JsonElement element : json.getAsJsonArray("components")) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("uid") && object.has("version") && object.get("uid").getAsString().equals("net.minecraft")) {
+                return object.get("version").getAsString();
+            }
+        }
+        return null;
     }
 
     private static InstanceType obtainClosedInstanceType(Path path) {

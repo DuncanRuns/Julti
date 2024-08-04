@@ -21,32 +21,10 @@ import java.io.IOException;
 
 public class JultiGUI extends JFrame {
     private static long lastUtilityKeyPress = 0;
-    public static final KeyAdapter UTILITY_MODE_SWITCHER_LISTENER = new KeyAdapter() {
-        @Override
-        public void keyReleased(KeyEvent e) {
-            if (e.isControlDown() && e.getKeyCode() == 85) {
-                if (Math.abs(lastUtilityKeyPress - System.currentTimeMillis()) < 50) {
-                    return;
-                }
-                lastUtilityKeyPress = System.currentTimeMillis();
-                synchronized (Julti.getJulti()) {
-                    JultiOptions options = JultiOptions.getJultiOptions();
-                    options.utilityMode = !options.utilityMode;
-                    if (options.utilityMode) {
-                        Julti.log(Level.INFO, "Utility Mode enabled! Press Ctrl+U or go to experimental options to disable Utilty Mode.");
-                    } else {
-                        Julti.log(Level.INFO, "Utility Mode disabled.");
-                    }
-                    OptionsGUI.reloadIfOpen();
-                }
-            }
-        }
-    };
-
     private static final JultiGUI INSTANCE = new JultiGUI();
-
     private boolean closed;
     private ControlPanel controlPanel;
+    private InstancesPanel instancesPanel;
     private boolean updating = false;
 
     private JultiIcon trayIcon;
@@ -76,6 +54,10 @@ public class JultiGUI extends JFrame {
 
     public ControlPanel getControlPanel() {
         return this.controlPanel;
+    }
+
+    public InstancesPanel getInstancesPanel() {
+        return this.instancesPanel;
     }
 
     public JultiIcon getJultiIcon() {
@@ -116,7 +98,8 @@ public class JultiGUI extends JFrame {
                 0
         ));
 
-        this.add(new InstancesPanel(() -> this.isActive() || this.isOptionsActive() || InstanceManager.getInstanceManager().getSelectedInstance() != null, this::isClosed), new GridBagConstraints(
+        this.instancesPanel = new InstancesPanel(() -> this.isActive() || this.isOptionsActive() || InstanceManager.getInstanceManager().getSelectedInstance() != null, this::isClosed);
+        this.add(this.instancesPanel, new GridBagConstraints(
                 0,
                 1,
                 1,
@@ -160,8 +143,30 @@ public class JultiGUI extends JFrame {
         this.trayIcon = new JultiIcon(JultiGUI.getLogo());
         this.trayIcon.setListener(this, JultiOptions.getJultiOptions().minimizeToTray);
 
-        this.addKeyListener(UTILITY_MODE_SWITCHER_LISTENER);
-        GUIUtil.forAllComponents(this, component -> component.addKeyListener(UTILITY_MODE_SWITCHER_LISTENER));
+        KeyAdapter utilityModeSwitcherListener = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.isControlDown() && e.getKeyCode() == 85) {
+                    if (Math.abs(lastUtilityKeyPress - System.currentTimeMillis()) < 50) {
+                        return;
+                    }
+                    lastUtilityKeyPress = System.currentTimeMillis();
+                    synchronized (Julti.getJulti()) {
+                        JultiOptions options = JultiOptions.getJultiOptions();
+                        options.utilityMode = !options.utilityMode;
+                        if (options.utilityMode) {
+                            Julti.log(Level.INFO, "Utility Mode enabled! Press Ctrl+U again to disable Utilty Mode.");
+                        } else {
+                            Julti.log(Level.INFO, "Utility Mode disabled.");
+                        }
+                        OptionsGUI.reloadIfOpen();
+                        INSTANCE.getInstancesPanel().utilityCheckBox.setSelected(options.utilityMode);
+                    }
+                }
+            }
+        };
+        this.addKeyListener(utilityModeSwitcherListener);
+        GUIUtil.forAllComponents(this, component -> component.addKeyListener(utilityModeSwitcherListener));
     }
 
     private boolean isOptionsActive() {

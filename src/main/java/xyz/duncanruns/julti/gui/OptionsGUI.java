@@ -108,16 +108,7 @@ public class OptionsGUI extends JFrame {
         JultiOptions options = JultiOptions.getJultiOptions();
 
         panel.add(GUIUtil.leftJustify(new JLabel("Experimental Settings")));
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.createSeparator());
 
-        panel.add(GUIUtil.createSpacer());
-        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> this.reload())));
-
-        if (options.utilityMode) {
-            panel.add(GUIUtil.createSpacer());
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
-        }
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
@@ -360,6 +351,20 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(new JLabel("Other Settings")));
         panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Utility Mode", "utilityMode", b -> {
+            this.reload();
+            JultiGUI.getJultiGUI().getInstancesPanel().utilityCheckBox.setSelected(b);
+        })));
+
+        if (options.utilityMode) {
+            panel.add(GUIUtil.createSpacer());
+            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Allow Resets In Utility", "utilityModeAllowResets")));
+        }
+
+        panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.createSeparator());
         panel.add(GUIUtil.createSpacer());
 
         panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("resetCounter", "Reset Counter", this, "", ResetCounter::updateFiles)));
@@ -420,7 +425,6 @@ public class OptionsGUI extends JFrame {
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
-                    options.utilityMode = false;
                 });
             }
             this.reload();
@@ -465,7 +469,7 @@ public class OptionsGUI extends JFrame {
                 }
             }
         }
-        if (candidates.size() == 0) {
+        if (candidates.isEmpty()) {
             if (0 == JOptionPane.showConfirmDialog(this, "Could not automatically find any candidates, browse for exe instead?",
                     "Julti: Choose " + (type == MinecraftInstance.InstanceType.MultiMC ? "MultiMC" : "ColorMC") + " Executable", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)) {
                 this.browseForLauncherExecutable(type);
@@ -814,6 +818,13 @@ public class OptionsGUI extends JFrame {
         }
         panel.add(GUIUtil.createSpacer());
 
+        panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Playing Settings with Utility Mode", "utilityModeUsePlayingSettings", b -> this.reload())));
+        panel.add(GUIUtil.createSpacer());
+
+        if (options.utilityMode && !options.utilityModeUsePlayingSettings) {
+            return;
+        }
+
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Use Borderless", "useBorderless", b -> this.reload())));
         panel.add(GUIUtil.createSpacer());
 
@@ -821,8 +832,10 @@ public class OptionsGUI extends JFrame {
             panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Playing", "maximizeWhenPlaying", b -> this.reload())));
             panel.add(GUIUtil.createSpacer());
 
-            panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
-            panel.add(GUIUtil.createSpacer());
+            if (!options.utilityMode) {
+                panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Maximize When Resetting", "maximizeWhenResetting", b -> this.reload())));
+                panel.add(GUIUtil.createSpacer());
+            }
         }
 
         panel.add(GUIUtil.createSeparator());
@@ -947,12 +960,15 @@ public class OptionsGUI extends JFrame {
     private void onClose() {
         this.closed = true;
         Julti.doLater(() -> {
-            if (!JultiOptions.getJultiOptions().utilityMode) {
+            JultiOptions options = JultiOptions.getJultiOptions();
+            if (!options.utilityMode) {
                 OBSStateManager.getOBSStateManager().tryOutputLSInfo();
                 MistakesUtil.checkStartupMistakes();
             }
             SleepBGUtil.disableLock();
-            Julti.resetInstancePositions();
+            if (options.utilityModeUsePlayingSettings || !options.utilityMode) {
+                Julti.resetInstancePositions();
+            }
         });
     }
 }

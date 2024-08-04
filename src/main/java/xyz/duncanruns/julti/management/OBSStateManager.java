@@ -127,7 +127,7 @@ public class OBSStateManager {
         JultiOptions options = JultiOptions.getJultiOptions();
         List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
-        if (instances.size() == 0) {
+        if (instances.isEmpty()) {
             Julti.log(Level.DEBUG, "OBSStateManager: No instances, cancelling.");
             return;
         }

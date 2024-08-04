@@ -38,7 +38,7 @@ public class WaitCommand extends Command {
     @Override
     public void run(String[] args, CancelRequester cancelRequester) {
         List<MinecraftInstance> instances = args[1].equals("all") ? InstanceManager.getInstanceManager().getInstances() : CommandManager.getInstances(args[1]);
-        if (instances.size() == 0) {
+        if (instances.isEmpty()) {
             throw new CommandFailedException("No instances found");
         }
         for (MinecraftInstance instance : instances) {
