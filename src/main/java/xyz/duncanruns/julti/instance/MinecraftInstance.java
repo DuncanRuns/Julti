@@ -63,10 +63,14 @@ public class MinecraftInstance {
         this.hwnd = hwnd;
         this.path = path;
         this.instanceType = instanceType;
-        this.versionString = versionString;
         this.stateTracker = new StateTracker(path.resolve("wpstateout.txt"), this::onStateChange, this::onPercentageUpdate);
         this.presser = new KeyPresser(hwnd);
         this.scheduler = new Scheduler();
+        if (instanceType == InstanceType.ColorMC) {
+            this.versionString = getVersionWithColorMC();
+        } else {
+            this.versionString = versionString;
+        }
     }
 
     public MinecraftInstance(Path path) {
@@ -116,6 +120,21 @@ public class MinecraftInstance {
             return InstanceType.ColorMC;
         }
         return InstanceType.Vanilla;
+    }
+
+    public String getVersionWithColorMC() {
+        if (usesColorMC()) {
+            try {
+                String contents = FileUtil.readString(path.resolveSibling("game.json"));
+                JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+                if (json.has("Version")) {
+                    return json.get("Version").getAsString();
+                }
+            } catch (Exception ignored) {
+                // Failed to check if it uses ColorMC, ignore and move on to taking folder name
+            }
+        }
+        return null;
     }
 
     public void tick() {

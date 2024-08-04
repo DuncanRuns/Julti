@@ -145,37 +145,37 @@ public final class InstanceInfoUtil {
         // Get the path out of the group
         String pathString = matcher.group(1);
 
-        // Assign the version matcher
-        Matcher matcher1;
-        if (commandLine.contains("\"-Djava.library.path=")) {
-            matcher1 = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
-        } else {
-            matcher1 = MULTIMC_PATH_PATTERN.matcher(commandLine);
-        }
-
-        // If no matches are found for the path, return null
-        if (!matcher1.find()) {
-            return null;
-        }
-
-        // Get the natives path out of the group
-        String nativesPathString = matcher1.group(1);
-
-        String versionString;
-
-        if (nativesPathString.contains("\\")) {
-            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("\\") + 1);
-        } else {
-            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("/") + 1);
-        }
-
-        if (versionString.isEmpty()) {
-            return null;
-        }
+//        // Assign the version matcher
+//        Matcher matcher1;
+//        if (commandLine.contains("\"-Djava.library.path=")) {
+//            matcher1 = MULTIMC_PATH_PATTERN_SPACES.matcher(commandLine);
+//        } else {
+//            matcher1 = MULTIMC_PATH_PATTERN.matcher(commandLine);
+//        }
+//
+//        // If no matches are found for the path, return null
+//        if (!matcher1.find()) {
+//            return null;
+//        }
+//
+//        // Get the natives path out of the group
+//        String nativesPathString = matcher1.group(1);
+//
+//        String versionString;
+//
+//        if (nativesPathString.contains("\\")) {
+//            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("\\") + 1);
+//        } else {
+//            versionString = nativesPathString.substring(nativesPathString.lastIndexOf("/") + 1);
+//        }
+//
+//        if (versionString.isEmpty()) {
+//            return null;
+//        }
 
         Path instancePath = Paths.get(pathString);
         if (Files.isDirectory(instancePath)) {
-            return new FoundInstanceInfo(versionString, instancePath, MinecraftInstance.InstanceType.ColorMC);
+            return new FoundInstanceInfo("", instancePath, MinecraftInstance.InstanceType.ColorMC);
         }
 
         return null;
