@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -190,9 +191,17 @@ public final class SafeInstanceLauncher {
         if (cancelRequester.isCancelRequested()) {
             return;
         }
+
+        // ColorMC only supports starting a single instance or multiple instances at once,
+        // and does not support starting each instance individually
+        List<MinecraftInstance> list = new ArrayList<>();
         for (MinecraftInstance instance : instances) {
             int instanceNum = instances.indexOf(instance) + 1;
             if (instance.hasWindow()) {
+                continue;
+            }
+            if (instance.getInstanceType() == MinecraftInstance.InstanceType.ColorMC) {
+                list.add(instance);
                 continue;
             }
             sleep(JultiOptions.getJultiOptions().launchDelay);
@@ -200,6 +209,26 @@ public final class SafeInstanceLauncher {
                 return;
             }
             instance.launch(launchOffline ? (options.launchOfflineName.replace("*", String.valueOf(instanceNum))) : null);
+        }
+        if (cancelRequester.isCancelRequested()) {
+            return;
+        }
+        if (!list.isEmpty()) {
+            launchWithColorMC(list);
+        }
+    }
+
+    private static void launchWithColorMC(List<MinecraftInstance> list) {
+        String[] arg = new String[list.size() + 2];
+        arg[0] = JultiOptions.getJultiOptions().colorMCPath.trim();
+        arg[1] = "-game";
+        try {
+            for (int a = 0; a < list.size(); a++) {
+                arg[a + 2] = list.get(a).getColorMCUUID();
+            }
+            Runtime.getRuntime().exec(arg);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
