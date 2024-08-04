@@ -1,3 +1,13 @@
+Changes in v1.5.0:
+- More support for old versions (1.7.10 was looked at specifically) (#107 @tildejustin)
+- Support for ColorMC launcher (A chinese launcher) (#108 @Coloryr)
+  - ColorMC exe is in experimental options 
+- Utility Mode is now moved to other options, as well as a button on the main GUI
+- Added a new utility mode option in window settings to apply playing window settings when using utility mode
+- Window title will now automatically set in utility mode, allowing for a Julti OBS setup to capture the game easier
+- More support for SeedQueue
+- Various other tweaks/fixes
+
 Changes in v1.4.7:
 - Fix inverted warning message
 
