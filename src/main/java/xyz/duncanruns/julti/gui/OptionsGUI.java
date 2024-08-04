@@ -52,6 +52,7 @@ public class OptionsGUI extends JFrame {
 
     private static void changeProfile(String profile) {
         Julti.waitForExecute(() -> Julti.getJulti().changeProfile(profile));
+        JultiGUI.getJultiGUI().getInstancesPanel().utilityCheckBox.setSelected(JultiOptions.getJultiOptions().utilityMode);
     }
 
     public static void reloadIfOpen() {
