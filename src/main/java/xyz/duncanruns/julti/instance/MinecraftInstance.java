@@ -123,14 +123,16 @@ public class MinecraftInstance {
     }
 
     public String getVersionWithColorMC() {
-        try {
-            String contents = FileUtil.readString(path.resolveSibling("game.json"));
-            JsonObject json = new Gson().fromJson(contents, JsonObject.class);
-            if (json.has("Version")) {
-                return json.get("Version").getAsString();
+        if (usesColorMC()) {
+            try {
+                String contents = FileUtil.readString(path.resolveSibling("game.json"));
+                JsonObject json = new Gson().fromJson(contents, JsonObject.class);
+                if (json.has("Version")) {
+                    return json.get("Version").getAsString();
+                }
+            } catch (Exception ignored) {
+                // Failed to check if it uses ColorMC, ignore and move on to taking folder name
             }
-        } catch (Exception ignored) {
-            // Failed to check if it uses ColorMC, ignore and move on to taking folder name
         }
         return null;
     }
