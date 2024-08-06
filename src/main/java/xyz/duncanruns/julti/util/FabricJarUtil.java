@@ -6,12 +6,10 @@ import xyz.duncanruns.julti.Julti;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,9 +27,9 @@ public final class FabricJarUtil {
                     return getJarInfo(path);
                 } catch (IOException e) {
                     Julti.log(Level.WARN, "Invalid jar " + path.getFileName() + " found in " + instancePath + ". Exception below:\n" + ExceptionUtil.toDetailedString(e));
-                    return null;
+                    return Optional.<FabricJarInfo>empty();
                 }
-            }).filter(Objects::nonNull).collect(Collectors.toList());
+            }).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
         }
     }
 
@@ -40,16 +38,18 @@ public final class FabricJarUtil {
         return infos.stream().filter(info -> id.equals(info.id)).findAny().orElse(null);
     }
 
-    private static FabricJarInfo getJarInfo(Path jarPath) throws IOException {
-        return GSON.fromJson(getJarFMJContents(jarPath), FabricJarInfo.class);
+    private static Optional<FabricJarInfo> getJarInfo(Path jarPath) throws IOException {
+        return getJarFMJContents(jarPath).map(s -> GSON.fromJson(s, FabricJarInfo.class));
     }
 
     @SuppressWarnings("all") //Suppress the redundant cast warning which resolves an ambiguous case
-    private static String getJarFMJContents(Path jarPath) throws IOException {
+    private static Optional<String> getJarFMJContents(Path jarPath) throws IOException {
         try (FileSystem fs = FileSystems.newFileSystem(jarPath, (ClassLoader) null)) {
             Path jsonFilePath = fs.getPath("fabric.mod.json");
             byte[] jsonData = Files.readAllBytes(jsonFilePath);
-            return new String(jsonData, StandardCharsets.UTF_8);
+            return Optional.of(new String(jsonData, StandardCharsets.UTF_8));
+        }catch (NoSuchFileException e){
+            return Optional.empty();
         }
     }
 
