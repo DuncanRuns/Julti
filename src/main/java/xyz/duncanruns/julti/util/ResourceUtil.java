@@ -55,7 +55,7 @@ public final class ResourceUtil {
 
         String[] filesToCopy = {
                 "dirtcover.png",
-                "lock.png",
+                "lock.webp",
                 "blacksmith_example.png",
                 "beach_example.png",
                 "sounds"
