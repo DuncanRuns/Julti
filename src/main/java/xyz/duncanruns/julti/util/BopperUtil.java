@@ -95,7 +95,7 @@ public final class BopperUtil {
         if (name.startsWith("_")) {
             return false;
         }
-        return name.startsWith("New World") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
+        return name.startsWith("New World") || name.startsWith("Benchmark Reset #") || name.contains("Speedrun #") || name.contains("Practice Seed") || name.contains("Seed Paster");
     }
 
     public static void waitForFinish() {
