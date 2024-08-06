@@ -1,6 +1,6 @@
 --[[
 
-    Julti OBS Link v1.2.0
+    Julti OBS Link v1.2.1
     
     The purpose of the OBS Link Script is to generate and control a Julti scene to assist with multi-instance speedrunning.
 
