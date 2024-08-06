@@ -850,7 +850,7 @@ function _setup_lock_scene()
 
     -- Lock image
     local lock_data = obs.obs_data_create_from_json('{"file":"' ..
-        julti_dir .. 'lock.png' .. '"}')
+        julti_dir .. 'lock.webp' .. '"}')
     local lock_source = obs.obs_source_create("image_source", "Lock Image", lock_data, nil)
     obs.obs_scene_add(scene, lock_source)
     release_source(lock_source)
