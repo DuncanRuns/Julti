@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'xyz.duncanruns.julti'
-version '1.5.0+pre2'
+version '1.5.0+pre3'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
