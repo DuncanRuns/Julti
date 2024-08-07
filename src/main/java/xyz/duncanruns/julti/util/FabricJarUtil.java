@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,7 +47,7 @@ public final class FabricJarUtil {
             Path jsonFilePath = fs.getPath("fabric.mod.json");
             byte[] jsonData = Files.readAllBytes(jsonFilePath);
             return Optional.of(new String(jsonData, StandardCharsets.UTF_8));
-        }catch (NoSuchFileException e){
+        } catch (NoSuchFileException e) {
             return Optional.empty();
         }
     }
