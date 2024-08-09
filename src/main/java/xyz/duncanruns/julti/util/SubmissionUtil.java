@@ -1,5 +1,6 @@
 package xyz.duncanruns.julti.util;
 
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
@@ -14,11 +15,16 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public final class SubmissionUtil {
+    private static final Path SRIGT_LATEST_WORLD_JSON_PATH = Paths.get(System.getProperty("user.home")).resolve("speedrunigt").resolve("latest_world.json");
+    private static final Pattern ATUM_WORLD_PATTERN = Pattern.compile("^.*Speedrun #(\\d+)$");
+
     private SubmissionUtil() {
     }
 
@@ -28,7 +34,7 @@ public final class SubmissionUtil {
     public static Path tryPrepareSubmission(MinecraftInstance instance) {
         try {
             return prepareSubmission(instance);
-        } catch (IOException | SecurityException e) {
+        } catch (Exception e) {
             Julti.log(Level.ERROR, "Failed to prepare files for submission - please refer to the speedrun.com rules to submit files yourself.\nDetailed error:" + ExceptionUtil.toDetailedString(e));
             return null;
         }
@@ -38,7 +44,7 @@ public final class SubmissionUtil {
      * @author DuncanRuns
      * @author draconix6
      */
-    public static Path prepareSubmission(MinecraftInstance instance) throws IOException, SecurityException {
+    public static Path prepareSubmission(MinecraftInstance instance) throws IOException, SecurityException, JsonSyntaxException {
         Path savesPath = instance.getPath().resolve("saves");
         if (!Files.isDirectory(savesPath)) {
             Julti.log(Level.ERROR, "Saves path for " + instance.getName() + " not found! Please refer to the speedrun.com rules to submit files yourself.");
@@ -48,6 +54,25 @@ public final class SubmissionUtil {
         Path logsPath = instance.getPath().resolve("logs");
         if (!Files.isDirectory(logsPath)) {
             Julti.log(Level.ERROR, "Logs path for " + instance.getName() + " not found! Please refer to the speedrun.com rules to submit files yourself.");
+            return null;
+        }
+
+        boolean hasSeedQueue = instance.getGameOptions().jars.stream().anyMatch(j -> Objects.equals(j.id, "seedqueue"));
+        if (hasSeedQueue) {
+            if (instance.getGameOptions().jars.stream().noneMatch(j -> Objects.equals(j.id, "speedrunigt") && VersionUtil.tryCompare(j.version.split("\\+")[0], "14.0", -2) >= 0)) {
+                Julti.log(Level.ERROR, "SeedQueue detected without an updated SpeedRunIGT! Please refer to the speedrun.com rules to submit files yourself.");
+                return null;
+            }
+            Julti.log(Level.DEBUG, "SeedQueue detected, using SeedQueue world yoinking method.");
+        }
+        // latest world + 5 previous saves or previous 5 worlds + everything after for seedqueue
+        List<Path> worldsToCopy = hasSeedQueue ? getLatestWorldsForSQ(savesPath) : getFilesByMostRecent(savesPath);
+
+        if (worldsToCopy.isEmpty()) {
+            Julti.log(Level.ERROR, "No worlds found! Please refer to the speedrun.com rules to submit files yourself.");
+            if (hasSeedQueue) {
+                Julti.log(Level.ERROR, "(You are using SeedQueue, so this may be because you selected the wrong instance to package, or your SpeedRunIGT might be out of date!)");
+            }
             return null;
         }
 
@@ -66,15 +91,10 @@ public final class SubmissionUtil {
         submissionPath.toFile().mkdirs();
         Julti.log(Level.INFO, "Created folder for submission.");
 
-        // latest world + 5 previous saves
-        List<Path> worldsToCopy = Arrays.stream(Objects.requireNonNull(savesPath.toFile().list())) // Get all world names
-                .map(savesPath::resolve) // Map to world paths
-                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-                .collect(Collectors.toList());
         Path savesDest = submissionPath.resolve("Worlds");
         savesDest.toFile().mkdirs();
         try {
-            for (Path currentPath : worldsToCopy.subList(0, Math.min(worldsToCopy.size(), 6))) {
+            for (Path currentPath : hasSeedQueue ? worldsToCopy : worldsToCopy.subList(0, Math.min(worldsToCopy.size(), 6))) {
                 File currentSave = currentPath.toFile();
                 Julti.log(Level.INFO, "Copying " + currentSave.getName() + " to submission folder...");
                 FileUtils.copyDirectoryToDirectory(currentSave, savesDest.toFile());
@@ -87,10 +107,7 @@ public final class SubmissionUtil {
         }
 
         // last 3 logs
-        List<Path> logsToCopy = Arrays.stream(Objects.requireNonNull(logsPath.toFile().list())) // Get all log names
-                .map(logsPath::resolve) // Map to paths
-                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
-                .collect(Collectors.toList());
+        List<Path> logsToCopy = getFilesByMostRecent(logsPath);
         File logsDest = submissionPath.resolve("Logs").toFile();
         logsDest.mkdirs();
         for (Path currentPath : logsToCopy.subList(0, Math.min(logsToCopy.size(), 6))) {
@@ -105,6 +122,35 @@ public final class SubmissionUtil {
         copyFolderToZip(submissionPath.resolve("Logs.zip"), submissionPath.resolve("Logs"));
 
         return submissionPath;
+    }
+
+    private static List<Path> getLatestWorldsForSQ(Path savesPath) throws IOException, JsonSyntaxException {
+        Path latestWorldPath = Optional.ofNullable(FileUtil.readJson(SRIGT_LATEST_WORLD_JSON_PATH).get("world_path").getAsString()).map(Paths::get).orElse(null);
+        if (latestWorldPath == null) {
+            return Collections.emptyList();
+        }
+        List<Path> filesByMostRecent = getFilesByMostRecent(savesPath);
+        if (!filesByMostRecent.contains(latestWorldPath)) {
+            // Wrong instance!
+            return Collections.emptyList();
+        }
+        Matcher matcher = ATUM_WORLD_PATTERN.matcher(latestWorldPath.getFileName().toString());
+        if (!matcher.matches()) {
+            // Wrong instance!
+            return Collections.emptyList();
+        }
+        int minimumWorldNum = Integer.parseInt(matcher.group(1)) - 5;
+        return filesByMostRecent.stream().filter(path -> {
+            Matcher m = ATUM_WORLD_PATTERN.matcher(path.getFileName().toString());
+            return m.matches() && Integer.parseInt(m.group(1)) >= minimumWorldNum;
+        }).collect(Collectors.toList());
+    }
+
+    private static List<Path> getFilesByMostRecent(Path path) {
+        return Arrays.stream(Objects.requireNonNull(path.toFile().list())) // Get all world names
+                .map(path::resolve) // Map to world paths
+                .sorted(Comparator.comparing(value -> value.toFile().lastModified(), Comparator.reverseOrder())) // Sort by most recent first
+                .collect(Collectors.toList());
     }
 
     private static void copyFolderToZip(Path zipFile, Path sourceFolder) {
