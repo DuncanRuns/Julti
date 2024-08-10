@@ -135,7 +135,7 @@ public abstract class ResetManager {
 
         JultiOptions options = JultiOptions.getJultiOptions();
 
-        if(options.utilityMode){
+        if (options.utilityMode) {
             return new Rectangle(sceneSize);
         }
 
