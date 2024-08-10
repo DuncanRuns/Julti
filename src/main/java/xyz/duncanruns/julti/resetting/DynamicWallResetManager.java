@@ -212,6 +212,10 @@ public class DynamicWallResetManager extends WallResetManager {
     public Rectangle getInstancePosition(MinecraftInstance instance, Dimension sceneSize) {
         JultiOptions options = JultiOptions.getJultiOptions();
 
+        if (options.utilityMode) {
+            return super.getInstancePosition(instance, sceneSize);
+        }
+
         if (sceneSize != null) {
             sceneSize = new Dimension(sceneSize);
         } else {

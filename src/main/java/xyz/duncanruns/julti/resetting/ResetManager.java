@@ -134,6 +134,11 @@ public abstract class ResetManager {
         List<MinecraftInstance> instances = InstanceManager.getInstanceManager().getInstances();
 
         JultiOptions options = JultiOptions.getJultiOptions();
+
+        if(options.utilityMode){
+            return new Rectangle(sceneSize);
+        }
+
         int totalRows;
         int totalColumns;
 
