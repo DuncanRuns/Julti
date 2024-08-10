@@ -13,6 +13,7 @@ public class GameOptions {
     public Boolean pauseOnLostFocus = null;
     public Boolean f1SS = null;
     public Boolean f3PauseOnWorldLoad = null;
+    public Boolean hasSeedQueue = null;
 
     public List<FabricJarInfo> jars;
 

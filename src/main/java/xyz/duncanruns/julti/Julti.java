@@ -127,9 +127,20 @@ public final class Julti {
     }
 
     private static void runUtilityModeReset() {
+        JultiOptions options = JultiOptions.getJultiOptions();
         MinecraftInstance instance = InstanceManager.getInstanceManager().getSelectedInstance();
         if (instance != null) {
             instance.getKeyPresser().pressKey(instance.getGameOptions().createWorldKey);
+            if (!options.utilityModeUsePlayingSettings) {
+                return;
+            }
+            if (options.autoFullscreen) {
+                if (!instance.isFullscreen()) {
+                    instance.pressFullscreen();
+                }
+            } else {
+                instance.ensurePlayingWindowState();
+            }
         }
     }
 

@@ -204,6 +204,8 @@ public class MinecraftInstance {
             throw new RuntimeException(e);
         }
 
+        this.gameOptions.hasSeedQueue = this.gameOptions.jars.stream().anyMatch(j -> Objects.equals("seedqueue", j.id));
+
         String wpVer = VersionUtil.extractVersion(FabricJarUtil.getVersionOf(this.gameOptions.jars, "worldpreview"));
         String soVer = VersionUtil.extractVersion(FabricJarUtil.getVersionOf(this.gameOptions.jars, "state-output"));
 
@@ -368,7 +370,7 @@ public class MinecraftInstance {
         if (this.stateTracker.isCurrentState(InstanceState.INWORLD)) {
             if (!doingSetup) {
                 if (options.autoFullscreen && options.fullscreenBeforeUnpause) {
-                    this.presser.pressKey(this.gameOptions.fullscreenKey);
+                    this.pressFullscreen();
                     this.waitForFullscreen();
                     this.windowStateDirty = true;
                 }
@@ -384,7 +386,7 @@ public class MinecraftInstance {
                     this.openToLan(true, options.coopModeCheats);
                 }
                 if (options.autoFullscreen && !options.fullscreenBeforeUnpause) {
-                    this.presser.pressKey(this.gameOptions.fullscreenKey);
+                    this.pressFullscreen();
                     this.windowStateDirty = true;
                 }
             }
@@ -394,6 +396,10 @@ public class MinecraftInstance {
         } else {
             PluginEvents.InstanceEventType.ACTIVATE.runAll(this);
         }
+    }
+
+    public void pressFullscreen() {
+        this.presser.pressKey(this.gameOptions.fullscreenKey);
     }
 
     private void onStateChange() {
@@ -473,7 +479,7 @@ public class MinecraftInstance {
             }
 
             if (options.autoFullscreen && !options.utilityMode && !this.isFullscreen()) {
-                this.presser.pressKey(this.gameOptions.fullscreenKey);
+                this.pressFullscreen();
                 this.windowStateDirty = true;
             }
             if (this.gameOptions.f1SS) {
@@ -863,7 +869,7 @@ public class MinecraftInstance {
         int delay = 0;
 
         Julti.log(Level.DEBUG, "Pressing fullscreen key...");
-        this.presser.pressKey(this.gameOptions.fullscreenKey);
+        this.pressFullscreen();
 
         Julti.log(Level.DEBUG, "Waiting for fullscreen option to turn false...");
 
@@ -935,6 +941,10 @@ public class MinecraftInstance {
         Julti.log(Level.INFO, "");
 
         KeyboardUtil.copyToClipboard(toCopy.toString());
+    }
+
+    public boolean hasSeedQueue() {
+        return this.gameOptions.hasSeedQueue;
     }
 
     public enum InstanceType {
