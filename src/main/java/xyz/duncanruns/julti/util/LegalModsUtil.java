@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class LegalModsUtil {
     private static Set<String> legalMods = Arrays.stream(
             // Start with default legal mods in case updating fails
-            "planifolia, phosphor, antiresourcereload, forceport, chunkumulator, fabricproxylite, lithium, voyager, dynamicmenufps, nopaus, sleepbackground, setspawnmod, sodiummac, fastreset, statsperworld, chunkcacher, speedrunigt, atum, retino, standardsettings, antigone, lazydfu, lazystronghold, optifabric, starlight, extraoptions, zbufferfog, sodium, stateoutput, tabfocus, krypton, worldpreview, anchiale, biomethreadlocalfix, costar"
+            "planifolia, phosphor, antiresourcereload, forceport, chunkumulator, fabricproxylite, lithium, voyager, dynamicmenufps, nopaus, sleepbackground, setspawnmod, sodiummac, fastreset, legacycrashfix, statsperworld, chunkcacher, speedrunigt, atum, speedrunapi, retino, standardsettings, antigone, lazydfu, lazystronghold, optifabric, starlight, extraoptions, zbufferfog, sodium, stateoutput, tabfocus, krypton, worldpreview, anchiale, biomethreadlocalfix, seedqueue, costar"
                     .split(", ")
     ).collect(Collectors.toSet());
     private static boolean updated = false;
