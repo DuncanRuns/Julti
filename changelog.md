@@ -1,4 +1,8 @@
-Changes in v1.5.0:
+Changes in v1.5.0-v1.5.4:
+- Update PaceMan Tracker (v1.5.4)
+- Add more utility mode window settings functionality (v1.5.3)
+- Fix utility mode obs compat (v1.5.2)
+- Add more stat tracking support in paceman tracker plugin (@jojoe77777) (v1.5.1)
 - More support for old versions (1.7.10 was looked at specifically) (#107 @tildejustin)
 - Support for ColorMC launcher (A chinese launcher) (#108 @Coloryr)
   - ColorMC exe is in experimental options 
