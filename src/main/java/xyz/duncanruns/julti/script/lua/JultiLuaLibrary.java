@@ -115,7 +115,7 @@ class JultiLuaLibrary extends LuaLibrary {
     @LuaDocumentation(description = "Closes a specific instance.")
     public void closeInstance(int instanceNum) {
         synchronized (Julti.getJulti()) {
-            getInstanceFromInt(instanceNum).reset();
+            getInstanceFromInt(instanceNum).closeWindow();
         }
     }
 
