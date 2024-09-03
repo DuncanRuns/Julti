@@ -156,6 +156,7 @@ public final class JultiOptions {
     public boolean useAltSwitching = false;
     public boolean allowResetDuringGenerating = false;
     public boolean resizeableBorderless = false;
+    public int worldLoadPauseDelay = 0;
     // public boolean forceActivate = false;
 
     // Launching

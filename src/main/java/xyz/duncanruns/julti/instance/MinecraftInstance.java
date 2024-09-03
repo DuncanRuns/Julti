@@ -493,10 +493,18 @@ public class MinecraftInstance {
             case 0:
                 break;
             case 1:
-                this.presser.pressEsc();
+                if (options.worldLoadPauseDelay > 0) {
+                    this.scheduler.schedule(this.presser::pressEsc, options.worldLoadPauseDelay);
+                } else {
+                    this.presser.pressEsc();
+                }
                 break;
             case 2:
-                this.presser.pressF3Esc();
+                if (options.worldLoadPauseDelay > 0) {
+                    this.scheduler.schedule(this.presser::pressF3Esc, options.worldLoadPauseDelay);
+                } else {
+                    this.presser.pressF3Esc();
+                }
                 break;
         }
 

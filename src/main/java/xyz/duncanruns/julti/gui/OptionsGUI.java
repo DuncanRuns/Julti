@@ -157,6 +157,9 @@ public class OptionsGUI extends JFrame {
         panel.add(GUIUtil.leftJustify(GUIUtil.createCheckBoxFromOption("Resizeable Borderless", "Allows the window to be resized, restored and maximized when Use Borderless is checked.", "resizeableBorderless", b -> this.reload())));
 
         panel.add(GUIUtil.createSpacer());
+        panel.add(GUIUtil.leftJustify(GUIUtil.createValueChangerButton("worldLoadPauseDelay", "World Load Pause Delay", this, "ms")));
+
+        panel.add(GUIUtil.createSpacer());
         panel.add(GUIUtil.createSeparator());
 
         panel.add(GUIUtil.createSpacer());
@@ -426,6 +429,7 @@ public class OptionsGUI extends JFrame {
                     options.useAltSwitching = false;
                     options.allowResetDuringGenerating = false;
                     options.resizeableBorderless = false;
+                    options.worldLoadPauseDelay = 0;
                 });
             }
             this.reload();
