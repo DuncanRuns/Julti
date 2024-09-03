@@ -103,7 +103,6 @@ public final class Julti {
         } else {
             log(Level.INFO, "Deleted " + toDelete.getName());
         }
-
     }
 
     /**

@@ -160,7 +160,6 @@ public final class GameOptionsUtil {
     }
 
     public static Integer getKey(Path instancePath, String optionsValue, boolean pre113) {
-
         if (pre113) {
             return getKeyPre113(instancePath, optionsValue);
         }
