@@ -1,3 +1,6 @@
+Changes in v1.6.0:
+- More support for pre 1.9
+
 Changes in v1.5.0-v1.5.4:
 - Update PaceMan Tracker (v1.5.4)
 - Add more utility mode window settings functionality (v1.5.3)
