@@ -1,5 +1,11 @@
-Changes in v1.6.0:
-- More support for pre 1.9
+Notes for v1.6.0:
+- Added experimental worldLoadPauseDelay for pre 1.13
+- Updated PaceMan Tracker to v0.6.9 (nice)
+- This update was supposed to be bigger but I'm releasing Julti is inherently incompatible with pre 1.9 because of how
+  shit fullscreen is in those versions, also it's gonna be way too much effort anyway
+- Removed Herobrine
+- This might be the last version of Julti unless PRs are made or PaceMan Tracker needs updating
+  - 1.16.1 players should use [Jingle](<https://github.com/DuncanRuns/Jingle/releases>) anyway
 
 Changes in v1.5.0-v1.5.4:
 - Update PaceMan Tracker (v1.5.4)
