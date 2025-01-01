@@ -1,3 +1,6 @@
+Notes for v1.6.1:
+- Updated PaceMan Tracker to v0.7.0
+
 Notes for v1.6.0:
 - Added experimental worldLoadPauseDelay for pre 1.13
 - Updated PaceMan Tracker to v0.6.9 (nice)
