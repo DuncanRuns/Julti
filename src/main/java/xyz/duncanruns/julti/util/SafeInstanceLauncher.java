@@ -221,7 +221,7 @@ public final class SafeInstanceLauncher {
     private static void launchWithColorMC(List<MinecraftInstance> list) {
         String[] arg = new String[list.size() + 2];
         arg[0] = JultiOptions.getJultiOptions().colorMCPath.trim();
-        arg[1] = "-game";
+        arg[1] = "--game";
         try {
             for (int a = 0; a < list.size(); a++) {
                 arg[a + 2] = list.get(a).getColorMCUUID();
